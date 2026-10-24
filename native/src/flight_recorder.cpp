@@ -995,3 +995,16 @@ ATLAS_API const char* atlas_fr_status(void) {
 }
 
 }  // extern "C"
+
+// ATLAS_RECORDER=1 (and ATLAS_RECORDER_DIR) switch the recorder on in the native tools and tests, without a Java host
+namespace {
+struct EnvInit {
+    EnvInit() {
+        const char* e = std::getenv("ATLAS_RECORDER");
+        if (e && *e == '1') {
+            const char* d = std::getenv("ATLAS_RECORDER_DIR");
+            atlas_fr_configure(1, d && *d ? d : "atlas-trace", 0, 0, -1);
+        }
+    }
+} g_envInit;
+}  // namespace

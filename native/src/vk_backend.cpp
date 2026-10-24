@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "flight_recorder.hpp"  // the flight recorder: zones and GPU timestamps
 #include "atlas_cloud_spv.h"
 #include "atlas_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
 #include "atlas_nearlight_spv.h"  // generated: its nearLightMain and nearUpsampleMain (the half-resolution near light)
@@ -347,6 +348,7 @@ struct Slot {
     VkCommandBuffer cmd = VK_NULL_HANDLE;
     VkFence fence = VK_NULL_HANDLE;
     VkQueryPool query = VK_NULL_HANDLE;
+    fr::GpuTimeline gt;  // the flight recorder's per-pass timestamps of this slot's frame
     bool inFlight = false;
     VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
@@ -426,6 +428,7 @@ public:
                 release(s.vgRankBack);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
+                s.gt.destroy();
             }
             for (auto& b : shared_) release(b);
             release(vgSat_);
@@ -647,6 +650,7 @@ public:
                 q.queryType = VK_QUERY_TYPE_TIMESTAMP;
                 q.queryCount = 4;  // the frame; the level-0 grid's build
                 if (vkCreateQueryPool(dev_, &q, nullptr, &s.query) != VK_SUCCESS) s.query = VK_NULL_HANDLE;  // no GPU timer
+                s.gt.create(dev_);
             }
             VkDescriptorSetLayout layouts[3] = {farSetLayout_, publishSetLayout_, ingestSetLayout_};
             VkDescriptorSet sets[3];
@@ -857,6 +861,7 @@ public:
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
         Slot& s = slots_[frameIndex_ % SLOTS];
+        ATLAS_ZONE("vk:glRender");
         auto tg0 = std::chrono::steady_clock::now();
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         auto tg1 = std::chrono::steady_clock::now();
@@ -924,6 +929,7 @@ public:
         gl_.Flush();
 
         begin(s);
+        ATLAS_ZONE("vk:recordAndSubmit");
         imageBarriers(s.cmd, true);
         uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
@@ -933,6 +939,7 @@ public:
             vkCmdPushConstants(s.cmd, ingestLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "nearIngest");
         }
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
@@ -1132,6 +1139,7 @@ public:
 
     bool stageScene(const PackedScene& sc) override {
         if (lost_) return false;
+        ATLAS_ZONE_MIN("vk:stageScene", 50);
         std::lock_guard<std::mutex> lock(sceneMu_);
         int c = current_ == 0 ? 1 : 0;
         if (copies_[c].lastFrame > completedFrame_.load()) return false;  // a frame may still read it
@@ -1170,6 +1178,7 @@ private:
     }
 
     bool waitFence(VkFence f, const char* what, std::string& err) {
+        ATLAS_ZONE_MIN("wait:gpuFence", 100);
         return vkOk(vkWaitForFences(dev_, 1, &f, VK_TRUE, FENCE_TIMEOUT_NS), what, err);
     }
 
@@ -1523,6 +1532,10 @@ private:
             enable.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
             budgetExt_ = true;
         }
+        if (has(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME)) {  // the flight recorder places GPU zones on the host clock
+            enable.push_back(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME);
+            calibratedTs_ = true;
+        }
         if (has(MEM_EXT) && has(SEM_EXT)) {
             enable.push_back(MEM_EXT);
             enable.push_back(SEM_EXT);
@@ -1574,6 +1587,7 @@ private:
             return vkOk(cr, "vkCreateDevice", err);
         }
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
+        fr::gpuInit(dev_, timestampPeriod_, 64, calibratedTs_);
         if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, genFamily_ == family_ ? 1 : 0, &genQueue_);
         if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
@@ -1641,6 +1655,7 @@ private:
             }
         }
         auto t0 = std::chrono::steady_clock::now();
+        ATLAS_ZONE("vk:createPipeline");
         VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cp, nullptr, out);
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
@@ -1784,6 +1799,7 @@ private:
     }
 
     bool prepare(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool readback, std::string& err) {
+        ATLAS_ZONE("vk:prepare");
         hotReload();
         uint32_t w = frame.dims[0], h = frame.dims[1];
         size_t px = size_t(w) * h;
@@ -2028,6 +2044,7 @@ private:
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(s.cmd, &bi);
+        s.gt.begin(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);  // (after the GL-ready wait, like the frame query below)
         if (s.query) {
             vkCmdResetQueryPool(s.cmd, s.query, 0, 4);
             // at the compute stage, which the GL-ready semaphore wait blocks: the time is atlas's own work only
@@ -2085,6 +2102,7 @@ private:
     // Takes the grid's next batch (prepare: the slot was waited) into the slot's host buffers; recordVoxGrid records
     // the copies and kernels. The far set binds the grid's buffers always (16-byte stand-ins until there is a grid).
     bool stageVoxGrid(Slot& s, const FrameInputs& in, std::string& err) {
+        ATLAS_ZONE("vk:stageVoxGrid");
         auto c0 = std::chrono::steady_clock::now();
         bool ok = stageVoxGridTimed(s, in, err);
         vgStageMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
@@ -2463,6 +2481,7 @@ private:
             }
         }
         if (s.query) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 3);
+        s.gt.mark(cmd, "voxgrid");
     }
 
     void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false) {
@@ -2518,31 +2537,38 @@ private:
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[2]);
             vkCmdDispatch(s.cmd, s.lightTiles, 1, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "lights");
         }
         if (clouds) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, cloudPipe_);
             uint32_t dv = cloudDiv_;
             vkCmdDispatch(s.cmd, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "clouds");
         }
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        s.gt.mark(s.cmd, "far");
         if (nearSplit) {
             // the near light: one pixel of each 2 x 2 traced, then the other three filled (both after the far pass:
             // the upsample darkens the air it wrote over covered surfaces)
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearLightPipe_);
             vkCmdDispatch(s.cmd, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearLight");
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearUpPipe_);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearUpsample");
             computeBarrier(s.cmd);  // then its history (every pixel complete before any is blended)
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearTempPipe_);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearTemporal");
         }
         if (sunDispatchRows_) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, sunPipe_);
             vkCmdDispatch(s.cmd, (sunSize_ + 7) / 8, (sunDispatchRows_ + 1 + 7) / 8, 1);
+            s.gt.mark(s.cmd, "sunMap");
         }
         prevSlot_ = int(&s - slots_);
     }
@@ -2557,6 +2583,7 @@ private:
 
     bool submit(Slot& s, VkSemaphore* wait, VkSemaphore* signal, std::string& err) {
         if (s.query) vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 1);
+        s.gt.mark(s.cmd, "publish");
         vkEndCommandBuffer(s.cmd);
         // the GL-ready wait blocks every stage that touches the shared images: the passes and the sun map copy
         VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -2574,7 +2601,9 @@ private:
         }
         vkResetFences(dev_, 1, &s.fence);
         {
+            ATLAS_ZONE_MIN("vk:queueSubmit", 100);
             std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
+            s.gt.submitted();
             if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (frame)", err)) return false;
             vgOpen_ = false;  // (the grid's batch is on its way)
         }
@@ -2589,6 +2618,8 @@ private:
         if (!s.inFlight) return true;
         if (!waitFence(s.fence, "frame wait", err)) return false;
         s.inFlight = false;
+        static const uint32_t gpuTrack = fr::trackId("GPU frames");
+        s.gt.resolve("gpu frame", gpuTrack);
         // frames complete in submission order on our single queue
         if (s.frameNumber > completedFrame_.load()) completedFrame_.store(s.frameNumber);
         if (s.query && gpuMs) {
@@ -2928,6 +2959,7 @@ private:
     }
 
     void release(Buf& b) {
+        ATLAS_ZONE_MIN("vk:releaseBuffer", 100);
         if (b.map) vkUnmapMemory(dev_, b.mem);
         if (b.buf) vkDestroyBuffer(dev_, b.buf, nullptr);
         if (b.mem) {
@@ -2939,6 +2971,7 @@ private:
 
     // vkAllocateMemory with the bookkeeping atlas_memory_info reports (and the test hook's view of it)
     VkResult allocate(const VkMemoryAllocateInfo& ma, VkDeviceMemory& mem) {
+        ATLAS_ZONE_MIN("vk:vkAllocateMemory", 100);
         mem = VK_NULL_HANDLE;
         VkResult r = vkAllocateMemory(dev_, &ma, nullptr, &mem);
         if (r == VK_SUCCESS) allocated_ += ma.allocationSize;
@@ -3027,6 +3060,7 @@ private:
     // Scene arrays -> staging (CPU) -> device-local buffers (GPU copy). The caller holds sceneMu_ and guarantees no
     // frame reads this copy. wait: block until the copy is done (render-thread fallback).
     bool uploadScene(SceneCopy& c, const PackedScene& sc, bool wait, std::string& err) {
+        ATLAS_ZONE(wait ? "vk:uploadScene (render thread)" : "vk:uploadScene");
         if (c.uploading && !waitFence(c.uploadFence, "scene upload wait", err)) return false;
         c.uploading = false;
         const void* src[BINDINGS] = {};
@@ -3099,6 +3133,7 @@ private:
     }
 
     std::atomic<uint64_t> allocated_{0};  // device memory allocated by this backend (bytes)
+    bool calibratedTs_ = false;           // VK_EXT_calibrated_timestamps enabled (flight recorder)
     bool budgetExt_ = false;              // VK_EXT_memory_budget enabled
     VkInstance inst_ = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT messenger_ = VK_NULL_HANDLE;

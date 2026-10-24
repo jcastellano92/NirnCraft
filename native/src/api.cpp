@@ -17,6 +17,7 @@
 #include "atlas/atlas.h"
 #include "air.hpp"
 #include "backend.hpp"
+#include "flight_recorder.hpp"
 #include "gencache.hpp"
 #include "atlas_build_hash.h"
 #include "bricks.hpp"
@@ -684,6 +685,7 @@ ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_
     if (!ctx || !mats) return ATLAS_ERR_ARG;
     ATLAS_TRY
     // (the grid's books share the world's stored copy: one section's ids once in memory, whatever reads them)
+    ATLAS_ZONE_MIN("api:uploadSection", 30);
     std::shared_ptr<const Section> sec = ctx->world.putSection(sx, sy, sz, mats);
     ctx->voxgrid.put(sx, sy, sz, VgIds(sec, &sec->mats));
     return ATLAS_OK;
@@ -900,6 +902,7 @@ ATLAS_API AtlasStatus atlas_set_actors(AtlasContext* ctx, const AtlasActor* a, u
 ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], double budgetMs) {
     if (!ctx || !centre) return ATLAS_ERR_ARG;
     ATLAS_TRY
+    ATLAS_ZONE("api:update");
     double ms = 0;
     // the level-0 grid: the columns its window entered read from the world here when the render thread could not (its
     // lock busy); what it gave up is the CPU's level 0 again only on the CPU backend (on a device the grid's coarse
@@ -915,7 +918,10 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
         const char* e = std::getenv("ATLAS_VOXGRID_LEVEL0");  // (as buildInputs: before the first frame too)
         ctx->world.gridOwnsLevel0 = ctx->voxgrid.enabled && (!e || std::atoi(e) != 0);
     }
-    ctx->world.update(centre, budgetMs, &ms);
+    {
+        ATLAS_ZONE("world:update");
+        ctx->world.update(centre, budgetMs, &ms);
+    }
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
     // a lost device stages nothing (the render thread reports the loss)
@@ -1004,7 +1010,13 @@ ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* f) {
 ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
-    std::lock_guard<std::mutex> lock(ctx->mu);
+    fr::frame();  // the flight recorder's frame boundary: one atlas frame a game frame
+    ATLAS_ZONE("api:glRender");
+    std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
+    {
+        ATLAS_ZONE_MIN("wait:ctxLock", 50);
+        lock.lock();
+    }
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
