@@ -1474,7 +1474,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
     // (the host's tiers: uploads packed on the GPU where the grid owns every level's real blocks; the CPU backend and
     // the CPU's own level paths keep raw sections)
-    ctx->world.setPackOnGpu(ctx->backend->onDevice() && ctx->world.gridOwnsReal() && ctx->voxgrid.packBudget > 0);
+    {
+        ATLAS_ZONE_MIN("api:world.setPackOnGpu", 100);
+        ctx->world.setPackOnGpu(ctx->backend->onDevice() && ctx->world.gridOwnsReal() && ctx->voxgrid.packBudget > 0);
+    }
     // (bit 2: the grid owns every level's real blocks, World::gridOwnsReal: level 0's regions are the tiles' alone)
     // (bit 4: a run of level-0 chunks the grid does not hold yet traced in its coarse levels, atlas_far.slang traceLod;
     // ATLAS_VOXGRID_FALLBACK=0, measurements: the regions as before)
@@ -1494,6 +1497,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         }
         easeMs(ctx->inTexMs, ttx);
         if (ts->revision != ctx->texturesRevision) {
+            ATLAS_ZONE("api:packTextures");
             packTextures(*ts, ctx->texturesPacked);
             ctx->texturesRevision = ts->revision;
         }
@@ -1501,6 +1505,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         in.texturesRevision = ctx->texturesRevision;
         // the materials' lights (gridLightMain): every emitter at its level in its colour (its brick's glowing
         // micro-voxels, else its palette colour), checked against the palette each frame (cheap: a word a material)
+        ATLAS_ZONE_MIN("api:materialLights", 100);
         std::vector<uint32_t>& lw = ctx->materialLights;
         lw.assign(ctx->palette.size(), 0u);
         uint64_t lh = 0xcbf29ce484222325ull;
