@@ -701,6 +701,8 @@ public:
         return true;
     }
     uint64_t framesSubmitted() const override { return frameCounter_.load(); }
+    double frameGpuMs() const override { return frameGpuEma_.load(); }
+    std::atomic<double> frameGpuEma_{0.0};
     uint64_t framesCompleted() const override { return completedFrame_.load(); }
 
     bool memoryInfo(MemoryInfo& m, std::string&) override {
@@ -2100,6 +2102,17 @@ private:
             vgStageBucket_ = c1;
         }
         vgStageCur_ = std::max(vgStageCur_, vgStageMs_);
+        // the staging's budget (ATLAS_STAGE_MS, 2 ms of the render thread a frame): over it, this frame's batch budgets
+        // shrink in proportion; well under it, they grow back (a tenth a frame) to their maxima
+        if (in.voxgrid) {
+            static const double target = [] {
+                const char* e = std::getenv("ATLAS_STAGE_MS");
+                return e && std::atof(e) > 0 ? std::atof(e) : 2.0;
+            }();
+            float& q = in.voxgrid->budgetScale;
+            if (vgStageMs_ > target) q = std::max(0.25f, q * float(std::clamp(0.8 * target / vgStageMs_, 0.5, 0.9)));
+            else if (vgStageMs_ < 0.5 * target) q = std::min(1.0f, q * 1.1f);
+        }
         return ok;
     }
     bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
@@ -2160,7 +2173,7 @@ private:
                 return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
             auto k0 = std::chrono::steady_clock::now();
-            b = g->take(budget);
+            b = g->take(g->scaled(budget));
             vgTakeMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - k0).count();
             vgTakeMaxMs_ = std::max(vgTakeMaxMs_, vgTakeMs_);
         }
@@ -2610,6 +2623,8 @@ private:
             uint32_t nq = s.vgTimed ? 4u : 2u;
             vkGetQueryPoolResults(dev_, s.query, 0, nq, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
             *gpuMs = double(ts[1] - ts[0]) * timestampPeriod_ / 1e6;
+            double was = frameGpuEma_.load();
+            frameGpuEma_.store(was <= 0.0 ? *gpuMs : was * 0.8 + *gpuMs * 0.2);
             if (s.vgTimed) {
                 vgLastMs_ = double(ts[3] - ts[2]) * timestampPeriod_ / 1e6;
                 vgLastSections_ = s.vgSections;

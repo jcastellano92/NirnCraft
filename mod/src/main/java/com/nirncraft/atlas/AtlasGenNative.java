@@ -369,7 +369,7 @@ final class AtlasGenNative {
                 // hashErrors 112, chunkWrites 120, queued 128)
                 return new long[]{s.get(JAVA_INT, 0), s.get(JAVA_LONG, 8), s.get(JAVA_LONG, 16), s.get(JAVA_LONG, 24), s.get(JAVA_LONG, 32),
                         s.get(JAVA_LONG, 40), s.get(JAVA_LONG, 48), s.get(JAVA_LONG, 56), s.get(JAVA_LONG, 64), s.get(JAVA_LONG, 88),
-                        s.get(JAVA_LONG, 96), s.get(JAVA_LONG, 112), s.get(JAVA_LONG, 120), s.get(JAVA_LONG, 128)};
+                        s.get(JAVA_LONG, 96), s.get(JAVA_LONG, 112), s.get(JAVA_LONG, 120), s.get(JAVA_LONG, 128), s.get(JAVA_LONG, 136)};
             } catch (Throwable t) {
                 throw rethrow(t);
             }
@@ -379,11 +379,15 @@ final class AtlasGenNative {
         String paceLine() {
             if (paceStats == null) return null;
             try (Arena a = Arena.ofConfined()) {
-                MemorySegment s = a.allocate(8L * 8 + 48);
+                MemorySegment s = a.allocate(8L * 8 + 48 + 16 + 48);
                 check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
-                return String.format("budget{frame %.1f ms duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms (%s), %d submissions}",
-                        s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
-                        s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.getString(64), s.get(JAVA_LONG, 56));
+                // (AtlasGenPaceStats: periodMs 0, duty 8, tokens 16, used 24, waited 32, far 40, max 48, submissions 56,
+                // maxPhase 64, frameGpuMs 112, recentMaxMs 120, recentPhase 128)
+                return String.format("budget{frame %.1f ms (gpu %.1f) duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms (%s), "
+                                + "lately %.0f ms (%s), %d submissions}",
+                        s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 112), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
+                        s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.getString(64), s.get(JAVA_DOUBLE, 120), s.getString(128),
+                        s.get(JAVA_LONG, 56));
             } catch (Throwable t) {
                 throw rethrow(t);
             }

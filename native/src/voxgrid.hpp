@@ -234,6 +234,23 @@ public:
     mutable std::chrono::steady_clock::time_point covAt_{};
     // (atlas_info voxgrid) what is still to refine with the camera still: coarse cells given up and waiting for room, GPU
     // sections asked for again and the asks held back (asked lately), the bake's queue
+    // (take's phases, the worst of the last 2-4 s: the lock's wait, level 0, the coarse levels, the rest)
+    double phaseCur_[4] = {}, phasePrev_[4] = {};
+    std::chrono::steady_clock::time_point phaseAt_ = std::chrono::steady_clock::now();
+    void notePhases(const double* ms, std::chrono::steady_clock::time_point now) {
+        if (now - phaseAt_ > std::chrono::seconds(2)) {
+            for (int i = 0; i < 4; i++) phasePrev_[i] = phaseCur_[i], phaseCur_[i] = 0;
+            phaseAt_ = now;
+        }
+        for (int i = 0; i < 4; i++) phaseCur_[i] = std::max(phaseCur_[i], ms[i]);
+    }
+    std::string phaseInfo() const {
+        char t[160];
+        std::snprintf(t, sizeof t, "\"takePhases\":{\"lock\":%.2f,\"level0\":%.2f,\"coarse\":%.2f,\"rest\":%.2f},",
+                      std::max(phaseCur_[0], phasePrev_[0]), std::max(phaseCur_[1], phasePrev_[1]), std::max(phaseCur_[2], phasePrev_[2]),
+                      std::max(phaseCur_[3], phasePrev_[3]));
+        return t;
+    }
     std::string refineInfo() const {
         char b[160];
         {
@@ -258,6 +275,10 @@ public:
     // next frame (what the books thought written, written again)
     void forceReplace();
     int packBudget = 512;  // sections packed a batch at most (ATLAS_PACK_BUDGET)
+    // (the backend's staging budget: the render thread's share of a frame) the batch budgets scaled by this, 0.05..1,
+    // eased from the staging's measured time
+    float budgetScale = 1.0f;
+    int scaled(int b) const { return std::max(8, int(float(b) * budgetScale)); }
     // (the backend) a batch's packed sections, back from the GPU: to the world's warm tier
     void packedResults(const std::vector<World::PackDone>& done);
     // (GPU world generation) sections whose ids are already in a GPU buffer, without a round trip through the CPU:

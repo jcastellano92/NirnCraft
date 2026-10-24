@@ -1952,8 +1952,11 @@ private:
         std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
         uint64_t sampleFrames = 0, lastFrames = 0;
         std::chrono::steady_clock::time_point lastFrameAt = last;  // (when the frame counter last moved)
-        double usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
+        double usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0, gpuMs = 0;
         char maxPhase[48] = {};
+        double curMs = 0, prevMs = 0;  // (the worst submission of this 10 s bucket and the last one)
+        char curPhase[48] = {}, prevPhase[48] = {};
+        std::chrono::steady_clock::time_point bucketAt = std::chrono::steady_clock::now();
         uint64_t subs = 0;
         int cls = 0;
         bool init = false;
@@ -1962,6 +1965,10 @@ private:
     PaceStats paceStats() const override {
         PaceStats r{pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
         std::memcpy(r.maxPhase, pace_.maxPhase, sizeof r.maxPhase);
+        r.frameGpuMs = pace_.gpuMs;
+        bool cur = pace_.curMs >= pace_.prevMs;
+        r.recentMaxMs = cur ? pace_.curMs : pace_.prevMs;
+        std::memcpy(r.recentPhase, cur ? pace_.curPhase : pace_.prevPhase, sizeof r.recentPhase);
         return r;
     }
     static double envMs(const char* name, double def) {
@@ -2005,7 +2012,19 @@ private:
         } else {
             double over = std::min(1.0, std::max(0.0, (per - target) / (0.5 * target)));
             double perFrame = atTarget + (2.5 - atTarget) * over;
-            pace_.duty = std::min(0.8, std::max(0.08, perFrame / per));
+            double base = std::min(0.8, std::max(0.08, perFrame / per));
+            // the frames' own GPU time (their timestamps): the rest of the period the card is idle (the CPU's frame,
+            // vsync) and the generator may have a share of it. A long period with a short GPU frame is not the
+            // generator's doing: it had 8 % there and starved (30 ms frames of 10 ms GPU: 2 chunks a second)
+            double g = backend_ ? backend_->frameGpuMs() : 0.0;
+            if (g > 0.0) {
+                double idle = std::max(0.0, 1.0 - g / per);
+                double share = std::min(0.8, std::max(0.08, idle * 0.6));
+                pace_.duty = over > 0.0 ? std::max(base, std::min(share, 0.3)) : std::max(base, share);
+            } else {
+                pace_.duty = base;
+            }
+            pace_.gpuMs = g;
         }
         pace_.tokens = std::min(30.0, pace_.tokens + dt * pace_.duty);
     }
@@ -2058,6 +2077,19 @@ private:
                 if (ms > e->pace_.maxSubMs) {
                     e->pace_.maxSubMs = ms;
                     std::snprintf(e->pace_.maxPhase, sizeof e->pace_.maxPhase, "%s", e->phase_.c_str());
+                }
+                // (the worst of the last 10-20 s, two buckets: what persists, not a first call's pipeline build)
+                auto now = std::chrono::steady_clock::now();
+                if (now - e->pace_.bucketAt > std::chrono::seconds(10)) {
+                    e->pace_.prevMs = e->pace_.curMs;
+                    std::memcpy(e->pace_.prevPhase, e->pace_.curPhase, sizeof e->pace_.prevPhase);
+                    e->pace_.curMs = 0;
+                    e->pace_.curPhase[0] = 0;
+                    e->pace_.bucketAt = now;
+                }
+                if (ms > e->pace_.curMs) {
+                    e->pace_.curMs = ms;
+                    std::snprintf(e->pace_.curPhase, sizeof e->pace_.curPhase, "%s", e->phase_.c_str());
                 }
                 e->pace_.subs++;
                 static const double warnMs = envMs("ATLAS_GEN_TRACE_SUBS", 0.0);  // (measurements: submissions over this)
@@ -3581,6 +3613,9 @@ ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) 
     out->waitedMs = s.waitedMs, out->farWaitedMs = s.farWaitedMs, out->maxSubmissionMs = s.maxSubMs;
     out->submissions = s.submissions;
     std::memcpy(out->maxPhase, s.maxPhase, sizeof out->maxPhase);
+    out->frameGpuMs = s.frameGpuMs;
+    out->recentMaxMs = s.recentMaxMs;
+    std::memcpy(out->recentPhase, s.recentPhase, sizeof out->recentPhase);
     return ATLAS_OK;
 }
 

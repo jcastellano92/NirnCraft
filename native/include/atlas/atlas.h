@@ -902,6 +902,9 @@ typedef struct AtlasGenPaceStats {
     double periodMs, duty, tokensMs, usedMs, waitedMs, farWaitedMs, maxSubmissionMs;
     uint64_t submissions;
     char maxPhase[48];  /* what the longest submission held (a pass, a store stage, a far stage ...) */
+    double frameGpuMs;  /* the frames' own GPU time (timestamps, eased): the period's rest is the generator's to share */
+    double recentMaxMs; /* the longest submission of the last 10-20 s, and what it held */
+    char recentPhase[48];
 } AtlasGenPaceStats;
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
 typedef struct AtlasGenCacheStats {
