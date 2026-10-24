@@ -846,11 +846,11 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
         std::fwrite(sum.data(), 1, sum.size(), f);
         std::fclose(f);
     }
-    S.dumps.fetch_add(1);
     {
         std::lock_guard<std::mutex> lk(S.mu);
         S.lastDir = dir.string();
     }
+    S.dumps.fetch_add(1);  // (after lastDir: a reader that sees the count sees the directory)
     std::fprintf(stderr, "[atlas] flight recorder: %s dump in %.0f ms -> %s (%zu events, frame %.1f ms)\n", manual ? "manual" : "spike",
                  ms(nowNs() - t_begin), dir.string().c_str(), evs.size(), ms(fe - fs));
     (void)totalEvents;
@@ -963,6 +963,16 @@ ATLAS_API const char* atlas_fr_dump(const char* reason) {
     std::string err;
     std::string dir = dumpNow(0, 0, true, nowNs(), err);
     out = dir.empty() ? "error: " + err : dir;
+    return out.c_str();
+}
+
+ATLAS_API uint64_t atlas_fr_dump_count(void) { return st().dumps.load(); }
+
+ATLAS_API const char* atlas_fr_last_dump(void) {
+    static thread_local std::string out;
+    State& S = st();
+    std::lock_guard<std::mutex> lk(S.mu);
+    out = S.lastDir;
     return out.c_str();
 }
 
