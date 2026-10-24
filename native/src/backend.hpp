@@ -127,6 +127,8 @@ public:
         uint32_t lastSections = 0, lastJobs = 0;
         bool lastStates = false;
         double stageCpuMs = 0, stageCpuMaxMs = 0;  // the render thread's share (taking a batch, staging it): last, worst
+        double stageCpuRecentMs = 0;                // (the worst of the last 2-4 s)
+        double takeMs = 0, takeMaxMs = 0;           // (and of it the grid's take(): the books, the ranking lists, the batch)
     };
     virtual VoxGridTimes voxgridTimes() const { return {}; }
     // The game path's wall time on the render thread, eased (ms): waiting for the slot's previous frame, preparing

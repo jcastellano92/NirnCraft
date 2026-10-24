@@ -2048,6 +2048,9 @@ private:
         t.lastStates = vgLastStates_;
         t.stageCpuMs = vgStageMs_;
         t.stageCpuMaxMs = vgStageMaxMs_;
+        t.stageCpuRecentMs = std::max(vgStagePrev_, vgStageCur_);
+        t.takeMs = vgTakeMs_;
+        t.takeMaxMs = vgTakeMaxMs_;
         return t;
     }
 
@@ -2087,8 +2090,16 @@ private:
     bool stageVoxGrid(Slot& s, const FrameInputs& in, std::string& err) {
         auto c0 = std::chrono::steady_clock::now();
         bool ok = stageVoxGridTimed(s, in, err);
-        vgStageMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+        auto c1 = std::chrono::steady_clock::now();
+        vgStageMs_ = std::chrono::duration<double, std::milli>(c1 - c0).count();
         vgStageMaxMs_ = std::max(vgStageMaxMs_, vgStageMs_);
+        // the worst over the last 2-4 s (two buckets): whether it persists
+        if (c1 - vgStageBucket_ > std::chrono::seconds(2)) {
+            vgStagePrev_ = vgStageCur_;
+            vgStageCur_ = 0;
+            vgStageBucket_ = c1;
+        }
+        vgStageCur_ = std::max(vgStageCur_, vgStageMs_);
         return ok;
     }
     bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
@@ -2148,7 +2159,10 @@ private:
                 const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
                 return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
+            auto k0 = std::chrono::steady_clock::now();
             b = g->take(budget);
+            vgTakeMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - k0).count();
+            vgTakeMaxMs_ = std::max(vgTakeMaxMs_, vgTakeMs_);
         }
         bool work = b.clear || !b.jobs.empty() || b.coarse();
         bool fresh = false;
@@ -2956,7 +2970,9 @@ private:
         VkDeviceSize limit = uniform ? props_.limits.maxUniformBufferRange : maxStorageRange_;
         if (bound && size > limit) return fail(err, "a frame or scene buffer exceeds this device's descriptor range limit");
         release(b);
-        VkDeviceSize alloc = size + size / 4;  // headroom against regrowth every frame
+        // headroom against regrowth every frame: doubling up to 32 MiB (a batch that grows a little each frame made a
+        // device allocation each time: the render thread's worst staging), a quarter beyond
+        VkDeviceSize alloc = size < (32u << 20) ? size * 2 : size + size / 4;
         if (bound) alloc = std::max(size, std::min(alloc, limit));
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bc.size = alloc;
@@ -3144,7 +3160,8 @@ private:
     VkDeviceSize vgSatBytes_ = 0;
     uint64_t texRevision_ = ~0ull;
     uint64_t brickRevision_ = ~0ull;
-    double vgStageMs_ = 0, vgStageMaxMs_ = 0;
+    double vgStageMs_ = 0, vgStageMaxMs_ = 0, vgTakeMs_ = 0, vgTakeMaxMs_ = 0, vgStagePrev_ = 0, vgStageCur_ = 0;
+    std::chrono::steady_clock::time_point vgStageBucket_ = std::chrono::steady_clock::now();
     double vgLastMs_ = 0, vgMsTotal_ = 0;
     GlTimes glTimes_;
     uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
