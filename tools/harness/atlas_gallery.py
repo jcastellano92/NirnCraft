@@ -417,7 +417,7 @@ def sweep_rows(g, groups, work, a, say=print):
         for gr, c in fields:
             e, lk = eye(c, NEAR)
             steps.append({"op": "shot", "name": f"near/{gr['id']}", "eye": e, "look": lk, "settle": 12,
-                          "targets": [{"name": "q", "quad": quad(c), "at": lk, "half": 0.5}]})
+                          "targets": [{"name": "q", "at": lk, "half": 0.5}]})
         cx, cz = ox, oz - 20  # the middle of the fields
         for dist in SWEEP_DISTANCES:
             alt = min(110.0, dist * 0.9)
