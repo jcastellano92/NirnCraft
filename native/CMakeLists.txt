@@ -541,3 +541,6 @@ if(WIN32)
   target_link_libraries(pack_lab PRIVATE atlas_core opengl32)
   target_include_directories(pack_lab PRIVATE src)
 endif()
+
+# the flight recorder (docs/ATLAS-PLAN.md stage 0.2): always-on CPU zones and GPU timestamps, spike dumps
+target_sources(atlas_core PRIVATE src/flight_recorder.cpp)
