@@ -740,7 +740,7 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
             if (e.lane == frameLane) {
                 if (e.depth == 0) frameCover.push_back({e.t0, e.t1});
                 if (startsWith(e.name, "wait:gpu")) waitGpu += selfIn;
-                else if (!startsWith(e.name, "wait:") && selfIn > cpuTopSelf) {
+                else if (selfIn > cpuTopSelf) {  // (a wait for a lock is a cause; a wait for the GPU is counted above)
                     cpuTopSelf = selfIn;
                     cpuTopName = e.name;
                     cpuTopLane = ln.name;
@@ -831,7 +831,7 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
             // its biggest frame-thread leaf
             const Ev* top = nullptr;
             for (auto& e : evs)
-                if (e.lane == fr->lane && e.name != fname && !startsWith(e.name, "wait:") && e.t1 > fr->t0 && e.t0 < fr->t1 && (!top || e.self > top->self)) top = &e;
+                if (e.lane == fr->lane && e.name != fname && !startsWith(e.name, "wait:gpu") && e.t1 > fr->t0 && e.t0 < fr->t1 && (!top || e.self > top->self)) top = &e;
             add("  %s  %6.1f ms  biggest leaf: %s (%.1f ms)\n", wallClock(fr->t0, "%H:%M:%S").c_str(), ms(fr->t1 - fr->t0), top ? top->name : "-",
                 top ? top->self : 0.0);
         }

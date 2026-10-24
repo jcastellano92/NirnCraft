@@ -41,6 +41,18 @@ import java.util.stream.IntStream;
  */
 final class AtlasClientGen implements AutoCloseable {
     // flight recorder zones (AtlasRecorder): the generator thread's loop
+    private volatile double[] statPage, statPace;
+
+    /** The generator thread's own reading of the native counters (their calls take the generator's lock, held a whole batch). */
+    private void refreshStats() {
+        try {
+            if (devicePages) statPage = gen.pageStats();
+            statPace = gen.paceStats();
+        } catch (RuntimeException e) {
+            // (the next pass)
+        }
+    }
+
     private static final AtlasRecorder.Zone Z_PLAN = AtlasRecorder.zone("gen:plan"), Z_REPORTS = AtlasRecorder.zone("gen:gridReports"),
             Z_DIRECT = AtlasRecorder.zone("gen:directBatch"), Z_PRUNE = AtlasRecorder.zone("gen:prune"), Z_FAR = AtlasRecorder.zone("gen:farStep"),
             Z_PAGES = AtlasRecorder.zone("gen:pages"), Z_CACHE = AtlasRecorder.zone("gen:fromCache"), Z_RUN = AtlasRecorder.zone("gen:gen.run"),
@@ -605,12 +617,12 @@ final class AtlasClientGen implements AutoCloseable {
             r = c.ready.size();
         }
         long now = System.nanoTime(), j = c.jumpNs;
-        double[] dp = c.devicePages ? c.gen.pageStats() : null;
+        double[] dp = c.devicePages ? c.statPage : null;  // (cached by the generator thread: the native call waits for its lock, seconds)
         String pagesNow = dp == null ? "java" : String.format("device %d in %.0f ms", (long) dp[0], dp[1]);
         if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d, partial %d (retried %d), from the cache %d",
                 c.farTiles, c.farTaken, c.farChunks, c.farMs, c.farBusy, c.farPartial.size(), c.farRetried, c.farCached);
         pagesNow += String.format(", cached chunks %d (%d sections)", c.cachedChunks, c.cachedSections);
-        double[] pace = c.gen.paceStats();
+        double[] pace = c.statPace;
         if (pace != null)
             pagesNow += String.format(", budget{frame %.1f ms duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms, %d submissions}",
                     pace[0], pace[1], pace[2], pace[3], pace[4], pace[5], (long) pace[6]);
@@ -674,6 +686,7 @@ final class AtlasClientGen implements AutoCloseable {
         Planned cur = null;
         while (running) {
             try {
+                refreshStats();
                 int waiting;
                 synchronized (ready) {
                     waiting = ready.size();

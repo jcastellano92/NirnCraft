@@ -1453,11 +1453,15 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         ctx->voxgrid.frame(g.camInt, ctx->world);
     }
     easeMs(ctx->inGridMs, tgr);
+    ATLAS_ZONE_MIN("api:buildInputs tail (grid levels, packing, textures, bricks)", 100);
+    {
+        ATLAS_ZONE_MIN("api:voxgrid.origin+levelFrame", 100);
     ctx->voxgrid.origin(g.vgOrigin);
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
     g.vgDims[2] = uint32_t(ctx->voxgrid.D);
     for (int k = 1; k < VG_LEVELS; k++) ctx->voxgrid.levelFrame(k, g.vgLevel[k - 1]);
+    }
     // the coarse levels own the real blocks at their levels: the CPU builds those levels' regions from the tiles alone
     // and no longer rebuilds them (nor digests) per section (World::gridCoarse)
     ctx->world.gridCoarse = ctx->voxgrid.levels() - 1;  // (atlas_update sets it before the first frame too)

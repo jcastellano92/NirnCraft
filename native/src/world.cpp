@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "flight_recorder.hpp"
 
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
@@ -439,7 +440,7 @@ int World::regionRows(int lod) {
 void World::putTile(std::unique_ptr<Tile> t) {
     Key3 k{t->lod, t->tx, 0, t->tz};
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(putTile)", "hold:world.mu(putTile)");
         auto it = structures_.find(k);
         t->structures = it == structures_.end() ? nullptr : it->second;
     }
@@ -448,7 +449,7 @@ void World::putTile(std::unique_ptr<Tile> t) {
         t->canopyMat.clear();
     }
     t->buildPyramids();
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(putTile)", "hold:world.mu(putTile)");
     for (int ry = 0; ry < regionRows(t->lod); ry++) dirty_.insert({t->lod, t->tx, ry, t->tz});
     tiles_[k] = std::shared_ptr<const Tile>(std::move(t));
 }
@@ -462,7 +463,7 @@ void World::putStructures(int lod, int tx, int tz, std::shared_ptr<const Structu
     Key3 k{lod, tx, 0, tz};
     std::shared_ptr<const Tile> old;
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(putStructures)", "hold:world.mu(putStructures)");
         if (s) structures_[k] = s;
         else structures_.erase(k);
         auto it = tiles_.find(k);
@@ -477,7 +478,7 @@ void World::putStructures(int lod, int tx, int tz, std::shared_ptr<const Structu
         t->canopyMat.clear();
     }
     t->buildPyramids();
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(putStructures)", "hold:world.mu(putStructures)");
     auto it = tiles_.find(k);
     if (it == tiles_.end() || it->second != old) return;  // replaced meanwhile: that upload attached the latest
     for (int ry = 0; ry < regionRows(lod); ry++) dirty_.insert({lod, tx, ry, tz});
@@ -485,12 +486,12 @@ void World::putStructures(int lod, int tx, int tz, std::shared_ptr<const Structu
 }
 
 bool World::hasTile(int lod, int tx, int tz) const {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(hasTile)", "hold:world.mu(hasTile)");
     return tiles_.count({lod, tx, 0, tz}) != 0;
 }
 
 void World::setClasses(std::vector<uint8_t> cls) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(setClasses)", "hold:world.mu(setClasses)");
     classes_ = std::move(cls);
 }
 
@@ -499,7 +500,7 @@ World::World() : store_(std::make_unique<SectionStore>()), genCache_(std::make_u
 void World::setGenFingerprint(uint64_t fp) {
     std::string root;
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(setGenFingerprint)", "hold:world.mu(setGenFingerprint)");
         if (genFp_ == fp) return;
         genFp_ = fp;
         root = storeRoot_;
@@ -596,21 +597,21 @@ void World::baseIn(const Key3& k, const uint16_t* base, Made* made) {
 }
 
 void World::takeBaseWanted(std::vector<Key3>& out) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(takeBaseWanted)", "hold:world.mu(takeBaseWanted)");
     out.swap(baseWanted_);
     baseWanted_.clear();
     baseWantedN = 0;
 }
 
 void World::baseUniform(const Key3& k, uint16_t id, Made& made) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(baseUniform)", "hold:world.mu(baseUniform)");
     std::vector<uint16_t> ids(4096, id);
     baseIn(k, ids.data(), &made);
 }
 
 int World::layerNeed(const Key3& k) {
     if (!layerCount.load(std::memory_order_relaxed)) return 0;
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(layerNeed)", "hold:world.mu(layerNeed)");
     LayerPtr L = store_->layer(k);
     if (!L) return 0;
     if (L->replaced || L->baseLost || L->selfContained() || sections_.count(k) || store_->has(k)) return 1;
@@ -622,7 +623,7 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
     std::copy(mats, mats + 4096, s->mats.begin());
     if (layerCount.load(std::memory_order_relaxed)) {
         // (an edited section's base again: its layer over it; or its whole copy stays)
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(putSection)", "hold:world.mu(putSection)");
         baseAsked_.erase({0, sx, sy, sz});
         if (std::shared_ptr<const Section> keep = layerOver({0, sx, sy, sz}, *s, flags)) return keep;
     }
@@ -631,18 +632,18 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
     if (!gridOwnsReal()) {
         std::vector<uint8_t> cls;
         {
-            std::lock_guard<std::mutex> lock(mu_);
+            fr::LockZone lock(mu_, "wait:world.mu(putSection)", "hold:world.mu(putSection)");
             cls = classes_;
         }
         s->buildMips(cls);
     }
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(putSection)", "hold:world.mu(putSection)");
     commitSection({0, sx, sy, sz}, s, flags);
     return s;
 }
 
 void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(sectionsIn)", "hold:world.mu(sectionsIn)");
     for (auto& [k, s] : sections_)
         if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
     std::vector<std::pair<Key3, PackedIds>> packed;
@@ -652,7 +653,7 @@ void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair
 }
 
 void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(sectionsInBox)", "hold:world.mu(sectionsInBox)");
     for (int z = z0; z < z1; z++)
         for (int x = x0; x < x1; x++)
             for (int y = y0; y < y1; y++) {
@@ -667,7 +668,7 @@ void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::v
 }
 
 World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(sectionSource)", "hold:world.mu(sectionSource)");
     auto it = sections_.find({0, sx, sy, sz});
     if (it != sections_.end()) return {it->second, nullptr};
     PackedIds w = store_->get({0, sx, sy, sz});
@@ -700,14 +701,14 @@ bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::p
 
 void World::setPackOnGpu(bool on) {
     if (packOnGpu.load(std::memory_order_relaxed) == on) return;
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(setPackOnGpu)", "hold:world.mu(setPackOnGpu)");
     packOnGpu = on;
     if (!on) return;
     for (auto& [k, m] : rawMeta_) packQueue_.push_back({k, m.gen});  // (uploaded before: packed now too)
 }
 
 void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(takePackQueue)", "hold:world.mu(takePackQueue)");
     if (burst > max) max = std::max(max, std::min(burst, packQueue_.size() / 8));
     size_t i = 0;
     for (; i < packQueue_.size() && out.size() < max; i++) {
@@ -721,7 +722,7 @@ void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
 }
 
 void World::packedDone(const std::vector<PackDone>& done, Made* made) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(packedDone)", "hold:world.mu(packedDone)");
     for (const PackDone& d : done) {
         if (d.gen & BAKE) {
             if (d.words) {
@@ -835,7 +836,7 @@ void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVe
 }
 
 World::StoreStats World::storeStats(void* tiers) const {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(storeStats)", "hold:world.mu(storeStats)");
     StoreStats s;
     s.raw = sections_.size();
     s.rawBytes = uint64_t(sections_.size()) * sizeof(Section);
@@ -854,7 +855,7 @@ void World::setGridWindow(int ox, int oz, int d) {
 
 void World::gridReleased(const std::vector<Key3>& secs) {
     if (gridOwnsReal()) return;  // (level 0's regions are the tiles' alone: the grid's unknown chunks fall back to them)
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(gridReleased)", "hold:world.mu(gridReleased)");
     bool nbrs = groupsWanted.load(std::memory_order_relaxed);
     for (const Key3& k : secs) {
         gridNotHeld_.insert(k);
@@ -878,7 +879,7 @@ void World::gridWindowMoved() {
 }
 
 size_t World::gridSkippedCount() const {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(gridSkippedCount)", "hold:world.mu(gridSkippedCount)");
     return gridSkipped_.size();
 }
 
@@ -943,7 +944,7 @@ void Section::buildMips(const std::vector<uint8_t>& cls) {
 }
 
 bool World::editBlock(int x, int y, int z, uint16_t mat) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(editBlock)", "hold:world.mu(editBlock)");
     int sx = floorDiv(x, 16), sy = floorDiv(y, 16), sz = floorDiv(z, 16);
     Key3 sk{0, sx, sy, sz};
     uint32_t voxel = uint32_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)));
@@ -1075,7 +1076,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     // (the levels the grid's coarse levels own are not kept here: from the next one up)
     int first = std::max(COARSE_MIN, gridCoarse.load(std::memory_order_relaxed) + 1);
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(digest)", "hold:world.mu(digest)");
         top = coarseTop();
         if (top < first) {
             undigested_.clear();
@@ -1166,7 +1167,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
     if (std::getenv("ATLAS_COARSE_DEBUG"))
         std::fprintf(stderr, "[atlas] coarse digest: %zu sections computed in %.0f ms\n", todo.size(),
                      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(digest)", "hold:world.mu(digest)");
     // copies of the touched cubes (copy on write: jobs hold the old ones)
     std::unordered_map<Key3, std::shared_ptr<CoarseCube>, Key3Hash> work;
     auto edit = [&](const Key3& key) -> CoarseCube& {
@@ -1384,7 +1385,7 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
 }
 
 World::CoarseStats World::coarseStats() const {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(coarseStats)", "hold:world.mu(coarseStats)");
     CoarseStats st;
     st.bytes = coarseBytes_;
     for (auto& [key, c] : coarse_) {
@@ -1855,7 +1856,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         centreRegion[lod][1] = int(std::floor(centre[2] / span));
     }
     if (gridMoved_.exchange(false)) {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         gridWindowMoved();
     }
     // the sections that arrived, into the coarse levels (before the regions they dirtied are snapshot)
@@ -1863,7 +1864,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     if (groups) digest(centreRegion, budgetMs);
     auto tDigest1 = std::chrono::steady_clock::now();
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         // the coarser levels the sections dirtied, once the uploads have paused (or a region is missing outright)
         constexpr uint32_t SECTION_QUIET_MS = 2000;
         if (!sectionDirty_.empty() && int32_t(nowMs() - lastSectionMs_) >= int32_t(SECTION_QUIET_MS)) {
@@ -2010,7 +2011,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         // the last update, collected (as the synchronous path's results below)
         std::vector<Built> fin;
         {
-            std::lock_guard<std::mutex> lock(mu_);
+            fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
             queue_.clear();
             for (const Key3& k : want) queue_.push_back({k, !coveredByFiner(k, centreRegion) || (regions_.count(k) && !dirty_.count(k))});
             fin.swap(done_);
@@ -2067,7 +2068,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             }
             auto js0 = std::chrono::steady_clock::now();
             {
-                std::lock_guard<std::mutex> lock(mu_);
+                fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
                 const Key3& k = want[i];
                 jobs[i] = snapshot(k, groups && k.lod < groupLods);
                 auto r = regions_.find(k);
@@ -2105,7 +2106,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     auto tLock0 = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point tLock1;
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         tLock1 = std::chrono::steady_clock::now();
         lastGroupsBuilt_ = uint32_t(treesBuilt.load());
         lastGroupsMs_ = double(treeUs.load()) / 1000.0;
@@ -2185,11 +2186,11 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     }
     bool reshaped;
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         reshaped = shapes_->revision != packedShapes_ || cards_->revision != packedCards_;
     }
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         // (budgeted: what the view still waits for, the deferred trees left out; plus what the builders have in hand)
         lastPending_ = budgetMs < 0 ? urgent + inFlight_.size() : want.size() - size_t(built.load());
     }
@@ -2198,7 +2199,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     if (repacked && budgetMs < 0) {
         // (budgeted: packed by the packer thread; atlas_update stages the new revision once it is there)
         {
-            std::lock_guard<std::mutex> lock(packMu_);
+            fr::LockZone lock(packMu_, "wait:world.packMu(update)", "hold:world.packMu(update)");
             std::memcpy(packCentre_, centreRegion, sizeof packCentre_);
             packWanted_ = true;
             if (!packerThread_.joinable()) {
@@ -2246,7 +2247,7 @@ World::~World() {
     genCache_.reset();  // (its queue written first)
     {
         // (the edited sections not packed yet: into warm, so their layers' records keep them whole beside them)
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         for (auto& [k, m] : rawMeta_) {
             LayerPtr L = (m.flags & SectionStore::EDITED) ? store_->layer(k) : nullptr;
             auto s = sections_.find(k);
@@ -2258,12 +2259,12 @@ World::~World() {
     // (store_ first: its type is complete only here; it writes its changed layers)
     store_.reset();
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(update)", "hold:world.mu(update)");
         stopBuilders_ = true;
         queue_.clear();
     }
     {
-        std::lock_guard<std::mutex> lock(packMu_);  // (the packer waits on its own lock)
+        fr::LockZone lock(packMu_, "wait:world.packMu(update)", "hold:world.packMu(update)");  // (the packer waits on its own lock)
     }
     buildCv_.notify_all();
     packCv_.notify_all();
@@ -2328,7 +2329,7 @@ void World::builder() {
 }
 
 void World::setShapes(uint32_t first, const std::vector<std::shared_ptr<const MaterialShape>>& shapes) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(setShapes)", "hold:world.mu(setShapes)");
     auto next = std::make_shared<ShapeSet>(*shapes_);  // copy on write: builders hold the old snapshot
     if (next->byMaterial.size() < first + shapes.size()) next->byMaterial.resize(first + shapes.size());
     for (size_t i = 0; i < shapes.size(); i++) next->byMaterial[first + i] = shapes[i];
@@ -2346,14 +2347,14 @@ void World::setTextures(uint32_t first, const std::vector<std::shared_ptr<const 
 }
 
 void World::setCards(std::shared_ptr<const CardSet> cards) {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(setCards)", "hold:world.mu(setCards)");
     auto next = std::make_shared<CardSet>(*cards);
     next->revision = cards_->revision + 1;
     cards_ = std::move(next);
 }
 
 World::GroupStats World::groupStats() const {
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(groupStats)", "hold:world.mu(groupStats)");
     GroupStats st;
     for (auto& [k, r] : regions_) {
         if (!r->groups) continue;
@@ -2387,7 +2388,7 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     std::shared_ptr<const ShapeSet> shapesSnap;
     std::shared_ptr<const CardSet> cardsSnap;
     {
-        std::lock_guard<std::mutex> lock(mu_);
+        fr::LockZone lock(mu_, "wait:world.mu(repack)", "hold:world.mu(repack)");
         int side0 = 2 * windowRadius + 1;
         for (int lod = 0; lod < lodCount; lod++)
             for (int ry = 0; ry < regionRows(lod); ry++)
@@ -2575,7 +2576,7 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         std::lock_guard<std::mutex> snap(snapMu_);
         packed_ = std::move(next);
     }
-    std::lock_guard<std::mutex> lock(mu_);
+    fr::LockZone lock(mu_, "wait:world.mu(repack)", "hold:world.mu(repack)");
     packedShapes_ = shapesSnap->revision;
     packedCards_ = cardsSnap->revision;
     for (int lod = 0; lod < lodCount; lod++) {

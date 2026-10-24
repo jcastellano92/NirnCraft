@@ -8,6 +8,7 @@
 #pragma once
 #include <atomic>
 #include <cstdint>
+#include <mutex>
 
 #include "vk_loader.hpp"
 
@@ -59,6 +60,34 @@ private:
 // ATLAS_ZONE("render:prepare"); the zone ends with the scope. ATLAS_ZONE_MIN: only when it ran at least `us` microseconds.
 #define ATLAS_ZONE(NAME) ::atlas::fr::Zone ATLAS_FR_CAT(frZone_, __LINE__)(NAME)
 #define ATLAS_ZONE_MIN(NAME, US) ::atlas::fr::Zone ATLAS_FR_CAT(frZone_, __LINE__)(NAME, uint64_t(US) * 1000u)
+
+// A std::lock_guard that also records how long it waited for the mutex (>= 0.2 ms: "wait:...") and how long it held it
+// (>= 1 ms: "hold:..."): the trace then shows who held a lock a stalled thread was waiting for. Names are literals.
+class LockZone {
+public:
+    LockZone(std::mutex& m, const char* waitName, const char* holdName) : m_(m), hold_(holdName) {
+        if (enabled()) {
+            uint64_t t0 = nowNs();
+            m.lock();
+            t1_ = nowNs();
+            if (t1_ - t0 >= 200000) record(waitName, t0, t1_);
+        } else {
+            m.lock();
+        }
+    }
+    ~LockZone() {
+        uint64_t t2 = t1_ ? nowNs() : 0;
+        m_.unlock();
+        if (t1_ && t2 - t1_ >= 1000000) record(hold_, t1_, t2);
+    }
+    LockZone(const LockZone&) = delete;
+    LockZone& operator=(const LockZone&) = delete;
+
+private:
+    std::mutex& m_;
+    const char* hold_;
+    uint64_t t1_ = 0;
+};
 
 // The render thread's frame boundary (once per game frame): records the "frame" zone since the last call and starts a
 // spike dump when it ran over the threshold.
