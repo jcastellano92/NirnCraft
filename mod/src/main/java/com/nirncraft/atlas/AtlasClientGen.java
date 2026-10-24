@@ -91,6 +91,7 @@ final class AtlasClientGen implements AutoCloseable {
         for (int i = 0; i < chunkKeys.length; i++) {
             long k = chunkKeys[i];
             any |= c.done.remove(k);
+            c.deferred.remove(k);
             xz[i * 2] = ChunkPos.getX(k);
             xz[i * 2 + 1] = ChunkPos.getZ(k);
             for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(xz[i * 2], sec - 4, xz[i * 2 + 1]));
@@ -703,6 +704,38 @@ final class AtlasClientGen implements AutoCloseable {
                 if (cur == null) cur = plan(camCx, camCz, fresh ? FIRST_BATCH : BATCH);
                 terrainBusy = cur != null;
                 if (direct) gridReports();
+                if (cur == null && direct && storeOn && !deferred.isEmpty()) {
+                    // the window looked up: the misses it deferred, nearest first (those the camera left forgotten)
+                    int ccx = camCx, ccz = camCz;
+                    List<Long> near = new ArrayList<>();
+                    for (java.util.Iterator<Long> it = deferred.iterator(); it.hasNext(); ) {
+                        long k = it.next();
+                        if (!inWindow(ChunkPos.getX(k), ChunkPos.getZ(k), ccx, ccz, RADIUS + 1)) {
+                            it.remove();
+                            done.remove(k);
+                        } else {
+                            near.add(k);
+                        }
+                    }
+                    near.sort(java.util.Comparator.comparingLong(k -> {
+                        long dx = ChunkPos.getX(k) - ccx, dz = ChunkPos.getZ(k) - ccz;
+                        return dx * dx + dz * dz;
+                    }));
+                    int n = Math.min(BATCH, near.size());
+                    if (n > 0) {
+                        nearIdle = false;
+                        int[] b = new int[n * 2];
+                        for (int i = 0; i < n; i++) {
+                            long k = near.get(i);
+                            deferred.remove(k);
+                            b[i * 2] = ChunkPos.getX(k);
+                            b[i * 2 + 1] = ChunkPos.getZ(k);
+                        }
+                        directBatch(b, ids, flags, info, false);
+                        chunks += n;
+                        continue;
+                    }
+                }
                 if (cur == null && direct && storeOn) {
                     // nothing new to generate: the store's ready chunks still go out (64 a call)
                     long before = storeFinished;
@@ -710,14 +743,20 @@ final class AtlasClientGen implements AutoCloseable {
                     if (storeFinished != before) continue;
                 }
                 if (cur == null) {
+                    nearIdle = true;
                     if (direct) pruneDirect(camCx, camCz);
                     else prune(camCx, camCz);
                     // the near window done: the far terrain (a tile a turn, so a move is answered at once)
-                    if (farOn && farStep()) continue;
+                    if (farOn && farStep()) {
+                        farIdle = false;
+                        continue;
+                    }
+                    farIdle = true;
                     for (Thread t : featureWorkers) LockSupport.unpark(t);
                     LockSupport.parkNanos(20_000_000L);
                     continue;
                 }
+                nearIdle = farIdle = false;
                 long t0 = System.nanoTime();
                 int[][] made = cur.pages.join();
                 int[] miss = made[0];
@@ -729,7 +768,7 @@ final class AtlasClientGen implements AutoCloseable {
                 int n = batch.length / 2;
                 if (direct) {
                     if (fresh) firstBatchPagesNs = t1;
-                    directBatch(batch, ids, flags, info, fresh);
+                    directBatch(batch, ids, flags, info, fresh, true);
                     pruneDirect(camCx, camCz);
                     if (farOn && (chunks / BATCH) % 4 == 3) farStep();  // the far terrain between near batches too
                     chunks += n;
@@ -785,6 +824,15 @@ final class AtlasClientGen implements AutoCloseable {
      * device to device. Only the chunks the features will decorate bring their ids back.
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first) {
+        directBatch(batch, ids, flags, info, first, false);
+    }
+
+    /**
+     * (defer) The cache's chunks of the batch go up now and its misses wait (deferred) until the window has nothing
+     * left to look up: a relaunch serves its whole window from disk first, not a batch's hits behind the decoration
+     * of its misses (seconds a call).
+     */
+    private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before
         if (gen.cacheSupported()) {
@@ -793,6 +841,10 @@ final class AtlasClientGen implements AutoCloseable {
             // through the store, its neighbours sent back to the start by each new one)
             batch = fromCache(batch, info);
             if (batch.length == 0 && !storeOn) return;
+            if (defer && storeOn && batch.length > 0) {
+                for (int i = 0; i < batch.length; i += 2) deferred.add(ChunkPos.pack(batch[i], batch[i + 1]));
+                return;
+            }
         }
         int n = batch.length / 2;
         boolean wantIds = false;

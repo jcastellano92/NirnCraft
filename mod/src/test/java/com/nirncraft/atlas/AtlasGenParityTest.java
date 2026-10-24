@@ -1175,6 +1175,7 @@ class AtlasGenParityTest {
                 java.util.concurrent.atomic.AtomicBoolean rendering = new java.util.concurrent.atomic.AtomicBoolean(true);
                 java.util.concurrent.atomic.AtomicLong frames = new java.util.concurrent.atomic.AtomicLong();
                 String[] renderError = {null};
+                List<Float> frameMs = new ArrayList<>();  // (each frame's update + render, ms: the render thread's)
                 Thread renderer = new Thread(() -> {
                     AtlasNative.Frame f = new AtlasNative.Frame();
                     f.width = 320;
@@ -1184,15 +1185,23 @@ class AtlasGenParityTest {
                             .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
                     int[] color = new int[320 * 180];
                     float[] depth = new float[320 * 180];
+                    long nextFrame = System.nanoTime();
                     while (rendering.get()) {
                         f.x = cam[0];
                         f.y = 160;
                         f.z = cam[1];
                         try {
+                            long r0 = System.nanoTime();
                             ctx.update(f.x, f.y, f.z, frames.get() == 0 ? 0 : 2);
                             ctx.render(f, color, null, depth);
+                            synchronized (frameMs) {
+                                frameMs.add((System.nanoTime() - r0) / 1e6f);
+                            }
                             frames.incrementAndGet();
-                            Thread.sleep(16);
+                            // (a 60 Hz cadence, as vsync: the frame's own time out of the 16.7 ms)
+                            long left = nextFrame - System.nanoTime();
+                            if (left > 0) Thread.sleep(left / 1_000_000L, (int) (left % 1_000_000L));
+                            nextFrame = Math.max(nextFrame + 16_666_667L, System.nanoTime());
                         } catch (InterruptedException e) {
                             return;
                         } catch (Throwable t) {
@@ -1203,12 +1212,13 @@ class AtlasGenParityTest {
                 }, "test render");
                 renderer.setDaemon(true);
                 renderer.start();
-                double tWindow = -1, tHorizon = -1;
+                double tWindow = -1, tHorizon = -1, tSettled = -1;
                 try {
                     long t0 = System.nanoTime();
                     for (int stop = 0; stop < stops; stop++) {
                         // a walk to the stop at 30 blocks a second, then the settle: nothing generated or served for 2.5 s
                         double target = stop * 96.0;
+                        AtlasClientGen.follow(cam[0], cam[1], 0f);  // (the first stop too: no camera, no window)
                         while (cam[0] < target + 0.5) {
                             cam[0] = Math.min(target + 0.5, cam[0] + 30 * 0.05);
                             AtlasClientGen.follow(cam[0], cam[1], 0f);
@@ -1217,17 +1227,20 @@ class AtlasGenParityTest {
                         long[] last = AtlasClientGen.counters();
                         long still = System.nanoTime();
                         long stopStart = System.nanoTime();
-                        while ((System.nanoTime() - stopStart) / 1e9 < 90) {
+                        while ((System.nanoTime() - stopStart) / 1e9 < 300) {
                             Thread.sleep(250);
                             long[] now = AtlasClientGen.counters();
-                            if (!java.util.Arrays.equals(now, last)) {
+                            if (now[0] != last[0] || now[1] != last[1]) {  // (the near window's: far tiles go on meanwhile)
                                 last = now;
                                 still = System.nanoTime();
                             }
                             double[] j = cg.jumpTimes();
                             if (tWindow < 0 && j[1] >= 0) tWindow = (System.nanoTime() - t0) / 1e9;
-                            if ((System.nanoTime() - still) / 1e9 > 2.5 && j[1] >= 0) break;
+                            // settled: the worker has nothing left in the window and nothing changed for a second
+                            boolean[] idle = AtlasClientGen.idle();
+                            if (idle != null && idle[0] && (System.nanoTime() - still) / 1e9 > 1.0) break;
                         }
+                        if (stop == 0) tSettled = (System.nanoTime() - t0) / 1e9 - 1.0;
                         report.append(String.format("  launch %d stop %d (x %.0f): %.1f s  generated %d, from cache %d, far made %d, far cached %d%n",
                                 launch, stop, cam[0], (System.nanoTime() - t0) / 1e9, last[0], last[1], last[2], last[3]));
                         progress("relaunch " + launch, stop + 1, stops);
@@ -1236,15 +1249,23 @@ class AtlasGenParityTest {
                     long f0 = System.nanoTime();
                     String st = "";
                     while (farWanted && (System.nanoTime() - f0) / 1e9 < 240) {
-                        String farPart = AtlasClientGen.state().replaceAll(".*(far [^)]*?busy [0-9]+).*", "$1");
-                        if (farPart.equals(st)) break;
-                        st = farPart;
-                        Thread.sleep(4000);
+                        boolean[] idle = AtlasClientGen.idle();
+                        if (idle != null && idle[0] && idle[1]) break;
+                        Thread.sleep(250);
                     }
                     tHorizon = (System.nanoTime() - t0) / 1e9;
-                    report.append(String.format("launch %d: window up after %.1f s, horizon settled after %.1f s (%d frames)%n  %s%n", launch,
-                            tWindow, tHorizon, frames.get(), AtlasClientGen.state()));
+                    report.append(String.format("launch %d: first radius settled after %.1f s (window up %.1f s), horizon settled after %.1f s (%d frames)%n  %s%n", launch,
+                            tSettled, tWindow, tHorizon, frames.get(), AtlasClientGen.state()));
                     if (renderError[0] != null) report.append("  render thread: ").append(renderError[0]).append(System.lineSeparator());
+                    float[] ms;
+                    synchronized (frameMs) {
+                        ms = new float[frameMs.size()];
+                        for (int i = 0; i < ms.length; i++) ms[i] = frameMs.get(i);
+                    }
+                    java.util.Arrays.sort(ms);
+                    if (ms.length > 0)
+                        report.append(String.format("  frames (render thread, update + render): p50 %.1f p99 %.1f max %.1f ms; %s%n", ms[ms.length / 2],
+                                ms[(int) (ms.length * 0.99)], ms[ms.length - 1], ctx.info().replaceAll("(?s).*(\"stageCpuMs\"[^}]*?\"stageScale\":[0-9.]+).*?(\"takePhases\":\\{[^}]*\\}).*", "$1 $2")));
                     if (launch == 2) second = AtlasClientGen.counters();
                 } finally {
                     cg.close();
