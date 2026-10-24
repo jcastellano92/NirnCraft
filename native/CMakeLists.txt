@@ -543,4 +543,4 @@ if(WIN32)
 endif()
 
 # the flight recorder (docs/ATLAS-PLAN.md stage 0.2): always-on CPU zones and GPU timestamps, spike dumps
-target_sources(atlas_core PRIVATE src/flight_recorder.cpp)
+target_sources(atlas_core PRIVATE src/flight_recorder.cpp src/texturepack.cpp)

@@ -1870,14 +1870,35 @@ private:
         releaseRetired(false);
         if (!stageVoxGrid(s, in, err)) return false;
         vgOpen_ = true;  // (cleared by the frame's submit)
-        if (!shared_[B_TEX].buf || (in.textures && in.texturesRevision != texRevision_)) {
-            // a new texture set: into a new buffer; frames in flight keep the old one until they are done (no wait)
-            retire(shared_[B_TEX]);
-            static const uint32_t none = 0u;
-            const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
-            size_t n = in.textures && !in.textures->empty() ? in.textures->size() : 1;
-            if (!upload(shared_[B_TEX], src, n * 4, false, Mem::HostWrite, err)) return false;
-            texRevision_ = in.textures ? in.texturesRevision : 0;
+        {
+            const bool texNew = in.textures && in.texturesRevision != texRevision_;
+            const size_t texWords = in.textures && !in.textures->empty() ? in.textures->size() : 1;
+            const bool texFull = !shared_[B_TEX].buf || in.texturesGeneration != texGeneration_ || (texNew && texWords * 4 > shared_[B_TEX].size);
+            if (texFull) {
+                // the first set, a slot rewritten, or the set outgrew the buffer: into a new buffer (with room to grow); frames in
+                // flight keep the old one until they are done (no wait)
+                retire(shared_[B_TEX]);
+                static const uint32_t none = 0u;
+                const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
+                if (!ensure(shared_[B_TEX], VkDeviceSize(texWords) * 4 * 6 / 5, false, Mem::HostWrite, err)) return false;
+                std::memcpy(shared_[B_TEX].map, src, texWords * 4);
+                texRevision_ = in.textures ? in.texturesRevision : 0;
+                texGeneration_ = in.texturesGeneration;
+                texUploadedWords_ = texWords;
+            } else if (texNew) {
+                // texturepack.hpp: slots are only ever appended and the table has a fixed length, so what changed is the table and the
+                // tail: copied in place (frames in flight read slots that were there before)
+                ATLAS_ZONE_MIN("vk:textures delta", 100);
+                const uint32_t* src = in.textures->data();
+                size_t table = std::min<size_t>(texWords, size_t(src[0]) + 1);
+                std::memcpy(shared_[B_TEX].map, src, table * 4);
+                if (texWords > texUploadedWords_) {
+                    size_t from = std::max(texUploadedWords_, table);
+                    std::memcpy(static_cast<char*>(shared_[B_TEX].map) + from * 4, src + from, (texWords - from) * 4);
+                }
+                texUploadedWords_ = texWords;
+                texRevision_ = in.texturesRevision;
+            }
         }
         if (!shared_[B_BRICKS].buf || (in.bricks && in.bricksRevision != brickRevision_)) {
             // new bricks: a new buffer, as the textures (frames in flight keep the old one)
@@ -3197,7 +3218,8 @@ private:
     size_t vgWords_ = 0;      // chunk words of every level the buffers hold
     uint32_t vgCap_ = 0;      // slots of every level
     VkDeviceSize vgSatBytes_ = 0;
-    uint64_t texRevision_ = ~0ull;
+    uint64_t texRevision_ = ~0ull, texGeneration_ = 0;
+    size_t texUploadedWords_ = 0;  // the texture buffer holds this many words of the host's set (texturepack.hpp)
     uint64_t brickRevision_ = ~0ull;
     double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;

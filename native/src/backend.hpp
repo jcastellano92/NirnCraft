@@ -52,6 +52,7 @@ struct FrameInputs {
     VoxGrid* voxgrid = nullptr;               // the level-0 grid's books: the backend takes its batches (voxgrid.hpp)
     const std::vector<uint32_t>* textures = nullptr;  // the near field's textures, packed (voxgrid.hpp packTextures)
     uint64_t texturesRevision = 0;
+    uint64_t texturesGeneration = 0;  // bumped when a slot already there was rewritten (texturepack.hpp): upload it all again
     const std::vector<uint32_t>* bricks = nullptr;  // (abi 0.18) the bricks, packed (bricks.hpp BrickStore::pack)
     uint64_t bricksRevision = 0;
     bool gridLights = false;  // (abi 0.18) some material emits: the grid's emitters become lights (gridLightMain)

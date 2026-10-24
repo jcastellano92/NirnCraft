@@ -18,6 +18,7 @@
 #include "air.hpp"
 #include "backend.hpp"
 #include "flight_recorder.hpp"
+#include "texturepack.hpp"
 #include "gencache.hpp"
 #include "atlas_build_hash.h"
 #include "bricks.hpp"
@@ -149,7 +150,9 @@ struct AtlasContext {
     std::string cacheDir;
     uint64_t cacheSeed = 0, cacheHostBytes = 0, cacheDiskBytes = 0;
     uint32_t cacheGenVersion = 0;
-    std::vector<uint32_t> texturesPacked = std::vector<uint32_t>(1, 0u);  // packTextures of the world's TextureSet
+    // the near field's textures for the kernels (texturepack.hpp): a slot a material, packed on a worker thread as they arrive
+    TexturePack texPack;
+    std::vector<uint32_t> texturesPacked;
     uint64_t texturesRevision = 0;
     // (abi 0.18) the micro-voxel bricks (atlas_set_material_bricks), packed for the kernels once each revision
     BrickStore bricks;
@@ -1490,19 +1493,11 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
         auto ttx = std::chrono::steady_clock::now();
-        std::shared_ptr<const TextureSet> ts;
-        {
-            ATLAS_ZONE_MIN("api:world.textures", 50);
-            ts = ctx->world.textures();
-        }
+        if (ctx->texPack.sync(ctx->texturesPacked)) ctx->texturesRevision++;  // (the slots the worker finished; never waits)
         easeMs(ctx->inTexMs, ttx);
-        if (ts->revision != ctx->texturesRevision) {
-            ATLAS_ZONE("api:packTextures");
-            packTextures(*ts, ctx->texturesPacked);
-            ctx->texturesRevision = ts->revision;
-        }
         in.textures = &ctx->texturesPacked;
         in.texturesRevision = ctx->texturesRevision;
+        in.texturesGeneration = ctx->texPack.generation();
         // the materials' lights (gridLightMain): every emitter at its level in its colour (its brick's glowing
         // micro-voxels, else its palette colour), checked against the palette each frame (cheap: a word a material)
         ATLAS_ZONE_MIN("api:materialLights", 100);
@@ -1797,7 +1792,7 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
         std::memcpy(t->faces, textures + size_t(i) * 6 * 256, sizeof t->faces);
         v[i] = std::move(t);
     }
-    ctx->world.setTextures(first, v);
+    ctx->texPack.submit(first, v);  // (packed off the render thread, merged a few a frame: texturepack.hpp)
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
