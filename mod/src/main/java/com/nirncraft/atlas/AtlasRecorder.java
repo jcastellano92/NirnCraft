@@ -262,7 +262,7 @@ public final class AtlasRecorder {
             String verdict = verdictOf(dir);
             com.nirncraft.NirnCraft.LOGGER.warn("atlas recorder: frame spike dumped to {}: {}", dir, verdict);
             var mc = Minecraft.getInstance();
-            if (mc.player != null) mc.player.displayClientMessage(Component.literal("atlas trace: " + dir + " - " + verdict), false);
+            if (mc.player != null) mc.player.sendSystemMessage(Component.literal("atlas trace: " + dir + " - " + verdict));
         } catch (Throwable t) {
             // ignore
         }
