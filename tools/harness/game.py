@@ -235,7 +235,7 @@ def _launch(group, groups, limit=900):
     _iris_enable()
     cfg = groups.get(group, {})
     jvm = dict(cfg.get("jvm", {}))
-    if "nirncraft.autotest.world" not in jvm and group == "live":
+    if "nirncraft.autotest.world" not in jvm and (group == "live" or cfg.get("keptWorld")):
         jvm.update({"nirncraft.autotest.world": kept_world(), "nirncraft.autotest.keepWorld": "true"})
     _set_group_flags(jvm)
     _enable_overlay()
@@ -312,6 +312,8 @@ def sync_native():
         return
     import native_sources  # tools/dev: which sources a core was built from (check_natives --require-fresh)
     digest = native_sources.source_hash()
+    if not NATIVE_BUILT.exists() and NATIVE_SHIPPED.exists() and not native_sources.stale("windows-x86_64", digest):
+        return  # a worktree with no native build of its own: the shipped core was built from these very sources
     if native_stale(digest=digest):
         log("  native sources changed: building atlas_core (once for this run)")
         tr.step("auto_native_build")

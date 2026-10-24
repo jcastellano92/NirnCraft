@@ -179,7 +179,9 @@ building in real time), multiplayer at scale, baked light, weather.
 
 ## 5. How the work runs (cost)
 
-- **One worker agent on the current stage**, plus a read-only reviewer on every new GPU kernel. No parallel fronts.
+- **A few agents, each on the model its work needs** (owner, 2026-10-24): Haiku for image checks, Sonnet for coding,
+  Opus for deep planning and stuck debugging. Poor work from a lower tier: stop it and hand over to the next tier up.
+  Parallel agents only on separate files and worktrees; a read-only reviewer on every new GPU kernel.
 - **Commit small and often**, with WIP commits allowed on the stage branch, so a usage limit never strands work.
 - **Every agent prompt names the stage gate**, and the agent reports the gate's numbers, not a narrative.
 - **Gates run by me**, in the game, through the route and the gallery. The owner tests at the gates of stages 2, 3, 4
