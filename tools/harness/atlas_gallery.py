@@ -110,6 +110,21 @@ def choose(groups, a, sweep):
     n = getattr(a, "gallery_limit", 0) or 0
     if sweep and not n and not pats and not getattr(a, "gallery_all", False):
         n = 96  # a spread through the registry, in order; --gallery-all for every group
+    per = getattr(a, "gallery_per_block", 0) or 6
+    if not getattr(a, "gallery_all", False) and not sweep:
+        # models that differ only by a rotation or a facing are one kind of thing: at most `per` of a block (the ones
+        # with the most parts first, the rest spread), every part of the block is still in the sample
+        keep, byblock = [], {}
+        for g in out:
+            byblock.setdefault(g["block"], []).append(g)
+        for lst in byblock.values():
+            if len(lst) > per:
+                head = lst[:2]
+                rest = lst[2:]
+                k = per - 2
+                lst = head + [rest[int(i * len(rest) / k)] for i in range(k)]
+            keep += lst
+        out = keep
     if n and len(out) > n:
         step = len(out) / n
         out = [out[int(i * step)] for i in range(n)]
@@ -210,6 +225,13 @@ def lab(img):
     return np.stack([116 * f[..., 1] - 16, 500 * (f[..., 0] - f[..., 1]), 200 * (f[..., 1] - f[..., 2])], axis=-1)
 
 
+def minfilter3(a):
+    """The 3 x 3 neighbourhood minimum (a one-pixel shift between vanilla's raster and atlas's rays is not a pit)."""
+    p = np.pad(a, 1, mode="edge")
+    h, w = a.shape
+    return np.min([p[y:y + h, x:x + w] for y in range(3) for x in range(3)], axis=0)
+
+
 def pair_metrics(v_png, a_png):
     v, a = Image.open(v_png), Image.open(a_png)
     if v.size != a.size:
@@ -219,9 +241,11 @@ def pair_metrics(v_png, a_png):
     de = np.sqrt((d ** 2).sum(-1))
     off = np.median(d.reshape(-1, 3), axis=0)
     shape = np.sqrt(((d - off) ** 2).sum(-1))
-    dl = (la[..., 0] - off[0]) - lv[..., 0]
+    ca = la[..., 0] - off[0]
+    pit = ca < minfilter3(lv[..., 0]) - PIT_L           # darker than every vanilla pixel around it
+    bright = ca > -minfilter3(-lv[..., 0]) + PIT_L      # brighter than every vanilla pixel around it
     return {"dE": float(de.mean()), "dEp95": float(np.percentile(de, 95)), "dEshape": float(shape.mean()),
-            "offsetL": float(off[0]), "pit": float((dl < -PIT_L).mean()), "bright": float((dl > PIT_L).mean()),
+            "offsetL": float(off[0]), "pit": float(pit.mean()), "bright": float(bright.mean()),
             "lumaVanilla": float(lv[..., 0].mean()), "lumaAtlas": float(la[..., 0].mean()), "px": int(de.size)}
 
 
@@ -267,7 +291,8 @@ def font(size):
 
 def heat(v_png, a_png, size):
     v, a = Image.open(v_png), Image.open(a_png).resize(Image.open(v_png).size)
-    d = np.sqrt(((lab(a) - lab(v)) ** 2).sum(-1))
+    d = lab(a) - lab(v)
+    d = np.sqrt(((d - np.median(d.reshape(-1, 3), axis=0)) ** 2).sum(-1))  # the shape difference: lighting level removed
     t = np.clip(d / 30.0, 0, 1)
     rgb = np.stack([t * 255, (1 - np.abs(t - 0.5) * 2) * 160, (1 - t) * 90], axis=-1).astype(np.uint8)
     return Image.fromarray(rgb).resize((size, size), Image.NEAREST)
