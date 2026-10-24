@@ -260,6 +260,7 @@ public:
     struct PaceStats {
         double periodMs = 0, duty = 1, tokensMs = 0, usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
         uint64_t submissions = 0;
+        char maxPhase[48] = {};  // what the longest submission was
     };
     virtual PaceStats paceStats() const { return {}; }
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
@@ -1922,15 +1923,19 @@ private:
     struct Pacer {
         double tokens = 20.0, periodMs = 0.0, duty = 0.8;
         std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
-        uint64_t sampleFrames = 0;
+        uint64_t sampleFrames = 0, lastFrames = 0;
+        std::chrono::steady_clock::time_point lastFrameAt = last;  // (when the frame counter last moved)
         double usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
+        char maxPhase[48] = {};
         uint64_t subs = 0;
         int cls = 0;
         bool init = false;
     } pace_;
     void paceClass(int c) override { pace_.cls = c; }
     PaceStats paceStats() const override {
-        return {pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
+        PaceStats r{pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
+        std::memcpy(r.maxPhase, pace_.maxPhase, sizeof r.maxPhase);
+        return r;
     }
     static double envMs(const char* name, double def) {
         const char* e = std::getenv(name);
@@ -1947,10 +1952,23 @@ private:
             pace_.sampleFrames = f;
             pace_.sampleAt = now;
         }
+        if (f != pace_.lastFrames) {
+            pace_.lastFrames = f;
+            pace_.lastFrameAt = now;
+        }
         double win = std::chrono::duration<double, std::milli>(now - pace_.sampleAt).count();
         if (win >= 200.0) {
-            double p = f > pace_.sampleFrames ? win / double(f - pace_.sampleFrames) : 0.0;  // (0: no frames this window)
-            pace_.periodMs = p == 0.0 ? 0.0 : (pace_.periodMs == 0.0 ? p : pace_.periodMs * 0.5 + p * 0.5);
+            double p;
+            if (f > pace_.sampleFrames) {
+                p = win / double(f - pace_.sampleFrames);
+            } else {
+                // No frame in the window: either none run (loading, a paused game: none for 2 s) or they are stalled
+                // (frames of 200 ms and more: the stall itself is the period, longest wins): the worst case for the
+                // generator, not the best (the first version read both as "no frames" and gave it 80 %)
+                double since = std::chrono::duration<double, std::milli>(now - pace_.lastFrameAt).count();
+                p = since < 2000.0 && pace_.lastFrames != 0 ? std::max(win, since) : 0.0;
+            }
+            pace_.periodMs = p == 0.0 ? 0.0 : (pace_.periodMs == 0.0 || p > pace_.periodMs ? p : pace_.periodMs * 0.5 + p * 0.5);
             pace_.sampleFrames = f;
             pace_.sampleAt = now;
         }
@@ -2010,7 +2028,10 @@ private:
                 e->pace_.tokens -= ms;
                 e->lastSubMs_ = ms;
                 e->pace_.usedMs += ms;
-                e->pace_.maxSubMs = std::max(e->pace_.maxSubMs, ms);
+                if (ms > e->pace_.maxSubMs) {
+                    e->pace_.maxSubMs = ms;
+                    std::snprintf(e->pace_.maxPhase, sizeof e->pace_.maxPhase, "%s", e->phase_.c_str());
+                }
                 e->pace_.subs++;
                 static const double warnMs = envMs("ATLAS_GEN_TRACE_SUBS", 0.0);  // (measurements: submissions over this)
                 if (warnMs > 0.0 && ms > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", ms, e->phase_.c_str());
@@ -2145,6 +2166,7 @@ struct AtlasGen {
     // its neighbours' stages back (they wrote its old copy); a chunk never held needs no one's stages again
     std::unordered_set<int64_t> storeDropped;
     uint64_t storeMade = 0, storeStageRuns = 0, storePacks = 0;  // (atlas_gen_store_counters)
+    std::unordered_map<uint32_t, double> storeStageMs;  // per stage order: ms a chunk (EMA), for the call sizes
     int32_t storeFocusX = 0, storeFocusZ = 0;  // (the last asked chunks' centre: a call asking none drains around it)
     std::vector<uint32_t> storeFree;
     uint32_t storeSlots = 0;
@@ -2442,7 +2464,21 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
                 int v = e ? std::atoi(e) : 16;
                 return size_t(std::max(1, std::min(int(MAX_CHUNKS), v)));
             }();
-            if (ready.size() > perCall) ready.resize(perCall);
+            // (the GPU budget) a call of about 50 ms at most, from the stage's measured time a chunk: a decoration of
+            // 16 chunks held the card for 944 ms once; paced, 4 chunks first and then what 50 ms holds
+            size_t calls = perCall;
+            {
+                static const bool paced = [] {
+                    const char* e = std::getenv("ATLAS_GEN_PACE");
+                    return !e || std::atoi(e) != 0;
+                }();
+                if (paced && h->ctx) {
+                    auto m = h->storeStageMs.find(stage.order);
+                    calls = m == h->storeStageMs.end() ? std::min<size_t>(perCall, 4)
+                                                       : std::max<size_t>(1, std::min<size_t>(perCall, size_t(50.0 / std::max(m->second, 0.5))));
+                }
+            }
+            if (ready.size() > calls) ready.resize(calls);
             int32_t r = int32_t(stage.radius), w = 2 * r + 1;
             std::vector<int32_t> list, nb;
             for (const AtlasGen::StoreChunk* c : ready) {
@@ -2454,7 +2490,16 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
                     }
             }
             (void)w;
+            auto st0 = std::chrono::steady_clock::now();
+            double used0 = h->engine->paceStats().usedMs;
             if (!h->engine->storeStage(stage, uint32_t(ready.size()), list, nb, err)) return false;
+            {
+                // (the GPU time of its submissions, not the wall time: that holds the budget's waits)
+                double du = h->engine->paceStats().usedMs - used0;
+                double per = (du > 0.0 ? du : msSince(st0)) / double(ready.size());
+                double& m = h->storeStageMs[stage.order];
+                m = m <= 0.0 ? per : m * 0.6 + per * 0.4;
+            }
             h->storeStageRuns += ready.size();
             for (const AtlasGen::StoreChunk* c : ready) {
                 auto it = h->store.find(key(c->cx, c->cz));
@@ -3451,6 +3496,14 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
     });
 }
 
+ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out) {
+    if (!h || !h->ctx || !out) return ATLAS_ERR_ARG;
+    VoxGrid* g = contextGrid(h->ctx);
+    if (!g) return ATLAS_ERR_STATE;
+    g->coarseWindow(level, out);
+    return ATLAS_OK;
+}
+
 ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level) {
     if (!h || !h->ctx) return 0;
     VoxGrid* g = contextGrid(h->ctx);
@@ -3464,16 +3517,17 @@ ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) 
     out->periodMs = s.periodMs, out->duty = s.duty, out->tokensMs = s.tokensMs, out->usedMs = s.usedMs;
     out->waitedMs = s.waitedMs, out->farWaitedMs = s.farWaitedMs, out->maxSubmissionMs = s.maxSubMs;
     out->submissions = s.submissions;
+    std::memcpy(out->maxPhase, s.maxPhase, sizeof out->maxPhase);
     return ATLAS_OK;
 }
 
-ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out) {
+static AtlasStatus genCacheStats(AtlasGen* h, AtlasGenCacheStats* out, bool wait) {
     if (!h || !out) return ATLAS_ERR_ARG;
     return guarded([&] {
         *out = AtlasGenCacheStats{};
         GenCache* gc = h->ctx ? contextWorld(h->ctx)->genCache() : nullptr;
         if (!gc) return ATLAS_OK;
-        gc->flush();
+        if (wait) gc->flush();
         GenCache::Stats st = gc->stats();
         out->on = st.on ? 1u : 0u;
         out->fingerprint = st.fingerprint;
@@ -3490,9 +3544,14 @@ ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out
         out->farHits = st.farHits;
         out->farMisses = st.farMisses;
         out->hashErrors = st.hashErrors;
+        out->chunkWrites = st.chunkWrites;
+        out->queued = st.queued;
         return ATLAS_OK;
     });
 }
+
+ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out) { return genCacheStats(h, out, true); }
+ATLAS_API AtlasStatus atlas_gen_cache_peek(AtlasGen* h, AtlasGenCacheStats* out) { return genCacheStats(h, out, false); }
 
 }  // extern "C"
 

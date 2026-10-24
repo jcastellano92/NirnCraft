@@ -893,9 +893,13 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
 /* Free slots in the grid's coarse level `level` (1..6): a far tile it refused chunks of is asked for again when there is
    room for them. */
 ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level);
+/* A coarse level's window now: out[6] = origin x, z, side (chunks of the level), placed (1), jumps (how often it was placed
+   afresh: what was given before is gone), rows. The far tiles to ask for are those that cover its columns. */
+ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out);
 typedef struct AtlasGenPaceStats {
     double periodMs, duty, tokensMs, usedMs, waitedMs, farWaitedMs, maxSubmissionMs;
     uint64_t submissions;
+    char maxPhase[48];  /* what the longest submission held (a pass, a store stage, a far stage ...) */
 } AtlasGenPaceStats;
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
 typedef struct AtlasGenCacheStats {
@@ -904,9 +908,13 @@ typedef struct AtlasGenCacheStats {
     double encodeMs, decodeMs;
     uint64_t farWrites, farHits, farMisses;
     uint64_t hashErrors;  /* records whose ids did not match the GPU's content hash: refused (generated again) */
+    uint64_t chunkWrites; /* chunk headers written this session */
+    uint64_t queued;      /* records waiting to be written */
 } AtlasGenCacheStats;
 /* (waits for the cache's writes first) */
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out);
+/* The same without waiting for the writes (a profile line's: the queue shows in `queued`). */
+ATLAS_API AtlasStatus atlas_gen_cache_peek(AtlasGen* h, AtlasGenCacheStats* out);
 /* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. With a program that carries
    the page passes' inputs (AtlasGenProgram: the climate entries, the fields' kinds, the height noises) the generator
    then makes every page itself on its device (atlas_page.slang) before each batch's terrain: atlas_gen_missing_pages
