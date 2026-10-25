@@ -205,6 +205,16 @@ follows the design without new tests.
   - the far terrain as height fields with max-height pyramids, which also gives the sky exit.
   - Test offline on the saved scene against the current look, after the levels-1-2 completeness experiment.
 
+**Adoption checklist for any new technique (2026-10-25).** It is adopted only if it:
+1. stays inside the one grid and trace, with no separate near or far renderer;
+2. is chosen per pixel from the footprint;
+3. rebuilds cheaply when a section changes, so far edits still show;
+4. gives the same result on every machine (multiplayer and caches depend on it);
+5. keeps the look and the light (gallery and captures);
+6. fits its slice of the frame budget.
+
+Height fields may serve only as a skip structure inside the coarse levels, never as a far-terrain renderer.
+
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
 
