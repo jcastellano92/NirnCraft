@@ -143,6 +143,23 @@ The writer thread (one thread, one file open per record) is what bounds level 2 
 `ArcaneRegistry` registered its 14 regional flora blocks in `Map.ofEntries` order, which Java salts per launch (materials
 log "a new numbering", ingest table, fingerprint all differ). Sorted now (the materials log says where the order moved).
 
+**Keyed by what produces the data (atlas-bake2, 2026-10-25).** The generation and bake caches (`gen-<fingerprint>/`) used to carry
+`atlas_build_hash`, the hash of every native source, so any rebuild, a render-kernel-only one too, emptied them and the route baked
+from scratch. The fingerprint now takes `ATLAS_GEN_HASH` (`cmake/buildhash.cmake`, same header): the generator's own files only
+(atlas_gen / page / map / exact / features / feat_math / overlays / overlays_roads / ovl_javamath / store / height `.slang`, the
+generator, bake, features, overlays and height engines, the cache and its section codec, `spv_exact`), plus what it already
+carried: the program, the ingest table, the map (roads, settlements, tapes), the Java identity and the far stage's fingerprint, and
+the world's seed directory. Not the render kernels, `vk_backend`, the grid or the harness. The pipeline cache stays keyed by the driver
+and the SPIR-V, as before; the cold tier (the grid's packed sections) keeps the whole build hash. The **idle verifier** is the safety
+net for a key that misses a file: once loaded and idle, every 12 s (`-Dnirncraft.atlas.verify.seconds`) it makes one cached near
+chunk (through the store, apart from the cache: all 40 sections' hash and kind compared) or one cached stand-in far tile
+(`atlas_gen_verify_far_tile`: every chunk's kind and uniform material) again and compares; a difference is counted in the profile
+line / atlas-info (`verify{chunks N differed M, tiles N differed M}`), logged, and the chunk or tile made again; the route fails on
+one. A mixed far chunk's voxels are compared by classification only (LATER: a content digest in the tile record). **Per-stage
+fingerprints (step 7) plug in here:** `refreshFingerprint` (gen_engine.cpp) folds `genHash()` and the stages' orders into the set's
+key; step 7 replaces that one hash by one per stage (the stage's kernel files and its data), stored as the directory entry's
+buildId, so a changed stage marks only the regions it touches.
+
 **Near.** The self-baking cache plus an **idle baker**: the RequestRing's tail along the predicted path, then a
 spiral, run only from the pacer's idle tokens in bake-only mode. A full level-0 Tamriel is ~5.3 GB and ~40 GPU-min once
 trees are fixed: optional.

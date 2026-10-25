@@ -801,8 +801,7 @@ public:
     // ATLAS_FAR_PROFILE=1: ATLAS_FAR_SLICE (4096) chunks a part, labelled with the level and the count (the budget's counters
     // then show what a part of that size costs); ATLAS_FAR_SLICE_MAX (4096) caps a part.
     struct FarCost {
-        double msPerChunk = 0;
-        uint32_t lastN = 0;
+        double n = 0;  // (the chunks a part takes at this level now)
     };
     struct FarItem {
         uint32_t n;
@@ -825,24 +824,26 @@ public:
         const double budget = b->budgetUs ? double(b->budgetUs) / 1000.0 : 4.0;
         const uint32_t lod = uint32_t(b->lod);
         FarCost& c = farCost_[lod];
-        // what the parts done took: a chunk's time (the part's, whole: the places and the descriptors with part 0), quick up
+        // The part's own time steers the size. A dispatch of these threads costs a floor (a thread's whole walk, some ms)
+        // and little more up to a few thousand chunks: sizing from a time a chunk (time over chunks) shrank the parts to the
+        // floor's 64 chunks, 260 parts a tile. So: a part over 1.25 times the target is cut to the share of the target, one
+        // under 0.7 times it that was a full-size part grows by half. The target is above the floor, under the 8 ms a submission
+        // may take: 1.5 times the budget.
+        const double target = budget * 1.5;
+        if (c.n <= 0.0) c.n = 256.0;
         for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
-            double per = double(b->partUs[farFed_]) / 1000.0 / double(std::max(1u, farPlan_[farFed_].n));
-            c.msPerChunk = c.msPerChunk <= 0.0 || per > c.msPerChunk ? per : c.msPerChunk * 0.6 + per * 0.4;
+            double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
+            if (t > target * 1.25) c.n = std::max(64.0, used * target / t * 0.9);
+            else if (t < target * 0.7 && used >= c.n * 0.95) c.n = std::min(c.n * 1.5, double(maxN));
         }
         const uint32_t left = chunks - farOff_;
-        uint32_t n;
-        if (profile) {
-            n = profileN;
-        } else if (c.msPerChunk <= 0.0) {
-            n = 256u;  // (a probe: the first part of a level)
-        } else {
-            double want = budget * 0.5 / c.msPerChunk;
-            n = uint32_t(std::clamp(want, 64.0, std::min(double(maxN), double(std::max(64u, c.lastN)) * 2.0)));
-        }
+        if (part == 0) c.n = std::min(c.n, 1024.0);  // (a new tile: not sized from the last tile's end alone)
+        uint32_t n = profile ? profileN : uint32_t(c.n);
         n = std::min(left, std::max(64u, n & ~63u));
-        // (a thread's scratch is a slot of the dispatch: its width times the rows, within the scratch the origins' tables are)
+        // (a thread's scratch is a slot of the dispatch: its width times the rows, past the places' list: within the scratch)
         if (farRows_ > 0) {
+            uint64_t room = scratch_.size / 4 > 16384u + 12u * farRows_ * 64u ? (scratch_.size / 4 - 16384u) / (12ull * farRows_) : 0;
+            n = std::max(64u, std::min<uint32_t>(n, uint32_t(room) & ~63u));
             uint32_t w = (n + GROUP - 1) / GROUP * GROUP;
             p.rec = 0xFFFFFFFFu;  // (FAR_ROWS)
             p.store = farRow0_;
@@ -850,7 +851,6 @@ public:
             p.budget = w;
             dispatch(S_FARTREES, w / GROUP, farRows_);
         }
-        c.lastN = n;
         farOff_ += n;
         bool last = farOff_ >= chunks || farRows_ == 0;
         if (last) {

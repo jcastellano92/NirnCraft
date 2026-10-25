@@ -130,6 +130,19 @@ final class AtlasCoarseBake implements Runnable {
         return gen.farKnown(level, tx, tz);
     }
 
+    /** A cached stand-in tile of levels 3 to 6 chosen at random, for the idle verifier ({level, tx, tz}), or null. */
+    static int[] sampleKnownTile(java.util.Random rnd) {
+        AtlasCoarseBake b = active;
+        if (b == null || b.phase < 2) return null;
+        for (int tries = 0; tries < 40; tries++) {
+            int level = LOAD_LO + rnd.nextInt(LOAD_HI - LOAD_LO + 1), span = 256 << level;
+            int x0 = Math.floorDiv(MIN_X, span), x1 = Math.floorDiv(MAX_X - 1, span), z0 = Math.floorDiv(MIN_Z, span), z1 = Math.floorDiv(MAX_Z - 1, span);
+            int tx = x0 + rnd.nextInt(x1 - x0 + 1), tz = z0 + rnd.nextInt(z1 - z0 + 1);
+            if (!b.failed.contains(key(level, tx, tz)) && b.gen.farKnown(level, tx, tz)) return new int[]{level, tx, tz};
+        }
+        return null;
+    }
+
     /** (gridReports) The grid gave up a chunk of this tile: it is put again. */
     static void dropped(int level, int tx, int tz) {
         AtlasCoarseBake b = active;

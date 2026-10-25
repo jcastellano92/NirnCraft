@@ -42,6 +42,7 @@ final class AtlasProbe {
                     + "chunk hits (\\d+) misses (\\d+) \\((\\d+) incomplete\\), section reads (\\d+), far tile hits (\\d+), hash errors (\\d+)\\}");
     // AtlasReady.line: "ready{ok}" or "ready{pending: what}"
     private static final Pattern READY = Pattern.compile("ready\\{(ok|pending: ([^}]*))\\}");
+    private static final Pattern VERIFY = Pattern.compile("verify\\{chunks (\\d+) differed (\\d+), tiles (\\d+) differed (\\d+)\\}");
     private static final Pattern JUMP = Pattern.compile("jump\\{firstUp=(-?[\\d.,]+) windowUp=(-?[\\d.,]+) features=(-?[\\d.,]+)");
 
     /** The counters a gate cannot do without. */
@@ -95,6 +96,7 @@ final class AtlasProbe {
             o.addProperty("ready", rm.group(1).equals("ok"));
             if (rm.group(2) != null) o.addProperty("readyPending", rm.group(2));
         }
+        num(o, VERIFY, info, "verifyChunks", "verifyChunksDiffered", "verifyTiles", "verifyTilesDiffered");  // (the idle verifier of the caches' key)
         num(o, JUMP, info, "jumpFirstUpMs", "jumpWindowUpMs", "jumpFeaturesMs");
         int at = info.indexOf(" core=");
         if (at >= 0) {

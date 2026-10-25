@@ -404,6 +404,7 @@ def summarize(data):
     m["loadSubs"] = parse_subs(ld.get("subs"))
     m["routeSubs"] = parse_subs(data.get("subs"))
     m["loadBake"] = ld.get("bake")
+    m["verify"] = {k: last_of(k) for k in ("verifyChunks", "verifyChunksDiffered", "verifyTiles", "verifyTilesDiffered")}
     queued = [d for d in data.get("dumps") or [] if "queued behind" in d.get("verdict", "")]
     m["dumps"] = len(data.get("dumps") or [])
     m["dumpsQueuedBehindGen"] = len([d for d in queued if "generator" in d["verdict"]])
@@ -417,6 +418,8 @@ def summarize(data):
             top = sub["rows"][0]
             fails.append(f"{what}: a generator submission of {top['max']} ms ({top['phase']}; {sub['over8']} over 8 ms of {sub['submissions']}) "
                          f"> {BAR['genSubmissionMs']:g}")
+    if (m["verify"]["verifyChunksDiffered"] or 0) + (m["verify"]["verifyTilesDiffered"] or 0):
+        fails.append(f"the idle verifier found cached data that the generator no longer makes: {m['verify']} (a cache key that missed a change)")
     if m["dumpsQueuedBehindGen"]:
         fails.append(f"{m['dumpsQueuedBehindGen']} frame(s) over 50 ms queued behind the generator (recorder dumps)")
     if m["p99"] > BAR["p99"]:
@@ -534,7 +537,8 @@ def html(folder, title, runs, verdict, extra=""):
             "over 50 ms", "dumps", "queued behind gen")) + "</tr><tr>" + "".join(f"<td>{v}</td>" for v in (
             ld.get("ready"), ld.get("toRendererS"), ld.get("toGeneratorS"), ld.get("toSpawnAreaS"), ld.get("toHorizonS"),
             ld.get("toReadyS"), lf.get("n"), round(lf.get("p50", 0), 1), round(lf.get("p99", 0), 1), round(lf.get("max", 0), 1),
-            lf.get("over50"), m.get("dumps"), m.get("dumpsQueuedBehindGen"))) + "</tr></table>")
+            lf.get("over50"), m.get("dumps"), m.get("dumpsQueuedBehindGen"))) + "</tr></table>"
+            + f"<p>idle verifier (cached chunks and far tiles made again and compared): {m.get('verify')}; loading counters: {m.get('loadBake')}</p>")
         for title, sub in (("generator and bake submissions while loading", m.get("loadSubs")), ("generator and bake submissions on the route", m.get("routeSubs"))):
             if sub and sub.get("rows"):
                 rows.append(f"<h4>{title}: {sub['submissions']} submissions, {sub['over8']} over 8 ms</h4><table><tr><th>phase</th><th>n</th><th>mean ms</th>"

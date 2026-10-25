@@ -42,7 +42,7 @@ import java.util.stream.IntStream;
 final class AtlasClientGen implements AutoCloseable {
     // flight recorder zones (AtlasRecorder): the generator thread's loop
     private volatile double[] statPage;
-    private volatile String statPaceLine, statCacheLine, statSubLine, statStoreLine;
+    private volatile String statPaceLine, statCacheLine, statSubLine, statStoreLine, statVerifyLine;
 
     /** The generator thread's own reading of the native counters (their calls take the generator's lock, held a whole batch). */
     private void refreshStats() {
@@ -50,6 +50,7 @@ final class AtlasClientGen implements AutoCloseable {
             if (devicePages) statPage = gen.pageStats();
             statPaceLine = gen.paceLine();
             statSubLine = gen.subLine(false);
+            statVerifyLine = verifyLine();
             if (storeOn) {
                 int[] ss = gen.storeStats();
                 statStoreLine = ss == null || ss.length < 3 ? null : String.format("store{held %d, waiting %d, ready %d}", ss[0], ss[1], ss[2]);
@@ -663,6 +664,8 @@ final class AtlasClientGen implements AutoCloseable {
         if (pace != null) pagesNow += ", " + pace;
         String subs = c.statSubLine;
         if (subs != null) pagesNow += ", " + subs;
+        String vl = c.statVerifyLine;
+        if (vl != null) pagesNow += ", " + vl;
         if (c.statStoreLine != null) pagesNow += ", " + c.statStoreLine;
         String cache = c.statCacheLine;
         pagesNow += ", " + (cache != null ? cache : "genCache{not in this library}");
@@ -833,6 +836,7 @@ final class AtlasClientGen implements AutoCloseable {
                     }
                     farIdle = true;
                     for (Thread t : featureWorkers) LockSupport.unpark(t);
+                    verifyStep();
                     LockSupport.parkNanos(20_000_000L);
                     continue;
                 }
@@ -929,6 +933,80 @@ final class AtlasClientGen implements AutoCloseable {
 
     /** Calls of the near window that did something (a batch in, or chunks out of the store): the bake's turn-taking while the screen holds. */
     private volatile long nearTurns;
+
+    // ---- the idle verifier ----
+    // The generation and bake caches are keyed by what produces the data (the generator's sources, its data inputs, the seed:
+    // cmake/buildhash.cmake ATLAS_GEN_HASH), not by the whole native build, so a render-kernel rebuild keeps them. A file the
+    // key does not name that does change what the generator makes would serve stale data: so once the load is over and the
+    // window idle, every VERIFY_S seconds one cached chunk or one cached stand-in far tile (alternately) is made again apart
+    // from the cache and compared (a chunk: every section's hash and kind; a tile: every chunk's kind and uniform material).
+    // A difference is counted (verify{} of the profile line / atlas-info) and what differed is made again.
+    static final double VERIFY_S = Double.parseDouble(System.getProperty("nirncraft.atlas.verify.seconds", "12"));
+    private long verifyNs;
+    private int verifyTurn;
+    private final java.util.Random verifyRnd = new java.util.Random(0x5EED);
+
+    private void verifyStep() {
+        if (!gen.verifySupported() || VERIFY_S <= 0 || !AtlasLoadStats.finished() || AtlasLoadingScreen.holding() || !camSet) return;
+        long now = System.nanoTime();
+        if (now - verifyNs < (long) (VERIFY_S * 1e9)) return;
+        verifyNs = now;
+        try {
+            if ((verifyTurn++ & 1) == 0) verifyChunk();
+            else verifyTile();
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: {}", e.toString());
+        }
+    }
+
+    private void verifyChunk() {
+        int r = RADIUS / 2;
+        for (int tries = 0; tries < 24; tries++) {
+            int cx = camCx + verifyRnd.nextInt(2 * r + 1) - r, cz = camCz + verifyRnd.nextInt(2 * r + 1) - r;
+            int[] xz = {cx, cz}, cached = new int[AtlasGenNative.INFO_WORDS];
+            byte[] hit = new byte[1];
+            if (gen.cacheLookup(xz, cached, hit) == 0 || hit[0] == 0) continue;
+            int[] outXZ = new int[AtlasGenNative.RUN_CHUNKS * 2], fl = new int[AtlasGenNative.RUN_CHUNKS];
+            int[] made = new int[AtlasGenNative.RUN_CHUNKS * AtlasGenNative.INFO_WORDS];
+            int m = 0;
+            for (int call = 0; call < 8 && m == 0; call++) m = gen.runStore(call == 0 ? xz : new int[0], outXZ, null, fl, made, null);
+            if (m > 0) gen.ingest(new long[m]);  // (nothing sent: the batch is released)
+            // (the store brings out whatever else was ready too, packed and not sent: asked for again, else holes in the window)
+            for (int i = 0; i < m; i++)
+                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz) done.remove(ChunkPos.pack(outXZ[i * 2], outXZ[i * 2 + 1]));
+            for (int i = 0; i < m; i++) {
+                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz || fl[i] != 0) continue;
+                int o = i * AtlasGenNative.INFO_WORDS;
+                boolean same = true;
+                for (int w = 0; w < 3 && same; w++) same = made[o + w] == cached[w];
+                for (int sec = 0; sec < 40 && same; sec++)
+                    for (int w = 0; w < 3 && same; w++) same = made[o + 4 + sec * 4 + w] == cached[4 + sec * 4 + w];
+                gen.verifyNote(!same);
+                if (!same) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: cached chunk ({}, {}) differs from the generator's: made again", cx, cz);
+                    regenerate(new long[]{ChunkPos.pack(cx, cz)});
+                }
+                return;
+            }
+            return;
+        }
+    }
+
+    private void verifyTile() {
+        int[] t = AtlasCoarseBake.sampleKnownTile(verifyRnd);
+        if (t == null) return;
+        int res = gen.verifyFarTile(t[0], t[1], t[2]);
+        if (res == 1) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: cached far tile level {} ({}, {}) differs from the generator's: baked again", t[0], t[1], t[2]);
+            AtlasCoarseBake.dropped(t[0], t[1], t[2]);  // (the grid's copy is put again from the cache)
+        }
+    }
+
+    /** {chunks checked, chunks that differed, tiles checked, tiles that differed} of the verifier, as a profile block. */
+    private String verifyLine() {
+        long[] v = gen.verifyStats();
+        return v == null ? null : String.format("verify{chunks %d differed %d, tiles %d differed %d}", v[0], v[1], v[2], v[3]);
+    }
 
     static long nearTurns() {
         AtlasClientGen c = active;

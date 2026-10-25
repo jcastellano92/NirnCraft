@@ -196,14 +196,23 @@ FRESH_WORLD = {"on": False}  # harness --fresh-world: make the test world again 
 
 def kept_world():
     """The test world for this world generation: kept between runs (places generated once load from disk in seconds);
-    a worldgen change (code or data) gets a new one; worlds of older generations are deleted."""
+    a worldgen change (code or data) gets a new one; the worlds of older generations are deleted once they are not among the
+    three last used (the instance is shared by every worktree: one launching used to delete the others' kept worlds, with the
+    player's saved spawn in them)."""
     import cameras
     name = f"harness_{cameras.worldgen_hash()}"
     saves = GAME / "saves"
     if saves.exists():
-        for d in saves.iterdir():
-            if d.is_dir() and d.name.startswith("harness_") and (d.name != name or FRESH_WORLD["on"]):
+        def used(d):
+            lv = d / "level.dat"
+            return (lv if lv.exists() else d).stat().st_mtime
+        others = sorted((d for d in saves.iterdir() if d.is_dir() and d.name.startswith("harness_") and d.name != name),
+                        key=used, reverse=True)
+        for i, d in enumerate(others):
+            if i >= 3:
                 shutil.rmtree(d, ignore_errors=True)
+        if FRESH_WORLD["on"]:
+            shutil.rmtree(saves / name, ignore_errors=True)
     return name
 
 

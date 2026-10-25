@@ -1004,6 +1004,14 @@ ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out);
 /* While on, the far field's submissions (atlas_gen_far_ingest, so the bake) are not paced and take nothing from the near
    work's budget: for a loading screen that holds the player, where no frame is to be protected. */
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on);
+/* The idle verifier of the generation and bake caches (they are keyed by the generator's own sources, data and seed, not by
+   the whole native build: a key that misses a change would serve stale data). atlas_gen_verify_far_tile makes one cached
+   stand-in far tile again, apart from the cache and the grid, and compares its chunks' kinds with the cache's: *outResult -1
+   not comparable, 0 the same, 1 it differed (the tile is baked again). atlas_gen_verify_note(kind 0, bad) counts a near
+   chunk the caller checked; atlas_gen_verify_stats gives {chunks checked, chunks differed, tiles checked, tiles differed}. */
+ATLAS_API AtlasStatus atlas_gen_verify_far_tile(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz, int32_t* outResult);
+ATLAS_API AtlasStatus atlas_gen_verify_note(AtlasGen* h, int32_t kind, int32_t bad);
+ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out);
 ATLAS_API AtlasStatus atlas_gen_bake_begin(AtlasGen* h, const AtlasGenBakeSpec* spec, AtlasGenBakeInfo* out);
 /* Makes the next maxTiles tiles not yet known (each one atlas_gen_far_ingest, paced as the far field is: the leftovers of
    the GPU budget). Returns early with info.busy set; call again after a frame. */

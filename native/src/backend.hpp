@@ -16,6 +16,8 @@ namespace atlas {
 std::string pipelineCachePath();
 // the native build's content hash (cmake/buildhash.cmake): the caches' build fingerprint
 uint64_t buildHash();
+// the generator's own content hash (the same script's ATLAS_GEN_HASH): what the generation and bake caches are keyed by
+uint64_t genHash();
 void setPipelineCachePath(const std::string& p);
 
 struct GlFrameIO {

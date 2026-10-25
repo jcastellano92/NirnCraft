@@ -22,13 +22,16 @@ SANDBOX_INPUT = ROOT / "mod/src/main/java"
 
 
 def worldgen_hash():
+    """The world-generation fingerprint: the files' paths and CONTENTS (their modification times used to be in it, and a git
+    worktree's checkout times differ from every other worktree's: each one launching the shared test instance made its own
+    kept world and deleted the others', the player's saved spawn and the world's atlas data with it, on an unchanged generator)."""
     h = hashlib.sha256()
     for rel in WORLDGEN:
         p = ROOT / rel
         files = [p] if p.is_file() else sorted(f for f in p.rglob("*") if f.is_file())
         for f in files:
-            st = f.stat()
-            h.update(f"{f.relative_to(ROOT).as_posix()}:{st.st_size}:{int(st.st_mtime)}".encode())
+            h.update(f"{f.relative_to(ROOT).as_posix()}:{f.stat().st_size}:".encode())
+            h.update(hashlib.sha256(f.read_bytes()).digest())
     return h.hexdigest()[:12]
 
 

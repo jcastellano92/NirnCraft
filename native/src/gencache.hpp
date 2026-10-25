@@ -73,6 +73,10 @@ public:
     void putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash, bool standIn = true);
     bool farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds);  // (true: known, whole)
     bool farKnown(int lod, int tx, int tz);                              // (the index alone)
+    // A tile made again (the idle verifier found it differing from the generator's): its kinds, its coarse chunks and their
+    // count no longer known at once, and a tombstone record on disk (a later scan drops what came before it), so that the
+    // records written after it are the tile's, in the file's order.
+    void forgetFarTile(int lod, int tx, int tz);
     bool farStandIn(int lod, int tx, int tz);                            // (known, and still the placeholder: not true data)
     std::shared_ptr<const std::vector<uint32_t>> coarse(const Key3& k);
     Stats stats();
@@ -106,7 +110,7 @@ private:
         std::unordered_map<uint64_t, uint32_t> baked;
     };
     struct Job {
-        int type = 1;  // 0 chunk, 1 section, 2 far tile, 3 coarse chunk, 4 a chunk's tombstone
+        int type = 1;  // 0 chunk, 1 section, 2 far tile, 3 coarse chunk, 4 a chunk's tombstone, 5 a far tile's tombstone
         bool isChunk = false;
         Key3 k;
         std::vector<uint32_t> info;
@@ -135,6 +139,7 @@ private:
     std::unordered_set<uint64_t> fresh_;  // (chunks whose header this session wrote: chunkKey)
     std::vector<std::filesystem::path> oldSets_;  // (other sets in the root: deleted at this one's first write)
     void dropOldSets();  // (caller holds mu_)
+    void eraseFarTile(Region& r, int lod, int tx, int tz);  // (caller holds mu_)
     std::string regionPath(uint64_t rk) const;
     Region& region(uint64_t rk);  // (caller holds mu_; scanned on first use)
     void writerLoop();

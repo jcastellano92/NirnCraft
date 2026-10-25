@@ -397,6 +397,7 @@ std::string pipelineCachePath() {
     return pipeCacheSet();
 }
 uint64_t buildHash() { return ATLAS_BUILD_HASH; }
+uint64_t genHash() { return ATLAS_GEN_HASH; }
 void setPipelineCachePath(const std::string& p) {
     std::lock_guard<std::mutex> l(pipeCacheMu());
     pipeCacheSet() = p;
