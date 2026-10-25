@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <condition_variable>
@@ -269,6 +270,13 @@ public:
         char recentPhase[48] = {};
     };
     virtual PaceStats paceStats() const { return {}; }
+    // the submissions' GPU times by what they held (a phase class: "far stage", "store stage 1000" ...) since the last reset:
+    // one line, the longest classes first (atlas_gen_sub_stats; any thread, no generator lock)
+    virtual size_t subStats(char* out, size_t cap, bool reset) {
+        (void)reset;
+        if (cap) out[0] = 0;
+        return 0;
+    }
     virtual bool stageInParts(uint32_t) const { return false; }  // (a store stage seen recording in parts)
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
                            uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
@@ -867,10 +875,14 @@ public:
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
-            uint32_t groups = k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP;
-            if (k < 3) {
-                // (the tile's columns in slices of groups, a submission each: their columns are independent)
-                uint32_t slice = sliceOf(100u + k, groups);
+            // (farChunk: a workgroup a chunk, its 64 lanes the chunk's voxels)
+            uint32_t groups = k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : 256 * rows;
+            {
+                // (the tile's columns, or its chunks, in slices of groups, a submission each: they are independent. A pass
+                // not yet timed starts small and learns its time a group from the first slices; none is "latency bound"
+                // here: a group is a few microseconds, and what the frames cost a slice was once read as such, leaving the
+                // whole pass, 70 to 120 ms, in one submission)
+                uint32_t slice = sliceOf(100u + k, groups, k == 3 ? 128u : 32u, false);
                 for (uint32_t g0 = 0; g0 < groups; g0 += slice) {
                     uint32_t m = std::min(slice, groups - g0);
                     vkCmdDispatchBase(cmd_, g0, 0, 0, m, 1, 1);
@@ -887,8 +899,6 @@ public:
                         vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
                     }
                 }
-            } else {
-                vkCmdDispatch(cmd_, groups, 1, 1);
             }
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -918,7 +928,8 @@ public:
         bool any = false;
         for (const Stage& st : stages_) any = any || st.ffn;
         if (!any) return true;
-        // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each
+        // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each; the stage sizes its parts
+        // from their own GPU times (version 3), at most two of them in flight
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         for (uint32_t ti = 0; ti < n; ti++) {
             bool cleared = false;
@@ -927,8 +938,12 @@ public:
                 if (!st.ffn) continue;
                 double& perUnit = farUnitMs_[si];
                 if (!drain(err)) return false;  // (part 0 may write its descriptor sets: nothing of ours in flight)
+                partUs_.clear();
+                partsDone_ = 0;
                 for (uint32_t part = 0;; part++) {
                     poll();
+                    while (part > partsDone_ + 2)  // (their times are what the next part is sized from)
+                        if (!waitOldest(err)) return false;
                     begin();
                     if (!cleared) {
                         vkCmdFillBuffer(cmd_, out_.buf, (VkDeviceSize(ti) * TILE_PLANES + 5) * TILE_COLS * 4, VkDeviceSize(2) * TILE_COLS * 4, 0u);
@@ -937,7 +952,7 @@ public:
                         cleared = true;
                     }
                     AtlasGenFarBatch fb{};
-                    fb.version = 2;
+                    fb.version = 3;
                     fb.lod = jobs[ti * 4];
                     fb.tx = jobs[ti * 4 + 1];
                     fb.tz = jobs[ti * 4 + 2];
@@ -952,6 +967,9 @@ public:
                     fb.part = part;
                     fb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
                     fb.lastPartUs = uint32_t(std::min(lastSubMs_ * 1000.0, 4e9));  // (the latest done, the ring's)
+                    fb.budgetUs = uint32_t(partMs * 1000.0);
+                    fb.partsDone = partsDone_;
+                    fb.partUs = partUs_.data();
                     int32_t r = st.ffn(st.user, &fb);
                     if (r != 0 && r != ATLAS_GEN_STAGE_MORE) {
                         vkEndCommandBuffer(cmd_);
@@ -959,11 +977,14 @@ public:
                     }
                     barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                    phase_ = "far stage, tile " + std::to_string(ti) + ", part " + std::to_string(part);
+                    phase_ = std::string("far stage") + (fb.label[0] ? " " : "") + fb.label + ", tile " + std::to_string(ti) + ", part " +
+                             std::to_string(part);
                     Slot& sl = ring_[cur_];
-                    sl.perUnit = &perUnit;  // (its estimate; refined from its time when it retires, a whole part)
+                    sl.part = int(part);  // (its own GPU time: partUs_, for the stage to size the next)
+                    partUs_.push_back(0u);
+                    sl.perUnit = &perUnit;
                     sl.units = double(fb.units);
-                    sl.refine = r == ATLAS_GEN_STAGE_MORE;
+                    sl.refine = false;
                     if (!submit(err, false)) return fail(err, err + " (far stage)");
                     if (r != ATLAS_GEN_STAGE_MORE) break;
                     if (part > 100000) return fail(err, "far stage never finished");
@@ -2143,6 +2164,7 @@ private:
             partUs_[size_t(s.part)] = uint32_t(std::min(gpu * 1000.0, 4e9));
             partsDone_ = std::max(partsDone_, uint32_t(s.part) + 1u);
         }
+        subNote(s.phase, gpu);
         if (gpu > pace_.maxSubMs) {
             pace_.maxSubMs = gpu;
             std::snprintf(pace_.maxPhase, sizeof pace_.maxPhase, "%s", s.phase.c_str());
@@ -2323,6 +2345,67 @@ private:
         std::chrono::steady_clock::time_point probeAt = last, probeMarkAt = last, lastSubAt = last, traceAt = last;
     } pace_;
     void paceClass(int c) override { pace_.cls = c; }
+    // ---- the submissions by phase class (the recorder's GPU lane, kept as counters: the loading and route gates)
+    struct SubRow {
+        uint64_t n = 0, over4 = 0, over8 = 0, over16 = 0;
+        double sumMs = 0, maxMs = 0;
+    };
+    std::map<std::string, SubRow> subRows_;
+    std::mutex subMu_;
+    static std::string subClass(const std::string& phase) {
+        // "far stage, tile 0, part 9" -> "far stage"; "store stage 1000, 48 chunks, part 675" -> "store stage 1000"; "pass 12" -> "pass #"
+        size_t c = phase.find(',');
+        if (c != std::string::npos) return phase.substr(0, c);
+        std::string r;
+        for (size_t i = 0; i < phase.size(); i++) {
+            if (phase[i] >= '0' && phase[i] <= '9') {
+                if (r.empty() || r.back() != '#') r += '#';
+            } else {
+                r += phase[i];
+            }
+        }
+        return r;
+    }
+    void subNote(const std::string& phase, double ms) {
+        std::lock_guard<std::mutex> l(subMu_);
+        SubRow& r = subRows_[subClass(phase)];
+        r.n++;
+        r.sumMs += ms;
+        r.maxMs = std::max(r.maxMs, ms);
+        r.over4 += ms > 4.0;
+        r.over8 += ms > 8.0;
+        r.over16 += ms > 16.0;
+    }
+    size_t subStats(char* out, size_t cap, bool reset) override {
+        std::vector<std::pair<std::string, SubRow>> rows;
+        {
+            std::lock_guard<std::mutex> l(subMu_);
+            rows.assign(subRows_.begin(), subRows_.end());
+            if (reset) subRows_.clear();
+        }
+        std::sort(rows.begin(), rows.end(), [](const auto& a, const auto& b) { return a.second.maxMs > b.second.maxMs; });
+        std::string t = "subs{";
+        uint64_t total = 0, over8 = 0;
+        for (auto& r : rows) total += r.second.n, over8 += r.second.over8;
+        char b[200];
+        std::snprintf(b, sizeof b, "%llu submissions, %llu over 8 ms", (unsigned long long)total, (unsigned long long)over8);
+        t += b;
+        int shown = 0;
+        for (auto& r : rows) {
+            if (r.second.maxMs < 2.0 || shown++ >= 12) continue;
+            std::snprintf(b, sizeof b, "; %s: n %llu mean %.2f max %.1f ms, >4 %llu >8 %llu >16 %llu", r.first.c_str(),
+                          (unsigned long long)r.second.n, r.second.sumMs / double(r.second.n), r.second.maxMs,
+                          (unsigned long long)r.second.over4, (unsigned long long)r.second.over8, (unsigned long long)r.second.over16);
+            t += b;
+        }
+        t += "}";
+        if (cap) {
+            size_t n = std::min(cap - 1, t.size());
+            std::memcpy(out, t.data(), n);
+            out[n] = 0;
+        }
+        return t.size();
+    }
     PaceStats paceStats() const override {
         PaceStats r{pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
         std::memcpy(r.maxPhase, pace_.maxPhase, sizeof r.maxPhase);
@@ -2466,7 +2549,9 @@ private:
             f.lastMs = f.lastMs * 0.7 + ms * 0.3;
         }
     }
-    uint32_t sliceOf(uint32_t kind, uint32_t n) {
+    // initial: the slice before the kind has been timed (0: all of it); trustLatency false: never read as latency bound
+    // (the far passes: they are throughput bound, and the flag was set by the frames' share of a slice's time)
+    uint32_t sliceOf(uint32_t kind, uint32_t n, uint32_t initial = 0, bool trustLatency = true) {
         static const bool on = [] {
             const char* e = std::getenv("ATLAS_GEN_PACE");
             return !e || std::atoi(e) != 0;
@@ -2474,8 +2559,10 @@ private:
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         if (!on || n <= 1) return std::max(1u, n);
         auto it = sliceFit_.find(kind);
-        if (it == sliceFit_.end() || it->second.latency || it->second.msPerUnit <= 0.0) return n;
-        return uint32_t(std::clamp(partMs / it->second.msPerUnit, 1.0, double(n)));
+        if (it == sliceFit_.end() || it->second.msPerUnit <= 0.0) return initial ? std::min(initial, n) : n;
+        if (trustLatency && it->second.latency) return n;
+        // (a slice of 8 groups at least: a submission is worth that)
+        return uint32_t(std::clamp(partMs / it->second.msPerUnit, trustLatency ? 1.0 : std::min(8.0, double(n)), double(n)));
     }
     // before a submission: wait for the budget; returns the wait
     double paceAcquire() {
@@ -4065,6 +4152,15 @@ ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) 
     out->recentMaxMs = s.recentMaxMs;
     std::memcpy(out->recentPhase, s.recentPhase, sizeof out->recentPhase);
     return ATLAS_OK;
+}
+
+ATLAS_API uint32_t atlas_gen_sub_stats(AtlasGen* h, char* out, uint32_t cap, int32_t reset) {
+    if (!h || !h->engine) return 0;
+    try {
+        return uint32_t(h->engine->subStats(out, cap, reset != 0));  // (its own small lock: answers while a batch runs)
+    } catch (...) {
+        return 0;
+    }
 }
 
 static AtlasStatus genCacheStats(AtlasGen* h, AtlasGenCacheStats* out, bool wait) {

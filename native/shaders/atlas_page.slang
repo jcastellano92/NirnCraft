@@ -1386,11 +1386,23 @@ uint farVoxel(uint t, uint c, float yc, float s) {
     }
     return 0u;
 }
-// one thread per level-k chunk: its kind, and its voxels when mixed (a slot taken from the counter)
+// one workgroup a level-k chunk, its 64 lanes the chunk's voxels (lane l: voxels l, l + 64 ...): its kind, and its voxels
+// when mixed (a slot taken from the counter). One thread a chunk walked 4096 voxels twice, a pass of 10 to 35 ms for a tile;
+// the lanes share the walk (the chunks and their slots are the same, the slot numbers may come in another order: the
+// counter is atomic, as it was).
+groupshared uint gsMixed;  // (a lane found a voxel unlike the first)
+groupshared uint gsSlot;
+uint farChunkVoxel(uint t, uint ccx, uint ccz, uint cy, float s, uint v) {
+    uint vx = v & 15u, vz = (v >> 4) & 15u, vy = v >> 8;
+    uint c = (ccz * 16u + vz) * TILE_SIDE + ccx * 16u + vx;
+    float yc = float(MIN_Y) + (float(cy * 16u + vy) + 0.5f) * s;
+    return farVoxel(t, c, yc, s);
+}
 [shader("compute")]
 [numthreads(64, 1, 1)]
-void farChunkMain(uint3 id : SV_DispatchThreadID) {
-    uint t = id.y + uint(params.pad1), k = id.x;
+void farChunkMain(uint3 gid : SV_GroupID, uint lane : SV_GroupIndex) {
+    // (t and k are the group's: every return before the first barrier is taken by all of its lanes or none)
+    uint t = gid.y + uint(params.pad1), k = gid.x;
     if (t >= uint(params.chunks)) return;
     int lod = pageJobs[t * 4u];
     uint rows = farRows(lod);
@@ -1401,41 +1413,51 @@ void farChunkMain(uint3 id : SV_DispatchThreadID) {
     uint chunkWord = 4u + (t * 256u * rows + k) * 2u;
     uint total = uint(params.chunks) * 256u * farRows(lod);  // (every job of a call has the same lod)
     uint slotBase = 4u + total * 2u;
+    if (lane == 0u) gsMixed = 0u;
+    GroupMemoryBarrierWithGroupSync();
     // classify: the first voxel's material, and whether every other one equals it
-    uint first = 0u;
-    bool uniform = true;
-    for (uint v = 0u; v < 4096u && uniform; v++) {
-        uint vx = v & 15u, vz = (v >> 4) & 15u, vy = v >> 8;
-        uint c = (ccz * 16u + vz) * TILE_SIDE + ccx * 16u + vx;
-        float yc = float(MIN_Y) + (float(cy * 16u + vy) + 0.5f) * s;
-        uint m = farVoxel(t, c, yc, s);
-        if (v == 0u) first = m;
-        else if (m != first) uniform = false;
-    }
-    if (uniform) {
-        farOut[chunkWord] = first == 0u ? 1u : (2u | (first << 8));
-        farOut[chunkWord + 1u] = 0xFFFFFFFFu;
-        return;
-    }
-    uint slot;
-    InterlockedAdd(farOut[0], 1u, slot);
-    if (slot >= farOut[1]) {  // no room: the host asks again with more
-        farOut[chunkWord] = 0xFFFFFFFEu;
-        farOut[chunkWord + 1u] = 0xFFFFFFFFu;
-        return;
-    }
-    farOut[chunkWord] = 0u;
-    farOut[chunkWord + 1u] = slot;
-    uint base = slotBase + slot * 2048u;
-    for (uint v = 0u; v < 4096u; v += 2u) {
-        uint m2[2];
-        for (uint q = 0u; q < 2u; q++) {
-            uint vv = v + q;
-            uint vx = vv & 15u, vz = (vv >> 4) & 15u, vy = vv >> 8;
-            uint c = (ccz * 16u + vz) * TILE_SIDE + ccx * 16u + vx;
-            float yc = float(MIN_Y) + (float(cy * 16u + vy) + 0.5f) * s;
-            m2[q] = farVoxel(t, c, yc, s);
+    uint first = farChunkVoxel(t, ccx, ccz, cy, s, 0u);
+    for (uint i = 0u; i < 64u; i++) {
+        if (farChunkVoxel(t, ccx, ccz, cy, s, i * 64u + lane) != first) {
+            InterlockedOr(gsMixed, 1u);  // (this lane has the answer: the chunk is mixed)
+            break;
         }
-        farOut[base + (v >> 1)] = (m2[0] & 0xFFFFu) | (m2[1] << 16);
+        if ((i & 7u) == 7u) {  // (a mixed chunk is known early: the other lanes stop looking)
+            uint seen;
+            InterlockedOr(gsMixed, 0u, seen);
+            if (seen != 0u) break;
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    if (gsMixed == 0u) {
+        if (lane == 0u) {
+            farOut[chunkWord] = first == 0u ? 1u : (2u | (first << 8));
+            farOut[chunkWord + 1u] = 0xFFFFFFFFu;
+        }
+        return;
+    }
+    if (lane == 0u) {
+        uint slot;
+        InterlockedAdd(farOut[0], 1u, slot);
+        gsSlot = slot;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    uint slot = gsSlot;
+    if (slot >= farOut[1]) {  // no room: the host asks again with more
+        if (lane == 0u) {
+            farOut[chunkWord] = 0xFFFFFFFEu;
+            farOut[chunkWord + 1u] = 0xFFFFFFFFu;
+        }
+        return;
+    }
+    if (lane == 0u) {
+        farOut[chunkWord] = 0u;
+        farOut[chunkWord + 1u] = slot;
+    }
+    uint base = slotBase + slot * 2048u;
+    for (uint w = lane; w < 2048u; w += 64u) {
+        uint m0 = farChunkVoxel(t, ccx, ccz, cy, s, w * 2u);
+        uint m1 = farChunkVoxel(t, ccx, ccz, cy, s, w * 2u + 1u);
+        farOut[base + w] = (m0 & 0xFFFFu) | (m1 << 16);
     }
 }

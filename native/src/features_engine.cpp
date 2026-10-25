@@ -714,6 +714,7 @@ public:
         // a dispatch over the tile's chunks (a record's trees: seeded on their own, written by atomics: any split is
         // exact); the canopy with the last
         uint32_t part = b->version >= 2 ? b->part : 0, units = b->version >= 2 ? b->units : 0;
+        const bool sized = b->version >= 3;  // (the stage sizes its parts itself: farSizedParts)
         if (part == 0) {
             VkBuffer planes = VkBuffer(b->planes);
             VkBuffer bufs[NB] = {prog_.buf, prog_.buf, scratch_.buf, prog_.buf, scratch_.buf, scratch_.buf, prog_.buf,
@@ -736,10 +737,10 @@ public:
         }
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &farSet_, 0, nullptr);
         FeatParams p{b->tx, b->tz, 0, uint32_t(b->lod), int32_t(b->tile), 0u, 0u, 0u};
-        auto dispatch = [&](uint32_t pipe, uint32_t gx) {
+        auto dispatch = [&](uint32_t pipe, uint32_t gx, uint32_t gy = 1) {
             vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
-            vkCmdDispatch(cmd, std::max(1u, gx), 1, 1);
+            vkCmdDispatch(cmd, std::max(1u, gx), std::max(1u, gy), 1);
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         };
@@ -747,18 +748,32 @@ public:
         uint32_t groups = (side * side + GROUP - 1) / GROUP;
         if (part == 0) {
             dispatch(S_FARPLACES, (places_ + GROUP - 1) / GROUP);
-            if (units == 0) {
+            if (sized) {
+                // the rows of the grid: the dispatch list from its first tree record to its last (the kernel lets the others go)
+                farRow0_ = farRows_ = 0;
+                for (uint32_t i = 0; i < dispatch_.size(); i++) {
+                    uint32_t rec = dispatch_[i];
+                    if (rec >= types_.size() || types_[rec] != 4u) continue;
+                    if (farRows_ == 0) farRow0_ = i;
+                    farRows_ = i - farRow0_ + 1;
+                }
+                farOff_ = 0;
+                farPlan_.clear();
+                farFed_ = 0;
+            } else if (units == 0) {
                 dispatch(S_FARTREES, groups);  // (all at once: an older generator)
                 dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
                 return 0;
-            }
+            } else {
             // (a unit: a tree record over a slice of 4096 of the tile's chunks)
             farRecs_.clear();
             for (uint32_t rec : dispatch_)
                 if (rec < types_.size() && types_[rec] == 4u)
                     for (uint32_t t0 = 0; t0 < side * side; t0 += FAR_SLICE) farRecs_.push_back({rec, t0});
             farCursor_ = 0;
+            }
         }
+        if (sized) return farSizedParts(b, part, side * side, p, dispatch);
         for (uint32_t i = 0; i < std::max(1u, units) && farCursor_ < farRecs_.size(); i++) {
             p.rec = farRecs_[farCursor_].first;
             p.first = farRecs_[farCursor_].second;
@@ -774,6 +789,84 @@ public:
     static constexpr uint32_t FAR_SLICE = 4096;
     std::vector<std::pair<uint32_t, uint32_t>> farRecs_;  // (the far stage in parts) (tree record, first chunk) units, the next
     size_t farCursor_ = 0;
+
+    // ---- the far stage sized by itself (AtlasGenFarBatch version 3) ----
+    // A part is ONE dispatch of featFarTreesMain: a range of the tile's chunks by the tree records, one record a row of the
+    // grid (params.rec = FAR_ROWS), some hundred thousand threads at once. A record a dispatch left the card nearly idle (64
+    // groups of 64 threads of the 2000 it holds at a time, each thread a chunk's whole walk): a tile's trees took 0.45 s, and a
+    // dispatch's time did not fall with the chunks given it. The range is sized from the parts done (the generator gives each
+    // part's own GPU time and keeps at most two in flight): the time a chunk took (all the records), the next range that
+    // much for half the budget (ATLAS_GEN_PART_MS, 4), at most twice the last; smaller at once when a part ran long. A tree
+    // record is seeded on its own and writes by atomics, so any grouping of (chunk, record) pairs is exact.
+    // ATLAS_FAR_PROFILE=1: ATLAS_FAR_SLICE (4096) chunks a part, labelled with the level and the count (the budget's counters
+    // then show what a part of that size costs); ATLAS_FAR_SLICE_MAX (4096) caps a part.
+    struct FarCost {
+        double msPerChunk = 0;
+        uint32_t lastN = 0;
+    };
+    struct FarItem {
+        uint32_t n;
+    };
+    std::unordered_map<uint32_t, FarCost> farCost_;  // (per level)
+    std::vector<FarItem> farPlan_;
+    size_t farFed_ = 0;
+    uint32_t farOff_ = 0, farRow0_ = 0, farRows_ = 0;
+    template <class D>
+    int32_t farSizedParts(const AtlasGenFarBatch* b, uint32_t part, uint32_t chunks, FeatParams& p, D& dispatch) {
+        static const bool profile = std::getenv("ATLAS_FAR_PROFILE") != nullptr;
+        static const uint32_t maxN = [] {
+            const char* e = std::getenv("ATLAS_FAR_SLICE_MAX");
+            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 4096u) & ~63u);
+        }();
+        static const uint32_t profileN = [] {
+            const char* e = std::getenv("ATLAS_FAR_SLICE");
+            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 4096u) & ~63u);
+        }();
+        const double budget = b->budgetUs ? double(b->budgetUs) / 1000.0 : 4.0;
+        const uint32_t lod = uint32_t(b->lod);
+        FarCost& c = farCost_[lod];
+        // what the parts done took: a chunk's time (the part's, whole: the places and the descriptors with part 0), quick up
+        for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
+            double per = double(b->partUs[farFed_]) / 1000.0 / double(std::max(1u, farPlan_[farFed_].n));
+            c.msPerChunk = c.msPerChunk <= 0.0 || per > c.msPerChunk ? per : c.msPerChunk * 0.6 + per * 0.4;
+        }
+        const uint32_t left = chunks - farOff_;
+        uint32_t n;
+        if (profile) {
+            n = profileN;
+        } else if (c.msPerChunk <= 0.0) {
+            n = 256u;  // (a probe: the first part of a level)
+        } else {
+            double want = budget * 0.5 / c.msPerChunk;
+            n = uint32_t(std::clamp(want, 64.0, std::min(double(maxN), double(std::max(64u, c.lastN)) * 2.0)));
+        }
+        n = std::min(left, std::max(64u, n & ~63u));
+        // (a thread's scratch is a slot of the dispatch: its width times the rows, within the scratch the origins' tables are)
+        if (farRows_ > 0) {
+            uint32_t w = (n + GROUP - 1) / GROUP * GROUP;
+            p.rec = 0xFFFFFFFFu;  // (FAR_ROWS)
+            p.store = farRow0_;
+            p.first = farOff_;
+            p.budget = w;
+            dispatch(S_FARTREES, w / GROUP, farRows_);
+        }
+        c.lastN = n;
+        farOff_ += n;
+        bool last = farOff_ >= chunks || farRows_ == 0;
+        if (last) {
+            p.rec = 0;
+            p.first = 0;
+            p.store = 0;
+            p.budget = 0;
+            dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
+        }
+        if (part < farPlan_.size()) farPlan_.resize(part);
+        farPlan_.push_back({n});  // (index = the part: the generator calls once a part, in order)
+        char label[48] = {};
+        if (profile) std::snprintf(label, sizeof label, "lod %u n %u", lod, n);
+        std::memcpy(const_cast<char*>(b->label), label, sizeof label);
+        return last ? 0 : ATLAS_GEN_STAGE_MORE;
+    }
 
     // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)
     void setOverlays(AtlasOvl* o) { ovl_ = o; }

@@ -924,6 +924,10 @@ typedef struct AtlasGenPaceStats {
     char recentPhase[48];
 } AtlasGenPaceStats;
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
+/* The generator's submissions by what they held, since the last reset, as one text line ("subs{N submissions, M over 8 ms;
+   far stage: n, mean, max ms, >4 >8 >16 ...}", the longest classes first): their GPU times (timestamps). Returns the full
+   length (cap-limited copy, NUL-terminated); reset != 0 starts the counts again. Answers while a batch runs. */
+ATLAS_API uint32_t atlas_gen_sub_stats(AtlasGen* h, char* out, uint32_t cap, int32_t reset);
 typedef struct AtlasGenCacheStats {
     uint32_t on;
     uint64_t fingerprint, chunks, sections, fileBytes, chunkHits, chunkMisses, sectionWrites, sectionReads;
@@ -1158,7 +1162,7 @@ typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* ba
 #define ATLAS_GEN_TILE_COLS 65536u   /* a tile's columns, 256 x 256, row-major (z outer) */
 #define ATLAS_GEN_TILE_PLANES 7u     /* a tile's planes of ATLAS_GEN_TILE_COLS words */
 typedef struct AtlasGenFarBatch {
-    uint32_t version;              /* 1 */
+    uint32_t version;              /* 1, 2 (parts), 3 (sized by the stage) */
     int32_t lod;                   /* the tiles' level: a column is 2^lod blocks square */
     int32_t tx, tz;                /* the tile: blocks tx * 256 * 2^lod .. (columns from there) */
     uint32_t tile;                 /* its index in the planes buffer: planes at tile * TILE_PLANES * TILE_COLS words */
@@ -1178,6 +1182,13 @@ typedef struct AtlasGenFarBatch {
     uint32_t units;
     uint32_t lastPartUs;
     uint32_t pad2;
+    /* (version 3) the stage sizes its own parts: `budgetUs` of GPU time a part at most, and the GPU time (microseconds) of this
+       tile's parts done so far, by part (`partUs`, `partsDone` of them: parts retire in order, at most two are in flight);
+       the stage names what a part held in `label` (a phase for the budget's counters and the trace; may stay empty) */
+    uint32_t budgetUs;
+    uint32_t partsDone;
+    const uint32_t* partUs;
+    char label[48];
 } AtlasGenFarBatch;
 typedef int32_t (*AtlasGenFarStageFn)(void* user, const AtlasGenFarBatch* batch);
 /* Registers a far stage (outId: for atlas_gen_remove_stage). */
