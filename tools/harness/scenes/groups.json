@@ -54,9 +54,18 @@
     "jvm": {},
     "server": false
   },
+  "hold": {
+    "description": "The player hold's live tests (hold_tools.py): the kept test world, the client generator off so the hold waits on the renderer alone (with it on, the spawn area is 1800 chunks and takes minutes: see docs/PLAYER-HOLD.md)",
+    "jvm": {
+      "nirncraft.atlas.clientGen": "false"
+    },
+    "keptWorld": true,
+    "server": false
+  },
   "hold-never": {
     "description": "A client that never reports ready (-Dnirncraft.hold.neverReady) with the server-side probe (-Dnirncraft.hold.probe): the hold's live test (hold_tools.py)",
     "jvm": {
+      "nirncraft.atlas.clientGen": "false",
       "nirncraft.hold.neverReady": "true",
       "nirncraft.hold.probe": "true"
     },
@@ -66,6 +75,7 @@
   "hold-intro": {
     "description": "The opening kept (-Dnirncraft.autotest.intro) in a fresh world: first join, the character select after the hold (hold_tools.py)",
     "jvm": {
+      "nirncraft.atlas.clientGen": "false",
       "nirncraft.autotest.intro": "true",
       "nirncraft.autotest.world": "hold-intro"
     },

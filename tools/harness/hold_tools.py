@@ -30,7 +30,7 @@ def scenes():
               "weather": "off", "capture": "world", "time": 6000, "seed": None, "_file": "(hold_tools.py)",
               "tags": ["suite:hold", "feature:hold"], "pose": {"visit": [-150, 260, 30, -90.0, 0]}, "timeout": 900}
     return [
-        {**common, "id": "hold-returning", "group": "live", "hold_tool": "returning",
+        {**common, "id": "hold-returning", "group": "hold", "hold_tool": "returning",
          "title": "A returning player is held at login and released by the client's ready at the same place; a mid-session hold likewise"},
         {**common, "id": "hold-never-ready", "group": "hold-never", "hold_tool": "never",
          "title": "A client that never reports ready stays held: a mob beside the player does nothing, nobody else sees them"},
@@ -86,6 +86,7 @@ def wait_for(pattern, g, limit, samples=None):
     """Polls the game log (and the client heartbeat into `samples`) for a regex; returns its last match text or None."""
     t0 = time.monotonic()
     rx = re.compile(pattern)
+    gone = 0
     while time.monotonic() - t0 < limit:
         txt = fresh_log(g)
         m = rx.search(txt)
@@ -94,7 +95,8 @@ def wait_for(pattern, g, limit, samples=None):
             samples.append((round(time.monotonic() - t0, 1), c.get("screen"), c.get("held")))
         if m:
             return m
-        if not g.running():
+        gone = 0 if g.running() else gone + 1  # (the window list can flicker: three misses in a row)
+        if gone >= 3:
             raise RuntimeError("the client exited while waiting for: " + pattern)
         time.sleep(0.5)
     return None
