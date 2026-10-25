@@ -11,6 +11,15 @@
 
 #include "atlas_shared.slang"
 
+// (-DATLAS_FAR_SPLIT=1: farMain built for the unified field's split frames alone, FRAME_PRIMARY_NEAR_LIT with
+// FRAME_NEAR_SPLIT, the game's: the primary rays and their G-buffer; the light is nearLightMain's. Every other path
+// (the near depth's, the far field's own light) compiled out, and with it most of the trace's call sites: the host
+// draws such frames with it, atlas_farsplit.spv)
+#ifndef ATLAS_FAR_SPLIT
+#define ATLAS_FAR_SPLIT 0
+#endif
+static const bool FAR_SPLIT = ATLAS_FAR_SPLIT != 0;
+
 [[vk::binding(0, 0)]] ConstantBuffer<FrameGpu> frame;
 [[vk::binding(1, 0)]] StructuredBuffer<int> regionTable;
 [[vk::binding(2, 0)]] StructuredBuffer<RegionGpu> regions;
@@ -167,6 +176,10 @@ float voxelExit(int3 v, float3 ro, float3 rd, float3 inv, float3 stepPos, float 
 void secCount(uint mode, int lod) {
     if (gSecondary && gSecMode == mode && ((gSecAblate & 67108864u) == 0u || lod == 0)) gSecCount++;
 }
+// (the hot loops: secCount's switches read once a walk, the mode counted at level `lod`, 0 none) The thread-private
+// statics live in local memory wherever the trace is a real call (NVIDIA honours [noinline]): a walk that reads them
+// every step, and keeps gTr.steps there, waited on memory a step (the far pass 10x Oct 20's at the same steps).
+uint secCountMode(int lod) { return gSecondary && ((gSecAblate & 67108864u) == 0u || lod == 0) ? gSecMode : 0u; }
 
 // The face a ray entered voxel v through: the axis whose slab it entered last (robust for rays that graze a boundary
 // plane, unlike the last DDA crossing). ro / rd / inv / stepPos: the ray in the voxel's units.
@@ -238,21 +251,25 @@ int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps
     uint hmBase = r.bases.w;
     int rl = r.origin.w;
     bool useMip = !(gSecondary && rl == 0 && (gSecAblate & 2097152u) != 0u);
+    // (the ray's step count and the counter's switches in registers for the walk, gTr.steps written back at each exit)
+    uint steps = gTr.steps;
+    uint scm = secCountMode(rl);
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) {
+            gTr.steps = steps;
             gTr.axis = axis;
             return 0;
         }
-        if (gTr.steps >= RAY_STEPS) break;
-        gTr.steps++;
-        secCount(1u, rl);
+        if (steps >= RAY_STEPS) break;
+        steps++;
+        if (scm == 1u) gSecCount++;
         float3 p = ro + rd * t;
         // Over terrain: find the largest column cell (whole region down to 4x4 voxels) whose highest voxel the ray
         // stays above until it leaves the cell, and skip straight across it. Far rays spend most of their length here.
         bool over = false;
         int lvlOff = 5460;
         for (int k = useMip ? 6 : -1; k >= 0; k--) {
-            secCount(3u, rl);
+            if (scm == 3u) gSecCount++;
             int per = 64 >> k;
             int sz = 4 << k;
             int2 cxz = clamp(int2(floor(p.xz)) >> (2 + k), int2(0, 0), int2(per - 1, per - 1));
@@ -267,7 +284,7 @@ int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps
                     axis = te >= t1 ? axis : (tx.x <= tx.y ? 0 : 2);
                     t = te + eps;
                     over = true;
-                    secCount(2u, rl);
+                    if (scm == 2u) gSecCount++;
                 }
                 break;
             }
@@ -296,7 +313,7 @@ int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps
             while (size > 4) {
                 int h = size >> 1;
                 uint mask = nodes[nodeBase + ptr] & 0xFFu;
-                secCount(4u, rl);
+                if (scm == 4u) gSecCount++;
                 uint c = ((v.x & h) != 0 ? 1u : 0u) | ((v.z & h) != 0 ? 2u : 0u) | ((v.y & h) != 0 ? 4u : 0u);
                 if ((mask & (1u << c)) == 0) { cell = h; break; }
                 uint k = countbits(mask);
@@ -325,6 +342,7 @@ int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps
             if (((bits >> b) & 1) != 0) {
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
+                gTr.steps = steps;  // (the hit's callees see the ray's count)
                 if (voxelStops(hitMat, v, (r.origin.xyz >> rl) + v, rl, ro, rd, inv, stepPos, t)) {
                     gTr.t = t;
                     gTr.mat = hitMat;
@@ -344,6 +362,7 @@ int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps
         axis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
         t = max(tn, t) + eps;
     }
+    gTr.steps = steps;
     gTr.axis = axis;
     return 2;
 }
@@ -644,14 +663,21 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
     bool3 up = bool3(d.x > 0, d.y > 0, d.z > 0);
     float t = u0;
     int exitAxis = seedAxis, exitTo = seedTo;
+    // (the ray's step count and the counter's switches in registers for the walk, gTr.steps written back at each exit)
+    uint steps = gTr.steps;
+    uint scm = secCountMode(0);
     for (int it = 0; it < 4096; it++) {
-        if (t >= u1) return TRACE_MISS;
-        if (gTr.steps >= stepCap) {
+        if (t >= u1) {
+            gTr.steps = steps;
+            return TRACE_MISS;
+        }
+        if (steps >= stepCap) {
+            gTr.steps = steps;
             uStop = t;
             return TRACE_CAPPED;
         }
-        gTr.steps++;
-        secCount(1u, 0);
+        steps++;
+        if (scm == 1u) gSecCount++;
         // (a point exactly on a cell face going down that axis lies in the cell below: else that face's exit is at t,
         // not after it, and the ray left a camera standing on a chunk's floor through the box's far sides instead)
         float3 p = ro + d * t;
@@ -660,6 +686,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
         if (exitAxis >= 0) v[exitAxis] = exitTo;
         vStop = v;
         if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= nb.x || v.y >= nb.y || v.z >= nb.z) {
+            gTr.steps = steps;
             uStop = t;
             return TRACE_UNCOVERED;
         }
@@ -667,6 +694,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
         uint cw = vgChunks[vgCellG(g, c)];
         uint st = cw & 3u;
         if (st == VG_UNLOADED) {
+            gTr.steps = steps;
             uStop = t;
             return TRACE_UNCOVERED;
         }
@@ -676,7 +704,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
             int3 ep = int3(int((cw >> 7) & 31u), int((cw >> 17) & 31u), int((cw >> 27) & 31u));
             lo = (c - en) * 16;
             hi = (c + ep + 1) * 16;
-            secCount(2u, 0);
+            if (scm == 2u) gSecCount++;
         } else {
             // (VG_UNIFORM: every block full, every voxel the id; the same steps as a MIXED chunk's from here, so a
             // uniform lake, leaf or glass section is cut out, passed and lit as the mixed ones are)
@@ -686,7 +714,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
             int3 b = l >> 2;
             uint bi = uint(b.x + 4 * (b.z + 4 * b.y));
             uint bw = uni ? 1u : vgBlocks[slot * 64u + bi];
-            secCount(4u, 0);
+            if (scm == 4u) gSecCount++;
             if ((bw & 1u) == 0u) {
                 int3 en = int3(int((bw >> 2) & 3u), int((bw >> 6) & 3u), int((bw >> 10) & 3u));
                 int3 ep = int3(int((bw >> 4) & 3u), int((bw >> 8) & 3u), int((bw >> 12) & 3u));
@@ -697,6 +725,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                 int3 q = v & 3;
                 uint bt = uint(q.x + 4 * q.z + 16 * q.y);
                 if (((bits >> bt) & 1) != 0) {
+                    gTr.steps = steps;  // (the hit's callees see the ray's count)
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
                     uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                     if (g.k > 0) {
@@ -727,6 +756,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     if (br != 0u) {
                         // (its walk is up to 48 micro-voxels: counted against the ray's budget as a few steps)
                         gTr.steps += 4u;
+                        steps += 4u;
                         BrickHit bh = brickHit(br, ro + d * t - float3(v) - brickOffset(mat, v + gBlock), d, entryAxis(v, ro, d, inv, stepPos));
                         if (bh.hit) {
                             gTr.t = t + bh.t;
@@ -806,6 +836,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
         exitAxis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
         exitTo = exitAxis == 0 ? (up.x ? hi.x : lo.x - 1) : exitAxis == 1 ? (up.y ? hi.y : lo.y - 1) : (up.z ? hi.z : lo.z - 1);
     }
+    gTr.steps = steps;
     uStop = t;
     return TRACE_CAPPED;  // (its iteration cap: not a gap)
 }
@@ -3304,7 +3335,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // in the deck) is ours. In tunnels and towns that skips most of the screen.
     // (ATLAS_FRAME_PRIMARY_NEAR / _LIT) atlas's primary rays are the near field: every pixel traced from the camera
     bool primaryNear = (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) != 0u;
-    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && !primaryNear) {
+    if (!FAR_SPLIT && (frame.dims.z & FRAME_NEAR_DEPTH) != 0 && !primaryNear) {
         float nd = nearDepth[pix];
         // (with FRAME_NEAR_LIGHT the host's near pass drew every covered pixel, however far: all of them are its, lit
         // here; past nearFieldEnd they were traced as far and that colour landed in the host's inscatter, the far
@@ -3458,7 +3489,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         // (what the host's depth test sees: the bed, so what swims over it shows, the water's medium on it from the
         // surface's distance, waterAdd.a; under water, where the ray left the water)
         float tDepth = watered && eyeWater ? min(tHit, max(airFrom, 0.05)) : tHit;
-        if (unified && (frame.dims.z & FRAME_NEAR_SPLIT) != 0u) {
+        if (FAR_SPLIT || (unified && (frame.dims.z & FRAME_NEAR_SPLIT) != 0u)) {
             // (the split, the light by need) the hit for the light passes: its distance and normal; its albedo (through
             // the water over it) in the colour until nearTemporalMain composites it, the water's own light and where the
             // air begins in waterAdd, the key light's visibility there too
@@ -3555,7 +3586,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             depth = tW + WATER_SEE;
             color = waterB + aerialPathTo(dir, tW).inscatter;
         }
-    } else if (tHit >= 0.0) {
+    } else if (!FAR_SPLIT && tHit >= 0.0) {  // (the split's hits all went to its light passes above)
         MaterialGpu m = palette[res.mat];
         cls = uint(m.emisClass.y);
         int ax = res.axis;
