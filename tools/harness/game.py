@@ -246,6 +246,8 @@ def _launch(group, groups, limit=900):
     jvm = dict(cfg.get("jvm", {}))
     if "nirncraft.autotest.world" not in jvm and (group == "live" or cfg.get("keptWorld")):
         jvm.update({"nirncraft.autotest.world": kept_world(), "nirncraft.autotest.keepWorld": "true"})
+    if os.environ.get("NIRNCRAFT_ATLAS_DUMP"):  # (dev) the generator's program, map and decoration program to that folder (AtlasClientGen.dumpWords)
+        jvm["nirncraft.atlas.dump"] = os.environ["NIRNCRAFT_ATLAS_DUMP"]
     _set_group_flags(jvm)
     _enable_overlay()
     code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True)

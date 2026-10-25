@@ -64,5 +64,19 @@
     },
     "keptWorld": true,
     "server": false
+  },
+  "atlas-probe": {
+    "description": "The far-path probe (atlas_probe.py, the middle loop): the atlas group without the loading screen, the near window idle, the nearest tiles of levels 3-6 through the whole far path, atlas-probe.json, then the harness closes the client",
+    "jvm": {
+      "nirncraft.atlas.unified": "true",
+      "nirncraft.atlas.clientGen": "true",
+      "nirncraft.atlas.profile": "true",
+      "nirncraft.atlas.safeMode": "false",
+      "nirncraft.atlas.loadingScreen": "false",
+      "nirncraft.atlas.verify.seconds": "0",
+      "nirncraft.atlas.probe.far": "6"
+    },
+    "keptWorld": true,
+    "server": false
   }
 }

@@ -261,12 +261,32 @@ final class AtlasClientGen implements AutoCloseable {
      * (atlas_page.slang) and Java computes none. Returns what the log says: "on the device", or why they stay in Java
      * (an older library, a program or biome source the page passes do not cover; AtlasGenPages then, as before).
      */
+    /**
+     * (dev) {@code -Dnirncraft.atlas.dump=<dir>}: the generator's program, its map and the decoration's program and id tables
+     * as little-endian int files (prog.bin, map.bin, feat.bin, g2f.bin, f2g.bin), what native/tools/gen_bake_tool loads to run
+     * the far path, the trees included, without the game (the inner loop of the bake's slicing).
+     */
+    private static void dumpWords(String name, int[] words) {
+        String dir = System.getProperty("nirncraft.atlas.dump");
+        if (dir == null || dir.isEmpty()) return;
+        try {
+            java.nio.file.Files.createDirectories(java.nio.file.Path.of(dir));
+            java.nio.ByteBuffer bb = java.nio.ByteBuffer.allocate(words.length * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            bb.asIntBuffer().put(words);
+            java.nio.file.Files.write(java.nio.file.Path.of(dir, name), bb.array());
+        } catch (java.io.IOException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas dump {} failed", name, e);
+        }
+    }
+
     static String devicePages(AtlasGenNative.Gen gen, AtlasGenProgram prog, net.minecraft.world.level.biome.BiomeSource biomes) {
         if (!gen.devicePagesSupported()) return "in Java (the library makes no pages)";
         if (!prog.pageGen) return "in Java (the program lacks the page passes' inputs)";
         try {
             long t0 = System.nanoTime();
             int[] map = AtlasGenMap.words(prog, biomes);
+            dumpWords("prog.bin", prog.words);
+            dumpWords("map.bin", map);
             gen.setMap(map);
             if (gen.pageStats()[2] == 0) return "in Java (the generator did not take them)";
             return String.format("on the device (map %d words, %.0f ms)", map.length, (System.nanoTime() - t0) / 1e6);
@@ -348,6 +368,9 @@ final class AtlasClientGen implements AutoCloseable {
                     long ts = System.nanoTime();
                     gen.storeEnable(STORE_SLOTS);
                     stages = gen.attachFeatures(storeFp.words, g2f, f2g);
+                    dumpWords("feat.bin", storeFp.words);
+                    dumpWords("g2f.bin", g2f);
+                    dumpWords("f2g.bin", f2g);
                     if (System.getenv("ATLAS_FEAT_PART_TRACE") != null) {  // (dev: which feature a traced record is)
                         var reg = ow.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE);
                         for (int i = 0; i < storeFp.dispatched.size(); i++)
@@ -750,7 +773,7 @@ final class AtlasClientGen implements AutoCloseable {
                 }
                 // (direct: terrain goes device to device, the ready queue holds only decorated chunks: never a reason to wait)
                 boolean full = !direct && waiting >= READY_MAX;
-                if (!camSet || full) {
+                if (!camSet || full || AtlasCoarseBake.probing()) {
                     LockSupport.parkNanos(full ? 2_000_000L : 20_000_000L);
                     continue;
                 }

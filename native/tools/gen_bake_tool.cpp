@@ -3,7 +3,10 @@
 // (AtlasGenParityTest: NIRNCRAFT_GEN_DUMP=<dir>: prog.bin, map.bin); the ingest table is a stand-in (each generator id its
 // own material: the sizes are of the generator's own variety), and no far stages (the canopy) are registered.
 //   gen_bake_tool <dump dir> <cache dir> [mode=bake|load] [x=0] [z=0] [seed=1] [fp=0] [lod2=0|1] [bg=0|1] [bgcap=16.7]
-//                 [minx= minz= maxx= maxz=] [margin=0] [first=6] [last=3]
+//                 [minx= minz= maxx= maxz=] [margin=0] [first=6] [last=3] [feat=1]
+// feat=1: the decoration's program from the dump (feat.bin, g2f.bin, f2g.bin: the game writes them with
+// -Dnirncraft.atlas.dump=<dir>, or NIRNCRAFT_ATLAS_DUMP=<dir> in the harness) attached on the generator, so the far stage (the
+// trees' canopy) runs as in the game; the JSON of each phase then has "subs": the generator's submissions by phase.
 // mode=bake: the first launch: bake levels first..last (the loading phase), then (lod2=1) level 2 (the background bake,
 // with bg=1 frames rendered on a thread at the game's cadence and their times kept). mode=load: a later launch: a new
 // context on the same cache; the boot load (every tile of the coarse levels' windows from the cache, nearest first), the
@@ -105,6 +108,25 @@ int main(int argc, char** argv) {
         atlas_gen_set_ingest(g, ing.data(), uint32_t(ing.size())) != ATLAS_OK) {
         std::fprintf(stderr, "generator refused: %s\n", atlas_gen_last_error(g));
         return 1;
+    }
+    if (arg(argc, argv, "feat", "0") != "0") {
+        std::vector<uint32_t> fw = load(dump + "/feat.bin"), g2f = load(dump + "/g2f.bin"), f2g = load(dump + "/f2g.bin");
+        if (fw.empty() || g2f.empty() || f2g.empty()) {
+            std::fprintf(stderr, "feat=1 needs feat.bin, g2f.bin and f2g.bin in %s\n", dump.c_str());
+            return 2;
+        }
+        if (atlas_gen_store_enable(g, 768) != ATLAS_OK) {
+            std::fprintf(stderr, "store_enable: %s\n", atlas_gen_last_error(g));
+            return 1;
+        }
+        AtlasFeat* feat = nullptr;
+        double a0 = nowMs();
+        if (atlas_feat_attach(g, fw.data(), uint32_t(fw.size()), g2f.data(), uint32_t(g2f.size()), f2g.data(), uint32_t(f2g.size()), &feat) !=
+            ATLAS_OK) {
+            std::fprintf(stderr, "feat_attach: %s\n", atlas_gen_last_error(g));
+            return 1;
+        }
+        std::fprintf(stderr, "decoration attached in %.0f ms\n", nowMs() - a0);
     }
     atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
     atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
@@ -260,9 +282,11 @@ int main(int argc, char** argv) {
         for (int k = 1; k <= 6; k++)
             std::printf("%s{\"lod\":%d,\"tiles\":%u,\"made\":%u,\"failed\":%u,\"s\":%.2f}", k > 1 ? "," : "", k, info.tiles[k], info.made[k],
                         info.failed[k], levelMs[k] / 1000);
-        std::printf("],\"mbPerLevel\":%s,\"farWrites\":%llu,\"encodeMs\":%.0f,\"pace\":{\"duty\":%.2f,\"waitedMs\":%.0f,\"farWaitedMs\":%.0f,"
+        char subs[6000] = {};
+        atlas_gen_sub_stats(g, subs, sizeof subs, 1);
+        std::printf("],\"subs\":\"%s\",\"mbPerLevel\":%s,\"farWrites\":%llu,\"encodeMs\":%.0f,\"pace\":{\"duty\":%.2f,\"waitedMs\":%.0f,\"farWaitedMs\":%.0f,"
                     "\"maxSubMs\":%.0f}%s}\n",
-                    jsonBytes(bytes).c_str(), (unsigned long long)cs.farWrites, cs.encodeMs, ps.duty, ps.waitedMs, ps.farWaitedMs,
+                    subs, jsonBytes(bytes).c_str(), (unsigned long long)cs.farWrites, cs.encodeMs, ps.duty, ps.waitedMs, ps.farWaitedMs,
                     ps.maxSubmissionMs, fr.c_str());
         std::fflush(stdout);
         return 0;

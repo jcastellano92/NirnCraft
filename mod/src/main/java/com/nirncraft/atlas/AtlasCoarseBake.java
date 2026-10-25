@@ -45,6 +45,21 @@ final class AtlasCoarseBake implements Runnable {
     /** Measurements: level 2 is made whether or not the near window has work (the worst case for the frames). */
     static final boolean ALWAYS = Boolean.getBoolean("nirncraft.atlas.bake.always") || "1".equals(System.getenv("NIRNCRAFT_ATLAS_BAKE_ALWAYS"));
 
+    /**
+     * The far-path probe (the middle loop: a launch of about a minute on any cache): {@code -Dnirncraft.atlas.probe.far=K} makes
+     * the K tiles nearest the spawn of each of levels 3 to 6 through the whole far path (the four passes, the trees, the
+     * chunks: atlas_gen_verify_far_tile, which writes nothing to the cache unless the tile differs), unpaced, with the near
+     * window left idle, then writes {@code atlas-probe.json} (the wall time of each tile, the generator's submissions by
+     * phase) and stops the client. Run by tools/harness/atlas_probe.py.
+     */
+    static final int PROBE = Integer.getInteger("nirncraft.atlas.probe.far", 0);
+    private static volatile boolean probing = PROBE > 0;
+
+    /** The near window waits while the probe runs (its submissions beside the probe's would blur what a tile costs). */
+    static boolean probing() {
+        return probing;
+    }
+
     private static volatile AtlasCoarseBake active;
 
     /** Phases: -1 off, 0 waiting for the camera and the windows, 1 making levels 3-6, 2 loaded (levels 3-6 whole), 3 level 2, 4 whole. */
@@ -219,6 +234,15 @@ final class AtlasCoarseBake implements Runnable {
         centreX = (int) Math.floor(AtlasClientGen.cameraX());
         centreZ = (int) Math.floor(AtlasClientGen.cameraZ());
         startNs = System.nanoTime();
+        if (PROBE > 0) {
+            try {
+                probe();
+            } finally {
+                probing = false;
+            }
+            phase = -1;
+            return;
+        }
         AtlasGenNative.Gen.BakeInfo b = gen.bakeBegin(MIN_X, MIN_Z, MAX_X, MAX_Z, centreX, centreZ, LOAD_HI, LOAD_LO, MARGIN, 0);
         if (b == null) {
             com.nirncraft.NirnCraft.LOGGER.info("atlas coarse bake: off (no cache armed for this world)");
@@ -298,6 +322,62 @@ final class AtlasCoarseBake implements Runnable {
         while (running && AtlasClientGen.nearTurns() == turns && !AtlasClientGen.nearIdleNow() && System.nanoTime() - t0 < 250_000_000L)
             LockSupport.parkNanos(1_000_000L);
         nearWaitNs += System.nanoTime() - t0;
+    }
+
+    private void probe() {
+        com.google.gson.JsonObject out = new com.google.gson.JsonObject();
+        com.google.gson.JsonArray tiles = new com.google.gson.JsonArray();
+        gen.paceBoost(true);
+        gen.subLine(true);  // (counted from here)
+        long t0 = System.nanoTime();
+        // the nearest tiles of each level, the coarse levels last first (as the bake's order)
+        for (int round = 0; round < PROBE; round++)
+            for (int level = LOAD_LO; level <= LOAD_HI; level++) {
+                int span = 256 << level;
+                int cx = Math.floorDiv(centreX, span), cz = Math.floorDiv(centreZ, span);
+                // (round r: the r-th tile of the spiral around the spawn's)
+                int[] d = spiral(round);
+                int tx = cx + d[0], tz = cz + d[1];
+                long s = System.nanoTime();
+                int res = gen.verifyFarTile(level, tx, tz);
+                double ms = (System.nanoTime() - s) / 1e6;
+                com.google.gson.JsonArray row = new com.google.gson.JsonArray();
+                row.add(level);
+                row.add(tx);
+                row.add(tz);
+                row.add(Math.round(ms * 10) / 10.0);
+                row.add(res);
+                tiles.add(row);
+            }
+        double total = (System.nanoTime() - t0) / 1e9;
+        out.add("tiles", tiles);  // [level, tx, tz, ms, verify result]
+        out.addProperty("totalS", total);
+        String subs = gen.subLine(false);
+        out.addProperty("subs", subs == null ? "" : subs);
+        com.nirncraft.NirnCraft.LOGGER.info("atlas far probe: {} tiles per level in {} s; {}", PROBE, String.format("%.1f", total), subs);
+        try {
+            java.nio.file.Files.writeString(net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("atlas-probe.json"), out.toString());
+        } catch (java.io.IOException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas probe receipt failed", e);
+        }
+        gen.paceBoost(false);
+    }
+
+    /** The n-th cell of a square spiral around (0, 0): (0,0), (1,0), (1,1), (0,1), (-1,1) ... */
+    private static int[] spiral(int n) {
+        int x = 0, z = 0, dx = 1, dz = 0, seg = 1, left = 1, turns = 0;
+        for (int i = 0; i < n; i++) {
+            x += dx;
+            z += dz;
+            if (--left == 0) {
+                int t = dx;
+                dx = -dz;
+                dz = t;
+                if ((++turns & 1) == 0) seg++;
+                left = seg;
+            }
+        }
+        return new int[]{x, z};
     }
 
     /** One bake step: the next tile; a tile in a window is in the grid already (the far path put it there). */
