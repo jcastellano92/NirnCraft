@@ -773,6 +773,13 @@ final class AtlasClientGen implements AutoCloseable {
                 }
                 // (direct: terrain goes device to device, the ready queue holds only decorated chunks: never a reason to wait)
                 boolean full = !direct && waiting >= READY_MAX;
+                if (camSet && !full && !AtlasCoarseBake.probing() && outerRingsWait()) {
+                    // (the far tiles the bake does not own, the finer levels around the spawn, go on: the horizon gate waits for them)
+                    boolean moved = farOn && farStep();
+                    nearIdle = true;
+                    if (!moved) LockSupport.parkNanos(20_000_000L);
+                    continue;
+                }
                 if (!camSet || full || AtlasCoarseBake.probing()) {
                     LockSupport.parkNanos(full ? 2_000_000L : 20_000_000L);
                     continue;
@@ -971,6 +978,19 @@ final class AtlasClientGen implements AutoCloseable {
      * and the window is still short, the ones not up are forgotten here so that the plan makes them again. Every 4 s at most.
      */
     private long reconcileNs;
+
+    /**
+     * The loading phase's order: the spawn area's nearest rings, then the horizon (the coarse levels), then the window's outer
+     * rings. While the screen holds the player and the spawn area is in but the horizon is not, the outer rings wait (the GPU is
+     * the bake's: they went on beside it, and the player waited for both); they follow once the horizon is loaded, in play.
+     */
+    private boolean outerRingsWait() {
+        if (!AtlasLoadingScreen.holding() || windowUpNs != 0) return false;
+        Progress p = progress();
+        if (p == null || !p.nearDone()) return false;
+        AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
+        return b != null && b.phase() > 0 && !b.loaded();
+    }
 
     /**
      * A chunk of the spawn window that atlas does not upload itself counts as in: one not proven exact (the server's blocks
