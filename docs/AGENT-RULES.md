@@ -32,6 +32,14 @@ below apply to every session and agent.
   calls (two `nextInt(3)` returned the same value). Keep such state in a storage buffer or pass it explicitly, and
   `[ForceInline]` the RNG chain. Double literals need the `l` suffix. Time each pipeline's creation with a `pipeline:`
   TRACE line.
+* **No static shared across a real call (learned 2026-10-25).** NVIDIA honours `[noinline]` (SPIR-V DontInline), so a
+  thread-private `static` that two such functions both touch becomes a Private global in local memory: every access a
+  trip to memory, and its value across the call is the compiler's guess. The far kernel ran 10x the Oct 20 one's time at
+  the same steps, and some builds doubled the steps (the picture depended on the build). Each `[noinline]` root owns
+  its state (a request struct in, a result struct out, its own copies of the statics, set at its entry, with no
+  initializers); shared helpers take state as parameters. Check: `spirv-dis <kernel>.spv | grep -c 'OpVariable.*Private'`
+  is 0 for every kernel. Offline timings of a new kernel are valid only once its driver compile is cached and the grid
+  is settled (atlas_render's warm-up: "settled in ... N frames" with N > 0 and nothing pending).
 * **Reviewers:** the orchestrator puts read-only reviewer agents on new GPU code and on any stuck debugging; their
   findings come to the owning agent through the orchestrator.
 * **Lessons that cost hours (2026-10-21), don't repeat:**
