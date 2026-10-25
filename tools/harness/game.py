@@ -351,6 +351,10 @@ def ensure_current():
     if _CURRENT["checked"] or os.environ.get("NIRNCRAFT_HARNESS_NO_BUILD") == "1":
         return
     _CURRENT["checked"] = True
+    # development: the newest three generation sets of atlas's cache stay (GenCache::configure), so worktrees and builds that
+    # alternate on this instance do not delete each other's bakes
+    (GAME / "atlas-cache").mkdir(parents=True, exist_ok=True)
+    (GAME / "atlas-cache" / "keep-gen-sets").write_text("3\n")
     sync_native()
     src = ROOT / "mod/src/main"
     newest = max((f.stat().st_mtime for f in src.rglob("*") if f.is_file()), default=0)

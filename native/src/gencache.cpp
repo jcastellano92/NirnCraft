@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 
 #include "sectioncodec.hpp"
 #include "sectionpack.hpp"
@@ -162,10 +163,25 @@ void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     on_ = true;
     // (another generator's or build's sets: never read again; deleted in the background, the world's folder does not
     // grow with every build)
-    std::vector<std::filesystem::path> old;
+    std::vector<std::pair<std::filesystem::file_time_type, std::filesystem::path>> others;
     for (auto& e : std::filesystem::directory_iterator(root, ec))
         if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != sub + 1)
-            old.push_back(e.path());
+            others.push_back({e.last_write_time(ec), e.path()});
+    // In development (a file `keep-gen-sets` in the cache's root, its text the number of sets to keep, 3 if empty: the test
+    // harness writes it) the newest sets by last use stay beside this one, so builds and worktrees that alternate on one
+    // instance do not delete each other's bakes. A player's cache keeps this set alone.
+    size_t keep = 0;
+    {
+        std::ifstream kf(std::filesystem::path(root).parent_path() / "keep-gen-sets");
+        if (kf) {
+            int n = 0;
+            kf >> n;
+            keep = size_t(n > 0 ? n : 3) - 1;  // (this set is one of them)
+        }
+    }
+    std::sort(others.begin(), others.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+    std::vector<std::filesystem::path> old;
+    for (size_t i = keep; i < others.size(); i++) old.push_back(others[i].second);
     oldSets_ = std::move(old);  // (deleted once this set has written something: a set opened for a moment, while the
                                 // generator was being put together or taken apart, must not delete the real one)
 }
