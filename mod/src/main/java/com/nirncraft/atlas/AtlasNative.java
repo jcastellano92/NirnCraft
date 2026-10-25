@@ -152,7 +152,7 @@ public final class AtlasNative {
     // abi 0.17, the sky's own light (null with an older library)
     private final MethodHandle setSkyGlow;
     // the host's tiers and the self-baking cache's directory (atlas_set_cache; null with an older library)
-    private final MethodHandle setCache, setPipelineCache;
+    private final MethodHandle setCache, setPipelineCache, pipelineProgress;
     // abi 0.18, the micro-voxel bricks (null with an older library)
     private final MethodHandle setBricks, setOffsets;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
@@ -247,6 +247,8 @@ public final class AtlasNative {
         airMultiscatter = bindOptional(l, lib, "atlas_air_multiscatter", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         setSkyGlow = bindOptional(l, lib, "atlas_set_sky_glow", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         setPipelineCache = bindOptional(l, lib, "atlas_set_pipeline_cache", FunctionDescriptor.of(JAVA_INT, ADDRESS));
+        pipelineProgress = bindOptional(l, lib, "atlas_pipeline_progress",
+                FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         setCache = bindOptional(l, lib, "atlas_set_cache",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
         setOffsets = bindOptional(l, lib, "atlas_set_material_offsets", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
@@ -467,6 +469,24 @@ public final class AtlasNative {
             throw rethrow(t);
         }
     }
+
+    /**
+     * The pipelines being built (atlas_pipeline_progress): callable from any thread while {@link #create} runs on another.
+     * Null with an older library.
+     */
+    public PipelineProgress pipelineProgress() {
+        if (pipelineProgress == null) return null;
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment done = a.allocate(JAVA_INT), total = a.allocate(JAVA_INT), split = a.allocate(JAVA_INT), name = a.allocate(96);
+            pipelineProgress.invokeExact(done, total, name, 96, split);
+            return new PipelineProgress(done.get(JAVA_INT, 0), total.get(JAVA_INT, 0), name.getString(0), split.get(JAVA_INT, 0));
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /** done of total of the context's kernels, the one being built; split: 0 none, 1 building, 2 ready, 3 failed. */
+    public record PipelineProgress(int done, int total, String name, int split) {}
 
     public Context create(int backend) {
         try (Arena a = Arena.ofConfined()) {

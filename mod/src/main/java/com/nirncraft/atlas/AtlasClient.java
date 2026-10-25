@@ -66,6 +66,9 @@ public final class AtlasClient {
     private static Path libPath;  // the loaded core (the client generator binds its own calls there)
     private static AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
+    // (start) the context being made on its thread: [context, on the CPU]; when it began
+    private static volatile java.util.concurrent.CompletableFuture<Object[]> ctxBuild;
+    private static long ctxBuildStartNs;
     private static long cpuLogAt;       // nanoTime of the next CPU-path log line
     private static AtlasTargets targets;
     private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
@@ -165,6 +168,10 @@ public final class AtlasClient {
         NeoForge.EVENT_BUS.addListener(AtlasCacheWipe::onCommands);  // (/nirncraft-atlas-wipecache)
         // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
+        // in the world while kernels still compile (the context's, or the split frames' far kernel in the background):
+        // one small line, the real counts (atlas_pipeline_progress), never a timed bar
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RenderGuiEvent.Post e) ->
+                AtlasGuard.run("atlas compile line", Z_LOADING, () -> compileLine(e.getGuiGraphics())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas loading phase", Z_LOADING, () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
@@ -530,7 +537,33 @@ public final class AtlasClient {
 
     // ------------------------------------------------------------------ start
 
+    private static void compileLine(net.minecraft.client.gui.GuiGraphicsExtractor g) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.gui.screen() != null || lib == null) return;
+        AtlasNative.PipelineProgress pp = building();
+        if (pp == null) return;
+        String text = buildingContext() && pp.total() > 0
+                ? "Atlas: compiling its kernels " + Math.min(pp.done() + 1, pp.total()) + " / " + pp.total() + " (" + pp.name() + ")"
+                : pp.split() == 1 ? "Atlas: compiling its fast far kernel in the background" : null;
+        if (text == null) return;
+        g.text(mc.font, net.minecraft.network.chat.Component.literal(text), 4, mc.getWindow().getGuiScaledHeight() - 12,
+                0xA0C8C0B0, true);
+    }
+
+    /** The context's kernels as they are built (the loading screen), or null: none being made, an older library. */
+    static AtlasNative.PipelineProgress building() {
+        AtlasNative l = lib;
+        return l == null ? null : l.pipelineProgress();
+    }
+
+    /** Whether the context is being made on its thread (its kernels compiling). */
+    static boolean buildingContext() {
+        java.util.concurrent.CompletableFuture<Object[]> b = ctxBuild;
+        return b != null && !b.isDone();
+    }
+
     private static boolean start(Minecraft mc) {
+        if (buildingContext()) return false;  // (its kernels still compiling on their thread: vanilla draws this frame)
         try {
             if (!decided) {
                 decided = true;
@@ -573,18 +606,47 @@ public final class AtlasClient {
             // (-Dnirncraft.atlas.backend=cpu forces it: what a machine without a GPU sees). On the CPU the frame is
             // rendered on atlas's worker from the near field's depth and info read back from GL, a few frames behind
             // the camera (atlas_core's CPU GL path; atlas_info's cpuGl block has its times)
-            cpuBackend = "cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"));
-            if (cpuBackend) {
-                ctx = lib.create(AtlasNative.BACKEND_CPU);
-            } else {
-                try {
-                    ctx = lib.create(AtlasNative.BACKEND_VULKAN);
-                } catch (AtlasNative.AtlasException e) {
-                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: no GPU backend ({}): the far field runs on the CPU", e.getMessage());
-                    ctx = lib.create(AtlasNative.BACKEND_CPU);
-                    cpuBackend = true;
-                }
+            // the context on its own thread: its Vulkan pipelines are the driver's compile, minutes on a cold cache, and the
+            // render thread must never wait for it (the window froze, "Not Responding"). Until it is made the frame is
+            // vanilla's (start() false), the loading screen shows the kernels as they are built (pipelineProgress)
+            if (ctxBuild == null) {
+                boolean forceCpu = "cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"));
+                AtlasNative l = lib;
+                java.util.concurrent.CompletableFuture<Object[]> build = new java.util.concurrent.CompletableFuture<>();
+                Thread t = new Thread(() -> {
+                    try {
+                        if (forceCpu) {
+                            build.complete(new Object[]{l.create(AtlasNative.BACKEND_CPU), true});
+                            return;
+                        }
+                        try {
+                            build.complete(new Object[]{l.create(AtlasNative.BACKEND_VULKAN), false});
+                        } catch (AtlasNative.AtlasException e) {
+                            com.nirncraft.NirnCraft.LOGGER.warn("atlas: no GPU backend ({}): the far field runs on the CPU", e.getMessage());
+                            build.complete(new Object[]{l.create(AtlasNative.BACKEND_CPU), true});
+                        }
+                    } catch (Throwable e) {
+                        build.completeExceptionally(e);
+                    }
+                }, "atlas context build");
+                t.setDaemon(true);
+                ctxBuild = build;
+                ctxBuildStartNs = System.nanoTime();
+                t.start();
             }
+            if (!ctxBuild.isDone()) return false;  // (vanilla draws this frame)
+            Object[] made;
+            try {
+                made = ctxBuild.join();
+            } catch (java.util.concurrent.CompletionException e) {
+                ctxBuild = null;
+                throw e.getCause() != null ? e.getCause() : e;
+            }
+            ctxBuild = null;
+            ctx = (AtlasNative.Context) made[0];
+            cpuBackend = (Boolean) made[1];
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: context made in {} s (its kernels built off the render thread)",
+                    String.format("%.1f", (System.nanoTime() - ctxBuildStartNs) / 1e9));
             firstFrame = true;
             armTestFault(ctx);
             // memory: what this machine can spare sizes the targets, the sun map, the clouds and the clipmap (on the

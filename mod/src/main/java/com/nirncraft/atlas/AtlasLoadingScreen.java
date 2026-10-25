@@ -27,6 +27,7 @@ final class AtlasLoadingScreen extends Screen {
     private static volatile boolean armed, open;
 
     private final long openedNs = System.nanoTime();
+    private long rendererNs;  // (when atlas's kernels were built: the give-up clock starts there)
     private long nearDoneNs;
     private String lastLine = "";
 
@@ -73,7 +74,9 @@ final class AtlasLoadingScreen extends Screen {
 
     @Override
     public void tick() {
-        double s = (System.nanoTime() - openedNs) / 1e9;
+        // (the kernels' compile has its own true progress, minutes on a cold cache: the give-up clock starts once they are built)
+        if (rendererNs == 0 && !AtlasClient.buildingContext()) rendererNs = System.nanoTime();
+        double s = rendererNs == 0 ? 0 : (System.nanoTime() - rendererNs) / 1e9;
         AtlasClientGen.Progress p = AtlasClientGen.progress();
         boolean failed = AtlasClient.failedForSession();
         if (p != null && p.nearDone() && nearDoneNs == 0) nearDoneNs = System.nanoTime();
@@ -100,7 +103,14 @@ final class AtlasLoadingScreen extends Screen {
         y += 22;
         AtlasClientGen.Progress p = AtlasClientGen.progress();
         boolean renderer = AtlasClient.started();
-        y = line(g, cx, y, "Renderer", renderer ? "ready" : "preparing shaders", renderer ? 1 : 0);
+        // the renderer's kernels as the driver compiles them (atlas_pipeline_progress: done of the backend's list, by name)
+        AtlasNative.PipelineProgress pp = AtlasClient.building();
+        String rText = renderer ? "ready" : pp != null && AtlasClient.buildingContext() && pp.total() > 0
+                ? "compiling " + Math.min(pp.done() + 1, pp.total()) + " / " + pp.total() + " (" + pp.name() + ")" : "starting";
+        double rFrac = renderer ? 1 : pp != null && pp.total() > 0 ? Math.min(1.0, pp.done() / (double) pp.total()) : 0;
+        y = line(g, cx, y, "Renderer", rText, rFrac);
+        // the split frames' far kernel: one compile in the background (no count to show: a state), not waited for
+        if (pp != null && pp.split() == 1) y = line(g, cx, y, "Renderer (fast far kernel)", "compiling in the background", -1);
         y = line(g, cx, y, "Generator", p != null && p.running() ? "ready" : renderer ? "starting" : "waiting", p != null && p.running() ? 1 : 0);
         double near = p == null || p.nearTotal() == 0 ? 0 : Math.min(1.0, p.near() / (double) p.nearTotal());
         String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks"
@@ -128,6 +138,7 @@ final class AtlasLoadingScreen extends Screen {
         g.text(font, Component.literal(name), x0, y, SkyUi.TEXT, false);
         g.text(font, Component.literal(state), x0 + w - font.width(state), y, SkyUi.DIM, false);
         int by = y + font.lineHeight + 2;
+        if (frac < 0) return by + 4;  // (a state with no count behind it: no bar)
         g.fill(x0, by, x0 + w, by + 3, 0xFF2A2724);
         g.fill(x0, by, x0 + (int) Math.round(w * Math.max(0, Math.min(1, frac))), by + 3, SkyUi.GOLD);
         return by + 12;
