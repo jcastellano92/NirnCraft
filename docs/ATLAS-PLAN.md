@@ -82,6 +82,19 @@ against the watchdog, uniform cells taking no slot, the 16³ micro-brick for non
 One stage at a time. Nothing from a later stage starts early. **Frozen until stage 3 passes:** far settlements and
 overlays, new generator features, entities as bricks, multiplayer, baked light, weather.
 
+### The GPU-driven loop and the baked world (2026-10-24)
+
+[ATLAS-GPU-LOOP.md](ATLAS-GPU-LOOP.md) holds the design: the CPU only kicks submissions and does file I/O, every request,
+schedule, ingest and codec runs on the GPU, the baked world is the main path, and live generation is the fallback. Its
+twelve steps feed the stages:
+
+- **Stage 1** (steps 1-3): wide, resumable trees; no `submitWait`.
+- **Stage 2** (steps 4-10): the GPU region format and codec, the whole-map coarse bake as the floor, per-stage
+  fingerprints with a verifier, the GPU request ring and idle baker, GPU scheduling and ingest.
+- **Stage 5, started now on separate files** (steps 11-12): the integrated server fed from the GPU world, and
+  collisions agreeing.
+
+
 ### Stage 0: tools that tell the truth (small, first)
 
 1. **Salvage the grid work** on atlas-naadf (632 uncommitted lines: window-driven far scheduling, 0 uncovered within
