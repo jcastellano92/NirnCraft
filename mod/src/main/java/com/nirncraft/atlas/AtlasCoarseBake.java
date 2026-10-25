@@ -41,7 +41,7 @@ final class AtlasCoarseBake implements Runnable {
     static final int MIN_X = TamrielMap.MIN_X, MIN_Z = TamrielMap.MIN_Z, MAX_X = TamrielMap.MAX_X, MAX_Z = TamrielMap.MAX_Z;
     static final int MARGIN = Integer.getInteger("nirncraft.atlas.bake.margin", 0);
     /** Measurements: level 2 is made whether or not the near window has work (the worst case for the frames). */
-    static final boolean ALWAYS = Boolean.getBoolean("nirncraft.atlas.bake.always");
+    static final boolean ALWAYS = Boolean.getBoolean("nirncraft.atlas.bake.always") || "1".equals(System.getenv("NIRNCRAFT_ATLAS_BAKE_ALWAYS"));
 
     private static volatile AtlasCoarseBake active;
 
