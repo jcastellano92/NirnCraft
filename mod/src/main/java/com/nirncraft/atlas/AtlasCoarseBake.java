@@ -160,7 +160,8 @@ final class AtlasCoarseBake implements Runnable {
         AtlasGenNative.Gen.BakeInfo i = b.info;
         long s = b.startNs;
         return String.format("bake{phase %d levels 3-6 %d/%d loaded at %.1f s, windows at %.1f s, level 2 %s, served %d tiles %.0f ms, tiles made %d+%d, failed %d, step %.0f ms, queued %d}",
-                b.phase, b.loadDone, b.loadTotal, since(s, b.loadedNs), since(s, b.windowsNs), b.wholeNs != 0 ? String.format("whole at %.1f s", since(s, b.wholeNs)) : "pending",
+                b.phase, b.loadDone, b.loadTotal, since(s, b.loadedNs), since(s, b.windowsNs), b.wholeNs != 0 ? String.format("whole at %.1f s", since(s, b.wholeNs))
+                        : b.phase >= 3 && i != null ? String.format("%d/%d tiles", i.madeTotal() + i.knownTotal(), i.total()) : "pending",
                 b.servedTiles, b.serveNs / 1e6, b.bakeTilesLoad, b.bakeTilesBackground, b.failed.size(), b.stepNs / 1e6, i == null ? 0 : i.queued());
     }
 

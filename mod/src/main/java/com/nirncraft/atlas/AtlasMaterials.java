@@ -69,8 +69,10 @@ final class AtlasMaterials {
         try {
             java.nio.file.Files.createDirectories(file.toAbsolutePath().getParent());
             boolean same = false;
+            String onDisk = "none";
             if (java.nio.file.Files.isRegularFile(file)) {
                 List<String> lines = java.nio.file.Files.readAllLines(file);
+                onDisk = lines.isEmpty() ? "empty" : lines.get(0);
                 same = !lines.isEmpty() && lines.get(0).equals(header);
                 if (same) {
                     replaying = true;
@@ -94,8 +96,8 @@ final class AtlasMaterials {
                 }
             }
             if (!same) java.nio.file.Files.writeString(file, header + "\n");  // (another registry or mode: the ids start over)
-            com.nirncraft.NirnCraft.LOGGER.info("atlas materials: {} allocations replayed from {} ({})", replayed, file.getFileName(),
-                    same ? "same ids as the last launch" : "a new numbering");
+            com.nirncraft.NirnCraft.LOGGER.info("atlas materials: {} allocations replayed from {} ({}; header {}, on disk {})", replayed,
+                    file.getFileName(), same ? "same ids as the last launch" : "a new numbering", header, onDisk);
         } catch (java.io.IOException | RuntimeException e) {
             allocLogPath = null;
             com.nirncraft.NirnCraft.LOGGER.warn("atlas materials: the allocation log is off ({})", e.toString());
