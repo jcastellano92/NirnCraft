@@ -117,7 +117,7 @@ final class HoldSelftest {
         for (DamageSource src : List.of(level.damageSources().mobAttack(zombie), level.damageSources().drown(), level.damageSources().fall(),
                 level.damageSources().inWall(), level.damageSources().onFire()))
             if (!damageCancelled(held, src)) problems.add("damage from " + src.getMsgId() + " reaches the held player");
-        if (!NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(zombie, level.damageSources().playerAttack(held), 4f)).isCanceled())
+        if (!NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(zombie, new net.neoforged.neoforge.common.damagesource.DamageContainer(level.damageSources().playerAttack(held), 4f))).isCanceled())
             problems.add("the held player can hurt a mob");
 
         // cannot interact
@@ -165,7 +165,7 @@ final class HoldSelftest {
     }
 
     private static boolean damageCancelled(ServerPlayer p, DamageSource src) {
-        return NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(p, src, 4f)).isCanceled();
+        return NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(p, new net.neoforged.neoforge.common.damagesource.DamageContainer(src, 4f))).isCanceled();
     }
 
     private static void crashRecord(List<String> problems, List<String> info, ServerPlayer p, Vec3 home) {
