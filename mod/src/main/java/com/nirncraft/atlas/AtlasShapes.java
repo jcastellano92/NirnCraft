@@ -152,6 +152,9 @@ final class AtlasShapes {
         // 4 x 4 x 4, so its shape is the visual hull of its face tiles (a layer's bottom layer, a post's core column;
         // a chain is no floating slab)
         if (mask == 0 && !quads.isEmpty()) mask = hull(faces);
+        // (and a model thinner than that still fills the micro-voxels its quads pass through: a shapeless material was a
+        // plain full cube to everything that reads shapes, and the floor under a 1 px button went black)
+        if (mask == 0 && !quads.isEmpty()) mask = quadMask(quads);
         boolean fluid = !st.getFluidState().isEmpty() && quads.isEmpty();
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
@@ -256,6 +259,31 @@ final class AtlasShapes {
                 }
         }
         return tile;
+    }
+
+    /** The micro-voxels (4 x 4 x 4, bit x + 4 * (z + 4 * y)) any quad's extent touches. */
+    static long quadMask(List<BakedQuad> quads) {
+        long m = 0;
+        for (BakedQuad q : quads) {
+            float[] lo = {Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE}, hi = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+            for (int i = 0; i < 4; i++) {
+                Vector3fc p = q.position(i);
+                float[] c = {p.x(), p.y(), p.z()};
+                for (int k = 0; k < 3; k++) {
+                    lo[k] = Math.min(lo[k], c[k]);
+                    hi[k] = Math.max(hi[k], c[k]);
+                }
+            }
+            int[] a = new int[3], b = new int[3];
+            for (int k = 0; k < 3; k++) {
+                a[k] = Math.max(0, Math.min(TILE - 1, (int) Math.floor(lo[k] * TILE + 1e-4f)));
+                b[k] = Math.max(a[k], Math.min(TILE - 1, (int) Math.ceil(hi[k] * TILE - 1e-4f) - 1));
+            }
+            for (int y = a[1]; y <= b[1]; y++)
+                for (int z = a[2]; z <= b[2]; z++)
+                    for (int x = a[0]; x <= b[0]; x++) m |= 1L << (x + TILE * (z + TILE * y));
+        }
+        return m;
     }
 
     /** How far out along d a quad lies (the mean of its corners' depth: plane()). */
