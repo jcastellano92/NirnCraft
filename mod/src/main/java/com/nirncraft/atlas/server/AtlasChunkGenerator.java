@@ -67,7 +67,7 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
     }
 
     /** How long a request for a chunk may wait for the GPU before Java makes it. */
-    static final long TIMEOUT_MS = Long.getLong("nirncraft.atlas.serverGen.timeoutMs", 8_000L);
+    static final long TIMEOUT_MS = Long.getLong("nirncraft.atlas.serverGen.timeoutMs", 6_000L);
 
     /** Chunks filled from the GPU whose decoration step has not run yet (chunk pos -> time, ns). */
     private final ConcurrentHashMap<Long, Long> filled = new ConcurrentHashMap<>();

@@ -35,7 +35,9 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     private final AtlasClientGen owner;
     private final ConcurrentHashMap<Long, Req> reqs = new ConcurrentHashMap<>();
     private volatile boolean up, closed;
-    private volatile long served, flagged, waitedForTapes, notFinal;
+    private volatile long served, flagged, waitedForTapes, notFinal, overflow;
+    /** Requests the store holds at once; the rest are made in Java (-Dnirncraft.atlas.serverGen.outstanding). */
+    static final int MAX_OUTSTANDING = Integer.getInteger("nirncraft.atlas.serverGen.outstanding", 24);
 
     AtlasServerGen(AtlasClientGen owner, List<BlockState> blocks, int[] nearIds, net.minecraft.server.level.ServerLevel level) {
         this.owner = owner;
@@ -80,6 +82,13 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         // GPU world's to give: Java makes it now, rather than the server waiting on the recorder (seconds a structure)
         if (!AtlasOverlayLive.finalAt(cx, cz)) {
             notFinal++;
+            return null;
+        }
+        // the store makes a decorated chunk in about a tenth of a second (a trees' chunk longer): a burst the server asks for
+        // (a spawn, a teleport, a flight) is more than it can answer in a tolerable time, and the chunks past this many
+        // outstanding go to Java at once; the walk's trickle is the GPU's
+        if (reqs.size() >= MAX_OUTSTANDING) {
+            overflow++;
             return null;
         }
         Req r = reqs.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new Req(cx, cz));
@@ -176,6 +185,6 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     /** "server feed: asked / served / flagged / waiting for tapes" (atlas-info). */
     String state() {
         return "serverFeed{up=" + up + " waiting=" + reqs.size() + " served=" + served + " flagged=" + flagged
-                + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + "}";
+                + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + " javaOverflow=" + overflow + "}";
     }
 }

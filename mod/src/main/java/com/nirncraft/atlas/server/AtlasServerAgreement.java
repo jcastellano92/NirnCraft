@@ -63,6 +63,11 @@ public final class AtlasServerAgreement {
             COMPARED.put(key, -1);
             return;
         }
+        // pure: the chunk and all eight around it were filled from the GPU this session (a Java neighbour's decoration writes
+        // into it, and Java's ores and blobs are not the GPU's to the block: the 0.2 % the parity tests name)
+        boolean pure = true;
+        for (int dz = -1; dz <= 1 && pure; dz++)
+            for (int dx = -1; dx <= 1 && pure; dx++) pure = PATH.get(net.minecraft.world.level.ChunkPos.pack(cx + dx, cz + dz)) == 1;
         int same = 0, diff = 0;
         StringBuilder bad = null;
         for (int s = 0; s < sections.length; s++) {
@@ -89,6 +94,10 @@ public final class AtlasServerAgreement {
                 }
             }
         }
+        if (pure) {
+            pureCompared++;
+            if (diff == 0) pureSame++;
+        }
         sameSections += same;
         diffSections += diff;
         COMPARED.put(key, same | diff << 16);
@@ -101,7 +110,7 @@ public final class AtlasServerAgreement {
     }
 
     private static final Long2IntOpenHashMap PATH = new Long2IntOpenHashMap();  // chunk -> 1 filled from the GPU, 2 made by Java
-    private static long chunksJavaMade;
+    private static long chunksJavaMade, pureCompared, pureSame;
 
     /** The server filled the chunk from the GPU ids (placed: the blocks it set), or made it in Java. */
     public static synchronized void path(int cx, int cz, boolean gpu) {
@@ -112,7 +121,7 @@ public final class AtlasServerAgreement {
     /** Zeroes the tally (the route's start); the GPU records stay. */
     public static synchronized void reset() {
         COMPARED.clear();
-        sameSections = diffSections = chunksNoGpu = chunksSame = chunksDiff = chunksJavaMade = 0;
+        sameSections = diffSections = chunksNoGpu = chunksSame = chunksDiff = chunksJavaMade = pureCompared = pureSame = 0;
         SAMPLES.clear();
     }
 
@@ -123,6 +132,8 @@ public final class AtlasServerAgreement {
         o.addProperty("chunksDiffer", chunksDiff);
         o.addProperty("chunksWithoutGpuRecord", chunksNoGpu);
         o.addProperty("chunksMadeInJava", chunksJavaMade);
+        o.addProperty("pureGpuChunksCompared", pureCompared);
+        o.addProperty("pureGpuChunksSame", pureSame);
         o.addProperty("sectionsSame", sameSections);
         o.addProperty("sectionsDiffer", diffSections);
         JsonArray a = new JsonArray();
