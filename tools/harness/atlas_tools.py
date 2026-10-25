@@ -240,7 +240,6 @@ def summarize(data):
         "phases": {k: {x: round(v.get("frame", {}).get(x, 0), 2) for x in ("p50", "p99", "max")}
                    for k, v in (data.get("phases") or {}).items()},
     }
-    m["genChunks"] = int(span("genChunks"))
     cl = [r["collide"] for r in secs if isinstance(r.get("collide"), dict)]
     if cl:
         m.update({"collideSeconds": len(cl), "collideChecked": sum(c.get("checked", 0) for c in cl),
