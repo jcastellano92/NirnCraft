@@ -852,6 +852,7 @@ final class AtlasClientGen implements AutoCloseable {
                 }
                 if (cur == null) {
                     nearIdle = true;
+                    reconcileWindow();
                     rz = AtlasRecorder.begin();
                     if (direct) pruneDirect(camCx, camCz);
                     else prune(camCx, camCz);
@@ -963,6 +964,27 @@ final class AtlasClientGen implements AutoCloseable {
 
     /** Calls of the near window that did something (a batch in, or chunks out of the store): the bake's turn-taking while the screen holds. */
     private volatile long nearTurns;
+
+    /**
+     * The spawn window after a jump, chunks the store let go before they came out (its slots are few: 768 for a window of
+     * 1793, and a chunk dropped while waiting for neighbours stays in `done`, so nothing asks again): once the near work is idle
+     * and the window is still short, the ones not up are forgotten here so that the plan makes them again. Every 4 s at most.
+     */
+    private long reconcileNs;
+
+    private void reconcileWindow() {
+        long now = System.nanoTime();
+        if (windowUpNs != 0 || jumpNs == 0 || now - reconcileNs < 4_000_000_000L || now - nearWorkNs < 3_000_000_000L || !deferred.isEmpty()) return;
+        reconcileNs = now;
+        int lost = 0;
+        for (int dz = -RADIUS; dz <= RADIUS; dz++)
+            for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+                if (dx * dx + dz * dz > RADIUS * RADIUS) continue;
+                long k = ChunkPos.pack(jumpCx + dx, jumpCz + dz);
+                if (!upSinceJump.contains(k) && done.remove(k)) lost++;
+            }
+        if (lost > 0) com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: {} chunks of the spawn window were not up after the near work went idle: asked again", lost);
+    }
 
     // ---- the idle verifier ----
     // The generation and bake caches are keyed by what produces the data (the generator's sources, its data inputs, the seed:
