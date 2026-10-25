@@ -134,6 +134,8 @@ def returning(runner, s):
         m["inPlay"] = play.group(1)[:60]
     if "Autotest live: ready" not in txt:
         wait_for(r"Autotest live: ready", g, 60)
+    import atlas_tools
+    atlas_tools.wait_alive(g)  # atlas's first frames compile on the render thread: the heartbeat can be stale for a while
     # a hold in the middle of a session: released again, at the same place
     n0 = len(re.findall(r"hold: \S+ released after", fresh_log(g)))
     g.actions(["ui close", "command nirncraft-hold hold @p"], timeout=120)
