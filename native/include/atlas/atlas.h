@@ -956,6 +956,34 @@ ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txT
 ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t capacity,
                                            uint32_t* outKinds, uint32_t* outMixed, uint32_t* outTaken, uint32_t* outFlags,
                                            AtlasGenTimes* times);
+/* The whole-map coarse bake (gen_bake.cpp; docs/ATLAS-GPU-LOOP.md section 3): the far path run over every tile of the
+   levels lodFirst .. lodLast (either direction: the order made) that touch the map's bounds [minX, maxX) x [minZ, maxZ),
+   grown by marginBlocks, nearest the centre (spawn) first within a level, into the self-baking cache; a tile the cache
+   knows is skipped, so a later launch finds the bake whole and does nothing. atlas_gen_far_known: 1 the cache knows the
+   far tile whole, 0 not, -1 no cache (not armed). The cache set is the generator's fingerprint's: another generator, another
+   set, baked again. Tiles in a coarse level's window go into the grid as they are made (atlas_gen_far_ingest). */
+typedef struct AtlasGenBakeSpec {
+    int32_t minX, minZ, maxX, maxZ, centerX, centerZ;
+    int32_t lodFirst, lodLast, marginBlocks;
+    uint32_t capacity; /* mixed chunks a tile has room for (0: 2000; a tile with more is made again with room for all) */
+} AtlasGenBakeSpec;
+typedef struct AtlasGenBakeInfo {
+    uint32_t tiles[8], known[8], made[8], failed[8]; /* by level 1..6: planned, on disk at begin, made since, given up */
+    uint32_t total, knownTotal, madeTotal, failedTotal;
+    uint32_t durable; /* of the made: now known to the cache (written) */
+    uint32_t queued;  /* cache records waiting to be written */
+    uint32_t busy;    /* the last step stopped early: 1 no window yet / far buffers still read (a frame frees them), 2 cache writes behind */
+    uint32_t pad;
+    int32_t last[4];  /* the last tile the last step finished: lod, tx, tz, state (0 none, 1 made, 2 given up) */
+    double makeMs;    /* wall time inside atlas_gen_far_ingest */
+} AtlasGenBakeInfo;
+ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz);
+ATLAS_API AtlasStatus atlas_gen_bake_begin(AtlasGen* h, const AtlasGenBakeSpec* spec, AtlasGenBakeInfo* out);
+/* Makes the next maxTiles tiles not yet known (each one atlas_gen_far_ingest, paced as the far field is: the leftovers of
+   the GPU budget). Returns early with info.busy set; call again after a frame. */
+ATLAS_API AtlasStatus atlas_gen_bake_step(AtlasGen* h, uint32_t maxTiles, AtlasGenBakeInfo* out);
+ATLAS_API AtlasStatus atlas_gen_bake_info(AtlasGen* h, AtlasGenBakeInfo* out);
+ATLAS_API AtlasStatus atlas_gen_bake_end(AtlasGen* h);
 /* The grid's reports since the last call (VoxGrid::takeGpuDropped / takeGpuWanted), {level, x, y, z} each: level 0
    sections (section coordinates) or level-k chunks the grid no longer holds (dropped), and level 0 sections it would take
    now (wanted): make and send them again. Returns how many did not fit the arrays. */

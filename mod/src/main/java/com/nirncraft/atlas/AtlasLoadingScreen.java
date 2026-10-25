@@ -24,7 +24,7 @@ import net.minecraft.network.chat.Component;
 final class AtlasLoadingScreen extends Screen {
     static final boolean ON = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.loadingScreen"));
     static final int MAX_SECONDS = 180, HORIZON_GRACE_SECONDS = 8;
-    private static volatile boolean armed;
+    private static volatile boolean armed, open;
 
     private final long openedNs = System.nanoTime();
     private long nearDoneNs;
@@ -43,11 +43,22 @@ final class AtlasLoadingScreen extends Screen {
         armed = false;
     }
 
+    /** Whether the player is held: armed to open, or open (the background bake of level 2 waits for control). */
+    static boolean holding() {
+        return armed || open;
+    }
+
     /** (client tick) Opens the screen when armed and the world is in. */
     static void tick(Minecraft mc) {
         if (!armed || mc.level == null || mc.player == null || mc.gui.screen() != null) return;
         armed = false;
+        open = true;
         mc.gui.setScreen(new AtlasLoadingScreen());
+    }
+
+    @Override
+    public void removed() {
+        open = false;
     }
 
     @Override
@@ -66,8 +77,12 @@ final class AtlasLoadingScreen extends Screen {
         AtlasClientGen.Progress p = AtlasClientGen.progress();
         boolean failed = AtlasClient.failedForSession();
         if (p != null && p.nearDone() && nearDoneNs == 0) nearDoneNs = System.nanoTime();
-        boolean horizonDone = p != null && (p.farTotal() == 0 || p.far() >= p.farTotal()
-                || (nearDoneNs != 0 && (System.nanoTime() - nearDoneNs) / 1e9 > HORIZON_GRACE_SECONDS));
+        // the horizon: the whole-map coarse bake's levels 3-6 made or loaded, and the tiles of the windows in the grid
+        // (AtlasCoarseBake: first launch makes them, later ones load them); without it the old rule
+        AtlasCoarseBake.Progress bake = AtlasCoarseBake.progress();
+        boolean baking = bake != null && bake.phase() > 0;
+        boolean horizonDone = p != null && (baking ? bake.loaded() : (p.farTotal() == 0 || p.far() >= p.farTotal()
+                || (nearDoneNs != 0 && (System.nanoTime() - nearDoneNs) / 1e9 > HORIZON_GRACE_SECONDS)));
         boolean done = failed || s > MAX_SECONDS || (p != null && p.nearDone() && horizonDone);
         if (!done && !AtlasClientGen.ON) done = true;
         if (done) {
@@ -91,7 +106,13 @@ final class AtlasLoadingScreen extends Screen {
         String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks"
                 + (p.cached() > 0 ? " (" + p.cached() + " from the cache)" : "");
         y = line(g, cx, y, "Spawn area", nearText, p != null && p.nearDone() ? 1 : near);
-        if (p != null && p.farTotal() > 0) {
+        AtlasCoarseBake.Progress bake = AtlasCoarseBake.progress();
+        if (bake != null && bake.phase() > 0) {
+            boolean first = bake.total() > 0 && bake.phase() == 1;
+            y = line(g, cx, y, "Horizon", bake.loaded() ? "ready" : first ? "baking the world " + bake.done() + " / " + bake.total() + " tiles"
+                    : bake.phase() == 1 ? "loading" : "loading " + bake.servePending() + " tiles", bake.loaded() ? 1 : bake.total() == 0 ? 0
+                    : Math.min(1.0, bake.done() / (double) bake.total()));
+        } else if (p != null && p.farTotal() > 0) {
             double far = Math.min(1.0, p.far() / (double) p.farTotal());
             y = line(g, cx, y, "Horizon", p.far() + " / " + p.farTotal() + " tiles" + (p.farCached() > 0 ? " (" + p.farCached() + " from the cache)" : ""), far);
         }

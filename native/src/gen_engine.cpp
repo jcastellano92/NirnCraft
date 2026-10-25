@@ -27,6 +27,7 @@
 #include "parallel.hpp"
 #include "voxgrid.hpp"
 #include "gencache.hpp"
+#include "gen_bake.hpp"
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
 #include "atlas_gen_corner_spv.h"  // generated: slangc + spv_exact, one module per pass
@@ -2726,6 +2727,7 @@ ATLAS_API AtlasStatus atlas_gen_create_for(AtlasContext* ctx, AtlasGen** out) {
 
 ATLAS_API void atlas_gen_destroy(AtlasGen* h) {
     try {
+        atlas::bakeForget(h);
         delete h;
     } catch (...) {
     }
@@ -3633,6 +3635,13 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
         if (outTaken) *outTaken = taken;
         return ATLAS_OK;
     });
+}
+
+// (the whole-map coarse bake, gen_bake.cpp) whether the cache knows a far tile whole: 1 yes, 0 no, -1 no cache
+ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz) {
+    if (!h || !h->ctx || lod < 1 || lod > 6) return -1;
+    GenCache* gc = contextWorld(h->ctx)->genCache();
+    return gc && gc->on() ? (gc->farKnown(lod, tx, tz) ? 1 : 0) : -1;
 }
 
 ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out) {

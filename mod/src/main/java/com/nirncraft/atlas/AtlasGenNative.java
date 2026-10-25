@@ -38,6 +38,8 @@ final class AtlasGenNative {
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
     private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake;
+    // the whole-map coarse bake (atlas_gen_bake_*, atlas_gen_far_known; AtlasCoarseBake): null in a library without them
+    private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -96,6 +98,12 @@ final class AtlasGenNative {
         farCacheIngest = lib.find("atlas_gen_far_cache_ingest").isPresent()
                 ? bind(l, lib, "atlas_gen_far_cache_ingest", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, ADDRESS, ADDRESS))
                 : null;
+        boolean bk = lib.find("atlas_gen_bake_begin").isPresent() && lib.find("atlas_gen_far_known").isPresent();
+        bakeBegin = bk ? bind(l, lib, "atlas_gen_bake_begin", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS)) : null;
+        bakeStep = bk ? bind(l, lib, "atlas_gen_bake_step", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS)) : null;
+        bakeInfo = bk ? bind(l, lib, "atlas_gen_bake_info", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        bakeEnd = bk ? bind(l, lib, "atlas_gen_bake_end", FunctionDescriptor.of(JAVA_INT, ADDRESS)) : null;
+        farKnown = bk ? bind(l, lib, "atlas_gen_far_known", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT)) : null;
         boolean st = lib.find("atlas_gen_run_store").isPresent();
         storeEnable = st ? bind(l, lib, "atlas_gen_store_enable", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         runStore = st ? bind(l, lib, "atlas_gen_run_store", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS,
@@ -424,6 +432,108 @@ final class AtlasGenNative {
                 check((int) farCacheIngest.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, tx, tz), 1, served, ch, tk), "atlas_gen_far_cache_ingest");
                 if (served.get(JAVA_BYTE, 0) == 0) return null;
                 return new FarIngest(tk.get(JAVA_INT, 0), ch.get(JAVA_INT, 0), 0, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (unsynchronized: the cache's tile read takes no lock of the generator's, so a long store call of the worker's does not
+         * hold it) A far tile from the cache into the grid, as {@link #farCacheIngest}; null when the cache lacks it.
+         */
+        FarIngest farServe(int lod, int tx, int tz) {
+            if (farCacheIngest == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment served = a.allocate(1), ch = a.allocate(JAVA_INT), tk = a.allocate(JAVA_INT);
+                check((int) farCacheIngest.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, tx, tz), 1, served, ch, tk), "atlas_gen_far_cache_ingest");
+                if (served.get(JAVA_BYTE, 0) == 0) return null;
+                return new FarIngest(tk.get(JAVA_INT, 0), ch.get(JAVA_INT, 0), 0, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Whether this library has the whole-map coarse bake (atlas_gen_bake_*). */
+        boolean bakeSupported() {
+            return bakeBegin != null;
+        }
+
+        /** The cache knows the far tile whole (atlas_gen_far_known). */
+        boolean farKnown(int lod, int tx, int tz) {
+            if (farKnown == null) return false;
+            try {
+                return (int) farKnown.invokeExact(ptr, lod, tx, tz) == 1;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The bake's numbers (AtlasGenBakeInfo): tiles, known, made and failed by level 1..6 (index = level), their totals,
+         * made tiles now written, cache records queued, the last step's early stop (1 no window yet or far buffers still
+         * read, 2 cache writes behind), the last tile it finished (lod, tx, tz, state 0 none, 1 made, 2 given up), the ms
+         * inside the far path, and the status of the call (0 ok).
+         */
+        record BakeInfo(int status, int[] tiles, int[] known, int[] made, int[] failed, int total, int knownTotal, int madeTotal,
+                        int failedTotal, int durable, int queued, int busy, int[] last, double makeMs) {}
+
+        private static BakeInfo bakeInfoOf(MemorySegment s, int status) {
+            int[] t = new int[8], k = new int[8], m = new int[8], f = new int[8], last = new int[4];
+            for (int i = 0; i < 8; i++) {
+                t[i] = s.getAtIndex(JAVA_INT, i);
+                k[i] = s.getAtIndex(JAVA_INT, 8 + i);
+                m[i] = s.getAtIndex(JAVA_INT, 16 + i);
+                f[i] = s.getAtIndex(JAVA_INT, 24 + i);
+            }
+            for (int i = 0; i < 4; i++) last[i] = s.getAtIndex(JAVA_INT, 40 + i);
+            return new BakeInfo(status, t, k, m, f, s.getAtIndex(JAVA_INT, 32), s.getAtIndex(JAVA_INT, 33), s.getAtIndex(JAVA_INT, 34),
+                    s.getAtIndex(JAVA_INT, 35), s.getAtIndex(JAVA_INT, 36), s.getAtIndex(JAVA_INT, 37), s.getAtIndex(JAVA_INT, 38), last,
+                    s.get(JAVA_DOUBLE, 176));
+        }
+
+        /**
+         * Plans the bake of levels first..last over the bounds [minX, maxX) x [minZ, maxZ) (grown by margin), nearest
+         * (centreX, centreZ) first within a level; null without a cache (nothing to bake into).
+         */
+        BakeInfo bakeBegin(int minX, int minZ, int maxX, int maxZ, int centreX, int centreZ, int first, int last, int margin, int capacity) {
+            if (bakeBegin == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment spec = a.allocateFrom(JAVA_INT, minX, minZ, maxX, maxZ, centreX, centreZ, first, last, margin, capacity);
+                MemorySegment info = a.allocate(184);
+                int s = (int) bakeBegin.invokeExact(ptr, spec, info);
+                if (s == -2) return null;  // ATLAS_ERR_STATE: no cache armed
+                check(s, "atlas_gen_bake_begin");
+                return bakeInfoOf(info, s);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Makes the next tile(s) (atlas_gen_bake_step); status nonzero: a tile given up with that error. */
+        BakeInfo bakeStep(int maxTiles) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment info = a.allocate(184);
+                int s = (int) bakeStep.invokeExact(ptr, maxTiles, info);
+                return bakeInfoOf(info, s);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        BakeInfo bakeInfo() {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment info = a.allocate(184);
+                int s = (int) bakeInfo.invokeExact(ptr, info);
+                return s != 0 ? null : bakeInfoOf(info, s);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        void bakeEnd() {
+            if (bakeEnd == null) return;
+            try {
+                int s = (int) bakeEnd.invokeExact(ptr);
             } catch (Throwable t) {
                 throw rethrow(t);
             }
