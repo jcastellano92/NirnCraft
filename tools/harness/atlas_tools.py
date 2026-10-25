@@ -21,7 +21,7 @@ OUT = ROOT / ".work/harness/atlas"
 
 # the bar (docs/ATLAS-PLAN.md section 1): smooth and no holes, 1440p on the RTX 3090
 REQUIRED = ["atlasMs", "loadedChunks", "genChunks", "farTiles", "farCached", "budgetFrameMs", "holes", "partial", "farReach",
-            "stageCpuMs", "coldHits", "coldWrites"]  # AtlasProbe.REQUIRED: a gate never reports a counter it did not read
+            "stageCpuMs", "coldHits", "coldWrites", "ready"]  # AtlasProbe.REQUIRED: a gate never reports a counter it did not read
 BAR = {"p99": 20.0, "max": 50.0, "holes": 0, "relaunchGenerated": 0, "fullRadiusMs": 2000}
 START = (-150, 260, 30)          # x, z, blocks above the surface: open ground south of Whiterun (catalog spawn pose)
 HEADING = -90.0                  # Minecraft yaw: -90 looks +x (east)
@@ -125,17 +125,34 @@ def fly_route(runner, s, tag=TAG, say=print):
     wait_alive(g)
     lines = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear",
              "weather-off on", "try nirncraft-weather set-all clear 120",
-             f"visit {x} {z} {up} {HEADING} 0 clear", "settle-atlas 1200 100",
+             f"visit {x} {z} {up} {HEADING} 0 clear", "settle-atlas 3600 100",
              f"route {spec_file.as_posix()}"]
+    import live_world as lw
+    from osthreads import OsThreads
+    pids = [p["pid"] for p in lw.processes()]
+    osr = OsThreads(pids[0], 1.0).start() if pids else None  # every native thread's CPU, from outside the game
     try:
         g.actions(lines, timeout=s.get("timeout", 1500))
     except RuntimeError:
         g.recover(s)
         raise
+    finally:
+        if osr:
+            osr.stop()
     if not report.exists():
         raise RuntimeError("the route wrote no report (" + str(report) + ")")
     data = json.loads(report.read_text(encoding="utf-8"))
     data["settle"] = json.loads(settle.read_text(encoding="utf-8")) if settle.exists() else {}
+    if osr:
+        marks = sorted((r["epochMs"], r["phase"]) for r in data["seconds"] if "epochMs" in r)
+
+        def phase_of(t):
+            if not marks or t < marks[0][0]:
+                return "before the route (load, settle)"
+            if t > marks[-1][0] + 21000:
+                return "after the route"
+            return [ph for e, ph in marks if e <= t][-1]
+        data["osCpu"] = osr.report(phase_of)
     data["shots"] = []
     for c in data.get("captures", []):
         f = g.SHOTS / f"{c['tag']}.png"
@@ -229,6 +246,7 @@ def summarize(data):
         "phases": {k: {x: round(v.get("frame", {}).get(x, 0), 2) for x in ("p50", "p99", "max")}
                    for k, v in (data.get("phases") or {}).items()},
     }
+    m["cpu"] = cpu_summary(data)
     fails = [f"metric {k} absent" for k in absent]
     if m["p99"] > BAR["p99"]:
         fails.append(f"p99 frame {m['p99']} ms > {BAR['p99']:g}")
@@ -238,6 +256,25 @@ def summarize(data):
         fails.append(f"holes up to {m['holesMax']} (per level max {m['holesPerLevelMax']}), {m['holesAtEnd']} at the end; "
                      f"far reach down to {m['farReachMin']} m")
     return m, fails
+
+
+def cpu_summary(data):
+    """CPU per phase from both views (the OS's: every native thread, from outside; the JVM's ThreadMXBean), with the top
+    consumers named: {phase: {cores, osTop, jvmCores, jvmTop}} and the whole route's top consumers."""
+    os_, jvm = data.get("osCpu") or {}, data.get("cpu") or {}
+    out = {}
+    for ph in list(os_) + [p for p in jvm if p not in os_]:
+        o, j = os_.get(ph) or {}, jvm.get(ph) or {}
+        out[ph] = {"cores": o.get("cores"), "wallMs": o.get("wallMs"),
+                   "osTop": [f"{t['name']} {t['ms']} ms ({t['share'] * 100:.0f}%)" for t in (o.get("top") or [])[:5]],
+                   "jvmCores": None if not j else round(j.get("cores", 0), 2),
+                   "jvmTop": [f"{t['thread']} {t['ms']:.0f} ms" for t in (j.get("jvmThreads") or [])[:5]]}
+    tot = {}
+    for ph, o in os_.items():
+        for t in o.get("top") or []:
+            tot[t["name"]] = tot.get(t["name"], 0) + t["ms"]
+    out["_top"] = [f"{n} {ms} ms" for n, ms in sorted(tot.items(), key=lambda kv: -kv[1])[:8]]
+    return out
 
 
 def charts(data, m, folder):
@@ -319,6 +356,12 @@ def html(folder, title, runs, verdict, extra=""):
                                                                            "holesAtEnd", "farReachMin", "genChunks", "farTilesMade",
                                                                            "cachedChunks", "coldHits", "coldWrites", "stageCpuMaxMs",
                                                                            "atlasMsMax", "display")) + "</tr></table>")
+        cpu = [(k, v) for k, v in (m.get("cpu") or {}).items() if not k.startswith("_")]
+        if cpu:
+            rows.append("<h4>CPU by phase (the process's cores used; top consumers: OS threads, then the JVM's)</h4><table><tr><th>phase</th>"
+                        "<th>cores</th><th>top OS threads</th><th>JVM cores</th><th>top JVM threads</th></tr>" + "".join(
+                f"<tr><td>{k}</td><td>{v['cores']}</td><td style='text-align:left'>{'; '.join(v['osTop'])}</td><td>{v['jvmCores']}</td>"
+                f"<td style='text-align:left'>{'; '.join(v['jvmTop'])}</td></tr>" for k, v in cpu) + "</table>")
         rows.append("<table><tr><th>phase</th><th>p50</th><th>p99</th><th>max</th></tr>" + "".join(
             f"<tr><td>{k}</td><td>{v['p50']}</td><td>{v['p99']}</td><td>{v['max']}</td></tr>" for k, v in m["phases"].items())
             + "</table>")
@@ -361,7 +404,15 @@ def run_route_scene(runner, s, v, fp):
                 time.sleep(2)
                 g.ensure(s["group"], runner.groups)
             label = "run 2 (relaunch, same cache)" if i else ("run 1 (cold cache)" if relaunch else "run")
-            data = fly_route(runner, s, tag=TAG)
+            try:
+                data = fly_route(runner, s, tag=TAG)
+            except RuntimeError as e:
+                if "not ready:" not in str(e):
+                    raise
+                why = str(e)[str(e).index("not ready:"):].splitlines()[0][:300]
+                print(f"  {label}: {why}", flush=True)
+                return results.record(s["id"], v, "atlas-route", "fail", {"notReady": why}, fp,
+                                      extra={"fails": [f"{label}: {why}"], "error": why})
             data["label"] = label
             runs.append(data)
     finally:
