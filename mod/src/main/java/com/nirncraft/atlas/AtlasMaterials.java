@@ -59,6 +59,37 @@ final class AtlasMaterials {
         long sig = 1125899906842597L;
         for (Block b : BuiltInRegistries.BLOCK) sig = 31 * sig + BuiltInRegistries.BLOCK.getKey(b).toString().hashCode();
         sig = 31 * sig + Block.BLOCK_STATE_REGISTRY.size();
+        // (diagnosis: a signature that moves between launches renumbers every material and wipes the cache: the same set in
+        // another order, or another set?)
+        long set = 0, count = 0;
+        for (Block b : BuiltInRegistries.BLOCK) {
+            set += BuiltInRegistries.BLOCK.getKey(b).toString().hashCode() * 0x9E3779B97F4A7C15L;
+            count++;
+        }
+        com.nirncraft.NirnCraft.LOGGER.info("atlas materials: block registry {} blocks, {} states, ordered {}, as a set {}", count,
+                Block.BLOCK_STATE_REGISTRY.size(), Long.toHexString(sig), Long.toHexString(set));
+        try {
+            // (where the order moved: the names in order, kept beside the materials' log, compared with the last launch's)
+            java.nio.file.Path f = net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("atlas-cache").resolve("block-order.txt");
+            List<String> now = new ArrayList<>();
+            for (Block b : BuiltInRegistries.BLOCK) now.add(BuiltInRegistries.BLOCK.getKey(b).toString());
+            if (java.nio.file.Files.isRegularFile(f)) {
+                List<String> was = java.nio.file.Files.readAllLines(f);
+                int i = 0, moved = 0, first = -1;
+                for (; i < Math.min(was.size(), now.size()); i++)
+                    if (!was.get(i).equals(now.get(i))) {
+                        if (first < 0) first = i;
+                        moved++;
+                    }
+                com.nirncraft.NirnCraft.LOGGER.info("atlas materials: block order against the last launch: {} of {} places differ, the first at {} ({} then {}; {} then {})",
+                        moved, now.size(), first, first < 0 ? "-" : was.get(first), first < 0 ? "-" : now.get(first),
+                        first < 0 || first + 1 >= was.size() ? "-" : was.get(first + 1), first < 0 || first + 1 >= now.size() ? "-" : now.get(first + 1));
+            }
+            java.nio.file.Files.createDirectories(f.getParent());
+            java.nio.file.Files.write(f, now);
+        } catch (java.io.IOException | RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.info("atlas materials: block order not compared ({})", e.toString());
+        }
         return Long.toHexString(sig);
     }
 
