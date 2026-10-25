@@ -40,6 +40,12 @@ gate, and a new one replaces a slower one. The process itself keeps improving, a
    and high-end machines alike. Nothing pops on or off. The same holds for entities, players, light and physical
    interactions: they scale by importance and distance, not by hard limits.
 7. **Realistic light at every distance**, from the same light system near and far.
+10. **Pixels drive everything (owner, 2026-10-25).** Every detail, resolution, refresh and residency decision comes from
+    the pixel footprint at the current resolution, FOV and zoom, never a fixed distance or ring. Small and huge things
+    simplify at the same pixel size.
+    - Open item: each level's data window, and the generator's near radius, should be sized from the footprint (the
+      distance where that level's voxel is about 1 px), not a fixed chunk count. It's a focused core change after the
+      current far-view steps.
 9. **Never freeze, and say truly what is loading (owner, 2026-10-25).** No pipeline compile or bake work on the render
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
