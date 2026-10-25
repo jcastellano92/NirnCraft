@@ -731,7 +731,10 @@ final class AtlasClientGen implements AutoCloseable {
             try {
                 refreshStats();
                 // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
-                if (serverGen != null && direct && storeOn && serveServer(ids, flags, info)) continue;
+                if (serverGen != null && direct && storeOn) {
+                    serverGen.prioritize(gen);
+                    if (serveServer(ids, flags, info)) continue;
+                }
                 int waiting;
                 synchronized (ready) {
                     waiting = ready.size();

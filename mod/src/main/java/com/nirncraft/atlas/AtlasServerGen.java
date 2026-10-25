@@ -106,6 +106,28 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         reqs.remove(ChunkPos.pack(cx, cz));
     }
 
+    private long prioSent = Long.MIN_VALUE;
+
+    /**
+     * Worker thread: the store's stages run first for the chunks the server waits for (and what their stages read), and their
+     * neighbourhoods are made first; told to the store whenever the set changed (a server request outranks the camera's window).
+     */
+    void prioritize(AtlasGenNative.Gen gen) {
+        int n = 0;
+        long sig = 1469598103934665603L;
+        int[] xz = new int[reqs.size() * 2];
+        for (Req r : reqs.values()) {
+            if (!r.submitted || n * 2 + 1 >= xz.length) continue;
+            xz[n * 2] = r.cx;
+            xz[n * 2 + 1] = r.cz;
+            sig += ChunkPos.pack(r.cx, r.cz) * 0x9E3779B97F4A7C15L;  // (order free)
+            n++;
+        }
+        if (sig == prioSent) return;
+        prioSent = sig;
+        gen.storePrioritize(java.util.Arrays.copyOf(xz, n * 2));
+    }
+
     /** Whether any request waits (the worker passes the id buffer to the store's call only then). */
     boolean pending() {
         return !reqs.isEmpty();

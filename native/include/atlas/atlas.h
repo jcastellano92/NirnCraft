@@ -1148,6 +1148,9 @@ ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, 
 ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count);
 /* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
+/* The chunks the integrated server waits for (replaces the last set; count 0: none): every call's stages run for them, and for the
+   chunks their stages read, before the others, and the missing chunks of their neighbourhoods are made first. */
+ATLAS_API AtlasStatus atlas_gen_store_prioritize(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */
 ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t minCz, int32_t maxCx, int32_t maxCz);
 /* held: chunks in the store; waiting: asked for (atlas_gen_run_store), not yet through every stage; ready: through every

@@ -2272,6 +2272,7 @@ struct AtlasGen {
     uint64_t storeMade = 0, storeStageRuns = 0, storePacks = 0;  // (atlas_gen_store_counters)
     std::unordered_map<uint32_t, double> storeStageMs;  // per stage order: ms a chunk (EMA), for the call sizes
     std::vector<int32_t> noBake;  // (atlas_gen_set_no_bake) boxes the cache keeps nothing of: minCx, minCz, maxCx, maxCz
+    std::vector<std::pair<int32_t, int32_t>> storePrio;  // (atlas_gen_store_prioritize) the chunks the integrated server waits for
     int32_t storeFocusX = 0, storeFocusZ = 0;  // (the last asked chunks' centre: a call asking none drains around it)
     std::vector<uint32_t> storeFree;
     uint32_t storeSlots = 0;
@@ -2404,6 +2405,13 @@ AtlasStatus generate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32
 }
 
 // ---- the chunk store ------------------------------------------------------------------------------------------
+// whether chunk (cx, cz) lies within `reach` (Chebyshev) of a chunk the integrated server waits for (atlas_gen_store_prioritize):
+// such a chunk's stages and neighbourhood come before everyone else's
+bool nearPrio(const AtlasGen* h, int32_t cx, int32_t cz, int32_t reach) {
+    for (const auto& p : h->storePrio)
+        if (std::abs(p.first - cx) <= reach && std::abs(p.second - cz) <= reach) return true;
+    return false;
+}
 std::vector<const Stage*> storeStages(AtlasGen* h) {
     std::vector<const Stage*> v;
     for (const Stage& s : h->stages)
@@ -2559,7 +2567,13 @@ bool storeAdvance(AtlasGen* h, std::string& err) {
             for (auto& [kk, c] : h->store)
                 if (storeReady(h, c, k, stage.radius)) ready.push_back(&c);
             if (ready.empty()) break;
-            std::sort(ready.begin(), ready.end(), [](const AtlasGen::StoreChunk* a, const AtlasGen::StoreChunk* b) {
+            int32_t total = 0;
+            for (const Stage* s2 : st) total += int32_t(s2->radius);
+            std::sort(ready.begin(), ready.end(), [&](const AtlasGen::StoreChunk* a, const AtlasGen::StoreChunk* b) {
+                if (!h->storePrio.empty()) {  // (the server's chunks and what they wait for first)
+                    bool pa = nearPrio(h, a->cx, a->cz, total), pb = nearPrio(h, b->cx, b->cz, total);
+                    if (pa != pb) return pa;
+                }
                 return a->cz != b->cz ? a->cz < b->cz : a->cx < b->cx;
             });
             // a call's chunks: few enough that its one submission stays well inside the display driver's watchdog (a
@@ -3130,7 +3144,8 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
                             int64_t nk = key(c.cx + dx, c.cz + dz);
                             if (h->store.count(nk) || !missing.insert(nk).second) continue;
                             int64_t ex = c.cx + dx - ccx, ez = c.cz + dz - ccz;
-                            order.push_back({ex * ex + ez * ez, nk});
+                            // (the server's chunks' neighbourhoods first, whatever the call's centre)
+                            order.push_back({(nearPrio(h, c.cx + dx, c.cz + dz, reach) ? 0 : (int64_t(1) << 50)) + ex * ex + ez * ez, nk});
                         }
                 }
             // (only into room: free slots and chunks no one waiting needs; taking a needed one would make it again later)
@@ -3266,6 +3281,14 @@ ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t m
             }
         return ATLAS_OK;
     });
+}
+
+ATLAS_API AtlasStatus atlas_gen_store_prioritize(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    if (!h || (count && !chunkXZ)) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> l(h->mu);
+    h->storePrio.clear();
+    for (uint32_t i = 0; i < count; i++) h->storePrio.push_back({chunkXZ[i * 2], chunkXZ[i * 2 + 1]});
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
