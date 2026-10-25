@@ -1008,6 +1008,13 @@ public:
         int pick = -1;
         for (size_t i = 0; i < farSlabs_.size() && pick < 0; i++)
             if (!farSlabs_[i].busy && farSlabs_[i].buf.size >= words * 4) pick = int(i);
+        // (a free slab too small for this call: grown in place; the coarse bake asks for the small levels' first, and 24
+        // small slabs once left a bigger level no room for good)
+        for (size_t i = 0; i < farSlabs_.size() && pick < 0 && farSlabs_.size() >= 24; i++)
+            if (!farSlabs_[i].busy) {
+                if (!ensure(farSlabs_[i].buf, words * 4, false, err, false, true)) return false;
+                pick = int(i);
+            }
         if (pick < 0) {
             if (farSlabs_.size() >= 24) return fail(err, "busy: every far slab is still read by the grid");
             FarSlab fs;

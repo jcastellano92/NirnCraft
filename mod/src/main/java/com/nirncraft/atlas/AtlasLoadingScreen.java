@@ -86,8 +86,8 @@ final class AtlasLoadingScreen extends Screen {
         boolean done = failed || s > MAX_SECONDS || (p != null && p.nearDone() && horizonDone);
         if (!done && !AtlasClientGen.ON) done = true;
         if (done) {
-            com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: {} after {} s ({})", failed ? "atlas off" : s > MAX_SECONDS ? "gave up"
-                    : "ready", String.format("%.1f", s), p == null ? "no generator" : p.describe());
+            com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: {} after {} s ({}; {})", failed ? "atlas off" : s > MAX_SECONDS ? "gave up"
+                    : "ready", String.format("%.1f", s), p == null ? "no generator" : p.describe(), AtlasCoarseBake.line());
             minecraft.gui.setScreen(null);
         }
     }

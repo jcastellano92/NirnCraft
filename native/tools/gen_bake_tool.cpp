@@ -193,6 +193,8 @@ int main(int argc, char** argv) {
         double levelMs[8] = {};
         double levelAt = p0;
         size_t steps = 0, busySteps = 0, frames = 0;
+        uint32_t lastDone = 0;
+        double lastProgress = nowMs();
         int curLod = first;
         for (;;) {
             AtlasStatus s = atlas_gen_bake_step(g, 2, &info);
@@ -209,6 +211,17 @@ int main(int argc, char** argv) {
                 }
             (void)curLod;
             if (info.busy) busySteps++;
+            if (info.busy && busySteps % 300 == 1) {
+                std::string inf = atlas_info(ctx);
+                size_t p = inf.find("\"coarse");
+                std::fprintf(stderr, "STALL busy=%u made=%u: %s\n", info.busy, info.madeTotal,
+                             inf.substr(p == std::string::npos ? 0 : p, 700).c_str());
+            }
+            if (nowMs() - lastProgress > 90000) {
+                std::fprintf(stderr, "no tile finished for 90 s: giving up\n");
+                break;
+            }
+            if (info.madeTotal + info.failedTotal != lastDone) lastDone = info.madeTotal + info.failedTotal, lastProgress = nowMs();
             renderMain();
             frames++;
             bool allSettled = info.madeTotal + info.failedTotal + info.knownTotal >= info.total;
@@ -254,7 +267,73 @@ int main(int argc, char** argv) {
     };
 
     int rc = 0;
-    if (mode == "bake") {
+    if (mode == "l0") {
+        // level 0 of a block of chunks around (x, z), terrain only (no decoration stages): ms per chunk by pass, the share of
+        // the sections that are air / shell (reach a coarse voxel's vote from above or the side) / buried (blocks wholly
+        // below the lowest ground less 16: caves, ores, aquifers, sealed in rock) / deep rock, and the cache's bytes per chunk
+        int R = std::atoi(arg(argc, argv, "radius", "16").c_str());
+        int ccx = int(std::floor(x / 16)), ccz = int(std::floor(z / 16));
+        std::vector<std::pair<int, int>> todo;
+        for (int dz = -R; dz <= R; dz++)
+            for (int dx = -R; dx <= R; dx++)
+                if (dx * dx + dz * dz <= R * R) todo.push_back({ccx + dx, ccz + dz});
+        std::sort(todo.begin(), todo.end(), [&](auto& a, auto& b) {
+            return (a.first - ccx) * (a.first - ccx) + (a.second - ccz) * (a.second - ccz) <
+                   (b.first - ccx) * (b.first - ccx) + (b.second - ccz) * (b.second - ccz);
+        });
+        const uint32_t INFO = 164;
+        std::vector<uint32_t> info(64 * INFO), flags(64);
+        double passMs[6] = {}, kernelMs = 0, totalMs = 0, wall0 = nowMs();
+        size_t air = 0, shell = 0, buried = 0, rock = 0, chunks = 0, flagged = 0, batches = 0;
+        for (size_t at = 0; at < todo.size(); at += 64) {
+            std::vector<int32_t> batch;
+            for (size_t i = at; i < std::min(todo.size(), at + 64); i++) batch.push_back(todo[i].first), batch.push_back(todo[i].second);
+            uint32_t n = uint32_t(batch.size() / 2);
+            AtlasGenTimes t{};
+            if (atlas_gen_run(g, batch.data(), n, nullptr, flags.data(), info.data(), &t) != ATLAS_OK) {
+                std::fprintf(stderr, "run: %s\n", atlas_gen_last_error(g));
+                return 1;
+            }
+            kernelMs += t.kernelMs, totalMs += t.totalMs;
+            for (int k = 0; k < 6; k++) passMs[k] += t.passMs[k];
+            std::vector<uint64_t> masks(n);
+            for (uint32_t c = 0; c < n; c++) {
+                const uint32_t* row = info.data() + size_t(c) * INFO;
+                int lowest = int(row[0]), top = int(row[1]);
+                flagged += flags[c] != 0;
+                uint64_t m = 0;
+                for (int sct = 0; sct < 40; sct++) {
+                    uint32_t kind = row[4 + sct * 4 + 2];
+                    int y0 = (sct - 4) * 16;
+                    if (kind == 0) air++;
+                    else if (kind == 2) rock++;
+                    else {
+                        if (y0 + 15 < lowest - 16) buried++;
+                        else shell++;
+                        m |= uint64_t(1) << sct;
+                    }
+                }
+                (void)top;
+                masks[c] = flags[c] ? 0 : m;
+            }
+            uint32_t sent = 0;
+            atlas_gen_ingest(g, masks.data(), &sent, nullptr);
+            chunks += n;
+            batches++;
+            for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &out);
+        }
+        double wall = nowMs() - wall0;
+        for (int i = 0; i < 200; i++) atlas_render(ctx, &f, &out);
+        AtlasGenCacheStats cs{};
+        atlas_gen_cache_stats(g, &cs);
+        double secs = double(air + shell + buried + rock);
+        std::printf("{\"phase\":\"level0\",\"chunks\":%zu,\"flagged\":%zu,\"wallMs\":%.0f,\"msPerChunkWall\":%.2f,\"kernelMsPerChunk\":%.2f,"
+                    "\"passMsPerChunk\":[%.3f,%.3f,%.3f,%.3f,%.3f,%.3f],\"sections\":{\"air\":%.3f,\"shell\":%.3f,\"buriedBlocks\":%.3f,"
+                    "\"deepRock\":%.3f},\"cacheMB\":%.2f,\"bytesPerChunk\":%.0f}\n",
+                    chunks, flagged, wall, wall / chunks, kernelMs / chunks, passMs[0] / chunks, passMs[1] / chunks, passMs[2] / chunks,
+                    passMs[3] / chunks, passMs[4] / chunks, passMs[5] / chunks, air / secs, shell / secs, buried / secs, rock / secs,
+                    cs.fileBytes / 1048576.0, double(cs.fileBytes) / chunks);
+    } else if (mode == "bake") {
         int first = std::atoi(arg(argc, argv, "first", "6").c_str()), last = std::atoi(arg(argc, argv, "last", "3").c_str());
         std::printf("{\"setupMs\":%.0f,\"placedMs\":%.0f}\n", tReady - t0, tPlaced - tReady);
         if (first >= last) rc = phase(first, last, "levels");

@@ -66,10 +66,14 @@ public:
     // rows, as atlas_gen_far's: 0 mixed, 1 air, 2 | material << 8 one id) and its mixed chunks (packed on the GPU,
     // Key3{lod, cx, cy, cz}); a tile is known when its kinds and every mixed chunk are on disk. In f<lod>.<rx>.<rz>.gch,
     // regions of 8 x 8 tiles.
-    void putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds);
-    void putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash);
+    // standIn: the coarse generator's own terrain (the far path's placeholder: the default, and every record already on disk);
+    // false: true data, downsampled from level-0 chunks of the exact generator, which replaces a stand-in on disk (a later
+    // record of the same tile or chunk wins when it is true; a stand-in never replaces a true one) and in the grid
+    void putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds, bool standIn = true);
+    void putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash, bool standIn = true);
     bool farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds);  // (true: known, whole)
     bool farKnown(int lod, int tx, int tz);                              // (the index alone)
+    bool farStandIn(int lod, int tx, int tz);                            // (known, and still the placeholder: not true data)
     std::shared_ptr<const std::vector<uint32_t>> coarse(const Key3& k);
     Stats stats();
     void flush();  // (waits for the queue: tests, shutdown)
@@ -94,9 +98,11 @@ private:
         struct Tile {
             Loc loc;
             uint32_t mixed = 0;
+            bool trueData = false;  // (bit 31 of the record's word 1: downsampled from level 0; clear: a stand-in)
         };
         std::unordered_map<uint64_t, Tile> tiles;
         std::unordered_map<Key3, Loc, Key3Hash> coarse;
+        std::unordered_set<Key3, Key3Hash> coarseTrue;  // (the coarse chunks whose record is true data)
         std::unordered_map<uint64_t, uint32_t> baked;
     };
     struct Job {
@@ -106,6 +112,7 @@ private:
         std::vector<uint32_t> info;
         std::shared_ptr<const std::vector<uint32_t>> words;
         uint32_t hash = 0;
+        bool standIn = true;
     };
     std::mutex mu_;  // the index, the queue, the files' appends
     std::condition_variable cv_, idle_;
