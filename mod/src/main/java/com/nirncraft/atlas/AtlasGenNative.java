@@ -700,8 +700,8 @@ final class AtlasGenNative {
         boolean storePrioritize(int[] chunkXZ) {
             if (storePrioritize == null) return false;
             try (Arena a = Arena.ofConfined()) {
-                check((int) storePrioritize.invokeExact(ptr, chunkXZ.length == 0 ? MemorySegment.NULL : a.allocateFrom(JAVA_INT, chunkXZ),
-                        chunkXZ.length / 2), "atlas_gen_store_prioritize");
+                MemorySegment xz = chunkXZ.length == 0 ? MemorySegment.NULL : a.allocateFrom(JAVA_INT, chunkXZ);
+                check((int) storePrioritize.invokeExact(ptr, xz, chunkXZ.length / 2), "atlas_gen_store_prioritize");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

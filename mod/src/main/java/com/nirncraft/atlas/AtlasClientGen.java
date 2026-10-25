@@ -732,8 +732,18 @@ final class AtlasClientGen implements AutoCloseable {
                 refreshStats();
                 // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
                 if (serverGen != null && direct && storeOn) {
-                    serverGen.prioritize(gen);
-                    if (serveServer(ids, flags, info)) continue;
+                    boolean served = false;
+                    try {
+                        serverGen.prioritize(gen);
+                        served = serveServer(ids, flags, info);
+                    } catch (RuntimeException e) {  // (the server's chunks never stop the camera's: Java makes them from now on)
+                        com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the server feed is off", e);
+                        AtlasServerGen sg = serverGen;
+                        serverGen = null;
+                        com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
+                        sg.close();
+                    }
+                    if (served) continue;
                 }
                 int waiting;
                 synchronized (ready) {
