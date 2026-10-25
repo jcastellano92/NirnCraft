@@ -84,6 +84,12 @@ public final class AtlasServerAgreement {
                 bad.append(' ').append(minSec + s);
                 int[][] want_ = IDS.get(key);
                 int[] ref = want_ == null || gi >= want_.length ? null : want_[gi];
+                int gn = 0, sn = 0, gfirst = -1, sfirst = -1;
+                for (int b = 0; b < 4096; b++) {
+                    if (ref != null && ref[b] != 0) { gn++; if (gfirst < 0) gfirst = b; }
+                    if (ids[b] != 0) { sn++; if (sfirst < 0) sfirst = b; }
+                }
+                bad.append(String.format("{nonAir gpu=%d@%d server=%d@%d}", gn, gfirst, sn, sfirst));
                 int shown = 0;
                 for (int b = 0; b < 4096 && shown < 2; b++) {
                     int a = ref == null ? 0 : ref[b];
