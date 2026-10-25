@@ -16,6 +16,9 @@ public final class AtlasServer {
     private AtlasServer() {}
 
     public static void init() {
+        // the integrated server beside the GPU world (docs/ATLAS-GPU-LOOP.md section 4)
+        com.nirncraft.atlas.server.AtlasServerCap.init();
+        com.nirncraft.atlas.server.AtlasServerStats.init();
         // never crash the server for the far field: a failing hook turns its feature off with one WARN line
         NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) ->
                 AtlasGuard.run("atlas tile service", () -> AtlasTileServer.start(e.getServer())));

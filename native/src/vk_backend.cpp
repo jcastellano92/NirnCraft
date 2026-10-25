@@ -457,6 +457,7 @@ public:
             if (vgLayout_) vkDestroyPipelineLayout(dev_, vgLayout_, nullptr);
             if (vgSetLayout_) vkDestroyDescriptorSetLayout(dev_, vgSetLayout_, nullptr);
             release(sunReadback_);
+            release(peek_);
             release(noiseStaging_);
             if (noiseSampler_) vkDestroySampler(dev_, noiseSampler_, nullptr);
             if (noiseView_) vkDestroyImageView(dev_, noiseView_, nullptr);
@@ -2999,6 +3000,69 @@ private:
     }
 
 public:
+    // regions of src into the peek buffer (host-visible), submitted and waited for (tests' readbacks)
+    bool peekCopy(VkBuffer src, const std::vector<VkBufferCopy>& regions, std::string& err) {
+        std::lock_guard<std::mutex> scene(sceneMu_);
+        if (copies_[0].uploading && !waitFence(copies_[0].uploadFence, "peek wait", err)) return false;
+        copies_[0].uploading = false;
+        VkCommandBuffer cmd = copies_[0].uploadCmd;
+        vkResetCommandBuffer(cmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmd, &bi);
+        vkCmdCopyBuffer(cmd, src, peek_.buf, uint32_t(regions.size()), regions.data());
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        vkEndCommandBuffer(cmd);
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmd;
+        vkResetFences(dev_, 1, &copies_[0].uploadFence);
+        {
+            std::lock_guard<std::mutex> q(queueMu_);
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence), "peek", err)) return false;
+        }
+        return waitFence(copies_[0].uploadFence, "peek", err);
+    }
+
+    bool readVoxels(const std::vector<uint32_t>& chunk, const std::vector<uint32_t>& local, std::vector<uint32_t>& out,
+                    std::string& err) override {
+        size_t n = chunk.size();
+        out.assign(n, 0xFFFEu);
+        if (!n) return true;
+        if (!shared_[B_VG_CHUNKS].buf || !shared_[B_VG_POOL].buf) {
+            err = "the grid has no GPU buffers yet";
+            return false;
+        }
+        for (auto& o : slots_)
+            if (!waitSlot(o, nullptr, err)) return false;
+        if (!ensure(peek_, VkDeviceSize(n) * 4, false, Mem::HostRead, err)) return false;
+        std::vector<VkBufferCopy> rc(n);
+        for (size_t i = 0; i < n; i++) rc[i] = VkBufferCopy{VkDeviceSize(chunk[i]) * 4, VkDeviceSize(i) * 4, 4};
+        if (!peekCopy(shared_[B_VG_CHUNKS].buf, rc, err)) return false;
+        std::vector<uint32_t> words(n);
+        std::memcpy(words.data(), peek_.map, n * 4);
+        std::vector<size_t> mixed;
+        std::vector<VkBufferCopy> pc;
+        for (size_t i = 0; i < n; i++) {
+            uint32_t w = words[i], st = w & 3u;
+            if (st == VG_EMPTY) out[i] = 0;
+            else if (st == VG_UNIFORM) out[i] = (w >> 2) & 0xFFFFu;
+            else if (st == VG_MIXED) {
+                pc.push_back(VkBufferCopy{(VkDeviceSize(w >> 2) * VG_SECTION_WORDS + (local[i] >> 1)) * 4, VkDeviceSize(mixed.size()) * 4, 4});
+                mixed.push_back(i);
+            }
+        }
+        if (!mixed.empty()) {
+            if (!peekCopy(shared_[B_VG_POOL].buf, pc, err)) return false;
+            const uint32_t* p = static_cast<const uint32_t*>(peek_.map);
+            for (size_t j = 0; j < mixed.size(); j++) out[mixed[j]] = (local[mixed[j]] & 1u) ? p[j] >> 16 : p[j] & 0xFFFFu;
+        }
+        return true;
+    }
+
     bool readSunMap(std::vector<float>& out, std::string& err) override {
         out.clear();
         if (!sunSize_ || !shared_[B_SUNMAP].buf) return true;
@@ -3480,6 +3544,7 @@ private:
     uint32_t sunImageSize_ = 0;
     bool sunImageFresh_ = false;
     Buf sunReadback_;
+    Buf peek_;  // (readVoxels: the tests' readback of the grid)
     VkShaderModule cloudShader_ = VK_NULL_HANDLE;
     std::chrono::steady_clock::time_point reloadCheck_{};  // shader hot reload (ATLAS_SHADER_DIR): last look
     std::filesystem::file_time_type reloadStamp_{};          // and the far kernel's time then

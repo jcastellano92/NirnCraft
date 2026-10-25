@@ -54,7 +54,7 @@ final class AtlasOverlayLive {
     /** The block states the settlements' builders place (a dev bake: AtlasOverlaysGpuTest.bakeStates). */
     static final String STATES = "/nirncraft/atlas/overlay_states.txt";
     /** Bumped when the tapes' meaning changes (the cache's key). */
-    static final int TAPE_VERSION = 3;  // 2: the pieces' boxes per chunk; 3: the layers (the dungeons' recorded writes)
+    static final int TAPE_VERSION = 4;  // 2: the pieces' boxes per chunk; 3: the layers (the dungeons' recorded writes); 4: block entities and mobs (the side files)
     /** Settlements within the client generator's window plus this many blocks are prepared. */
     static final int AHEAD = Integer.getInteger("nirncraft.atlas.overlays.ahead", 384);
     static final boolean ON = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.overlays"));
@@ -129,6 +129,28 @@ final class AtlasOverlayLive {
         if (l == null || l.gen != gen) return;
         live = null;
         l.close();
+    }
+
+    /** Whether the overlays have looked for the seeded starts near the camera (a chunk is final only after, finalAt). */
+    static boolean scanned() {
+        Live l = live;
+        return l == null || l.scanned;
+    }
+
+    /**
+     * Whether chunk (cx, cz) comes out of the store with every stage's data: no settlement or seeded start whose tapes
+     * are still being recorded reaches it (the self-baking cache's no-bake boxes), and the starts near the camera have been
+     * found. The integrated server keeps what it is given for good, so it waits for this.
+     */
+    static boolean finalAt(int cx, int cz) {
+        Live l = live;
+        if (l == null) return true;  // (the overlays are off: no tapes to wait for)
+        if (!l.scanned) return false;
+        int[] b = l.noBakeSent;
+        if (b != null)
+            for (int i = 0; i + 3 < b.length; i += 4)
+                if (cx >= b[i] && cz >= b[i + 1] && cx <= b[i + 2] && cz <= b[i + 3]) return false;
+        return true;
     }
 
     /** The overlays' handle on this generator (the decoration's mask reads their piece boxes), or null. */
@@ -215,7 +237,8 @@ final class AtlasOverlayLive {
             gen.setNoBake(boxes);
         }
 
-        int[] noBakeSent;
+        volatile int[] noBakeSent;
+        volatile boolean scanned;
 
         String state() {
             return String.format("overlays: %d settlements and seeded starts (%d recorded in %.1f s, %d from the cache), %d chunks stamped, %d states missing%s",
@@ -266,6 +289,7 @@ final class AtlasOverlayLive {
                         }
                     }
                     noBake(plan);  // (the seeded starts found near the camera)
+                    scanned = true;
                     if (best < 0 && seeded == null) {
                         LockSupport.parkNanos(500_000_000L);
                         continue;
@@ -314,6 +338,10 @@ final class AtlasOverlayLive {
             if (!Files.exists(f)) return null;
             try (DataInputStream in = new DataInputStream(new java.io.BufferedInputStream(new GZIPInputStream(Files.newInputStream(f))))) {
                 long[] keys = tapes.read(in);
+                // (the block entities and mobs beside it; a cache without them is recorded again)
+                Map<Long, List<net.minecraft.nbt.CompoundTag>> side = AtlasSideOps.read(cache.resolve(id + ".side.gz"));
+                if (side == null) return null;
+                AtlasSideOps.register(id, side);
                 loaded++;
                 return keys;
             } catch (Exception e) {
@@ -355,6 +383,7 @@ final class AtlasOverlayLive {
             doing = "recording " + id + " (" + touched.size() + " chunks)";
             Map<Long, ProtoChunk> terrain = terrain(new ArrayList<>(need), ow);
             AtlasOverlayTapes.Window w = new AtlasOverlayTapes.Window(ow, ow.getSeed(), k -> terrain.get(k));
+            w.side = new AtlasSideCapture(ow);  // (the structures' block entities and mobs, for the integrated server's chunks)
             if (layer == AtlasOverlayTapes.LAYER_SETTLEMENTS) {
                 List<SettlementPiece> sp = new ArrayList<>();
                 for (StructurePiece p : pieces) if (p instanceof SettlementPiece s) sp.add(s);
@@ -364,6 +393,9 @@ final class AtlasOverlayLive {
             }
             long[] keys = touched.stream().mapToLong(Long::longValue).toArray();
             Files.createDirectories(cache);
+            Map<Long, List<net.minecraft.nbt.CompoundTag>> side = w.side.finish(w.chunks.values());
+            AtlasSideOps.write(cache.resolve(id + ".side.gz"), side);
+            AtlasSideOps.register(id, side);
             Path f = cache.resolve(id + ".tape.gz"), tmp = cache.resolve(id + ".tape.gz.tmp");
             try (DataOutputStream out = new DataOutputStream(new java.io.BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(tmp))))) {
                 tapes.write(out, keys);

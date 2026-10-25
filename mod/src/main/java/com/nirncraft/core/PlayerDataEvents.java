@@ -92,16 +92,27 @@ public final class PlayerDataEvents {
             fullSync(player);
             PlayerData data = SkyData.get(player);
             if (data.getRace() == null) RACE_PROMPT_START.put(player.getUUID(), player.level().getServer().getTickCount());
-            if (!data.module("core").getBooleanOr("spawn_placed", false)) {
-                data.module("core").putBoolean("spawn_placed", true);
-                com.nirncraft.combat.Sheathe.setSheathed(player, true);
-                data.markDirty();
-                // the cottage is the first spawn (set before the character screen, so there is no gate spawn and move);
-                // the world spawn is the fallback when there is no cottage (other worlds, intro off)
-                if (!com.nirncraft.quest.story.IntroFlow.onFirstJoin(player)) placeAtStart(player);
-            }
-            com.nirncraft.quest.story.IntroFlow.onLogin(player);
+            // the player is held (invisible, untargetable, frozen: hold/PlayerHold) until their client reports that its
+            // loading is complete; only then the first-join placement and the character select, or the return to the last
+            // position (the opening's state, which is what opens the character screen on the client), run
+            if (!com.nirncraft.hold.PlayerHold.beginOnLogin(player, () -> afterLoading(player))) afterLoading(player);
         }
+    }
+
+    /** Login's second half: the first-join placement and the opening's state (the character select), or the resume. */
+    private static void afterLoading(ServerPlayer player) {
+        PlayerData data = SkyData.get(player);
+        NirnCraft.LOGGER.info("hold: {} is in play at {} {} {}: {}", player.getGameProfile().name(), (int) player.getX(), (int) player.getY(), (int) player.getZ(),
+                data.module("core").getBooleanOr("spawn_placed", false) ? "back at the last position (the opening resumes if unfinished)" : "first join: placement and the character select start now");
+        if (!data.module("core").getBooleanOr("spawn_placed", false)) {
+            data.module("core").putBoolean("spawn_placed", true);
+            com.nirncraft.combat.Sheathe.setSheathed(player, true);
+            data.markDirty();
+            // the cottage is the first spawn (set before the character screen, so there is no gate spawn and move);
+            // the world spawn is the fallback when there is no cottage (other worlds, intro off)
+            if (!com.nirncraft.quest.story.IntroFlow.onFirstJoin(player)) placeAtStart(player);
+        }
+        com.nirncraft.quest.story.IntroFlow.onLogin(player);
     }
 
     /**

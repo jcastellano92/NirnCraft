@@ -104,6 +104,7 @@ public final class IntroClient {
      */
     static boolean coverWanted() {
         if (com.nirncraft.client.autotest.ClientAutotest.automated()) return false;  // tests see the world at once
+        if (com.nirncraft.hold.client.HoldClient.held()) return false;  // the hold's own screen is up; the opening starts when it lets go
         if (awaiting) return true;
         return state == IntroState.JOINED || state == IntroState.CHARACTER || state == IntroState.LOADING;
     }
@@ -149,7 +150,7 @@ public final class IntroClient {
             
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
-            if (awaiting && ++awaitTicks > 200) awaiting = false; // the server never answered: do not hold the world back
+            if (awaiting && !com.nirncraft.hold.client.HoldClient.held() && ++awaitTicks > 200) awaiting = false; // the server never answered: do not hold the world back
             if (characterDone && (state == IntroState.JOINED || state == IntroState.CHARACTER)) {
                 // the server did not take the character: let them choose again
                 if (++characterTicks > 200) {

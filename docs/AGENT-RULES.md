@@ -222,3 +222,36 @@ Read these first:
 * **The same for `<game>/atlas-shaders` (2026-10-25).** The core draws with any `*.spv` there in place of its own
   kernels (shader_watch `--game`). A folder left from 10-20 made every gallery run measure that day's far kernel (no
   bricks). The harness moves it aside before each live run (`game.clear_dev_shaders`); never leave one there.
+
+* **Three loops, fastest first (owner, 2026-10-25).** Most iterations must not launch the game.
+  * **Inner (seconds):** check a change offline on a saved real scene: atlas_render with `watch=1` shader reload, a scene
+    exported from the game (harness `atlaslab-export` / twins) or made by gen_bake_tool. Kernels, look, coarse levels
+    and materials are iterated here.
+  * **Middle (~1 min):** one small live probe (`harness.py probe` or a single `--class` gallery batch) on a warm cache,
+    only for what offline can't show.
+  * **Outer (milestones only):** the route, the full gallery sample and the relaunch test, once per finished step that is
+    ready to merge.
+
+  A live run in the inner loop, or a route per change, is a process bug: say why if you need one.
+
+  **Enforced by `heavy.py` (2026-10-25):** a live-labelled job must declare `--loop middle|outer --why "<one line>"`
+  before the `--`, or it is refused (exit 3, `[gate] DENIED`); middle runs also face hard checks and a Haiku judge.
+  There is no override: if a denial is wrong, run `heavy.py --gate-escalate "<why>" "<label>"`, keep working offline,
+  and wait for the orchestrator's `--gate-resolve` (allow = one run of that label). Example live call:
+  `py -3 E:/NirnCraft-scratch/locks/heavy.py --exclusive --loop outer --why "finished bake slicing: confirm route" "bake2 game: route" -- py -3 tools/harness/harness.py run atlas-route`
+
+  **Watching your own jobs (no Haiku needed):** `heavy.py --follow <label-substring>` (run it in the background or under
+  a Monitor) streams your jobs' events: queued, position, started, phase, counters, `NO PROGRESS`, finished rc.
+  `heavy.py --status [label-substring]` is the one-shot snapshot: your place in the queue, each job ahead (phase, last
+  output and last progress, process alive and CPU). Progress decides, never time alone: output, a phase or counter
+  change, CPU in the job's process tree, or files written all count, so a long job that is moving is never "stuck".
+  Only a stall (no progress for 10 min by default, `gate-rules.json`) reaches Haiku. If you think a job is stuck, run
+  `heavy.py --stuck "<what I wait on, why it looks stuck>" [label-substring]`: Haiku answers normal (with an ETA and a
+  "re-check at HH:MM"), stuck (diagnosis) or unsure; the last two escalate to the orchestrator automatically. At the
+  ETA run `heavy.py --recheck` to verify; a second "normal" with no progress since counts as unsure. Haiku only
+  reports; it never kills or changes a job.
+
+* **Process feedback (2026-10-25).** When a rule, the gate, the harness or any step of the process slows you down or
+  makes no sense, say so: `py -3 E:/NirnCraft-scratch/locks/feedback.py "<what, and your suggestion>"`. The orchestrator
+  sees it within about 5 minutes and changes the process. Keep working meanwhile.
+

@@ -305,6 +305,16 @@ public:
     size_t ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count, uint8_t* accepted = nullptr,
                      const uint32_t* uniform = nullptr);
     size_t gpuSectionsPending() const;
+    // (tests: atlas_debug_read_blocks) where block (x, y, z) lives in level 0: its chunk word's index and its index in the
+    // section (x + 16 * (z + 16 * y)); false outside the window
+    bool locate(int x, int y, int z, uint32_t& chunk, uint32_t& local) const {
+        std::lock_guard<std::mutex> lock(mu_);
+        int sx = x >> 4, sy = y >> 4, sz = z >> 4;
+        if (!inWindow(sx, sy, sz)) return false;
+        chunk = phys(sx, sy, sz);
+        local = uint32_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)));
+        return true;
+    }
     // (level, x, y, z): level 0 sections (section coordinates), level k > 0 the generator's chunks (ingestCoarseGpu)
     std::vector<std::array<int32_t, 4>> takeGpuDropped();
     std::vector<std::array<int32_t, 4>> takeGpuWanted();  // what level 0 would take now: send again

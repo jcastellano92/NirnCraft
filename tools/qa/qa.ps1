@@ -193,7 +193,7 @@ if ($Server) {
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
     $cmds = @("forceload add -96 -96 96 96", "nirncraft-quest selftest flow", "nirncraft magic selftest", "nirncraft-protect selftest", "nirncraft-inventory selftest", "nirncraft-containers selftest",
-        "nirncraft-quest intro selftest", "nirncraft-mounts selftest", "nirncraft-fire selftest", "nirncraft-fire census helgen generate", "nirncraft-society selftest", "skylore selftest lecterns")
+        "nirncraft-quest intro selftest", "nirncraft-hold selftest", "nirncraft-mounts selftest", "nirncraft-fire selftest", "nirncraft-fire census helgen generate", "nirncraft-society selftest", "skylore selftest lecterns")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
     $popSample | ForEach-Object { $cmds += "skypop $_" }

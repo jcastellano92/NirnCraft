@@ -274,11 +274,11 @@ public final class ClientAutotest {
     /** When the world last finished loading (the harness's "loading is done" signal; 0 while loading). */
     private static long worldReadyAt;
     private static final java.util.Set<String> LOADING_SCREENS = java.util.Set.of("LevelLoadingScreen",
-            "ReceivingLevelScreen", "IntroLoadingScreen", "GenericMessageScreen", "ProgressScreen");
+            "ReceivingLevelScreen", "IntroLoadingScreen", "AtlasLoadingScreen", "GenericMessageScreen", "ProgressScreen");
 
     static boolean loading(Minecraft mc) {
         var screen = mc.gui.screen();
-        return mc.level == null || mc.player == null
+        return mc.level == null || mc.player == null || com.nirncraft.hold.client.HoldClient.held()
                 || screen != null && LOADING_SCREENS.contains(screen.getClass().getSimpleName());
     }
 
@@ -347,6 +347,7 @@ public final class ClientAutotest {
             status.addProperty("remoteCommandSubmissions", remoteCommandSubmissions);
             status.addProperty("remoteCommandAcknowledged", false);
             status.addProperty("screen", mc.gui.screen() == null ? "game" : mc.gui.screen().getClass().getSimpleName());
+            status.addProperty("held", com.nirncraft.hold.client.HoldClient.held());
             status.addProperty("queued", LIVE_ACTIONS.size());
             status.addProperty("waitTicks", Math.max(0, liveWait));
             status.addProperty("burstFrames", burstRemaining);
@@ -371,7 +372,9 @@ public final class ClientAutotest {
                         java.nio.file.StandardCopyOption.ATOMIC_MOVE);
             } catch (Exception ignored) {}
         }
-        if (!liveStarted) {
+        // the player is held until loading completes: the setup (spectator, intro skip) runs after the release; the action
+        // queue (a harness "stop", a probe) still works meanwhile
+        if (!liveStarted && !com.nirncraft.hold.client.HoldClient.held()) {
             // The dedicated QA controller grants op after login; never silently run privileged setup before that.
             if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;
             liveStarted = true;
@@ -386,8 +389,10 @@ public final class ClientAutotest {
             serverCommand(mc, "gamerule advance_time false");
             serverCommand(mc, "gamerule advance_weather false");
             serverCommand(mc, "gamerule send_command_feedback false");
-            serverCommand(mc, "execute as @p at @p run nirncraft-quest intro skip");
-            com.nirncraft.network.SkyNetwork.sendToServer(new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+            if (!Boolean.getBoolean("nirncraft.autotest.intro")) {  // (intro=true tests the opening itself: the character select stays)
+                serverCommand(mc, "execute as @p at @p run nirncraft-quest intro skip");
+                com.nirncraft.network.SkyNetwork.sendToServer(new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+            }
             NirnCraft.LOGGER.info("Autotest live: ready; control file {}", LIVE_FILE.toAbsolutePath());
             liveStartedAt = System.currentTimeMillis();
         }

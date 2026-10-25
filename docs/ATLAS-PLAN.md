@@ -5,6 +5,23 @@ order-of-work sections of ATLAS-STATUS.md, ATLAS-ENGINE.md §3 and ATLAS-RENDERE
 history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the checklist of everything Minecraft draws
 (ATLAS-RENDER-INVENTORY) and the decision log.
 
+## North star (owner, 2026-10-25)
+
+Read this before choosing any step. The world is visible to the true horizon, with the planet's curvature, and
+detail flows smoothly from your feet to that horizon with no seam. It's fast and scales sensibly with resolution and
+hardware.
+
+- **Content:** every vanilla and NirnCraft block and element, water included, looks like Minecraft up close.
+- **Light and look:** great light (GI, interiors and exteriors), with our sky, distant fog and dynamic atmosphere kept,
+  or adapted to work.
+- **Servers:** it works there too, with world speed, update rate and scale not possible before.
+- **Supported, built when their stage comes:** distant storms and 3D cloud weather, far entities changing, fast AI
+  pathing, water.
+
+**How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
+experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
+gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
+
 ## 0. Principles (owner, 2026-10-24)
 
 1. **One system for everything.** Our renderer draws every pixel of the world, near and far: blocks, fluids,
@@ -23,6 +40,18 @@ history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the che
    and high-end machines alike. Nothing pops on or off. The same holds for entities, players, light and physical
    interactions: they scale by importance and distance, not by hard limits.
 7. **Realistic light at every distance**, from the same light system near and far.
+10. **Pixels drive everything (owner, 2026-10-25).** Every detail, resolution, refresh and residency decision comes from
+    the pixel footprint at the current resolution, FOV and zoom, never a fixed distance or ring. Small and huge things
+    simplify at the same pixel size.
+    - Open item: each level's data window, and the generator's near radius, should be sized from the footprint (the
+      distance where that level's voxel is about 1 px), not a fixed chunk count. It's a focused core change after the
+      current far-view steps.
+    - Residency by touch: the GPU knows which cells the rays touched in the last frames, and only those need to stay in
+      VRAM. Untouched cells (rock under the feet while on the surface, the far side of a mountain) drop to compressed
+      host or disk tiers until a ray needs them. A memory and loading win, not render time: drawing already touches
+      only what rays reach. Viewport and occlusion drive it, but "touched" includes the secondary rays (shadows, bounce,
+      water reflections reach behind and above the camera), plus a look-ahead margin from the camera's motion and turn
+      rate, so a fast turn, a shadow or a reflection never meets a hole.
 9. **Never freeze, and say truly what is loading (owner, 2026-10-25).** No pipeline compile or bake work on the render
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
@@ -60,6 +89,41 @@ distance. As numbers:
 
 A stage is done when its bar passes in the real game, not offline.
 
+### Merge gate (2026-10-25)
+
+A step merges when it's proven by the numbers its own fast loop already measures, promptly, not in big batches.
+
+**Later, once it works here (owner, 2026-10-25):** cross-vendor exactness, scaling to lower resolutions and 8 GB cards,
+a moving-capture check per temporal change, a gallery no-drop rule on merges, and the cache lifecycle for players
+(in-save storage, a budget, estimates, warnings). These are parked, not dropped: they'd slow the iteration now.
+
+**The cache lifecycle, as the owner wants it (2026-10-25):**
+- **Budget:** a per-world disk budget chosen at world creation, default 5 GB (2 GB and up selectable). The more you
+  play, the more is baked and the faster the world loads, until it runs like butter.
+- **Smart removal:** least useful first (far from where you play, long unvisited), never the coarse whole-map levels.
+- **Smart updates:** a game update rebakes only what its changed generator stages affect (per-stage fingerprints). A
+  server you join sends its world's changes as deltas over the shared bake, cached locally. Your own world's edits are
+  deltas too, so changes load as fast as the rest.
+- **Location:** stored with the world (deleting the world deletes it), with an estimate shown at creation and a warning
+  when disk is low.
+
+### Frame budget (2026-10-25)
+
+At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
+the reserved slices stay free for what comes later:
+
+| Part | Budget |
+|---|---|
+| Terrain, near to horizon | 6-8 ms |
+| Lighting (sun, sky, bounce, lights) | ~3 ms |
+| Entities and effects (far movers as points, emitters in the light list) | 1-2 ms |
+| **Reserved:** clouds and weather (volumetric, amortised, same trace) | ~2 ms |
+| Post-processing | ~1 ms |
+
+Far edits re-ingest only the changed sections and their coarse levels (microseconds to a ms each). Far fires and
+lightning go in the light layer; far battles are points or silhouettes. In game the renderer was 25-29 ms on
+2026-10-25: the far-view work (sky exit, amortised far field) is what frees the reserve.
+
 ## 2. Why we keep not getting there
 
 1. **Too many fronts at once.** Generation on the GPU, features, settlements, content, water and residency all moved
@@ -89,6 +153,66 @@ roadmap of 12 slices is mostly unbuilt. Not a code source. Four ideas are worth 
 
 Already ours (Aether copied them from us): footprint level per pixel, `[noinline]` with value structs, step budgets
 against the watchdog, uniform cells taking no slot, the 16³ micro-brick for non-cube blocks.
+
+## 3b. Architecture check: every requirement against the design (2026-10-25)
+
+The renderer direction is decided by this table, not by building everything to find out. **Known** means it's built
+and measured, or standard practice we already rely on. **Risk** means only an experiment answers it. Only the
+experiments in the last column get run, in this order: E1, then E2 to E5 as their stage comes up. Everything else
+follows the design without new tests.
+
+| Requirement | How the design meets it | State | Vital experiment (only if risk) |
+|---|---|---|---|
+| Terrain, near to horizon | NAADF grid per level (clipmap, levels 0-6), footprint picks the level per pixel, baked coarse floor | Built; in game the grid is the far path (~17 km reach) | **E1** grid far cost on 3 views (valley, 10 km horizon, grazing): fits ~6 ms at 1440p? Else hybrid or height pyramid |
+| Vanilla and custom blocks, materials | Level-0 blocks plus 16³ micro-bricks from baked quads; the gallery against vanilla | 113/300 pass; causes now lighting, not shape | No new experiment: the gallery is the measure |
+| Water and fluids | Medium in the trace (in and under), waterlogged bricks | Built; look gap (tint, waves) | None: a look decision, done in the lighting pass |
+| Sky light, sun, moon, night | Physical sky, light by need, tile schedules | Built; night not rechecked since the kernel rework | None: route captures at night |
+| Static light sources, near and far | Emitters in GPU light binning, far lights | Built | None |
+| Dynamic lights (held torches, spells, burning mobs) | One per-frame light list into the same binning | Not built | **E3** binning cost with 1,000 moving lights at 1440p |
+| Shadows | Traced (shadow rays against the grid and the entity BVH) | Terrain yes; entities not yet | Covered by E2 |
+| Entities, players, mobs near to mid | Object-space micro-voxel bricks, posed per frame, GPU two-level BVH traced with the terrain | Not built (vanilla raster with our light now) | **E2** BVH build and trace with 50 / 500 / 5,000 animated entities: frame ms at 1440p |
+| Entities far | Splatted into the coarse levels as transient voxels; impostors with dissolve exist in the old far view | Partly (old view) | Covered by E2 (splat cost) |
+| Smoke, clouds, particles, volumes | GPU particles and density volumes in the same trace (clouds already), lit by ours | Clouds built; particles vanilla | **E4** a smoke volume plus 10k particles: ms near and far |
+| Low-end and high-end scaling | One continuous quality controller (resolution, lod bias, ray and light budgets, entity detail) | Pacer only | **E5** the route on the integrated GPU with the controller holding 30 fps: does the picture stay acceptable? |
+| Fast loading and far changes | GPU-native region files, baked whole-map coarse levels, per-section edits re-downsampled, per-stage fingerprints | Coarse bake built (7-19 MB per level); format and fingerprints designed | None now: measured by the route's relaunch and ready time |
+| Server communicates elements | Coalesced position-based edits plus entity state by interest; bake shared by region hashes (designed) | Edits stored as deltas; sharing not built | None until multiplayer; design in ATLAS-WORLD-STORE §2 |
+| Same world for collisions | The server fed from the GPU generator; level-0 ids against the client level | Built on atlas-server; 0 mismatches over 7,500 blocks | None (server speed is the generator's) |
+
+**Two candidate techniques to test when their stage comes (from an outside review, 2026-10-25):**
+- **(C) Directional coarse voxels:** six-direction colour and opacity per coarse voxel, so distant forests and meadows
+  don't average to mud and read right from the side. Test with the far-look work, on the gallery sweep (grass
+  coverage at 1 km, tree shimmer).
+- **(E) Cone tracing through the coarse levels** for bounce and AO. Test in the lighting pass against the dark side
+  faces and corners.
+
+- **(F) Coarse-voxel appearance:** directional opacity, a self-occlusion factor and a tight sub-box per coarse voxel,
+  so thin things (fences, grass) neither vanish nor swell far off, and forests don't brighten when they coarsen. Test
+  together with (C), offline, on the gallery sweep (from an outside review, 2026-10-25).
+
+- **(G) An amortised far field (owner, 2026-10-25):** beyond a few km, trace the far pixels at a fraction of the rate
+  (a rotating subset per frame, reprojected) or into a slowly refreshed horizon cache of the same trace (same image,
+  less often: not a second renderer).
+  - Far lights (cities, fires, lava, volcanoes, lightning) from the light list as an emissive layer composited every
+    frame, so they stay live.
+  - Sky light from the atmosphere model.
+  - Far players and creatures as points or silhouettes drawn every frame.
+  - Test right after the sky and height exit, on the horizon view: far pass ms, plus a still-and-moving capture.
+
+Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
+(§0.1-0.2).
+
+**Supported, not built (owner, 2026-10-25).** E2-E5 aren't features to build now. They're checks that the core leaves
+room for them, so none forces a redesign later. Each is a design check against the core's interfaces:
+- the trace loop has a slot for a second structure (the entity BVH) and for density volumes;
+- the light binning takes a per-frame list;
+- the frame has the controller's knobs (resolution, lod bias, ray and light budgets, per-entity detail);
+- the grid's levels accept transient splats.
+
+A micro-benchmark runs only if the design check finds a likely blocker. Only E1 is a measurement, because it decides
+the core itself.
+
+Rules for tests from here: the route, gallery and relaunch are the standing gates; E1 now; E2-E5 as design checks,
+done when the core settles; no other new tests unless a gate can't answer a question.
 
 ## 4. The stages
 
