@@ -54,7 +54,7 @@ public class NirnCraft {
         boolean harness = System.getProperty("nirncraft.harness") != null;
         if (harness)
             for (String k : System.getProperties().stringPropertyNames())
-                if ((k.startsWith("nirncraft.atlas.") || k.startsWith("nirncraft.hold.") || k.equals("nirncraft.autotest.intro")) && !props.containsKey(k))
+                if ((k.startsWith("nirncraft.atlas.") || k.startsWith("nirncraft.hold.") || k.equals("nirncraft.autotest.intro") || k.equals("nirncraft.autotest.keepWorld")) && !props.containsKey(k))
                     System.clearProperty(k);
         for (String k : props.stringPropertyNames())
             if (harness || System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));

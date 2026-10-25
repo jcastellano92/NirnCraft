@@ -222,6 +222,10 @@ public final class PlayerHold {
     public static boolean release(ServerPlayer p, String why) {
         Held h = HELD.remove(p.getUUID());
         if (h == null) return false;
+        if (p.level().dimension() == h.dim && p.position().distanceToSqr(h.pos) > 1.0E-4) {  // (back exactly where the hold began: the pin runs every other tick)
+            p.setPos(h.pos.x, h.pos.y, h.pos.z);
+            if (p.connection != null) p.connection.teleport(h.pos.x, h.pos.y, h.pos.z, p.getYRot(), p.getXRot());
+        }
         restore(p, h);
         p.getPersistentData().remove(TAG);
         ServerLevel level = p.level();

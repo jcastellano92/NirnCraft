@@ -47,8 +47,11 @@ final class HoldSelftest {
         ServerPlayer held = standIn(level, "hold-test-held", home);
         ServerPlayer viewer = standIn(level, "hold-test-viewer", home.add(3, 0, 0));
         ServerPlayer control = standIn(level, "hold-test-control", home.add(0, 0, 3));
+        var difficulty = server.getWorldData().getDifficulty();
+        server.setDifficulty(net.minecraft.world.Difficulty.NORMAL, true);  // (a peaceful world makes no hostile mobs, and scales their damage to 0)
         Zombie zombie = (Zombie) net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
         if (zombie == null) {
+            server.setDifficulty(difficulty, true);
             problems.add("could not make a zombie");
             return problems;
         }
@@ -58,6 +61,7 @@ final class HoldSelftest {
             ready(problems, info, held, viewer, control, zombie, home);
             crashRecord(problems, info, held, home);
         } finally {
+            server.setDifficulty(difficulty, true);
             PlayerHold.release(held, "selftest end");
             PlayerHold.clearForTests();
             for (ServerPlayer p : List.of(held, viewer, control)) {
