@@ -143,6 +143,36 @@ The writer thread (one thread, one file open per record) is what bounds level 2 
 `ArcaneRegistry` registered its 14 regional flora blocks in `Map.ofEntries` order, which Java salts per launch (materials
 log "a new numbering", ingest table, fingerprint all differ). Sorted now (the materials log says where the order moved).
 
+**Bounded parts and turn-taking (atlas-bake2, 2026-10-25).** What the first in-game bake taught (cold, loading screen held, 2560x1440):
+263 tiles took 148 s beside the near window, 31k generator submissions, 4.4k of them over 8 ms (far stage up to 480 ms,
+tileBiome 162, tile 75, farChunk 31), the near window made 800 of 1793 chunks (below).
+- **A far pass's cost is a floor, not a rate.** tile / tileBiome / tileSurf walk a column's noise in doubles: a slice costs about
+  4.5 ms + 0.03 ms a group whatever the groups beside it. The old slicer sized slices from the time a group measured on small
+  slices, so it shrank them to 8 groups of 5 ms (a tile in 400 submissions) or, flagged "latency bound", left the pass whole
+  (70 to 120 ms). Now each far kind (kinds 100-103) has a slice that follows its own submissions' time: x1.25 while they run
+  under 85 % of the limit (`ATLAS_GEN_FAR_PASS_MS`, 6), cut to the limit's share when one ran over.
+- **farChunk is a workgroup a chunk** (its 64 lanes share the 4096 voxels' classify and fill; one thread a chunk walked them twice
+  in 10 to 35 ms). Same chunks, kinds and voxels (slot numbers may come in another order; the counter was atomic).
+- **The far stage (trees) is one 2-D dispatch a part**: a range of the tile's chunks by the dispatch list's tree records
+  (`params.rec = FAR_ROWS`), so a part fills the card where a record a dispatch left it idle. A part's size follows its own GPU
+  time as the passes' does (limit 8 ms); the generator keeps two parts in flight and hands the stage each part's time. Records are
+  seeded alone and write by atomics, so the grouping is exact: the same tiles by the old units (`ATLAS_FAR_V2=1`) and by these
+  parts give the same records in all 16 cache files of a 60-tile bench (gen_bake_tool feat=1 on a dump of the game's program).
+- **Offline** (gen_bake_tool feat=1, boost as the loading screen, RTX 3090, no near window): levels 6-3, 263 tiles, 70.7 s
+  (L3 165 tiles 50.9 s, L4 13.2, L5 4.4, L6 2.2), 59.8k submissions of which 115 over 8 ms (0.19 %), the longest 15.6 ms
+  (tileBiome), far stage 13.9. Not representative of frames beside it: the tool's frame at 2560x1440 is the empty-world 159 ms one.
+- **The loading phase is one engine with two users.** The deferred flush of a cold window (c6276916) sent its 1793 misses in 64
+  a call with no regard to the store's 768 slots: the store let go the farthest of the chunks still waiting for neighbours and
+  `done` held them, so 800 chunks came out and the spawn area never completed ("800 of 1793", with or without the bake, on any
+  spawn). It now waits while 64 chunks wait, as `next()` does. The bake yields to the near window between tiles while the screen
+  holds the player and the spawn area is not in (`AtlasCoarseBake.yieldToNear`: one near turn since its last tile, or the near
+  window idle, at most 250 ms), and the whole generator is unpaced meanwhile (`setBoost`: no frame to keep).
+- **Tools:** `atlas_probe.py` (middle loop: the whole far path on K tiles per level, unpaced, in a live client, nothing written to
+  the cache; group `atlas-probe`), `NIRNCRAFT_ATLAS_DUMP=<dir>` / `-Dnirncraft.atlas.dump` (the program, map and decoration program
+  as little-endian ints for gen_bake_tool), `ATLAS_FAR_TRACE=1` (the first parts of each tile: size, rows, last part's time),
+  `atlas_gen_sub_stats` (submissions by phase: count, mean, max, over 4/8/16 ms; `subs{}` in the profile line and in
+  `atlas-load.json`).
+
 **Keyed by what produces the data (atlas-bake2, 2026-10-25).** The generation and bake caches (`gen-<fingerprint>/`) used to carry
 `atlas_build_hash`, the hash of every native source, so any rebuild, a render-kernel-only one too, emptied them and the route baked
 from scratch. The fingerprint now takes `ATLAS_GEN_HASH` (`cmake/buildhash.cmake`, same header): the generator's own files only
