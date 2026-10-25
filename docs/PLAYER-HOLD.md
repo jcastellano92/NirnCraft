@@ -32,6 +32,28 @@ silently released.
 Single player is the same path through the integrated server. While held the loading screen does not pause the integrated
 server (the hold protects the player, and the same code runs in multiplayer).
 
+## Holding on arrival (teleports, dimension travel, respawn, jumps)
+
+The same hold, at the destination, whenever a player in play arrives somewhere new (owner, 2026-10-25). Events only:
+
+* **A move of more than `nirncraft.hold.jump` blocks (default 64) in one server tick** (`PlayerTickEvent.Pre`, same
+  dimension): /tp, ender pearls, chorus fruit, a mod's travel (carriages, the opening's door). `EntityTeleportEvent` is
+  read only for the reason in the log and on the screen ("teleport command 8275 blocks", "ender pearl ...").
+* **`PlayerChangedDimensionEvent`** (portals and every dimension travel) and **`PlayerRespawnEvent`** (death, return from
+  the End; at LOWEST priority, so the mod's own respawn placement has run and the hold is made where they end up).
+* The server holds exactly as at login (`PlayerHold.arrive`), pinned at the destination; `Held(true, token, reason)` tells
+  the client why. The client asks `AtlasReady` around the new position and reports ready; the server releases at the
+  destination (the release snaps back there). Nothing to run on release.
+* **A warm arrival stays instant:** the client polls readiness without a screen and reports ready the moment it is, and
+  the `AtlasLoadingScreen` only shows if the arrival is not ready after 1.5 s (the server hold itself is over in a few
+  ticks; vanilla needs about 0.6 to 0.9 s to deliver the destination's chunks anyway). The server cannot know the
+  client's residency, so a warm teleport is still a hold of a few ticks: the player is hidden and listed again at once.
+* A cold destination shows the screen with true progress (`AtlasReady`: the vanilla terrain arriving, then atlas's spawn
+  area, horizon and grid around the new position) and the player stays held until it is complete.
+* Off in a harness run unless `-Dnirncraft.hold.arrival=true` (harness scenes teleport the camera constantly and time the
+  loading themselves); `-Dnirncraft.hold.arrival=false` turns it off anywhere. A hold in progress cancels further
+  teleports of that player (`EntityTeleportEvent`), so the mod's own movers retry after the release.
+
 ## What holds, and by which public API
 
 | behaviour | mechanism |
@@ -73,6 +95,12 @@ server (the hold protects the player, and the same code runs in multiplayer).
   off at release; the release now snaps the player back to where the hold began.
 
 ## Tests
+
+* Arrival: `nirncraft-hold selftest` also checks, on stand-ins, that a move under the threshold does not hold, a far
+  teleport holds at the destination with its reason (hidden, frozen) and releases there, and a dimension arrival holds
+  (passed on the dedicated dev server). Live, `hold-arrival` (`tools/harness/hold_tools.py`, group `hold` with
+  `nirncraft.hold.jump=24`): `/tp` to a far spot, `/tp` 40 blocks to a spot whose chunks are in (no screen), and a real
+  respawn (`kill`, then `nirncraft-hold respawn @p`, the Respawn click from the server), each held and released at the place.
 
 * `nirncraft-hold selftest` (headless, stand-in players; in tools/qa/qa.ps1's server run): hidden from a viewer, mob cannot
   target, no damage, attacks / breaking / teleports cancelled, pinned after being moved, a hold with no ready stays, a stale
