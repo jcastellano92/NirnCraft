@@ -305,6 +305,18 @@ final class AtlasMaterials {
         return (short) best[1];
     }
 
+    /**
+     * (tests) Per material id handed out, the state it was made for: the state id for an exact id, -(1 + block id) for the
+     * block-level ids (a per-block colour or tint). Any thread.
+     */
+    synchronized Map<Integer, Integer> stateIndex() {
+        Map<Integer, Integer> m = new HashMap<>();
+        for (Map.Entry<Block, Short> e : ids.entrySet()) m.put(e.getValue() & 0xFFFF, -(1 + BuiltInRegistries.BLOCK.getId(e.getKey())));
+        for (Map.Entry<Long, Short> e : tinted.entrySet()) m.put(e.getValue() & 0xFFFF, -(1 + (int) (e.getKey() >> 32)));
+        for (Map.Entry<Long, Short> e : exact.entrySet()) m.put(e.getValue() & 0xFFFF, (int) (e.getKey() >> 32));
+        return m;
+    }
+
     /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
     synchronized String state() {
         return "exactIds{used=" + (nextExact - EXACT_FIRST) + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()

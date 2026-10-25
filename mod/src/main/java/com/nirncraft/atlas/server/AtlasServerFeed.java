@@ -17,9 +17,11 @@ public final class AtlasServerFeed {
     /**
      * A chunk as the GPU store holds it once every stage has run (terrain, surface, map water, the decoration, the
      * settlements and the road paint): per section 4096 ids ({@code x + 16 * (z + 16 * y)}) into {@link #palette}, null for
-     * an all-air section; sections 0..39 are y -64..575 (the sections above are air).
+     * an all-air section; sections 0..39 are y -64..575 (the sections above are air). {@code side}: the block entities
+     * ("nirnKind" be) and mobs ("entity") of the structures in the chunk, as the proto chunk takes them (the tapes carry
+     * blocks only).
      */
-    public record Chunk(int cx, int cz, short[][] sections, BlockState[] palette) {}
+    public record Chunk(int cx, int cz, short[][] sections, BlockState[] palette, java.util.List<net.minecraft.nbt.CompoundTag> side) {}
 
     public interface Provider {
         /**
@@ -34,6 +36,9 @@ public final class AtlasServerFeed {
 
         /** Whether the provider can serve now (its chunk store is up). */
         boolean ready();
+
+        /** Whether the GPU world has this structure's pieces (the recorded settlements and dungeons); else Java places them. */
+        boolean covers(net.minecraft.world.level.levelgen.structure.Structure structure);
     }
 
     private static volatile ChunkGenerator boundTo;

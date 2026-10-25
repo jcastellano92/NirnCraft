@@ -396,7 +396,7 @@ final class AtlasClientGen implements AutoCloseable {
             c.featStages = stages;
             if (c.storeOn && direct && com.nirncraft.atlas.server.AtlasServerMode.gpuChunks()) {
                 // the server's AtlasChunkGenerator takes its chunks from the store, on this generator's worker
-                c.serverGen = new AtlasServerGen(c, prog.blocks, c.farIds);
+                c.serverGen = new AtlasServerGen(c, prog.blocks, c.farIds, ow);
                 com.nirncraft.atlas.server.AtlasServerFeed.bind(g, c.serverGen);
                 com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the integrated server's chunks come from the GPU store ({})",
                         g instanceof com.nirncraft.atlas.server.AtlasChunkGenerator ? "AtlasChunkGenerator" : "this world's generator is not the atlas one: unused");

@@ -28,6 +28,8 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         }
     }
 
+    private final java.util.Set<net.minecraft.world.level.levelgen.structure.Structure> coveredSets =
+            java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final BlockState[] palette;
     private final int[] nearIds;       // per generator id: the renderer's near id (the agreement tally)
     private final AtlasClientGen owner;
@@ -35,8 +37,22 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     private volatile boolean up, closed;
     private volatile long served, flagged, waitedForTapes;
 
-    AtlasServerGen(AtlasClientGen owner, List<BlockState> blocks, int[] nearIds) {
+    AtlasServerGen(AtlasClientGen owner, List<BlockState> blocks, int[] nearIds, net.minecraft.server.level.ServerLevel level) {
         this.owner = owner;
+        // the structures the overlays stamp: the sets whose every structure is a seeded settlement or a dungeon
+        // (AtlasOverlayStarts' own rule); the street plan's named settlements are covered besides
+        try {
+            for (var set : level.getChunkSource().getGeneratorState().possibleStructureSets()) {
+                var placement = set.value().placement();
+                if (!(placement instanceof net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement)
+                        && !(placement instanceof com.nirncraft.tamriel.PlacesPlacement)) continue;
+                boolean all = !set.value().structures().isEmpty();
+                for (var e : set.value().structures()) all &= AtlasOverlayStarts.ALL.test(e.structure().value());
+                if (all) for (var e : set.value().structures()) coveredSets.add(e.structure().value());
+            }
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas server feed: the covered structures are unknown (Java places every structure's chunks)", e);
+        }
         this.palette = blocks.toArray(new BlockState[0]);
         this.nearIds = nearIds;
     }
@@ -63,6 +79,11 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         Req r = reqs.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new Req(cx, cz));
         owner.wake();
         return r.f.copy();  // (the caller's timeout must not complete the shared future)
+    }
+
+    @Override
+    public boolean covers(net.minecraft.world.level.levelgen.structure.Structure s) {
+        return (s instanceof com.nirncraft.tamriel.settlement.SettlementStructure ss && "place".equals(ss.source)) || coveredSets.contains(s);
     }
 
     @Override
@@ -133,7 +154,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
             }
             AtlasServerAgreement.gpu(xz[i * 2], xz[i * 2 + 1], hashes);
             served++;
-            r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette));
+            r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette, AtlasSideOps.at(xz[i * 2], xz[i * 2 + 1])));
         }
     }
 

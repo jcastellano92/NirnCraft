@@ -34,6 +34,12 @@ PHASES = [
     {"name": "still", "ticks": 200, "speed": 0.0, "mode": "hold", "pitch": 0},
 ]
 CAPTURES = [560, 800, 990, 1060, 1200, 1390, 1460, 1520, 1640, 1830]
+# the collision walk (ATLAS-GPU-LOOP step 12): a walk and a sprint, once a second atlas's level 0 under the player is read back from
+# the GPU and compared with the client level's blocks (the server's chunks, which collisions read); bar: 0 mismatches
+COLLIDE_PHASES = [
+    {"name": "walk", "ticks": 600, "speed": 4.317, "mode": "ground", "pitch": 6, "collide": True},
+    {"name": "sprint", "ticks": 400, "speed": 5.612, "mode": "ground", "pitch": 6, "collide": True},
+]
 
 
 def scenes():
@@ -46,6 +52,9 @@ def scenes():
         {**common, "id": "atlas-route",
          "title": "Scripted route in the real game: walk 30 s, sprint, fly 2 km, turn 360, stand still; frame times, holes, "
                   "generation and cache per second against the bar (p99 <= 20 ms, max <= 50 ms, holes 0)"},
+        {**common, "id": "atlas-collide", "collide": True, "timeout": 900, "time": 6000,
+         "title": "The walk and the sprint with atlas's level 0 under the player read back from the GPU against the client level's "
+                  "blocks, once a second (bar: 0 mismatches)"},
         {**common, "id": "atlas-route-relaunch", "relaunch": True,
          "title": "The route twice across a client restart on one cache: chunks generated on the second run (bar 0) and "
                   "time to full radius (bar < 2 s)", "timeout": 3000},
@@ -63,6 +72,8 @@ def run(runner, s, v, fp):
 
 # ------------------------------------------------------------------------------------------------------------ the route
 def route_spec(scene=None):
+    if scene and scene.get("collide"):
+        return {"tag": TAG, "heading": HEADING, "phases": COLLIDE_PHASES, "captures": [], "uncap": False, "collide": True}
     return {"tag": TAG, "heading": HEADING, "phases": PHASES, "captures": CAPTURES, "uncap": True,
             "window": list(WINDOW)}
 
@@ -206,6 +217,12 @@ def summarize(data):
                    for k, v in (data.get("phases") or {}).items()},
     }
     m["genChunks"] = int(span("genChunks"))
+    cl = [r["collide"] for r in secs if isinstance(r.get("collide"), dict)]
+    if cl:
+        m.update({"collideSeconds": len(cl), "collideChecked": sum(c.get("checked", 0) for c in cl),
+                  "collideMismatches": sum(c.get("mismatches", 0) for c in cl), "collideUnloaded": sum(c.get("unloaded", 0) for c in cl),
+                  "collideErrors": [c["error"] for c in cl if "error" in c][:3],
+                  "collideSamples": [x for c in cl for x in c.get("samples", [])][:12]})
     # the integrated server over the route (AtlasServerStats): ticks, worker CPU, chunks made by Java and by the GPU
     srv = data.get("server") or {}
     st = srv.get("tick") or {}
@@ -224,6 +241,12 @@ def summarize(data):
         "serverGpuTimeouts": srv.get("gpuTimeouts", 0),
     })
     fails = []
+    if cl:
+        if m["collideErrors"] or m["collideChecked"] == 0:
+            fails.append(f"collision check did not run: {m['collideErrors'] or 'nothing compared'}")
+        if m["collideMismatches"]:
+            fails.append(f"{m['collideMismatches']} of {m['collideChecked']} blocks differ between atlas level 0 and the client level")
+        return m, fails
     if m["p99"] > BAR["p99"]:
         fails.append(f"p99 frame {m['p99']} ms > {BAR['p99']:g}")
     if m["max"] > BAR["max"]:
@@ -349,7 +372,7 @@ def run_route_scene(runner, s, v, fp):
     relaunch = bool(s.get("relaunch"))
     cold = relaunch or bool(getattr(runner.a, "cold", False))
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    name = "route-relaunch" if relaunch else "route"
+    name = "route-relaunch" if relaunch else ("collide" if s.get("collide") else "route")
     folder = OUT / name / stamp
     folder.mkdir(parents=True, exist_ok=True)
     runs = []

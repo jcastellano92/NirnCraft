@@ -685,6 +685,10 @@ typedef struct AtlasSurfaceCard {
 ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
+/* Tests only: level 0's block ids as the GPU holds them (the collision-agreement walk). xyz: count block positions (x, y, z
+   each); out: count words, the 16-bit block id (the near materials the sections carry), 0xFFFE where level 0 holds nothing
+   (outside its window, or a chunk not loaded). Waits for the GPU; slow (two submissions): a handful of positions a call. */
+ATLAS_API AtlasStatus atlas_debug_read_blocks(AtlasContext* ctx, const int32_t* xyz, uint32_t count, uint32_t* out);
 /*
  * (abi 0.10) Refinement fades: a region rebuilt over a resident one (an exact tile replacing the raster stand-in,
  * buildings or landmarks arriving on a tile, a finer LOD entering the window over the coarser one) dissolves from what

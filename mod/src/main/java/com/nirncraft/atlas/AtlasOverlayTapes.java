@@ -952,6 +952,8 @@ final class AtlasOverlayTapes implements Canvas.Tape {
         final long seed;
         /** Every write the window takes, in order (recordRaw's), or null. */
         java.util.function.BiConsumer<BlockPos, BlockState> sink;
+        /** Non-null: the proxy keeps the structures' block entities and mobs too (AtlasSideCapture). */
+        AtlasSideCapture side;
 
         Window(LevelHeightAccessor heights, long seed, LongFunction<ProtoChunk> source) {
             this.heights = heights;
@@ -1007,6 +1009,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                             ProtoChunk c = chunk(SectionPos.blockToSectionCoord(p.getX()), SectionPos.blockToSectionCoord(p.getZ()));
                             if (c == null) return false;
                             c.setBlockState(p, s, (int) args[2]);
+                            if (side != null) side.blockSet(c, p, s);
                             if (sink != null) sink.accept(p, s);
                             return true;
                         }
@@ -1018,6 +1021,7 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                             if (c != null) {
                                 BlockState s = state(p).getFluidState().createLegacyBlock();
                                 c.setBlockState(p, s, 3);
+                                if (side != null) side.blockSet(c, p, s);
                                 if (sink != null) sink.accept(p, s);
                             }
                             return c != null;
@@ -1063,7 +1067,31 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                         if (n == 2) return ((Predicate<FluidState>) args[1]).test(state((BlockPos) args[0]).getFluidState());
                         break;
                     case "getBlockEntity":
+                        if (side != null && n >= 1 && args[0] instanceof BlockPos p) {
+                            ProtoChunk c = chunk(SectionPos.blockToSectionCoord(p.getX()), SectionPos.blockToSectionCoord(p.getZ()));
+                            net.minecraft.world.level.block.entity.BlockEntity be = c == null ? null : c.getBlockEntity(p);
+                            if (n == 2) return be != null && be.getType() == args[1] ? Optional.of(be) : Optional.empty();
+                            return be;
+                        }
                         return n == 2 ? Optional.empty() : null;
+                    case "getLevel":
+                        if (side != null) return side.level;
+                        break;
+                    case "getCurrentDifficultyAt":
+                        if (side != null) return side.difficulty();
+                        break;
+                    case "getDifficulty":
+                        if (side != null) return net.minecraft.world.Difficulty.NORMAL;
+                        break;
+                    case "addFreshEntity":
+                    case "addFreshEntityWithPassengers":
+                        if (side != null && n >= 1 && args[0] instanceof net.minecraft.world.entity.Entity e) {
+                            ProtoChunk c = chunk(SectionPos.blockToSectionCoord(e.getBlockX()), SectionPos.blockToSectionCoord(e.getBlockZ()));
+                            if (c == null) return false;
+                            c.addEntity(e);
+                            return true;
+                        }
+                        break;
                     case "getSeed":
                         return seed;
                     case "getRandom":

@@ -1120,6 +1120,15 @@ public final class AtlasClient {
         }
     }
 
+    /** (tests) The context and the materials of the running renderer, or null. */
+    static AtlasNative.Context testContext() {
+        return ctx;
+    }
+
+    static AtlasMaterials testMaterials() {
+        return materials;
+    }
+
     /** Tears atlas down (start() brings it back with fresh tiles). The library stays loaded. */
     private static void stop() {
         AtlasMaterials m = materials;

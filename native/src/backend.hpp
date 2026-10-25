@@ -169,6 +169,14 @@ public:
     // the frames' own GPU time (their timestamps, eased), ms; 0 unknown (the generator's budget reads the GPU's idle share)
     virtual double frameGpuMs() const { return 0.0; }
     virtual uint64_t framesCompleted() const { return 0; }
+    // (tests) level 0's block ids as the GPU holds them: per query the chunk word's index and the index in the section
+    // (VoxGrid::locate); out[i] the 16-bit id, 0xFFFE the chunk is unloaded (no data). Waits for the GPU.
+    virtual bool readVoxels(const std::vector<uint32_t>& chunk, const std::vector<uint32_t>& local, std::vector<uint32_t>& out,
+                            std::string& err) {
+        err = "not on this backend";
+        out.clear();
+        return false;
+    }
     // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
     virtual bool readSunMap(std::vector<float>& out, std::string& err) {
         err = "no sun map";

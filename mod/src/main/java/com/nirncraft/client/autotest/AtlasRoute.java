@@ -50,6 +50,7 @@ final class AtlasRoute {
     private static int[] captureTicks = new int[0];
     private static final ConcurrentHashMap<Integer, JsonObject> samples = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Integer, JsonObject> where = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Integer, JsonObject> collide = new ConcurrentHashMap<>();  // (phases with "collide": the grid against the client level)
     private static JsonArray captures = new JsonArray();
     private static long began;
     // display restore
@@ -188,6 +189,7 @@ final class AtlasRoute {
         routeTick = phaseIndex = phaseTick = captureNext = 0;
         samples.clear();
         where.clear();
+        collide.clear();
         captures = new JsonArray();
         frames.clear();
         cpu.clear();
@@ -312,6 +314,20 @@ final class AtlasRoute {
             w.addProperty("groundY", loaded ? ground : -999);
             w.addProperty("loadedAround", loaded);
             where.put(sec, w);
+            if (ph.has("collide") && ph.get("collide").getAsBoolean()) {
+                // atlas's level 0 against the client level under the player (the walk's collision agreement): the client
+                // level read here, the grid read back from the GPU on the sampler thread
+                int[] want = com.nirncraft.atlas.AtlasCollide.expected(mc, (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z), 2, 3, 2);
+                SAMPLER.execute(() -> {
+                    try {
+                        collide.put(sec, com.nirncraft.atlas.AtlasCollide.compare(want));
+                    } catch (RuntimeException e) {
+                        var err = new JsonObject();
+                        err.addProperty("error", e.toString());
+                        collide.put(sec, err);
+                    }
+                });
+            }
             if (SAMPLING.compareAndSet(false, true)) {
                 SAMPLER.execute(() -> {
                     try {
@@ -369,6 +385,8 @@ final class AtlasRoute {
             if (w != null) for (var e : w.entrySet()) row.add(e.getKey(), e.getValue());
             var a = samples.get(s);
             if (a != null) row.add("atlas", a);
+            var cc = collide.get(s);
+            if (cc != null) row.add("collide", cc);
             secs.add(row);
         }
         out.add("seconds", secs);

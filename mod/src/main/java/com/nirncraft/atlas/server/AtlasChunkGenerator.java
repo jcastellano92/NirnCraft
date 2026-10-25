@@ -91,9 +91,9 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
         // (blending data: an upgraded old world; its terrain is not the store's)
         if (feed == null || !feed.ready() || !blender.isEmpty() || chunk.isUpgrading())
             return java(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);
-        // a structure's pieces reach the chunk: Java makes it whole (its block entities and mobs are made by the pieces'
-        // own placement; the GPU's tapes carry blocks only)
-        if (hasStructure(chunk)) {
+        // a structure the GPU world does not carry reaches the chunk (everything but the recorded settlements and dungeons):
+        // Java makes it whole. Those it carries come with their block entities and mobs (the side files)
+        if (hasUncoveredStructure(chunk, feed)) {
             AtlasServerStats.STRUCTURE_CHUNKS.incrementAndGet();
             return java(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);
         }
@@ -125,9 +125,9 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
     }
 
     /** Whether any structure's start lies in the chunk or its pieces' box reaches it (the references the structure step made). */
-    static boolean hasStructure(ChunkAccess chunk) {
-        for (var e : chunk.getAllReferences().entrySet()) if (!e.getValue().isEmpty()) return true;
-        for (var e : chunk.getAllStarts().entrySet()) if (e.getValue().isValid()) return true;
+    static boolean hasUncoveredStructure(ChunkAccess chunk, AtlasServerFeed.Provider feed) {
+        for (var e : chunk.getAllReferences().entrySet()) if (!e.getValue().isEmpty() && !feed.covers(e.getKey())) return true;
+        for (var e : chunk.getAllStarts().entrySet()) if (e.getValue().isValid() && !feed.covers(e.getKey())) return true;
         return false;
     }
 
@@ -175,6 +175,31 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
             }
         }
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.OCEAN_FLOOR_WG, Heightmap.Types.WORLD_SURFACE_WG));
+        replaySide(chunk, gpu);
+    }
+
+    /**
+     * The structures' block entities and mobs, recorded with their tapes: a block entity where the final block still has
+     * one of that type (a later write may have replaced it), a mob as the proto chunk keeps it.
+     */
+    private static void replaySide(ChunkAccess chunk, AtlasServerFeed.Chunk gpu) {
+        if (gpu.side() == null) return;
+        for (net.minecraft.nbt.CompoundTag t : gpu.side()) {
+            String kind = t.getStringOr("nirnKind", "");
+            t.remove("nirnKind");
+            if (kind.equals("be")) {
+                net.minecraft.core.BlockPos pos = new net.minecraft.core.BlockPos(t.getIntOr("x", 0), t.getIntOr("y", 0), t.getIntOr("z", 0));
+                if (chunk.getPos().x() != pos.getX() >> 4 || chunk.getPos().z() != pos.getZ() >> 4) continue;
+                BlockState at = chunk.getBlockState(pos);
+                if (!at.hasBlockEntity() || !(at.getBlock() instanceof net.minecraft.world.level.block.EntityBlock eb)) continue;
+                net.minecraft.world.level.block.entity.BlockEntity probe = eb.newBlockEntity(pos, at);
+                if (probe == null || !net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(probe.getType()).toString()
+                        .equals(t.getStringOr("id", ""))) continue;
+                chunk.setBlockEntityNbt(t);
+            } else if (kind.equals("entity") && chunk instanceof net.minecraft.world.level.chunk.ProtoChunk proto) {
+                proto.addEntity(t);
+            }
+        }
     }
 
     @Override
