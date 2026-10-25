@@ -35,7 +35,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     private final AtlasClientGen owner;
     private final ConcurrentHashMap<Long, Req> reqs = new ConcurrentHashMap<>();
     private volatile boolean up, closed;
-    private volatile long served, flagged, waitedForTapes;
+    private volatile long served, flagged, waitedForTapes, notFinal;
 
     AtlasServerGen(AtlasClientGen owner, List<BlockState> blocks, int[] nearIds, net.minecraft.server.level.ServerLevel level) {
         this.owner = owner;
@@ -76,6 +76,12 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     @Override
     public CompletableFuture<AtlasServerFeed.Chunk> request(int cx, int cz) {
         if (!ready()) return null;
+        // a chunk whose settlement or dungeon is not recorded yet (or the starts around the camera not found yet) is not the
+        // GPU world's to give: Java makes it now, rather than the server waiting on the recorder (seconds a structure)
+        if (!AtlasOverlayLive.finalAt(cx, cz)) {
+            notFinal++;
+            return null;
+        }
         Req r = reqs.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new Req(cx, cz));
         owner.wake();
         return r.f.copy();  // (the caller's timeout must not complete the shared future)
@@ -135,6 +141,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
             long[] hashes = new long[40];
             int base = i * AtlasGenNative.CHUNK_WORDS;
             int[] near = new int[4096];
+            int[][] nearSecs = new int[40][];
             for (int s = 0; s < 40; s++) {
                 short[] sec = null;
                 for (int w = 0; w < 2048; w++) {
@@ -150,9 +157,10 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
                 } else {
                     for (int b = 0; b < 4096; b++) near[b] = nearIds[sec[b] & 0xFFFF];
                     hashes[s] = AtlasServerAgreement.hash(near);
+                    nearSecs[s] = near.clone();
                 }
             }
-            AtlasServerAgreement.gpu(xz[i * 2], xz[i * 2 + 1], hashes);
+            AtlasServerAgreement.gpu(xz[i * 2], xz[i * 2 + 1], hashes, nearSecs);
             served++;
             r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette, AtlasSideOps.at(xz[i * 2], xz[i * 2 + 1])));
         }
@@ -161,6 +169,6 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     /** "server feed: asked / served / flagged / waiting for tapes" (atlas-info). */
     String state() {
         return "serverFeed{up=" + up + " waiting=" + reqs.size() + " served=" + served + " flagged=" + flagged
-                + " tapeWaits=" + waitedForTapes + "}";
+                + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + "}";
     }
 }

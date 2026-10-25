@@ -1077,6 +1077,9 @@ final class AtlasOverlayTapes implements Canvas.Tape {
                     case "getLevel":
                         if (side != null) return side.level;
                         break;
+                    case "registryAccess":
+                        if (side != null) return side.registries();
+                        break;
                     case "getCurrentDifficultyAt":
                         if (side != null) return side.difficulty();
                         break;

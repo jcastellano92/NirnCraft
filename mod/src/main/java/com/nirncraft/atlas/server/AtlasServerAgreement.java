@@ -33,12 +33,17 @@ public final class AtlasServerAgreement {
     }
 
     /** The store's chunk as the server was given it: per section (index 0 = y -64) the near-id hash (null section: air). */
-    public static synchronized void gpu(int cx, int cz, long[] sectionHashes) {
+    public static synchronized void gpu(int cx, int cz, long[] sectionHashes, int[][] nearIds) {
         if (GPU.size() > KEEP) {  // oldest first is not tracked: an unbounded run drops the lot, the tally goes on
             GPU.clear();
         }
-        GPU.put(net.minecraft.world.level.ChunkPos.pack(cx, cz), sectionHashes);
+        long k = net.minecraft.world.level.ChunkPos.pack(cx, cz);
+        GPU.put(k, sectionHashes);
+        IDS.put(k, nearIds);  // (the last few chunks' ids, to say what differs)
+        while (IDS.size() > 48) IDS.remove(IDS.firstLongKey());
     }
+
+    private static final it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap<int[][]> IDS = new it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap<>();
 
     /**
      * The client's read of the chunk it received: sections[s] is section index s from minSec (null: not read, deep solid
@@ -67,6 +72,16 @@ public final class AtlasServerAgreement {
                 diff++;
                 if (bad == null) bad = new StringBuilder();
                 bad.append(' ').append(minSec + s);
+                int[][] want_ = IDS.get(key);
+                int[] ref = want_ == null || gi >= want_.length ? null : want_[gi];
+                int shown = 0;
+                for (int b = 0; b < 4096 && shown < 2; b++) {
+                    int a = ref == null ? 0 : ref[b];
+                    if (a == ids[b]) continue;
+                    shown++;
+                    bad.append(String.format("[%d,%d,%d gpu=%s server=%s]", (cx << 4) + (b & 15), (minSec + s) * 16 + (b >> 8), (cz << 4) + (b >> 4 & 15),
+                            a == 0 ? "air" : net.minecraft.world.level.block.Block.stateById(a), ids[b] == 0 ? "air" : net.minecraft.world.level.block.Block.stateById(ids[b])));
+                }
             }
         }
         sameSections += same;
