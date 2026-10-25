@@ -360,6 +360,16 @@ def ensure_current():
                            capture_output=True, text=True)
         if r.returncode:
             raise RuntimeError("install-core failed: " + (r.stdout + r.stderr)[-600:])
+    # The game prefers <game>/atlas-dev/atlas_core.dll over the jar's core (AtlasLibrary.candidates). Several worktrees
+    # share this instance, so that file is whichever core someone copied last: make it this run's shipped core, or every
+    # live test measures another branch's code (2026-10-24: a route ran an older core for hours).
+    dev = GAME / "atlas-dev" / NATIVE_SHIPPED.name
+    if dev.exists() and NATIVE_SHIPPED.exists() and sha(dev) != sha(NATIVE_SHIPPED):
+        log(f"  atlas-dev core replaced with this run's ({ROOT.name}): it was another build's")
+        tr.step("auto_dev_core")
+        if running():
+            close()
+        shutil.copy2(NATIVE_SHIPPED, dev)
     try:
         if sync_pack():
             log("  shader pack updated from its source")
