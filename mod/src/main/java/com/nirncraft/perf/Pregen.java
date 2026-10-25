@@ -207,7 +207,7 @@ public final class Pregen {
 
     private static boolean autoEnabled(MinecraftServer server) {
         // the GPU world draws what the server would only pre-generate beyond its radius (atlas.server.AtlasServerMode)
-        if (com.nirncraft.atlas.server.AtlasServerMode.capView()) return false;
+        if (com.nirncraft.atlas.server.AtlasServerMode.capView() && !Boolean.getBoolean("nirncraft.atlas.serverPregen")) return false;
         return PerfConfig.get(server.isDedicatedServer() ? PerfConfig.AUTO : PerfConfig.AUTO_INTEGRATED);
     }
 
