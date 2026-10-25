@@ -196,14 +196,19 @@ GenCache::Region& GenCache::region(uint64_t rk) {
         } else if (type == 1) {
             r.secs[Key3{0, int32_t(h[2]), int32_t(h[3]), int32_t(h[4])}] = loc;
         } else if (type == 2) {
-            r.tiles[tileKey(int32_t(h[2]), int32_t(h[4]))] = {loc, h[1] >> 8};
+            bool tru = (h[1] >> 31) != 0;
+            auto& t = r.tiles[tileKey(int32_t(h[2]), int32_t(h[4]))];
+            if (t.loc.bytes == 0 || tru || !t.trueData) t = {loc, (h[1] >> 8) & 0x7FFFFFu, tru};  // (a stand-in never replaces true data)
         } else if (type == 4) {
             int32_t cx = int32_t(h[2]), cz = int32_t(h[4]);
             r.chunks.erase(chunkKey(cx, cz));
             for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
         } else if (type == 3) {
-            Key3 k{int32_t(h[3] >> 16), int32_t(h[2]), int32_t(h[3] & 0xFFFFu), int32_t(h[4])};
+            Key3 k{int32_t(h[3] >> 16 & 0x7FFFu), int32_t(h[2]), int32_t(h[3] & 0xFFFFu), int32_t(h[4])};
+            bool tru = (h[3] >> 31) != 0;
             if (r.coarse.emplace(k, loc).second) r.baked[tileKey(tdiv(k.x), tdiv(k.z))]++;
+            else if (tru) r.coarse[k] = loc;  // (true data replaces the stand-in's record)
+            if (tru) r.coarseTrue.insert(k);
         }
         at += uint64_t(HEAD) * 4 + pad4(h[5]);
         if (std::fseek(f, long(at), SEEK_SET) != 0) break;
@@ -295,13 +300,21 @@ void GenCache::writerLoop() {
             int tx = j.type == 2 ? j.k.x : tdiv(j.k.x), tz = j.type == 2 ? j.k.z : tdiv(j.k.z);
             uint64_t rk = farRegionOf(j.k.lod, tx, tz);
             Region& r = region(rk);
-            bool have = j.type == 2 ? r.tiles.count(tileKey(tx, tz)) != 0 : r.coarse.count(j.k) != 0;
+            // (a record is written unless one is there; true data also over a stand-in's)
+            bool have;
+            if (j.type == 2) {
+                auto it = r.tiles.find(tileKey(tx, tz));
+                have = it != r.tiles.end() && (j.standIn || it->second.trueData);
+            } else {
+                have = r.coarse.count(j.k) != 0 && (j.standIn || r.coarseTrue.count(j.k) != 0);
+            }
             if (!have) {
                 uint32_t mixed = 0;
                 if (j.type == 2)
                     for (uint32_t v : j.info) mixed += v == 0u;
-                uint32_t h[HEAD] = {MAGIC, uint32_t(j.type) | (j.type == 2 ? mixed << 8 : 0u), uint32_t(j.k.x),
-                                    j.type == 2 ? uint32_t(j.k.lod) : uint32_t(j.k.y) | uint32_t(j.k.lod) << 16, uint32_t(j.k.z),
+                uint32_t tru = j.standIn ? 0u : 0x80000000u;
+                uint32_t h[HEAD] = {MAGIC, uint32_t(j.type) | (j.type == 2 ? mixed << 8 | tru : 0u), uint32_t(j.k.x),
+                                    j.type == 2 ? uint32_t(j.k.lod) : uint32_t(j.k.y) | uint32_t(j.k.lod) << 16 | tru, uint32_t(j.k.z),
                                     uint32_t(payload.size())};
                 FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
                 static const uint8_t zero[4] = {0, 0, 0, 0};
@@ -312,8 +325,12 @@ void GenCache::writerLoop() {
                 if (ok) {
                     dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
-                    if (j.type == 2) r.tiles[tileKey(tx, tz)] = {loc, mixed};
-                    else if (r.coarse.emplace(j.k, loc).second) r.baked[tileKey(tx, tz)]++;
+                    if (j.type == 2) r.tiles[tileKey(tx, tz)] = {loc, mixed, !j.standIn};
+                    else {
+                        if (r.coarse.emplace(j.k, loc).second) r.baked[tileKey(tx, tz)]++;
+                        else r.coarse[j.k] = loc;
+                        if (!j.standIn) r.coarseTrue.insert(j.k);
+                    }
                     uint64_t add = uint64_t(HEAD) * 4 + pad4(uint32_t(payload.size()));
                     r.fileBytes += add;
                     st_.fileBytes += add;
@@ -494,10 +511,11 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     return w;
 }
 
-void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds) {
+void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds, bool standIn) {
     if (!on()) return;
     Job j;
     j.type = 2;
+    j.standIn = standIn;
     j.k = Key3{lod, tx, 0, tz};
     j.info = kinds;
     {
@@ -507,10 +525,11 @@ void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& 
     cv_.notify_one();
 }
 
-void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash) {
+void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash, bool standIn) {
     if (!on() || !words) return;
     Job j;
     j.type = 3;
+    j.standIn = standIn;
     j.k = k;
     j.words = std::move(words);
     j.hash = hash;
@@ -529,6 +548,12 @@ bool GenCache::farKnown(int lod, int tx, int tz) {
     if (it == r.tiles.end()) return false;
     auto b = r.baked.find(tileKey(tx, tz));
     return it->second.mixed == 0 || (b != r.baked.end() && b->second >= it->second.mixed);
+}
+
+bool GenCache::farStandIn(int lod, int tx, int tz) {
+    if (!farKnown(lod, tx, tz)) return false;
+    std::lock_guard<std::mutex> l(mu_);
+    return !region(farRegionOf(lod, tx, tz)).tiles[tileKey(tx, tz)].trueData;
 }
 
 bool GenCache::farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds) {

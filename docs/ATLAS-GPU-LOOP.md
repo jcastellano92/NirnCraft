@@ -118,6 +118,31 @@ Stage-1 slicing comes first, since the bake and the idle baker run the same gene
 - This is also stage 2's **floor**: where level-0 data exists, `vgDownMain` replaces the stand-ins with true
   downsampled voxels.
 
+**Built (atlas-bake, 2026-10-25): the floor.** `native/src/gen_bake.cpp` plans every far tile of levels 6 to 3, then 2, that
+touches the map's bounds (TamrielMap: x -15360..12800, z -5120..16384; 229 tiles in 3-6, 588 in 2), coarsest level first and
+the nearest the spawn first within a level, and makes each through `atlas_gen_far_ingest` into the existing far cache
+(`f<lod>.<rx>.<rz>.gch`, set `gen-<fingerprint>/` of the world's store: seed plus the generator's fingerprint, another
+fingerprint is another set and the old one is deleted). `AtlasCoarseBake.java` runs it: levels 3-6 in the loading phase (the
+loading screen shows the tiles done; its submissions are unpaced while the screen holds the player), level 2 after control
+from the near window's idle time (paced as the far field is), and its thread loads every known tile of the coarse levels'
+windows into the grid from disk, coarsest level first, nearest first, and goes on as the windows slide; `farStep` only
+makes the tiles it does not own (the live fallback). Every far record is marked a stand-in (bit 31 of the record's word
+clear); `GenCache::putFarTile/putCoarse(..., standIn=false)` writes true data, which replaces a stand-in on disk. Per-stage,
+per-region fingerprints (step 7) are not built: any change of the fingerprint rebakes everything, and a changed decoration
+stage rebakes the horizon too (the far tiles need their own set).
+
+Measured (RTX 3090, `native/tools/gen_bake_tool.cpp` on the Oct 21 program dump: terrain only, no far stages, so a lower
+bound; in the game the far stage adds the canopy): levels 6-3, 245 tiles (the map plus the spawn window of levels 5 and 6):
+14.6 s made, 16.6 s written; L3 165 tiles 11.0 s 5.1 MB, L4 48 tiles 2.3 s 1.4 MB, L5 16 tiles 0.8 s 0.5 MB, L6 16 tiles
+0.5 s 0.4 MB; level 2, 588 tiles: 41.9 s, 18.8 MB, with 335 fps frames beside it (p99 5.3 ms); a later launch: 817 tiles
+found known in 168 ms, the 80 tiles of the windows (64 on disk) in the grid in 1.7 s. In the game (harness atlas-route,
+2560x1440, stand-in ingest table of the game): levels 3-6 whole 20.3 to 28.2 s after the world began (229 tiles, near
+generation beside them), 11.1 MB on disk; the first launch's tiles are all read back by the next (0 far tiles made live).
+The writer thread (one thread, one file open per record) is what bounds level 2 (the queue sat at its 8192 cap).
+**Found on the way:** every cache keyed by block ids was unreadable on the next launch, because the registry's order moved:
+`ArcaneRegistry` registered its 14 regional flora blocks in `Map.ofEntries` order, which Java salts per launch (materials
+log "a new numbering", ingest table, fingerprint all differ). Sorted now (the materials log says where the order moved).
+
 **Near.** The self-baking cache plus an **idle baker**: the RequestRing's tail along the predicted path, then a
 spiral, run only from the pacer's idle tokens in bake-only mode. A full level-0 Tamriel is ~5.3 GB and ~40 GPU-min once
 trees are fixed: optional.

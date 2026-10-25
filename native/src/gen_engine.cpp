@@ -27,6 +27,7 @@
 #include "parallel.hpp"
 #include "voxgrid.hpp"
 #include "gencache.hpp"
+#include "gen_bake.hpp"
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
 #include "atlas_gen_corner_spv.h"  // generated: slangc + spv_exact, one module per pass
@@ -1055,6 +1056,13 @@ public:
         int pick = -1;
         for (size_t i = 0; i < farSlabs_.size() && pick < 0; i++)
             if (!farSlabs_[i].busy && farSlabs_[i].buf.size >= words * 4) pick = int(i);
+        // (a free slab too small for this call: grown in place; the coarse bake asks for the small levels' first, and 24
+        // small slabs once left a bigger level no room for good)
+        for (size_t i = 0; i < farSlabs_.size() && pick < 0 && farSlabs_.size() >= 24; i++)
+            if (!farSlabs_[i].busy) {
+                if (!ensure(farSlabs_[i].buf, words * 4, false, err, false, true)) return false;
+                pick = int(i);
+            }
         if (pick < 0) {
             if (farSlabs_.size() >= 24) return fail(err, "busy: every far slab is still read by the grid");
             FarSlab fs;
@@ -2475,6 +2483,7 @@ private:
         if (!on || !shared_ || !backend_) return 0.0;
         pace_.lastSubAt = std::chrono::steady_clock::now();  // (busy from here: a window with a wait in it is not the frames' own)
         paceUpdate();
+        if (pace_.cls == 2) return 0.0;  // (the loading phase's bake: the card is its)
         double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
         auto t0 = std::chrono::steady_clock::now();
         // (the work in flight ahead of the frames: at most ATLAS_GEN_AHEAD_MS (6) of it, estimated)
@@ -2578,6 +2587,7 @@ int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint3
 }  // namespace
 
 struct AtlasGen {
+    std::atomic<bool> paceBoost{false};  // (the loading phase's bake: the far field is paced as if no frame were running)
     std::unique_ptr<Engine> engine;
     std::mutex mu;       // the engine (one batch at a time)
     std::mutex pagesMu;  // the page map: atlas_gen_missing_pages answers while a batch runs
@@ -3075,6 +3085,7 @@ ATLAS_API AtlasStatus atlas_gen_create_for(AtlasContext* ctx, AtlasGen** out) {
 
 ATLAS_API void atlas_gen_destroy(AtlasGen* h) {
     try {
+        atlas::bakeForget(h);
         delete h;
     } catch (...) {
     }
@@ -3308,7 +3319,7 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
         double ms = 0;
         std::string err;
         h->engine->farBake = contextWorld(h->ctx)->genCache();
-        h->engine->paceClass(1);  // (the far field: the leftovers of the GPU budget)
+        h->engine->paceClass(h->paceBoost ? 2 : 1);  // (the far field: the leftovers of the GPU budget; 2: the loading phase, all of it)
         bool ok = h->engine->farIngest(jobs, lod, rows, capacity, outKinds, mixed, taken, bad.data(), ms, err);
         h->engine->paceClass(0);
         h->last = Batch{};
@@ -3982,6 +3993,31 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
         if (outTaken) *outTaken = taken;
         return ATLAS_OK;
     });
+}
+
+// (the whole-map coarse bake, gen_bake.cpp) whether the cache knows a far tile whole: 1 yes, 0 no, -1 no cache
+// (the cache set's key in its parts, for logs: why a launch found another generator's set) build, program, ingest table, map,
+// the caller's extra, the stages, the whole
+ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out) {
+    if (!h || !out) return ATLAS_ERR_ARG;
+    uint64_t st = 0;
+    for (const Stage& s : h->stages) st = fnv64(&s.order, 4, s.ffn ? fnv64(&s.fp, 8, st) : st);
+    out[0] = buildHash(), out[1] = h->fpProg, out[2] = h->fpIngest, out[3] = h->fpMap, out[4] = h->fpExtra, out[5] = st, out[6] = h->fpSent;
+    out[7] = h->stages.size();
+    return ATLAS_OK;
+}
+
+// (gen_bake.cpp) the bake of the loading phase: the far field's submissions are not paced while a loading screen holds the player
+ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on) {
+    if (!h) return ATLAS_ERR_ARG;
+    h->paceBoost = on != 0;
+    return ATLAS_OK;
+}
+
+ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz) {
+    if (!h || !h->ctx || lod < 1 || lod > 6) return -1;
+    GenCache* gc = contextWorld(h->ctx)->genCache();
+    return gc && gc->on() ? (gc->farKnown(lod, tx, tz) ? 1 : 0) : -1;
 }
 
 ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out) {

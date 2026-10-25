@@ -185,6 +185,7 @@ final class AtlasClientGen implements AutoCloseable {
     private volatile long farTiles, farChunks, farTaken, farBusy;
     private volatile double farMs;
     private volatile boolean farOn;
+    private volatile AtlasCoarseBake bake;  // (the whole-map coarse bake: run starts it, close stops it)
     /** The generator makes its own pages on the device (atlas_gen_set_map took the map). */
     private volatile boolean devicePages;
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
@@ -641,6 +642,7 @@ final class AtlasClientGen implements AutoCloseable {
         if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d, partial %d (retried %d), from the cache %d",
                 c.farTiles, c.farTaken, c.farChunks, c.farMs, c.farBusy, c.farPartial.size(), c.farRetried, c.farCached);
         pagesNow += String.format(", cached chunks %d (%d sections)", c.cachedChunks, c.cachedSections);
+        if (AtlasCoarseBake.line() != null) pagesNow += ", " + AtlasCoarseBake.line();
         String pace = c.statPaceLine;
         if (pace != null) pagesNow += ", " + pace;
         String cache = c.statCacheLine;
@@ -702,6 +704,8 @@ final class AtlasClientGen implements AutoCloseable {
         // the self-baking cache's fingerprint, now that the generator is whole (program, stages, ingest, map): the
         // generator's completed by the far identity (world generation and painting code)
         if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
+        // the whole-map coarse bake and the boot load of the far tiles (its own thread; farStep keeps the tiles it does not own)
+        if (cacheArm && farOn) bake = AtlasCoarseBake.start(gen);
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -1269,7 +1273,7 @@ final class AtlasClientGen implements AutoCloseable {
                 for (int tx = Math.floorDiv(ox, 16); tx <= Math.floorDiv(ox + side - 1, 16); tx++) {
                     long key = farKey(k, tx, tz);
                     int now = tileCover(tx, tz, ox, oz, side);
-                    if (now == 0) continue;
+                    if (now == 0 || AtlasCoarseBake.owns(k, tx, tz, win)) continue;  // (the bake's tiles: baked, loaded by its thread)
                     int[] sw = farWin.get(key);
                     if (farDone.contains(key) && sw != null && sw[2] == win[4] && now - tileCover(tx, tz, sw[0], sw[1], side) < 16) continue;
                     double cx = (tx + 0.5) * span - x, cz = (tz + 0.5) * span - z;
@@ -1344,6 +1348,7 @@ final class AtlasClientGen implements AutoCloseable {
                     done.remove(ChunkPos.pack(x, z));
                 } else {
                     farPartial.add(farKey(level, Math.floorDiv(x, 16), Math.floorDiv(z, 16)));
+                    AtlasCoarseBake.dropped(level, Math.floorDiv(x, 16), Math.floorDiv(z, 16));  // (the bake's thread puts it again)
                 }
             }
         }
@@ -1671,6 +1676,7 @@ final class AtlasClientGen implements AutoCloseable {
     public void close() {
         running = false;
         if (active == this) active = null;
+        if (bake != null) bake.stop();
         List<Thread> all = new ArrayList<>(featureWorkers);
         all.add(worker);
         all.add(uploader);
