@@ -92,6 +92,7 @@ public final class SkyNetwork {
         com.nirncraft.protect.ProtectModule.registerPackets();
         com.nirncraft.combat.Threats.registerPackets();
         com.nirncraft.atlas.AtlasNet.register();
+        com.nirncraft.hold.HoldModule.registerPackets();
 
         initialized = true;
         modBus.addListener(SkyNetwork::registerPayloads);

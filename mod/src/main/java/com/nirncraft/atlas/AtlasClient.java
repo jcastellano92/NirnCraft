@@ -77,6 +77,9 @@ public final class AtlasClient {
     private static Supplier<WeatherFeed> weather = () -> WEATHER;
     /** Off for the session (the reason is in the status line). */
     private static boolean failed;
+    private static AtlasStatusLine.Off offKind;
+    /** No shader pack and no usable fallback compositor: atlas does not start (and nothing is wrong). */
+    private static volatile boolean idleByConfig;
     private static boolean infoLogged;  // atlas_info logged for this context
     private static final AtlasNative.Frame frame = new AtlasNative.Frame();
     private static final AtlasNative.GlFrameIO io = new AtlasNative.GlFrameIO();
@@ -293,7 +296,8 @@ public final class AtlasClient {
                     targets = null;
                 }
             }
-            if (!pack && !fallbackUsable()) {
+            idleByConfig = !pack && !fallbackUsable();
+            if (idleByConfig) {
                 // nobody would see the far field: do not draw it (it comes back when a pack is switched on)
                 status(AtlasStatusLine.off("no shader pack is active and the fallback compositor "
                         + (fallbackBlocker != null ? "cannot run: " + fallbackBlocker : "is off")), null);
@@ -804,9 +808,24 @@ public final class AtlasClient {
         return failed;
     }
 
+    /**
+     * Atlas is off by the player's own choice or by configuration, not by a failure: nothing to wait for (the hold,
+     * AtlasReadiness). {@code -Dnirncraft.atlas=false} or an unsupported graphics API (kind SETTING), or no shader pack
+     * and no usable compositor (atlas never starts).
+     */
+    static boolean offByChoice() {
+        return failed ? offKind == AtlasStatusLine.Off.SETTING : idleByConfig;
+    }
+
+    /** Why atlas is off for the session (the status line), or null. */
+    static String offReason() {
+        return failed ? lastStatus : null;
+    }
+
     /** Off for the rest of the session: one status line (WARN), a notice where the player can act on it. */
     private static void offForSession(String reason, AtlasStatusLine.Off kind, Throwable t) {
         failed = true;
+        offKind = kind;
         com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);  // its knobs cost nothing from now on
         status(AtlasStatusLine.off(reason), kind);
         if (t != null && kind == AtlasStatusLine.Off.ERROR)
