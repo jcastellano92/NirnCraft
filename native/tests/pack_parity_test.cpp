@@ -119,13 +119,14 @@ void main() {
         float l = std::sqrt(c.sun[0] * c.sun[0] + c.sun[1] * c.sun[1] + c.sun[2] * c.sun[2]);
         float sun[3] = {c.sun[0] / l, c.sun[1] / l, c.sun[2] / l};
         // AirSun (w the eye's altitude: 57 blocks over the sea, km of air), the moon: the default opposite the sun,
-        // its irradiance pi x the old moonlight, faded out while the sun is up (air.hpp lightsOf, AtlasAir.moonFor)
+        // its irradiance pi x the core's fallback moon (a real full moon, api.cpp moonOf), faded out while the sun is
+        // up (air.hpp lightsOf, AtlasAir.moonFor)
         float t = std::fmin(1.0f, std::fmax(0.0f, (sun[1] - 0.1f) / (0.0f - 0.1f)));
         float fade = 3.14159265f * t * t * (3 - 2 * t);
         float block[28];
         std::memcpy(block, coeffs, sizeof(coeffs));
         float tail[12] = {sun[0], sun[1], sun[2], (120.0f - 63.0f) * coeffs[11], -sun[0], -sun[1], -sun[2], 0,
-                          0.035f * fade, 0.05f * fade, 0.09f * fade, 0};
+                          8.7e-6f * fade, 1.25e-5f * fade, 2.2e-5f * fade, 0};
         std::memcpy(block + 16, tail, sizeof(tail));
         bufSub(ubo, 0, sizeof(block), block);
         gl.ProgramUniformMatrix4fv(prog, gl.GetUniformLocation(prog, "invVP"), 1, 0, inv);
