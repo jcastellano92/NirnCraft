@@ -1131,6 +1131,15 @@ class AtlasGenParityTest {
         System.out.println(report);
     }
 
+    /** "p50 x p99 y max z ms (n)" of frame times, or "none". */
+    private static String pct(List<Float> v) {
+        if (v.isEmpty()) return "none";
+        float[] a = new float[v.size()];
+        for (int i = 0; i < a.length; i++) a[i] = v.get(i);
+        java.util.Arrays.sort(a);
+        return String.format("p50 %.1f p99 %.1f max %.1f ms (%d)", a[a.length / 2], a[Math.min(a.length - 1, (int) (a.length * 0.99))], a[a.length - 1], a.length);
+    }
+
     /**
      * The generated world kept across launches (NIRNCRAFT_TEST_WORLD=tamriel): AtlasClientGen as the game starts it (the
      * store's decoration, the overlays attached, the materials log, the self-baking cache in one directory) with a camera
@@ -1176,6 +1185,7 @@ class AtlasGenParityTest {
                 java.util.concurrent.atomic.AtomicLong frames = new java.util.concurrent.atomic.AtomicLong();
                 String[] renderError = {null};
                 List<Float> frameMs = new ArrayList<>();  // (each frame's update + render, ms: the render thread's)
+                List<Long> frameAt = new ArrayList<>();   // (each frame's start, System.nanoTime)
                 Thread renderer = new Thread(() -> {
                     AtlasNative.Frame f = new AtlasNative.Frame();
                     // NIRNCRAFT_RELAUNCH_SIZE "w,h": the frames' size (default 320 x 180; 2560,1440 loads the card as the game's)
@@ -1184,6 +1194,9 @@ class AtlasGenParityTest {
                     f.width = fw;
                     f.height = fh;
                     f.maxDistance = 2000;
+                    // NIRNCRAFT_RELAUNCH_NEAR: the near field's end (the game's near pass draws its loaded chunks: about the
+                    // render distance), so the frames cost what the game's do (0: atlas draws every pixel)
+                    f.nearFieldEnd = Float.parseFloat(System.getenv().getOrDefault("NIRNCRAFT_RELAUNCH_NEAR", "0"));
                     new org.joml.Matrix4f().perspective((float) Math.toRadians(70), (float) fw / fh, 0.05f, 4000f)
                             .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
                     int[] color = new int[fw * fh];
@@ -1199,6 +1212,7 @@ class AtlasGenParityTest {
                             ctx.render(f, color, null, depth);
                             synchronized (frameMs) {
                                 frameMs.add((System.nanoTime() - r0) / 1e6f);
+                                frameAt.add(r0);
                             }
                             frames.incrementAndGet();
                             // (a 60 Hz cadence, as vsync: the frame's own time out of the 16.7 ms)
@@ -1216,6 +1230,7 @@ class AtlasGenParityTest {
                 renderer.setDaemon(true);
                 renderer.start();
                 double tWindow = -1, tHorizon = -1, tSettled = -1;
+                long firstGenerated = 0;
                 try {
                     long t0 = System.nanoTime();
                     for (int stop = 0; stop < stops; stop++) {
@@ -1243,7 +1258,10 @@ class AtlasGenParityTest {
                             boolean[] idle = AtlasClientGen.idle();
                             if (idle != null && idle[0] && (System.nanoTime() - still) / 1e9 > 1.0) break;
                         }
-                        if (stop == 0) tSettled = (System.nanoTime() - t0) / 1e9 - 1.0;
+                        if (stop == 0) {
+                            tSettled = (System.nanoTime() - t0) / 1e9 - 1.0;
+                            firstGenerated = last[0];
+                        }
                         report.append(String.format("  launch %d stop %d (x %.0f): %.1f s  generated %d, from cache %d, far made %d, far cached %d%n",
                                 launch, stop, cam[0], (System.nanoTime() - t0) / 1e9, last[0], last[1], last[2], last[3]));
                         progress("relaunch " + launch, stop + 1, stops);
@@ -1257,6 +1275,12 @@ class AtlasGenParityTest {
                         Thread.sleep(250);
                     }
                     tHorizon = (System.nanoTime() - t0) / 1e9;
+                    // NIRNCRAFT_RELAUNCH_IDLE seconds of frames with nothing left to make: the frames' own cost, the baseline
+                    // for the frames while generating (the gate: docs/ATLAS-GPU-LOOP.md stage 1)
+                    double idleS = Double.parseDouble(System.getenv().getOrDefault("NIRNCRAFT_RELAUNCH_IDLE", "0"));
+                    long idle0 = System.nanoTime();
+                    if (idleS > 0) Thread.sleep((long) (idleS * 1000));
+                    long idle1 = System.nanoTime();
                     report.append(String.format("launch %d: first radius settled after %.1f s (window up %.1f s), horizon settled after %.1f s (%d frames)%n  %s%n", launch,
                             tSettled, tWindow, tHorizon, frames.get(), AtlasClientGen.state()));
                     if (renderError[0] != null) report.append("  render thread: ").append(renderError[0]).append(System.lineSeparator());
@@ -1270,6 +1294,20 @@ class AtlasGenParityTest {
                         report.append(String.format("  frames (render thread, update + render): p50 %.1f p99 %.1f max %.1f ms; %s%n", ms[ms.length / 2],
                                 ms[(int) (ms.length * 0.99)], ms[ms.length - 1], ctx.info().replaceAll("(?s).*(\"stageCpuMs\"[^}]*?\"stageScale\":[0-9.]+).*?(\"takePhases\":\\{[^}]*\\}).*", "$1 $2")));
                     if (launch == 2) second = AtlasClientGen.counters();
+                    // the gate's numbers: chunks a second to the first radius settled, the frames meanwhile, the idle frames
+                    {
+                        long genEnd = t0 + (long) (Math.max(0, tSettled) * 1e9);
+                        List<Float> during = new ArrayList<>(), idleF = new ArrayList<>();
+                        synchronized (frameMs) {
+                            for (int i = 0; i < frameMs.size(); i++) {
+                                long at = frameAt.get(i);
+                                if (at >= t0 && at < genEnd) during.add(frameMs.get(i));
+                                else if (at >= idle0 && at < idle1) idleF.add(frameMs.get(i));
+                            }
+                        }
+                        report.append(String.format("  gate: near chunks %d in %.1f s = %.1f/s; frames while generating %s; idle frames %s%n", firstGenerated,
+                                tSettled, firstGenerated / Math.max(1e-3, tSettled), pct(during), pct(idleF)));
+                    }
                 } finally {
                     cg.close();
                     rendering.set(false);
