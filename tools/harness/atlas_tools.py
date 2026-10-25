@@ -206,6 +206,23 @@ def summarize(data):
                    for k, v in (data.get("phases") or {}).items()},
     }
     m["genChunks"] = int(span("genChunks"))
+    # the integrated server over the route (AtlasServerStats): ticks, worker CPU, chunks made by Java and by the GPU
+    srv = data.get("server") or {}
+    st = srv.get("tick") or {}
+    m.update({
+        "serverTickP50": round(st.get("p50", 0), 2), "serverTickP99": round(st.get("p99", 0), 2),
+        "serverTickMax": round(st.get("max", 0), 2), "serverTickOver50": st.get("over50", 0), "serverTicks": st.get("n", 0),
+        "serverWorkerCpuMsPerSec": round(srv.get("workerCpuMsPerSec", 0), 1),
+        "serverThreadCpuMsPerSec": round(srv.get("serverThreadCpuMsPerSec", 0), 1),
+        "processCpuMsPerSec": round(srv.get("processCpuMsPerSec", 0), 1),
+        "serverNewChunks": srv.get("newChunks", 0), "serverLoadedChunks": srv.get("loadedChunksAtEnd", 0),
+        "serverView": srv.get("viewDistance"), "serverListView": srv.get("playerListViewDistance"),
+        "serverSim": srv.get("simulationDistance"), "serverCapped": srv.get("capped"),
+        "serverGenerator": srv.get("generator"), "serverGpuChunks": srv.get("gpuChunks", 0),
+        "serverJavaChunks": srv.get("javaChunks", 0), "serverJavaTerrainCalls": srv.get("javaTerrainCalls", 0),
+        "serverJavaDecorationCalls": srv.get("javaDecorationCalls", 0), "serverGpuWaitMs": round(srv.get("gpuWaitMs", 0), 1),
+        "serverGpuTimeouts": srv.get("gpuTimeouts", 0),
+    })
     fails = []
     if m["p99"] > BAR["p99"]:
         fails.append(f"p99 frame {m['p99']} ms > {BAR['p99']:g}")
@@ -224,7 +241,7 @@ def charts(data, m, folder):
     secs = data["seconds"]
     t = [r["sec"] for r in secs]
     atlas = [(r.get("atlas") or {}) for r in secs]
-    fig, ax = plt.subplots(4, 1, figsize=(12, 11), sharex=True)
+    fig, ax = plt.subplots(5, 1, figsize=(12, 13), sharex=True)
     fr = [r.get("frame", {}) for r in secs]
     ax[0].plot(t, [f.get("p50") for f in fr], label="p50", color="#4c9")
     ax[0].plot(t, [f.get("p99") for f in fr], label="p99", color="#e90")
@@ -249,7 +266,15 @@ def charts(data, m, folder):
     ax[3].plot(t, [a.get("atlasMs") if a else None for a in atlas], label="atlas GPU ms", color="#06c")
     ax[3].legend(loc="upper right")
     ax[3].set_ylabel("ms")
-    ax[3].set_xlabel("route second")
+    srows = (data.get("server") or {}).get("seconds") or []
+    if srows:
+        ax[4].plot([r["sec"] for r in srows], [r.get("workerCpuMs", 0) for r in srows], label="server worker CPU ms/s", color="#a60")
+        ax[4].plot([r["sec"] for r in srows], [r.get("serverCpuMs", 0) for r in srows], label="server thread CPU ms/s", color="#08a")
+        ax[4].plot([r["sec"] for r in srows], [r.get("tickMaxMs", 0) for r in srows], label="slowest server tick ms", color="#a0a")
+        ax[4].bar([r["sec"] for r in srows], [r.get("newChunks", 0) * 10 for r in srows], label="new server chunks /s (x10)", color="#9c9", alpha=.5)
+        ax[4].legend(loc="upper right", ncol=2)
+    ax[4].set_ylabel("integrated server")
+    ax[4].set_xlabel("route second")
     # phase shading
     ends, name = 0, None
     for p in data["spec"]["phases"]:
@@ -296,6 +321,10 @@ def html(folder, title, runs, verdict, extra=""):
                                                                            "holesAtEnd", "farReachMin", "genChunks", "farTilesMade",
                                                                            "cachedChunks", "coldHits", "coldWrites", "stageCpuMaxMs",
                                                                            "atlasMsMax", "display")) + "</tr></table>")
+        sv = ("serverGenerator", "serverView", "serverSim", "serverLoadedChunks", "serverNewChunks", "serverTickP50", "serverTickP99",
+              "serverTickMax", "serverTickOver50", "serverWorkerCpuMsPerSec", "serverThreadCpuMsPerSec", "processCpuMsPerSec",
+              "serverGpuChunks", "serverJavaChunks", "serverJavaTerrainCalls", "serverGpuWaitMs")
+        rows.append("<table><tr>" + "".join(f"<th>{k}</th>" for k in sv) + "</tr><tr>" + "".join(f"<td>{m.get(k)}</td>" for k in sv) + "</tr></table>")
         rows.append("<table><tr><th>phase</th><th>p50</th><th>p99</th><th>max</th></tr>" + "".join(
             f"<tr><td>{k}</td><td>{v['p50']}</td><td>{v['p99']}</td><td>{v['max']}</td></tr>" for k, v in m["phases"].items())
             + "</table>")

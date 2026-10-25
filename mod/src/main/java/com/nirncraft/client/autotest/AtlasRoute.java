@@ -202,6 +202,7 @@ final class AtlasRoute {
         startDelay = display.has("resizedFrom") ? 80 : 0;  // (the window takes its new size on a later event poll)
         if (startDelay == 0) measureDisplay(mc);
         began = System.currentTimeMillis();
+        com.nirncraft.atlas.server.AtlasServerStats.begin();  // (the integrated server's ticks, CPU and chunks over the route)
         running = true;
         NirnCraft.LOGGER.info("Autotest live: route {} started ({} ticks, {} captures)", tag, phaseStart[phases.size()], captureTicks.length);
     }
@@ -383,6 +384,8 @@ final class AtlasRoute {
             byPhase.add(phases.get(i).get("name").getAsString(), row);
         }
         out.add("phases", byPhase);
+        var srv = mc.getSingleplayerServer();
+        out.add("server", com.nirncraft.atlas.server.AtlasServerStats.end(srv));
         worst.sort((a, b) -> Float.compare(b[0], a[0]));
         var ws = new JsonArray();
         for (int i = 0; i < Math.min(25, worst.size()); i++) {
