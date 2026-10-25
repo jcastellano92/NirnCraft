@@ -833,7 +833,7 @@ public:
         if (c.n <= 0.0) c.n = 256.0;
         for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
             double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
-            if (t > limit) c.n = std::max(64.0, used * limit / t * 0.85);
+            if (t > limit) c.n = std::max(256.0, used * limit / t * 0.85);  // (256 at least: beside the frames a part's time holds their share)
             else if (t < limit * 0.85 && used >= c.n * 0.95) c.n = std::min(c.n * 1.25, double(maxN));
         }
         const uint32_t left = chunks - farOff_;

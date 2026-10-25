@@ -809,6 +809,13 @@ final class AtlasClientGen implements AutoCloseable {
                         long dx = ChunkPos.getX(k) - ccx, dz = ChunkPos.getZ(k) - ccz;
                         return dx * dx + dz * dz;
                     }));
+                    if (!near.isEmpty()) {
+                        // one 8 x 8 patch at a time, the nearest's (as next() plans): the nearest 64 by distance were a growing
+                        // ring, whose neighbourhood wants more slots than the store has (88 chunks waiting in 768 slots, none
+                        // able to take a neighbour: the spawn area stuck at 488 of 1793)
+                        int px0 = ChunkPos.getX(near.get(0)) >> 3, pz0 = ChunkPos.getZ(near.get(0)) >> 3;
+                        near.removeIf(k -> (ChunkPos.getX(k) >> 3) != px0 || (ChunkPos.getZ(k) >> 3) != pz0);
+                    }
                     int n = Math.min(BATCH, near.size());
                     if (n > 0) {
                         nearIdle = false;

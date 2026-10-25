@@ -2624,13 +2624,13 @@ private:
         if (!on || n <= 1) return std::max(1u, n);
         double& sl = farSlice_[kind];
         if (sl <= 0.0) sl = initial;
-        return uint32_t(std::clamp(sl, std::min(8.0, double(n)), double(n)));
+        return uint32_t(std::clamp(sl, std::min(64.0, double(n)), double(n)));  // (64 groups at least: beside the frames a slice's time holds their share, and slices shrunk by it made a tile in 200 submissions)
     }
     void farSliceSeen(uint32_t kind, uint32_t units, double ms) {
         static const double limit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
         double& sl = farSlice_[kind];
         if (sl <= 0.0 || units == 0) return;
-        if (ms > limit) sl = std::max(8.0, double(units) * limit / ms * 0.85);
+        if (ms > limit) sl = std::max(64.0, double(units) * limit / ms * 0.85);
         else if (ms < limit * 0.85 && double(units) >= sl * 0.95) sl = std::min(sl * 1.25, 4096.0);
     }
     // before a submission: wait for the budget; returns the wait
