@@ -68,12 +68,20 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class PlayerHold {
     /** Off with {@code -Dnirncraft.hold=false} (the server's JVM; clients then simply never see a hold). */
     public static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("nirncraft.hold"));
+    /**
+     * Hold on arriving somewhere (teleport, dimension, respawn, jump). On by default; off by default in a harness run
+     * (its scenes teleport the camera all the time and time the loading themselves); the hold's own tests switch it on
+     * with {@code -Dnirncraft.hold.arrival=true}.
+     */
+    public static final boolean ARRIVAL = Boolean.parseBoolean(System.getProperty("nirncraft.hold.arrival",
+            System.getProperty("nirncraft.harness") == null ? "true" : "false"));
     private static final String TAG = "nirncraft_hold";
     private static final long LOG_EVERY_TICKS = 20L * 30;
 
     /** One held player. */
     private static final class Held {
         final long token;
+        final String reason;
         final long sinceTick;
         final long sinceMs = System.currentTimeMillis();
         final ResourceKey<Level> dim;
@@ -84,8 +92,9 @@ public final class PlayerHold {
         long lastPin = -1_000_000L, lastLog;
         int pins;
 
-        Held(long token, ServerPlayer p, GameType prevMode, boolean noGravity, boolean invisible, @Nullable Runnable onRelease) {
+        Held(long token, String reason, ServerPlayer p, GameType prevMode, boolean noGravity, boolean invisible, @Nullable Runnable onRelease) {
             this.token = token;
+            this.reason = reason;
             this.sinceTick = p.level().getGameTime();
             this.dim = p.level().dimension();
             this.pos = p.position();
@@ -103,7 +112,13 @@ public final class PlayerHold {
         }
     }
 
+    /** A move of more than this many blocks in one server tick is an arrival somewhere new: the player is held there. */
+    public static final double JUMP_BLOCKS = Double.parseDouble(System.getProperty("nirncraft.hold.jump", "64"));
     private static final Map<UUID, Held> HELD = new ConcurrentHashMap<>();
+    /** Where each player was on the previous tick, for the jump check. */
+    private static final Map<UUID, Vec3> LAST = new ConcurrentHashMap<>();
+    /** Why the teleport that is about to be seen as a jump happened (from EntityTeleportEvent), for the log and the screen. */
+    private static final Map<UUID, String> WHY = new ConcurrentHashMap<>();
     private static final AtomicLong TOKENS = new AtomicLong(System.currentTimeMillis() & 0xFFFFFFFFL);
 
     private PlayerHold() {}
@@ -142,16 +157,39 @@ public final class PlayerHold {
      */
     public static boolean beginOnLogin(ServerPlayer p, @Nullable Runnable onRelease) {
         if (!ENABLED || p.connection == null || p instanceof FakePlayer) return false;
-        begin(p, onRelease);
+        begin(p, onRelease, "login");
         return true;
     }
 
-    /** Holds the player now (login, an operator, a test). A player already held keeps their hold and their release action. */
+    /** Holds the player now (an operator, a test). */
     public static void begin(ServerPlayer p, @Nullable Runnable onRelease) {
+        begin(p, onRelease, "operator");
+    }
+
+    /**
+     * Holds a player in play who has just arrived somewhere (a teleport, a dimension change, a respawn, a jump of more
+     * than {@link #JUMP_BLOCKS} blocks): the same hold as at login, at the destination, released there when the client
+     * reports the arrival ready. Does nothing when the hold is off, for a stand-in, or when they are already held.
+     */
+    public static boolean arrive(ServerPlayer p, String reason) {
+        if (!ENABLED || !ARRIVAL || p.connection == null || p instanceof FakePlayer || isHeld(p)) return false;
+        begin(p, null, reason);
+        return true;
+    }
+
+    /** As {@link #arrive} for a stand-in (the selftest): the same hold, without the connection checks. */
+    static boolean arriveForTests(ServerPlayer p, String reason) {
+        if (isHeld(p)) return false;
+        begin(p, null, reason);
+        return true;
+    }
+
+    /** Holds the player now. A player already held keeps their hold and their release action. */
+    static void begin(ServerPlayer p, @Nullable Runnable onRelease, String reason) {
         Held old = HELD.get(p.getUUID());
         if (old != null) {
             if (onRelease != null) old.onRelease = onRelease;
-            send(p, new HoldPackets.Held(true, old.token));
+            send(p, new HoldPackets.Held(true, old.token, old.reason));
             return;
         }
         // the real state: from the persisted record when a crash or disconnect left the hold on this player's data
@@ -169,14 +207,15 @@ public final class PlayerHold {
             t.putBoolean("invisible", invisible);
             p.getPersistentData().put(TAG, t);
         }
-        Held h = new Held(TOKENS.incrementAndGet(), p, mode, noGravity, invisible, onRelease);
+        Held h = new Held(TOKENS.incrementAndGet(), reason, p, mode, noGravity, invisible, onRelease);
         HELD.put(p.getUUID(), h);
         apply(p);
         // not in the tab list of anyone, and not in the world of anyone
         hideFromOthers(p);
-        send(p, new HoldPackets.Held(true, h.token));
-        NirnCraft.LOGGER.info("hold: {} is held at {} {} {} until their client reports its loading complete (real mode {})",
-                p.getGameProfile().name(), fmt(h.pos.x), fmt(h.pos.y), fmt(h.pos.z), mode.getName());
+        send(p, new HoldPackets.Held(true, h.token, reason));
+        LAST.put(p.getUUID(), h.pos);
+        NirnCraft.LOGGER.info("hold: {} is held at {} {} {} until their client reports its loading complete (real mode {}) [{}]",
+                p.getGameProfile().name(), fmt(h.pos.x), fmt(h.pos.y), fmt(h.pos.z), mode.getName(), reason);
     }
 
     /** The hold's state on the player: everything but the tracking and the tab list. Idempotent; also the per-login re-apply. */
@@ -234,7 +273,7 @@ public final class PlayerHold {
         for (ServerPlayer other : level.getServer().getPlayerList().getPlayers()) {
             if (other != p && other.connection != null) other.connection.send(info);
         }
-        send(p, new HoldPackets.Held(false, h.token));
+        send(p, new HoldPackets.Held(false, h.token, h.reason));
         NirnCraft.LOGGER.info("hold: {} released after {} ticks ({} ms) at {} {} {} (pinned {} times): {}", p.getGameProfile().name(),
                 p.level().getGameTime() - h.sinceTick, System.currentTimeMillis() - h.sinceMs, fmt(p.getX()), fmt(p.getY()), fmt(p.getZ()), h.pins, why);
         Runnable after = h.onRelease;
@@ -278,6 +317,7 @@ public final class PlayerHold {
     @SubscribeEvent
     public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        LAST.remove(p.getUUID());
         Held h = HELD.remove(p.getUUID());
         if (h == null) return;
         try {
@@ -292,7 +332,9 @@ public final class PlayerHold {
     /** Each server tick of a held player: pinned, still, breathing, not burning; the hold is logged now and then. */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Pre event) {
-        if (HELD.isEmpty() || !(event.getEntity() instanceof ServerPlayer p)) return;
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        watchJump(p, p.connection != null && !(p instanceof FakePlayer));
+        if (HELD.isEmpty()) return;
         Held h = HELD.get(p.getUUID());
         if (h == null) return;
         long now = p.level().getGameTime();
@@ -314,6 +356,56 @@ public final class PlayerHold {
             h.lastLog = now;
             NirnCraft.LOGGER.info("hold: {} is still held ({} s): the client has not reported ready", p.getGameProfile().name(), (now - h.sinceTick) / 20);
         }
+    }
+
+    /**
+     * The jump check: a player who moved more than {@link #JUMP_BLOCKS} since the previous tick, in the same dimension,
+     * has been teleported (a command, a pearl, a mod's travel ...) and is held at the destination. Package-private with
+     * {@code eligible} so the selftest can drive it with stand-ins.
+     */
+    static boolean watchJump(ServerPlayer p, boolean eligible) {
+        Vec3 pos = p.position();
+        Vec3 last = LAST.put(p.getUUID(), pos);
+        if (last == null || !eligible || isHeld(p) || !ARRIVAL) return false;
+        double d2 = last.distanceToSqr(pos);
+        if (d2 <= JUMP_BLOCKS * JUMP_BLOCKS) {
+            WHY.remove(p.getUUID());
+            return false;
+        }
+        String why = WHY.remove(p.getUUID());
+        String reason = (why == null ? "jump" : why) + " " + (int) Math.sqrt(d2) + " blocks";
+        return p instanceof FakePlayer ? arriveForTests(p, reason) : arrive(p, reason);
+    }
+
+    /** The kind of teleport, remembered for the hold the jump check is about to make. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onTeleportReason(EntityTeleportEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || isHeld(p)) return;
+        String why = event instanceof EntityTeleportEvent.EnderPearl ? "ender pearl"
+                : event instanceof EntityTeleportEvent.ItemConsumption ? "chorus fruit"
+                : event instanceof EntityTeleportEvent.TeleportCommand ? "teleport command"
+                : event instanceof EntityTeleportEvent.SpreadPlayersCommand ? "spreadplayers"
+                : "teleport";
+        WHY.put(p.getUUID(), why);
+    }
+
+    /** Another dimension: the destination may not be loaded at all. Held there. */
+    @SubscribeEvent
+    public static void onDimensionChanged(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        LAST.remove(p.getUUID());
+        arrive(p, "dimension " + event.getTo().identifier());
+    }
+
+    /**
+     * A respawn (after death, or the return from the End): the mod's own respawn placement (nearest town, bed) runs first
+     * at normal priority, so the hold is made where they end up.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
+        LAST.remove(p.getUUID());
+        arrive(p, event.isEndConquered() ? "return from the End" : "respawn");
     }
 
     // ------------------------------------------------------------------ events: what a held player cannot do or be

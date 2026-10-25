@@ -23,16 +23,19 @@ public final class HoldPackets {
 
     /**
      * Server to client: "you are held" ({@code held}) or "you are released" (the client may close its loading screen).
-     * {@code token} names this hold; the client echoes it in {@link Ready}.
+     * {@code token} names this hold; the client echoes it in {@link Ready}. {@code reason} is "login" or why a player in
+     * play is held again on arriving somewhere (a teleport, a dimension change, a respawn, a jump): the client shows its
+     * loading screen only if the arrival is not ready within a moment, so a warm arrival stays instant.
      */
-    public record Held(boolean held, long token) {
+    public record Held(boolean held, long token, String reason) {
         static void encode(Held m, RegistryFriendlyByteBuf b) {
             b.writeBoolean(m.held);
             b.writeVarLong(m.token);
+            b.writeUtf(m.reason, 64);
         }
 
         static Held decode(RegistryFriendlyByteBuf b) {
-            return new Held(b.readBoolean(), b.readVarLong());
+            return new Held(b.readBoolean(), b.readVarLong(), b.readUtf(64));
         }
 
         static void handle(Held m, IPayloadContext ctx) {
