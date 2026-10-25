@@ -42,6 +42,8 @@ final class AtlasGenNative {
     private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown, fingerprintParts, paceBoost;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
+    // the chunks the integrated server waits for, first in the store's stages (atlas_gen_store_prioritize; null in an older library)
+    private final MethodHandle storePrioritize;
     /** Columns of a far tile (atlas_gen_tiles). */
     static final int TILE_COLS = 65536;
     /** Words per probe (atlas_gen_probe). */
@@ -113,6 +115,8 @@ final class AtlasGenNative {
         runStore = st ? bind(l, lib, "atlas_gen_run_store", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS,
                 ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
         storeKeep = st ? bind(l, lib, "atlas_gen_store_keep", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT)) : null;
+        storePrioritize = st && lib.find("atlas_gen_store_prioritize").isPresent()
+                ? bind(l, lib, "atlas_gen_store_prioritize", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         storeStats = st ? bind(l, lib, "atlas_gen_store_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS)) : null;
         boolean fa = lib.find("atlas_feat_attach").isPresent();
         featAttach = fa ? bind(l, lib, "atlas_feat_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT,
@@ -825,6 +829,18 @@ final class AtlasGenNative {
                 if (info != null) MemorySegment.copy(inf, JAVA_INT, 0, info, 0, m * INFO_WORDS);
                 if (times != null && times.length > 0) times[0] = Times.of(t);
                 return m;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The chunks the server waits for (pairs): their stages and neighbourhoods run first. False in a library without it. */
+        boolean storePrioritize(int[] chunkXZ) {
+            if (storePrioritize == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment xz = chunkXZ.length == 0 ? MemorySegment.NULL : a.allocateFrom(JAVA_INT, chunkXZ);
+                check((int) storePrioritize.invokeExact(ptr, xz, chunkXZ.length / 2), "atlas_gen_store_prioritize");
+                return true;
             } catch (Throwable t) {
                 throw rethrow(t);
             }

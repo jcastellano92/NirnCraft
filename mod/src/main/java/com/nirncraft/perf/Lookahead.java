@@ -29,7 +29,7 @@ public final class Lookahead {
 
     static void refresh(ServerPlayer p) {
         ServerLevel level = p.level();
-        int view = Math.max(2, level.getServer().getPlayerList().getViewDistance());
+        int view = Math.max(2, com.nirncraft.atlas.server.AtlasServerCap.viewDistance(level.getServer()));
         double yaw = Math.toRadians(p.getYRot());
         ChunkPos c = p.chunkPosition();
         int added = cone(level, c, -Math.sin(yaw), Math.cos(yaw), Math.min(view, 8), 0);

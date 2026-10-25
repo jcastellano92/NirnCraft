@@ -697,6 +697,10 @@ typedef struct AtlasSurfaceCard {
 ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
+/* Tests only: level 0's block ids as the GPU holds them (the collision-agreement walk). xyz: count block positions (x, y, z
+   each); out: count words, the 16-bit block id (the near materials the sections carry), 0xFFFE where level 0 holds nothing
+   (outside its window, or a chunk not loaded). Waits for the GPU; slow (two submissions): a handful of positions a call. */
+ATLAS_API AtlasStatus atlas_debug_read_blocks(AtlasContext* ctx, const int32_t* xyz, uint32_t count, uint32_t* out);
 /*
  * (abi 0.10) Refinement fades: a region rebuilt over a resident one (an exact tile replacing the raster stand-in,
  * buildings or landmarks arriving on a tile, a finer LOD entering the window over the coarser one) dissolves from what
@@ -1209,6 +1213,9 @@ ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, 
 ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count);
 /* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
+/* The chunks the integrated server waits for (replaces the last set; count 0: none): every call's stages run for them, and for the
+   chunks their stages read, before the others, and the missing chunks of their neighbourhoods are made first. */
+ATLAS_API AtlasStatus atlas_gen_store_prioritize(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */
 ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t minCz, int32_t maxCx, int32_t maxCz);
 /* held: chunks in the store; waiting: asked for (atlas_gen_run_store), not yet through every stage; ready: through every

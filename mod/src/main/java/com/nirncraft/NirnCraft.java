@@ -107,6 +107,7 @@ public class NirnCraft {
         SkyNetwork.init(modBus);
         // atlas: the native far field (server tile stream + far actors; the client renderer on clients)
         com.nirncraft.atlas.AtlasServer.init();
+        com.nirncraft.atlas.server.AtlasChunkGenerator.init(modBus);
         com.nirncraft.platform.Sides.runOn(net.neoforged.api.distmarker.Dist.CLIENT,
                 () -> () -> com.nirncraft.atlas.AtlasClient.init(modBus));
     }

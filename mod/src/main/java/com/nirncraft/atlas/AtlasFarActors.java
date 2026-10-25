@@ -44,7 +44,7 @@ final class AtlasFarActors {
         List<Entity> candidates = new ArrayList<>();
         for (Entity e : level.getAllEntities())
             if (e.isAlive() && !e.isInvisible() && kind(e) >= 0) candidates.add(e);
-        double view = server.getPlayerList().getViewDistance() * 16.0;
+        double view = com.nirncraft.atlas.server.AtlasServerCap.viewDistance(server) * 16.0;
         for (ServerPlayer p : players) {
             List<double[]> near = new ArrayList<>();  // {distance, index}
             for (int i = 0; i < candidates.size(); i++) {

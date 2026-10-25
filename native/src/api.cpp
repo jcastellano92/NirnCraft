@@ -1957,6 +1957,30 @@ ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t
     ATLAS_CATCH(ctx)
 }
 
+ATLAS_API AtlasStatus atlas_debug_read_blocks(AtlasContext* ctx, const int32_t* xyz, uint32_t count, uint32_t* out) {
+    if (!ctx || !xyz || !out || !count || count > 4096) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    std::vector<uint32_t> chunk, local, at;
+    for (uint32_t i = 0; i < count; i++) {
+        out[i] = 0xFFFEu;
+        uint32_t c, l;
+        if (!ctx->voxgrid.locate(xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2], c, l)) continue;
+        chunk.push_back(c);
+        local.push_back(l);
+        at.push_back(i);
+    }
+    if (chunk.empty()) return ATLAS_OK;
+    std::vector<uint32_t> ids;
+    std::string err;
+    if (!ctx->backend->readVoxels(chunk, local, ids, err)) return backendFailure(ctx, err.empty() ? "no readback" : err, ATLAS_ERR_STATE);
+    for (size_t j = 0; j < at.size(); j++) out[at[j]] = ids[j];
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_set_light_group(AtlasContext* ctx, uint32_t group, const AtlasLight* lights, uint32_t count) {
     if (!ctx || (!lights && count)) return ATLAS_ERR_ARG;
     if (count > 1u << 20) return ctx->fail(ATLAS_ERR_ARG, "light group too large");
