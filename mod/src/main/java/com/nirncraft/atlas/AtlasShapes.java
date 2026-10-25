@@ -157,7 +157,7 @@ final class AtlasShapes {
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
         // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
         // (and a plain cube with see-through texels: a copper grate, mangrove roots, a cut-out cube's holes)
-        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes) || holedCube(quads, faces);
+        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes) || !st.isSolidRender() && holedCube(quads, faces);  // (a full opaque cube never gets holes)
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 
@@ -180,10 +180,13 @@ final class AtlasShapes {
     static int[] face(BlockState st, Direction d, List<BakedQuad> quads, int tint, int TILE) {
         int sub = Math.max(1, 16 / TILE);  // samples a texel side: a 4x4 tile averages 4x4 of the 16x16 sprite
         int[] tile = new int[TILE * TILE];
-        float[] depth = new float[TILE * TILE];
-        java.util.Arrays.fill(depth, Float.NEGATIVE_INFINITY);
-        for (BakedQuad q : quads) {
-            if (q.direction() != d) continue;
+        // the quads facing d, innermost first: each is laid over what is under it by its own coverage (a grass block's
+        // overlay quad over its dirt side: where the overlay is half there, half of the dirt shows, and the texel stays
+        // opaque; replacing it left the texel half transparent and made a full cube a cut-out with holes)
+        List<BakedQuad> ordered = new ArrayList<>();
+        for (BakedQuad q : quads) if (q.direction() == d) ordered.add(q);
+        ordered.sort(java.util.Comparator.comparingDouble(q -> quadDepth(d, q)));
+        for (BakedQuad q : ordered) {
             TextureAtlasSprite sp = q.materialInfo().sprite();
             NativeImage img;
             try {
@@ -196,7 +199,7 @@ final class AtlasShapes {
             boolean tinted = qt >= 0;
             int fw = sp.contents().width(), fh = sp.contents().height();
             // the quad's extent in the face plane and its depth along d
-            float a0 = Float.MAX_VALUE, a1 = -Float.MAX_VALUE, b0 = Float.MAX_VALUE, b1 = -Float.MAX_VALUE, dep = 0;
+            float a0 = Float.MAX_VALUE, a1 = -Float.MAX_VALUE, b0 = Float.MAX_VALUE, b1 = -Float.MAX_VALUE;
             float[] pa = new float[4], pb = new float[4], pu = new float[4], pv = new float[4];
             for (int i = 0; i < 4; i++) {
                 Vector3fc p = q.position(i);
@@ -207,7 +210,6 @@ final class AtlasShapes {
                 a1 = Math.max(a1, ab[0]);
                 b0 = Math.min(b0, ab[1]);
                 b1 = Math.max(b1, ab[1]);
-                dep += ab[2] / 4f;
                 long uv = q.packedUV(i);
                 pu[i] = (UVPair.unpackU(uv) - sp.getU0()) / (sp.getU1() - sp.getU0());
                 pv[i] = (UVPair.unpackV(uv) - sp.getV0()) / (sp.getV1() - sp.getV0());
@@ -220,7 +222,7 @@ final class AtlasShapes {
                     int k = tu + TILE * tv;
                     float ca = (tu + 0.5f) / TILE, cb = 1f - (tv + 0.5f) / TILE;  // tile v down = plane b down
                     if (d.getAxis() == Direction.Axis.Y) cb = (tv + 0.5f) / TILE;  // up/down: b is z, v grows with z
-                    if (ca < a0 || ca > a1 || cb < b0 || cb > b1 || dep < depth[k]) continue;
+                    if (ca < a0 || ca > a1 || cb < b0 || cb > b1) continue;
                     double sr = 0, sg = 0, sb = 0, sa = 0;
                     int n = 0;
                     for (int sy = 0; sy < sub; sy++)
@@ -240,17 +242,30 @@ final class AtlasShapes {
                             sa += 1;
                         }
                     if (sa == 0) continue;  // the quad is see-through here: what is behind it shows
-                    depth[k] = dep;
                     if (tinted) {
                         sr *= ((qt >> 16) & 255) / 255.0;
                         sg *= ((qt >> 8) & 255) / 255.0;
                         sb *= (qt & 255) / 255.0;
                     }
-                    tile[k] = (int) Math.round(255.0 * sa / n) << 24 | (int) Math.round(sr / sa) << 16 | (int) Math.round(sg / sa) << 8
-                            | (int) Math.round(sb / sa);
+                    double cov = sa / n, under = (tile[k] >>> 24) / 255.0 * (1 - cov), a = cov + under;  // (over the texel so far)
+                    int prev = tile[k];
+                    int r = (int) Math.round((sr / sa * cov + ((prev >> 16) & 255) * under) / a);
+                    int g = (int) Math.round((sg / sa * cov + ((prev >> 8) & 255) * under) / a);
+                    int b = (int) Math.round((sb / sa * cov + (prev & 255) * under) / a);
+                    tile[k] = (int) Math.round(255.0 * a) << 24 | r << 16 | g << 8 | b;
                 }
         }
         return tile;
+    }
+
+    /** How far out along d a quad lies (the mean of its corners' depth: plane()). */
+    private static double quadDepth(Direction d, BakedQuad q) {
+        double dep = 0;
+        for (int i = 0; i < 4; i++) {
+            Vector3fc p = q.position(i);
+            dep += plane(d, p.x(), p.y(), p.z())[2] / 4.0;
+        }
+        return dep;
     }
 
     /** The near field's texture size per face (atlas_set_material_textures). */

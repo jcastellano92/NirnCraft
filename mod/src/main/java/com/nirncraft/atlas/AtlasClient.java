@@ -984,6 +984,29 @@ public final class AtlasClient {
         }
     }
 
+    /**
+     * What atlas makes of one block state (the gallery's "describe" op): its model's quads and parts, whether the near
+     * feed keeps it and under which id, its shape and its brick. One line.
+     */
+    public static String describeState(net.minecraft.world.level.block.state.BlockState s) {
+        StringBuilder b = new StringBuilder(net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(s));
+        try {
+            var quads = AtlasShapes.quads(s);
+            b.append(" render=").append(s.getRenderShape()).append(" quads=").append(quads.size()).append(" parts=").append(AtlasShapes.parts(s).size())
+                    .append(" solid=").append(s.isSolidRender()).append(" brickable=").append(AtlasShapes.brickable(s, quads))
+                    .append(" kept=").append(AtlasSections.kept(s)).append(" nearKept=").append(AtlasClientSections.nearKept(s))
+                    .append(" nearId=").append(AtlasClientSections.nearIdOf(s)).append(" ownId=").append(net.minecraft.world.level.block.Block.getId(s));
+            var sh = AtlasShapes.of(s, -1);
+            b.append(" shape=").append(sh == null ? "none" : Long.toHexString(sh.occupancy()) + (sh.flags() != 0 ? "+cutout" : ""));
+            var br = AtlasShapes.brick(s, -1);
+            b.append(" brick=").append(br == null ? "none" : br.quads().size() + "q");
+            b.append(" fluid=").append(!s.getFluidState().isEmpty()).append(" offset=").append(AtlasShapes.offsetWord(s));
+        } catch (RuntimeException e) {
+            b.append(" ERROR ").append(e);
+        }
+        return b.toString();
+    }
+
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;

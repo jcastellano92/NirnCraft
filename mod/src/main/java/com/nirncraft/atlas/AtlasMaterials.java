@@ -250,6 +250,7 @@ final class AtlasMaterials {
             brick = null;  // a model that cannot say: its shape then
         }
         pendingExactBricks.add(brick);
+        if (brick != null) exactBricks++;
         pendingExactOffsets.add(AtlasShapes.offsetWord(s));
         short id = (short) nextExact++;
         exact.put(key, id);
@@ -262,6 +263,7 @@ final class AtlasMaterials {
     private final Map<Integer, List<int[]>> byState = new HashMap<>();
     private final List<Integer> tintPalette = new ArrayList<>();
     private long exactFull;
+    private int exactBricks;  // the exact materials that carry a brick (a non-cube block's micro-voxels)
     /** Distinct biome tints the exact materials take (the rest snap to the nearest): bounds tinted ids per state. */
     static final int TINT_PALETTE = 40;
     /** A biome tint within this much a channel of one in use is that one. */
@@ -307,7 +309,7 @@ final class AtlasMaterials {
 
     /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
     synchronized String state() {
-        return "exactIds{used=" + (nextExact - EXACT_FIRST) + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
+        return "exactIds{used=" + (nextExact - EXACT_FIRST) + " bricks=" + exactBricks + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
                 + " fullLookups=" + exactFull + " palette=" + (next - FIRST) + "/" + (LAST - FIRST + 1) + " paletteFull=" + paletteFull + "}";
     }
 

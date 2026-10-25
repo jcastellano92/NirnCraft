@@ -287,10 +287,14 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
         steps += [{"op": "goto", "at": [ox, oy + 6, oz], "wait": 30},
                   {"op": "place", "items": [dict(zip("xyz", cell(i)), state=gr["state"], w=3, d=3) for i, gr in enumerate(batch)],
                    "wait": 60}]
+        steps.append({"op": "describe", "name": f"b{b:03d}", "states": [gr["state"] for gr in batch]})
         settle = getattr(a, "gallery_settle", 0) or 3
         cells = [(gr, cell(i)) for i, gr in enumerate(batch)]
         for mode in ("vanilla", "atlas"):
             steps.append({"op": "mode", "name": mode, "wait": 100})
+            if mode == "atlas":  # (what was placed is up in atlas: nothing pending, the grid's counters still)
+                steps.append({"op": "settle", "max": 900, "min": 40})
+                steps.append({"op": "info", "name": f"b{b:03d}-atlas"})
             steps += shots_for(cells, mode, settle)
         steps.append({"op": "mode", "name": "atlas", "wait": 1})
         receipt = run_script(g, f"batch{b}", steps, out, timeout=2400)
@@ -679,6 +683,10 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
                 src = od / m / f"{r['id']}__{tag}__c.png"
                 if src.exists():
                     shutil.copy2(src, fail_dir / f"{r['id']}__{m}__{tag}.png")
+    infos = folder / "info"
+    for f in list(work.glob("b*/*.info.txt")) + list(work.glob("b*/*.describe.txt")):  # (atlas's own report at each batch's shots: kept, small)
+        infos.mkdir(exist_ok=True)
+        shutil.copy2(f, infos / f"{f.parent.name}-{f.name}")
     shutil.rmtree(work, ignore_errors=True)
     if RESUME["dir"]:
         shutil.rmtree(RESUME["dir"], ignore_errors=True)
@@ -756,6 +764,7 @@ def sweep_rows(g, groups, work, a, say=print):
             look = [cx + 0.5, oy + 0.5, cz + 0.5]
             steps.append({"op": "goto", "at": [eyep[0], eyep[1] - 1.62, eyep[2]], "wait": 20})
             steps.append({"op": "settle", "max": 1800, "min": 60})
+            steps.append({"op": "info", "name": f"d{dist}"})
             steps.append({"op": "shot", "name": f"d{dist}/all", "eye": eyep, "look": look, "settle": 20,
                           "targets": [{"name": gr["id"], "quad": quad(c), "at": [c[0] + 8.5, oy + 1, c[2] + 8.5], "half": 8}
                                       for gr, c in fields]})

@@ -269,6 +269,34 @@ final class AtlasGallery {
                         + (current.has("min") ? current.get("min").getAsInt() : 40));
                 idx++;
             }
+            case "info" -> {  // atlas's own report at this moment (the grid's coverage per level among it), to <name>.info.txt
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".info.txt"), com.nirncraft.atlas.AtlasClient.debugInfo());
+                } catch (java.io.IOException | RuntimeException e) {
+                    NirnCraft.LOGGER.warn("gallery info failed", e);
+                }
+                idx++;
+            }
+            case "describe" -> {  // what atlas makes of each listed state, to <name>.describe.txt
+                var out = new StringBuilder();
+                var reg = mc.level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BLOCK);
+                for (JsonElement e : current.getAsJsonArray("states")) {
+                    try {
+                        var st = net.minecraft.commands.arguments.blocks.BlockStateParser.parseForBlock(reg, e.getAsString(), false).blockState();
+                        out.append(com.nirncraft.atlas.AtlasClient.describeState(st)).append('
+');
+                    } catch (Exception ex) {
+                        out.append(e.getAsString()).append(" ERROR ").append(ex).append('
+');
+                    }
+                }
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".describe.txt"), out.toString());
+                } catch (java.io.IOException ex) {
+                    NirnCraft.LOGGER.warn("gallery describe failed", ex);
+                }
+                idx++;
+            }
             case "mode" -> {
                 boolean atlas = current.get("name").getAsString().equals("atlas");
                 // vanilla's raster alone: atlas neither owns the terrain nor draws a far field; atlas: the unified field
