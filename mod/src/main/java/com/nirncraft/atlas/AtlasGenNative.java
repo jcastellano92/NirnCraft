@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake, subStats;
     // the whole-map coarse bake (atlas_gen_bake_*, atlas_gen_far_known; AtlasCoarseBake): null in a library without them
     private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown, fingerprintParts, paceBoost;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
@@ -91,6 +91,8 @@ final class AtlasGenNative {
                 ? bind(l, lib, "atlas_gen_coarse_room", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         paceStats = lib.find("atlas_gen_pace_stats").isPresent()
                 ? bind(l, lib, "atlas_gen_pace_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        subStats = lib.find("atlas_gen_sub_stats").isPresent()
+                ? bind(l, lib, "atlas_gen_sub_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT)) : null;
         noBake = lib.find("atlas_gen_set_no_bake").isPresent()
                 ? bind(l, lib, "atlas_gen_set_no_bake", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         regenerate = lib.find("atlas_gen_regenerate").isPresent()
@@ -400,6 +402,22 @@ final class AtlasGenNative {
                         s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 112), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
                         s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.getString(64), s.get(JAVA_DOUBLE, 120), s.getString(128),
                         s.get(JAVA_LONG, 56));
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The generator's submissions by what they held (atlas_gen_sub_stats): count, mean, longest GPU ms and how many ran over
+         * 4, 8 and 16 ms, per phase class, since the last reset (reset: the counts start again). Answers while a batch runs
+         * (its own lock). Null with an older library.
+         */
+        String subLine(boolean reset) {
+            if (subStats == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment buf = a.allocate(4096);
+                int n = (int) subStats.invokeExact(ptr, buf, 4096, reset ? 1 : 0);
+                return n <= 0 ? null : buf.getString(0);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

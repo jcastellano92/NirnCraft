@@ -42,13 +42,18 @@ import java.util.stream.IntStream;
 final class AtlasClientGen implements AutoCloseable {
     // flight recorder zones (AtlasRecorder): the generator thread's loop
     private volatile double[] statPage;
-    private volatile String statPaceLine, statCacheLine;
+    private volatile String statPaceLine, statCacheLine, statSubLine, statStoreLine;
 
     /** The generator thread's own reading of the native counters (their calls take the generator's lock, held a whole batch). */
     private void refreshStats() {
         try {
             if (devicePages) statPage = gen.pageStats();
             statPaceLine = gen.paceLine();
+            statSubLine = gen.subLine(false);
+            if (storeOn) {
+                int[] ss = gen.storeStats();
+                statStoreLine = ss == null || ss.length < 3 ? null : String.format("store{held %d, waiting %d, ready %d}", ss[0], ss[1], ss[2]);
+            }
             statCacheLine = gen.cacheLine();
         } catch (RuntimeException e) {
             // (the next pass)
@@ -629,6 +634,17 @@ final class AtlasClientGen implements AutoCloseable {
         return c == null ? null : new long[]{c.generatedChunks, c.cachedChunks, c.farTiles - c.farCached, c.farCached};
     }
 
+    /** The generator's submissions by phase since the last reset (AtlasLoadStats; atlas_gen_sub_stats), or null. */
+    static String subStats(boolean reset) {
+        AtlasClientGen c = active;
+        if (c == null) return null;
+        try {
+            return c.gen.subLine(reset);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     static String state() {
         AtlasClientGen c = active;
         if (c == null) return "clientGen{off}";
@@ -645,6 +661,9 @@ final class AtlasClientGen implements AutoCloseable {
         if (AtlasCoarseBake.line() != null) pagesNow += ", " + AtlasCoarseBake.line();
         String pace = c.statPaceLine;
         if (pace != null) pagesNow += ", " + pace;
+        String subs = c.statSubLine;
+        if (subs != null) pagesNow += ", " + subs;
+        if (c.statStoreLine != null) pagesNow += ", " + c.statStoreLine;
         String cache = c.statCacheLine;
         pagesNow += ", " + (cache != null ? cache : "genCache{not in this library}");
         pagesNow += String.format(", generated chunks %d (cache served %d)", c.generatedChunks, c.cachedChunks);
@@ -767,6 +786,17 @@ final class AtlasClientGen implements AutoCloseable {
                     int n = Math.min(BATCH, near.size());
                     if (n > 0) {
                         nearIdle = false;
+                        // The store keeps a patch's neighbourhood at a time (next() sends none while 64 chunks wait). The
+                        // deferred flush had no such rule: a cold window's 1793 misses went in 64 a call, past the store's 768
+                        // slots, and the store let go the farthest of the chunks still waiting for their neighbours (a chunk
+                        // lost for good: `done` held it, nothing asked again): 800 of 1793 chunks came out, the spawn area never.
+                        int[] stNow = gen.storeStats();
+                        if (stNow != null && stNow.length > 1 && stNow[1] >= 64) {
+                            long before = storeFinished;
+                            directBatch(new int[0], ids, flags, info, false);  // (what waits runs on, and comes out)
+                            if (storeFinished == before) LockSupport.parkNanos(2_000_000L);
+                            continue;
+                        }
                         int[] b = new int[n * 2];
                         for (int i = 0; i < n; i++) {
                             long k = near.get(i);
@@ -892,6 +922,26 @@ final class AtlasClientGen implements AutoCloseable {
      * of its misses (seconds a call).
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
+        long finished = storeFinished;
+        directBatchRun(batch, ids, flags, info, first, defer);
+        if (batch.length > 0 || storeFinished != finished) nearTurns++;  // (a turn at the generator: the bake waits for one)
+    }
+
+    /** Calls of the near window that did something (a batch in, or chunks out of the store): the bake's turn-taking while the screen holds. */
+    private volatile long nearTurns;
+
+    static long nearTurns() {
+        AtlasClientGen c = active;
+        return c == null ? 0 : c.nearTurns;
+    }
+
+    /** Whether the near window has nothing to make or send now (the bake need not wait for it). */
+    static boolean nearIdleNow() {
+        AtlasClientGen c = active;
+        return c == null || c.nearIdle && c.deferred.isEmpty();
+    }
+
+    private void directBatchRun(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
         if (batch.length > 0) nearWorkNs = System.nanoTime();
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before

@@ -170,7 +170,10 @@ public final class AtlasClient {
         });
         NeoForge.EVENT_BUS.addListener(AtlasCacheWipe::onCommands);  // (/nirncraft-atlas-wipecache)
         // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
-        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> {
+            AtlasLoadingScreen.arm();
+            AtlasLoadStats.joined();  // (the loading gate's clock: join to AtlasReady, atlas-load.json)
+        });
         // (a quit while the kernels compile: the player's own render distance back before the options are saved)
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.GameShuttingDownEvent e) -> reduceVanilla(Minecraft.getInstance(), false));
         // in the world while kernels still compile (the context's, or the split frames' far kernel in the background):
@@ -178,7 +181,10 @@ public final class AtlasClient {
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RenderGuiEvent.Post e) ->
                 AtlasGuard.run("atlas compile line", Z_LOADING, () -> compileLine(e.getGuiGraphics())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
-                AtlasGuard.run("atlas loading phase", Z_LOADING, () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
+                AtlasGuard.run("atlas loading phase", Z_LOADING, () -> {
+                    AtlasLoadingScreen.tick(Minecraft.getInstance());
+                    AtlasLoadStats.tick(Minecraft.getInstance());
+                }));
         // (vanilla's distance back once no build runs, whatever path the frames took: a session turned off, no pack)
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> {
             if (reducedFrom >= 0 && !buildingContext()) reduceVanilla(Minecraft.getInstance(), false);
@@ -517,6 +523,7 @@ public final class AtlasClient {
             glRenderMs += ((g1 - g0) * 1e-6 - glRenderMs) * 0.05;  // (eased: atlas-info's wall time in the call)
             if (lastFrameNs != 0) frameWallMs += ((g1 - lastFrameNs) * 1e-6 - frameWallMs) * 0.05;
             lastFrameNs = g1;
+            AtlasLoadStats.frame(g1);
             farThisFrame = true;
             nearLitThisFrame = nearLit;
             if (pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {

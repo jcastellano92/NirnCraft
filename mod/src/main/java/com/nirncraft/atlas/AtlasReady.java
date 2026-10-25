@@ -26,6 +26,26 @@ public final class AtlasReady {
         return pending().isEmpty();
     }
 
+    /** The loading screen is armed or open: the player is held (a test run in the client waits, and does not close it). */
+    public static boolean loadingScreenHeld() {
+        return AtlasLoadingScreen.holding();
+    }
+
+    /** A string that changes while the loading phase progresses ("" when it is not held): the harness fails a step whose progress stops. */
+    public static String loadingProgress() {
+        if (!AtlasLoadingScreen.holding()) return "";
+        var p = AtlasClientGen.progress();
+        var b = AtlasCoarseBake.progress();
+        var pp = AtlasClient.building();  // (the kernels compiling: minutes on a cold driver cache)
+        return "|load" + (pp == null ? "" : "p" + pp.done()) + (p == null ? "" : p.near() + "/" + p.generated() + "/" + p.cached()) + (b == null ? "" : "/" + b.done() + "/" + b.servePending());
+    }
+
+    /** The generator's submissions by phase since atlas became ready (the route's own; AtlasLoadStats reset the count), or "". */
+    public static String genSubs() {
+        String s = AtlasClientGen.subStats(false);
+        return s == null ? "" : s;
+    }
+
     /** Atlas gave up for this session (a lost device, a crash guard): there is nothing to wait for. */
     public static boolean offForSession() {
         return AtlasClient.failedForSession();

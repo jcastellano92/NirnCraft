@@ -328,6 +328,15 @@ public final class ClientAutotest {
         } catch (Exception ignored) {}
     }
 
+    /** The control file asks for the client to stop (a close does not wait for atlas's loading phase). */
+    private static boolean stopQueued() {
+        try {
+            return Files.exists(LIVE_FILE) && Files.readString(LIVE_FILE).trim().equals("stop");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private static void liveTick(Minecraft mc) {
         if(liveCastUntil>0 && tick>=liveCastUntil) {
             liveCastUntil=0;
@@ -358,7 +367,8 @@ public final class ClientAutotest {
             if (pre != null) status.addProperty("farPrebuild", pre[0] + "/" + pre[1]);
             // what advances while a step runs (the harness fails a step whose progress stops: a hang, not a slow step)
             status.addProperty("progress", liveLastAction + "|" + LIVE_ACTIONS.size() + "|" + com.nirncraft.atlas.AtlasLabExport.viewProgress
-                    + "|" + visualStable + "|" + liveSettleStable + "|" + liveSettlePartial + "|" + AtlasRoute.progress() + AtlasGallery.progress());
+                    + "|" + visualStable + "|" + liveSettleStable + "|" + liveSettlePartial + "|" + AtlasRoute.progress() + AtlasGallery.progress()
+                    + com.nirncraft.atlas.AtlasReady.loadingProgress());
             status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active() || AtlasRoute.active() || AtlasGallery.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);
@@ -371,6 +381,9 @@ public final class ClientAutotest {
                         java.nio.file.StandardCopyOption.ATOMIC_MOVE);
             } catch (Exception ignored) {}
         }
+        // atlas's loading phase holds the player (its screen is open until atlas is ready): no action runs and the screen is
+        // not closed meanwhile, so a launch is measured as a player's is (the harness waits on `progress`, which moves)
+        if (com.nirncraft.atlas.AtlasReady.loadingScreenHeld() && !stopQueued()) return;
         if (!liveStarted) {
             // The dedicated QA controller grants op after login; never silently run privileged setup before that.
             if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;

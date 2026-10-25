@@ -457,6 +457,7 @@ final class AtlasRoute {
         out.addProperty("wallMs", System.currentTimeMillis() - began);
         out.addProperty("ticks", routeTick);
         out.addProperty("excludedFrames", excludedTotal);
+        out.addProperty("subs", com.nirncraft.atlas.AtlasReady.genSubs());  // (the generator's longest submissions of the route, by phase)
         var secs = new JsonArray();
         ArrayList<Float> all = new ArrayList<>();
         for (int s = 0; s < frames.size(); s++) {

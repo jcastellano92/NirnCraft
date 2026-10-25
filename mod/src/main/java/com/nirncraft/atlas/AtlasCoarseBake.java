@@ -59,7 +59,7 @@ final class AtlasCoarseBake implements Runnable {
     private volatile int loadTotal, loadDone;              // levels 3-6: tiles planned, finished (known, made or given up)
     private volatile int servePending;                     // known tiles of the windows not in the grid yet (last pass)
     private volatile long startNs, loadedNs, windowsNs, wholeNs;  // (when: the bake began, levels 3-6 whole, their windows in the grid, level 2 whole)
-    private volatile long servedTiles, serveNs, bakeTilesLoad, bakeTilesBackground, stepNs;
+    private volatile long servedTiles, serveNs, bakeTilesLoad, bakeTilesBackground, stepNs, nearWaitNs;
     private volatile int centreX, centreZ;
 
     private AtlasCoarseBake(AtlasGenNative.Gen gen) {
@@ -138,14 +138,28 @@ final class AtlasCoarseBake implements Runnable {
 
     // ---- the loading screen's view ----
 
-    /** What the loading screen shows: phase, levels 3-6 finished / planned, known tiles of the windows still to load. */
-    record Progress(int phase, int total, int done, int servePending, boolean loaded, double seconds) {}
+    /**
+     * What the loading screen shows: phase, levels 3-6 finished / planned, known tiles of the windows still to load, and the
+     * same per level (index = level 0..7: tiles planned, tiles finished: known on disk, made or given up) and the tiles read
+     * from disk into the grid so far (served) of those known (served + servePending).
+     */
+    record Progress(int phase, int total, int done, int servePending, boolean loaded, double seconds, int[] levelTiles, int[] levelDone,
+                    long served) {}
 
     static Progress progress() {
         AtlasCoarseBake b = active;
         if (b == null) return null;
         long s = b.startNs;
-        return new Progress(b.phase, b.loadTotal, b.loadDone, b.servePending, b.loadedAndServed(), s == 0 ? 0 : (System.nanoTime() - s) / 1e9);
+        AtlasGenNative.Gen.BakeInfo i = b.info;
+        int[] lt = new int[8], ld = new int[8];
+        if (i != null) {
+            for (int k = 0; k < 8; k++) {
+                lt[k] = i.tiles()[k];
+                ld[k] = i.known()[k] + i.made()[k] + i.failed()[k];
+            }
+        }
+        return new Progress(b.phase, b.loadTotal, b.loadDone, b.servePending, b.loadedAndServed(), s == 0 ? 0 : (System.nanoTime() - s) / 1e9,
+                lt, ld, b.servedTiles);
     }
 
     /** Levels 3-6 whole (known, made or given up) and every known tile of the windows in the grid. */
@@ -159,10 +173,10 @@ final class AtlasCoarseBake implements Runnable {
         if (b == null) return null;
         AtlasGenNative.Gen.BakeInfo i = b.info;
         long s = b.startNs;
-        return String.format("bake{phase %d levels 3-6 %d/%d loaded at %.1f s, windows at %.1f s, level 2 %s, served %d tiles %.0f ms, tiles made %d+%d, failed %d, step %.0f ms, queued %d}",
+        return String.format("bake{phase %d levels 3-6 %d/%d loaded at %.1f s, windows at %.1f s, level 2 %s, served %d tiles %.0f ms, tiles made %d+%d, failed %d, step %.0f ms, waited for the near window %.0f ms, queued %d}",
                 b.phase, b.loadDone, b.loadTotal, since(s, b.loadedNs), since(s, b.windowsNs), b.wholeNs != 0 ? String.format("whole at %.1f s", since(s, b.wholeNs))
                         : b.phase >= 3 && i != null ? String.format("%d/%d tiles", i.madeTotal() + i.knownTotal(), i.total()) : "pending",
-                b.servedTiles, b.serveNs / 1e6, b.bakeTilesLoad, b.bakeTilesBackground, b.failed.size(), b.stepNs / 1e6, i == null ? 0 : i.queued());
+                b.servedTiles, b.serveNs / 1e6, b.bakeTilesLoad, b.bakeTilesBackground, b.failed.size(), b.stepNs / 1e6, b.nearWaitNs / 1e6, i == null ? 0 : i.queued());
     }
 
     private static double since(long t0, long t) {
@@ -213,6 +227,7 @@ final class AtlasCoarseBake implements Runnable {
             // (the loading screen holds the player: no frame to protect, the card is the bake's)
             boolean hold = BOOST || AtlasLoadingScreen.holding();
             if (hold != boost) gen.paceBoost(boost = hold);
+            yieldToNear();
             step(1, true);
         }
         if (boost) gen.paceBoost(false);
@@ -252,6 +267,24 @@ final class AtlasCoarseBake implements Runnable {
             if (whole && phase == 3) phase = 4;
             LockSupport.parkNanos(whole || AtlasLoadingScreen.holding() ? 20_000_000L : 5_000_000L);
         }
+    }
+
+    /**
+     * While the loading screen holds the player and the spawn area is not in, the near window has its turn between two tiles:
+     * it is what the player needs, and the generator is one engine (a tile of the bake holds it, so did a batch of the
+     * near window; with the bake unpaced the near window got the gaps between tiles, and the cache lookups before its first
+     * chunk took 30 s). The bake waits until the near thread has taken a turn since its last tile (a batch in, or chunks out
+     * of the store), or has nothing to do, at most 250 ms: both go on, the near window first. Once the spawn area is in,
+     * or after control, the bake follows its own rules (the idle time of the near window).
+     */
+    private void yieldToNear() {
+        if (!AtlasLoadingScreen.holding()) return;
+        AtlasClientGen.Progress p = AtlasClientGen.progress();
+        if (p == null || p.nearDone()) return;
+        long turns = AtlasClientGen.nearTurns(), t0 = System.nanoTime();
+        while (running && AtlasClientGen.nearTurns() == turns && !AtlasClientGen.nearIdleNow() && System.nanoTime() - t0 < 250_000_000L)
+            LockSupport.parkNanos(1_000_000L);
+        nearWaitNs += System.nanoTime() - t0;
     }
 
     /** One bake step: the next tile; a tile in a window is in the grid already (the far path put it there). */
