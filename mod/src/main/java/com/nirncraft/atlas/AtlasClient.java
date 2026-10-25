@@ -151,6 +151,7 @@ public final class AtlasClient {
                     AtlasRecorder.end(Z_PROFILE, pz, 100_000);
                 }));
         AtlasClientSections.init();
+        AtlasTextureClock.init(modBus);
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
             if (guard != null) guard.stopped();  // a clean exit is not a crash
             stop();
@@ -414,6 +415,12 @@ public final class AtlasClient {
                 com.nirncraft.NirnCraft.LOGGER.debug("atlas: sky glow not set: {}", e.toString());
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
+            applyAblate(ctx);
+            try {
+                ctx.setTextureTicks((int) AtlasTextureClock.ticks());  // (animated bricks: the frame vanilla shows)
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.debug("atlas: texture ticks not set: {}", e.toString());
+            }
             if (AtlasNearPass.owns()) {
                 // the near pass's temporal resolve: atlas samples the same sub-pixel point as our G-buffer (in its pixels)
                 float sc = (float) farScaleX();
@@ -1012,6 +1019,64 @@ public final class AtlasClient {
         }
     }
 
+    /**
+     * What atlas makes of one block state (the gallery's "describe" op): its model's quads and parts, whether the near
+     * feed keeps it and under which id, its shape and its brick. One line.
+     */
+    public static String describeState(net.minecraft.world.level.block.state.BlockState s) {
+        StringBuilder b = new StringBuilder(net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(s));
+        try {
+            var quads = AtlasShapes.quads(s);
+            b.append(" render=").append(s.getRenderShape()).append(" quads=").append(quads.size()).append(" parts=").append(AtlasShapes.parts(s).size())
+                    .append(" solid=").append(s.isSolidRender()).append(" brickable=").append(AtlasShapes.brickable(s, quads))
+                    .append(" kept=").append(AtlasSections.kept(s)).append(" nearKept=").append(AtlasClientSections.nearKept(s))
+                    .append(" nearId=").append(AtlasClientSections.nearIdOf(s)).append(" ownId=").append(net.minecraft.world.level.block.Block.getId(s));
+            var sh = AtlasShapes.of(s, -1);
+            b.append(" shape=").append(sh == null ? "none" : Long.toHexString(sh.occupancy()) + (sh.flags() != 0 ? "+cutout" : ""));
+            var br = AtlasShapes.brick(s, -1);
+            b.append(" brick=").append(br == null ? "none" : br.quads().size() + "q");
+            b.append(" fluid=").append(!s.getFluidState().isEmpty()).append(" offset=").append(AtlasShapes.offsetWord(s));
+        } catch (RuntimeException e) {
+            b.append(" ERROR ").append(e);
+        }
+        return b.toString();
+    }
+
+    /**
+     * Whether the core holds this block as the client has it: true for air and for a block atlas does not keep
+     * (nearId 0), else the core's material there is not air. Render thread (the gallery's "await").
+     */
+    public static boolean coreHolds(int x, int y, int z) {
+        var mc = Minecraft.getInstance();
+        var s = mc.level == null ? null : mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z));
+        if (s == null || s.isAir() || AtlasClientSections.nearIdOf(s) == 0) return true;
+        var c = ctx;
+        if (c == null) return true;
+        short[] ids = c.debugSection(x >> 4, y >> 4, z >> 4);
+        return ids == null || ids[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] != 0;
+    }
+
+    /**
+     * One block as the three layers have it (the gallery's "probe" op): the client's state, the near id the feed would
+     * give it, and the material the core holds there now.
+     */
+    public static String probeBlock(int x, int y, int z) {
+        var mc = Minecraft.getInstance();
+        var s = mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z));
+        StringBuilder b = new StringBuilder(x + " " + y + " " + z + " client=" + net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(s));
+        b.append(" nearId=").append(AtlasClientSections.nearIdOf(s));
+        var c = ctx;
+        if (c != null) {
+            short[] ids = c.debugSection(x >> 4, y >> 4, z >> 4);
+            int m = ids == null ? -1 : ids[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] & 0xFFFF;
+            b.append(" core=").append(m).append(' ').append(materials != null && m > 0 ? materials.whoIs(m) : "");
+            int[] dm = m > 0 ? c.debugMaterial(m) : null;
+            if (dm != null) b.append(" tables{brick=").append(Integer.toHexString(dm[0])).append(" tex=").append(dm[1]).append(" cls=").append(dm[2]).append(" bricks=").append(dm[4]).append('/').append(dm[5]).append('}');
+        }
+        b.append(" chunk=").append(AtlasClientSections.chunkFlags(x >> 4, z >> 4));
+        return b.toString();
+    }
+
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;
@@ -1034,7 +1099,23 @@ public final class AtlasClient {
         return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " core=" + core + " " + AtlasRecorder.state();
     }
 
+    private static int ablateSet = 0;
+
+    /** (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE) */
+    private static void applyAblate(AtlasNative.Context ctx) {
+        int ab = Integer.getInteger("nirncraft.atlas.ablate", 0);
+        if (ab != ablateSet) {
+            ablateSet = ab;
+            try {
+                ctx.debugAblate(ab);
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.debug("atlas: ablate not set: {}", e.toString());
+            }
+        }
+    }
+
     private static void jitter(AtlasNative.Context ctx, boolean on) {
+        // (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE)
         try {
             if (on) {
                 // the offset the pack's vertices took this frame (the index published last frame), in atlas pixels

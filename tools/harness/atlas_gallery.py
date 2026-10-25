@@ -17,6 +17,8 @@ import fnmatch
 import hashlib
 import json
 import math
+import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -83,7 +85,9 @@ def run(runner, s, v, fp):
     first = len(list(work.glob("b*")))
     g.ensure_visible()
     setup = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear", "weather-off on",
-             "try nirncraft-weather set-all clear 120"]
+             "try nirncraft-weather set-all clear 120",
+             # (no random ticks: a crop grew or a sapling, cocoa or wheat on the stone floor was gone from one shot to the next)
+             "try gamerule random_tick_speed 0", "try gamerule randomTickSpeed 0"]
     ox, oy, oz = ORIGIN
     half = (COLS // 2) * SPACING + 8
     try:
@@ -284,13 +288,22 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
         steps = []
         if b == 0:
             steps.append({"op": "window", "w": WINDOW[0], "h": WINDOW[1]})
+        if os.environ.get("NIRNCRAFT_GALLERY_ABLATE"):  # (a measurement: bits into the core's ATLAS_ABLATE switches)
+            steps.append({"op": "prop", "name": "nirncraft.atlas.ablate", "value": os.environ["NIRNCRAFT_GALLERY_ABLATE"]})
         steps += [{"op": "goto", "at": [ox, oy + 6, oz], "wait": 30},
                   {"op": "place", "items": [dict(zip("xyz", cell(i)), state=gr["state"], w=3, d=3) for i, gr in enumerate(batch)],
                    "wait": 60}]
+        steps.append({"op": "describe", "name": f"b{b:03d}", "states": [gr["state"] for gr in batch]})
         settle = getattr(a, "gallery_settle", 0) or 3
         cells = [(gr, cell(i)) for i, gr in enumerate(batch)]
         for mode in ("vanilla", "atlas"):
             steps.append({"op": "mode", "name": mode, "wait": 100})
+            if mode == "atlas":  # (what was placed is up in atlas: nothing pending, the grid's counters still)
+                steps.append({"op": "await", "max": 1200, "blocks": [list(cell(i)) for i in range(len(batch))]})
+                steps.append({"op": "settle", "max": 900, "min": 40})
+                steps.append({"op": "info", "name": f"b{b:03d}-atlas"})
+                steps.append({"op": "probe", "name": f"b{b:03d}-atlas",
+                              "blocks": [list(cell(i)) for i in range(len(batch))] + [[cell(i)[0], cell(i)[1] - 1, cell(i)[2]] for i in range(len(batch))]})
             steps += shots_for(cells, mode, settle)
         steps.append({"op": "mode", "name": "atlas", "wait": 1})
         receipt = run_script(g, f"batch{b}", steps, out, timeout=2400)
@@ -306,10 +319,24 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
                 steps += [{"op": "mode", "name": mode, "wait": 120}] + shots_for(again, mode, settle + 2)
             steps.append({"op": "mode", "name": "atlas", "wait": 1})
             run_script(g, f"batch{b}-again{attempt}", steps, out, timeout=1800)
+        probes = []
+        try:
+            probes = (out / f"b{b:03d}-atlas.probe.txt").read_text(encoding="utf-8").splitlines()
+        except OSError:
+            pass
         for i, gr in enumerate(batch):
             row = measure_pair(out, gr)
+            if i < len(probes):
+                row["probe"] = probes[i]
+                if len(probes) >= 2 * len(batch):
+                    row["probeFloor"] = probes[len(batch) + i]
+                m = re.search(r" core=(\d+) ", probes[i])
+                if m and int(m.group(1)) == 0 and " client=minecraft:air" not in probes[i]:
+                    row["notInCore"] = True
+                    judge(row)
             row["dir"] = str(out)
             row["class"] = gr.get("class", "")
+            row["cell"] = list(cell(i))
             rows.append(row)
         if yield_check and b + 1 < nb and yield_check():
             raise Yielded(rows)
@@ -335,33 +362,219 @@ def minfilter3(a):
     return np.min([p[y:y + h, x:x + w] for y in range(3) for x in range(3)], axis=0)
 
 
-def pair_metrics(v_png, a_png):
-    v, a = Image.open(v_png), Image.open(a_png)
-    if v.size != a.size:
-        a = a.resize(v.size)
-    lv, la = lab(v), lab(a)
+def block_mean(a, k=4):
+    h, w = a.shape[:2]
+    h -= h % k
+    w -= w % k
+    return a[:h, :w].reshape(h // k, k, w // k, k, -1).mean((1, 3))
+
+
+def load_rgb(png, size=None):
+    im = Image.open(png).convert("RGB")
+    if size and im.size != size:
+        im = im.resize(size)
+    return np.asarray(im, dtype=np.float32)
+
+
+def lab_arr(rgb):
+    return lab(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)))
+
+
+# ---- the look: the tone curves between vanilla's raster and atlas's rays ---------------------------------------------
+# Atlas lights a block with a physical sun and sky and a tone map; vanilla multiplies the texture by a lightmap and a face
+# shade (top 1, north / south 0.8, east / west 0.6). The two differ by a curve per face over the whole picture (about x2 in
+# linear light on a sunlit top, compressed above; the north face, which only the sky lights, differs again), not by a
+# block's material: the same on stone, a tinted grass top, a terracotta. The gallery fits those curves from the full cubes
+# (blocks with nothing but a texture to differ in) and puts vanilla through them before it compares, so a state fails on
+# what it shows differently and the look difference is recorded once, in the report.
+CURVE_FILE = OUT / "tone-curve.json"
+CURVE_BIN = 8
+FACES = ("top", "front")   # what the 45-degree view shows of a patch (label 2, the floor and the sides, take the top's curve)
+
+
+def face_labels(row, tag, size):
+    """Per pixel of a pair's crop (size = (w, h)): 0 the patch's top, 1 its front (north) face, 2 anything else, from the shot's
+    own camera (the pose the gallery put it on, the window and the crop's rectangle the game wrote beside the picture)."""
+    out = Path(row["dir"])
+    try:
+        rec = json.loads((out / "done.json").read_text(encoding="utf-8"))
+        side = json.loads((out / "vanilla" / f"{row['id']}__{tag}.json").read_text(encoding="utf-8"))
+        rect = side["targets"]["c"]["rect"]
+        c = row["cell"]
+    except (OSError, ValueError, KeyError):
+        return np.zeros((size[1], size[0]), dtype=np.uint8)
+    e, lk = eye(c, NEAR if tag == "a2" else MID)
+    e, lk = np.array(e), np.array(lk)
+    d0 = lk - e
+    yaw = math.atan2(-d0[0], d0[2])
+    pitch = -math.atan2(d0[1], math.hypot(d0[0], d0[2]))
+    f = np.array([-math.sin(yaw) * math.cos(pitch), -math.sin(pitch), math.cos(yaw) * math.cos(pitch)])
+    r = np.array([-math.cos(yaw), 0.0, -math.sin(yaw)])
+    u = np.array([r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]])
+    th = math.tan(math.radians(rec["fov"]) / 2)
+    W, H = rec["w"], rec["h"]
+    gx = max(0, rect[0]) + (np.arange(size[0]) + 0.5) * (rect[2] / size[0] if rect[0] >= 0 else 1.0)
+    gy = max(0, rect[1]) + (np.arange(size[1]) + 0.5) * (rect[3] / size[1] if rect[1] >= 0 else 1.0)
+    sx = (gx / W) * 2 - 1
+    sy = 1 - (gy / H) * 2
+    d = (f[None, None, :] + sx[None, :, None] * th * (W / H) * r[None, None, :] + sy[:, None, None] * th * u[None, None, :])
+    x, y, z = c
+    lo, hi = np.array([x - 1.0, y, z - 1.0]), np.array([x + 2.0, y + 1.0, z + 2.0])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t1, t2 = (lo - e) / d, (hi - e) / d
+    tn = np.where(np.isfinite(t1), np.minimum(t1, t2), -np.inf)
+    tf = np.where(np.isfinite(t1), np.maximum(t1, t2), np.inf)
+    tmin, tmax = tn.max(-1), tf.min(-1)
+    axis = tn.argmax(-1)
+    lab_ = np.full(tmin.shape, 2, dtype=np.uint8)
+    hit = (tmin < tmax) & (tmax > 0)
+    lab_[hit & (axis == 1) & (d[..., 1] < 0)] = 0
+    lab_[hit & (axis == 2) & (d[..., 2] > 0)] = 1
+    return lab_
+
+
+def apply_curves(rgb, labels, curves):
+    """Vanilla's display values (0..255 a channel) as atlas's look shows them: each face's fitted tone curve, per channel."""
+    out = rgb.copy()
+    for k, name in enumerate(FACES):
+        c = curves.get(name) or curves.get("top")
+        if not c:
+            continue
+        xs, ys = c["x"], c["y"]
+        m = labels != 1 if k == 0 else labels == 1
+        mapped = np.where(rgb > xs[-1], ys[-1] + (rgb - xs[-1]), np.interp(rgb, xs, ys))
+        out = np.where(m[..., None], mapped, out)
+    return out
+
+
+def split_pits(dark, shape):
+    """A pit is a dark spot in a picture that otherwise matches: its component's ring (3 px around it) shows the block as
+    vanilla does (the shape difference there under 6). Dark where its surroundings differ too is a silhouette or a lighting
+    difference (a missing part, a shadow), not a hole. Returns (pit mask, silhouette mask)."""
+    from scipy import ndimage
+    lab_, n = ndimage.label(dark)
+    pit = np.zeros_like(dark)
+    if n == 0:
+        return pit, dark.copy()
+    for i, sl in enumerate(ndimage.find_objects(lab_), start=1):
+        y0, y1, x0, x1 = max(0, sl[0].start - 4), sl[0].stop + 4, max(0, sl[1].start - 4), sl[1].stop + 4
+        comp = lab_[y0:y1, x0:x1] == i
+        ring = ndimage.binary_dilation(comp, iterations=3) & ~comp
+        ring &= ~dark[y0:y1, x0:x1]
+        if ring.sum() >= 8 and float(shape[y0:y1, x0:x1][ring].mean()) < 6.0 and comp.sum() < 0.25 * dark.size:
+            pit[y0:y1, x0:x1] |= comp
+    return pit, dark & ~pit
+
+
+def pair_metrics(v_png, a_png, curves=None, labels=None):
+    """The pair's numbers. With `curves` (fit_curves) vanilla's pixels are first put through the look's tone curves: what is
+    left is the block's own difference, not the pipeline's (a physical sun and a tone map against vanilla's lightmap)."""
+    v = load_rgb(v_png)
+    a = load_rgb(a_png, (v.shape[1], v.shape[0]))
+    if labels is None or labels.shape != v.shape[:2]:
+        labels = None
+    if curves:
+        v = apply_curves(v, labels if labels is not None else np.zeros(v.shape[:2], dtype=np.uint8), curves)
+    lv, la = lab_arr(v), lab_arr(a)
     d = la - lv
     de = np.sqrt((d ** 2).sum(-1))
     off = np.median(d.reshape(-1, 3), axis=0)
-    shape = np.sqrt(((d - off) ** 2).sum(-1))
-    ca = la[..., 0] - off[0]
-    pit = ca < minfilter3(lv[..., 0]) - PIT_L           # darker than every vanilla pixel around it
+    # the level of each face apart (atlas lights the top by the sun, the front by the sky: no one offset is both's)
+    offmap = np.broadcast_to(off, d.shape).copy()
+    if labels is not None and labels.shape == d.shape[:2]:
+        for k in (0, 1):
+            m = labels == k if k == 1 else labels != 1
+            if m.mean() >= 0.05:
+                offmap[m] = np.median(d[m], axis=0)
+    shape = np.sqrt(((d - offmap) ** 2).sum(-1))
+    ca = la[..., 0] - offmap[..., 0]
+    dark = ca < minfilter3(lv[..., 0]) - PIT_L          # darker than every vanilla pixel around it
+    pit, sil = split_pits(dark, shape)
     bright = ca > -minfilter3(-lv[..., 0]) + PIT_L      # brighter than every vanilla pixel around it
     return {"dE": float(de.mean()), "dEp95": float(np.percentile(de, 95)), "dEshape": float(shape.mean()),
-            "offsetL": float(off[0]), "pit": float(pit.mean()), "bright": float(bright.mean()),
-            "lumaVanilla": float(lv[..., 0].mean()), "lumaAtlas": float(la[..., 0].mean()), "px": int(de.size)}
+            "offsetL": float(off[0]), "offsetFront": float(offmap[labels == 1, 0].mean()) if labels is not None and (labels == 1).any() else None, "pit": float(pit.mean()), "silhouette": float(sil.mean()), "bright": float(bright.mean()),
+            "lumaVanilla": float(lv[..., 0].mean()), "lumaAtlas": float(la[..., 0].mean()), "px": int(de.size),
+            # what is in the picture at all: the share of pixels near black in atlas and not in vanilla (a hole: nothing
+            # drawn, nothing loaded), and the spread of luminance in each (an atlas picture as flat as the stage's floor
+            # where vanilla's is not: the block is not drawn)
+            "blackAtlas": float(((a.max(-1) < 8) & (v.max(-1) >= 8)).mean()), "stdVanilla": float(lv[..., 0].std()),
+            "stdAtlas": float(la[..., 0].std())}
 
 
-def measure_pair(out, gr):
-    row = {"id": gr["id"], "block": gr["block"], "state": gr["state"], "count": gr["count"],
-           "full": gr.get("full"), "tinted": gr.get("tinted"), "emits": gr.get("emits"), "fluid": gr.get("fluid")}
-    for tag, key in (("a2", "m2"), ("b16", "m16")):
-        vp, ap = out / "vanilla" / f"{gr['id']}__{tag}__c.png", out / "atlas" / f"{gr['id']}__{tag}__c.png"
-        if vp.exists() and ap.exists():
-            row[key] = pair_metrics(vp, ap)
-        else:
-            row[key] = None
-            row.setdefault("missing", []).append(tag)
+def fit_curve(v, a, bin_w=CURVE_BIN, need=300):
+    """A monotone curve vanilla value -> atlas value: the median of atlas's values per bin of vanilla's. None when too thin."""
+    xs, ys = [0.0], [0.0]
+    for lo in range(0, 256, bin_w):
+        m = (v >= lo) & (v < lo + bin_w)
+        if m.sum() >= need:
+            xs.append(float(np.median(v[m])))
+            ys.append(float(np.median(a[m])))
+    if len(xs) < 6:
+        return None
+    ys = np.maximum.accumulate(np.array(ys))
+    return {"x": xs, "y": [float(y) for y in ys], "samples": int(v.size)}
+
+
+def fit_curves(items):
+    """items: [(vanilla png, atlas png, labels)] -> {face: curve} from 4 x 4 block means of every channel of every pair."""
+    vs, as_, ls = [], [], []
+    for vp, ap, lb in items:
+        try:
+            v = load_rgb(vp)
+            a = load_rgb(ap, (v.shape[1], v.shape[0]))
+        except OSError:
+            continue
+        bv, ba = block_mean(v), block_mean(a)
+        if lb is None or lb.shape != v.shape[:2]:
+            lb = np.zeros(v.shape[:2], dtype=np.uint8)
+        bl = lb[2::4, 2::4][:bv.shape[0], :bv.shape[1]]
+        vs.append(bv.reshape(-1, 3))
+        as_.append(ba.reshape(-1, 3))
+        ls.append(bl.reshape(-1))
+    if not vs:
+        return {}
+    v, a, lb = np.concatenate(vs), np.concatenate(as_), np.concatenate(ls)
+    out = {}
+    top = lb != 1
+    c = fit_curve(v[top].reshape(-1), a[top].reshape(-1))
+    if c:
+        out["top"] = c
+    front = lb == 1
+    c = fit_curve(v[front].reshape(-1), a[front].reshape(-1), 16, 150)
+    if c:
+        out["front"] = c
+    return out
+
+
+def tone_curves(rows, work_dirs):
+    """The curves of this run (its full cubes within reach of vanilla's look), else the last good ones, else {}."""
+    items = []
+    for r in rows:
+        m = r.get("raw2") or r.get("m2")
+        if r.get("class") == "cube" and m and m["dEshape"] <= 8.0 and r["id"] in work_dirs:
+            od = work_dirs[r["id"]]
+            for tag in ("a2", "b16"):
+                vp, ap = od / "vanilla" / f"{r['id']}__{tag}__c.png", od / "atlas" / f"{r['id']}__{tag}__c.png"
+                if vp.exists() and ap.exists():
+                    items.append((vp, ap, face_labels(r, tag, Image.open(vp).size)))
+    curves = fit_curves(items) if len(items) >= 16 else {}
+    if curves.get("top"):
+        CURVE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        CURVE_FILE.write_text(json.dumps(curves), encoding="utf-8")
+        return curves
+    if CURVE_FILE.exists():
+        try:
+            c = json.loads(CURVE_FILE.read_text(encoding="utf-8"))
+            for v in c.values():
+                v["fromFile"] = True
+            return c
+        except ValueError:
+            pass
+    return {}
+
+
+def judge(row):
+    """The row's verdict from its m2 / m16."""
     m2, m16 = row["m2"], row["m16"]
     why = []
     if row.get("missing"):
@@ -379,9 +592,62 @@ def measure_pair(out, gr):
         if abs(m["offsetL"]) > LIMITS["tone"]:
             why.append(f"{m['offsetL']:+.0f} L brighter/darker than vanilla at {d}")
     row["fails"] = why
+    # the cause the numbers point at first (the report counts them): a hole (black where vanilla draws), a block not drawn
+    # (atlas as flat as the floor where vanilla has texture), dark pits, the shape's colours, the tone alone
+    causes = []
+    for m, d in ((m2, "2 m"), (m16, "16 m")):
+        if not m:
+            continue
+        if m["blackAtlas"] > 0.05:
+            causes.append("hole")
+        if m["stdAtlas"] < 2.5 and m["stdVanilla"] > 6.0:
+            causes.append("not drawn")
+        if m["pit"] > (LIMITS["pit"] if d == "2 m" else LIMITS["pit16"]):
+            causes.append("pits")
+        if m["dEshape"] > (LIMITS["shape"] if d == "2 m" else LIMITS["shape16"]):
+            causes.append("shape")
+    if row.get("notInCore"):
+        causes.append("not in core")  # (atlas's core holds air where the client has a block: the feed lost it)
+    if tone > 1 and not causes:
+        causes.append("tone")
+    row["causes"] = sorted(set(causes))
     row["structure"], row["tone"] = round(struct, 2), round(tone, 2)
     row["score"] = struct * 10 + tone if (m2 or m16) else 999
     return row
+
+
+def measure_pair(out, gr):
+    row = {"id": gr["id"], "block": gr["block"], "state": gr["state"], "count": gr["count"],
+           "full": gr.get("full"), "tinted": gr.get("tinted"), "emits": gr.get("emits"), "fluid": gr.get("fluid")}
+    for tag, key in (("a2", "m2"), ("b16", "m16")):
+        vp, ap = out / "vanilla" / f"{gr['id']}__{tag}__c.png", out / "atlas" / f"{gr['id']}__{tag}__c.png"
+        if vp.exists() and ap.exists():
+            row[key] = pair_metrics(vp, ap)
+        else:
+            row[key] = None
+            row.setdefault("missing", []).append(tag)
+    return judge(row)
+
+
+def apply_look(rows, work_dirs):
+    """Fits the look and re-measures every pair through it. The first measurement stays in each row (raw2, raw16) and its
+    verdict in `rawFails`: the old numbers are what the gallery said before the look was taken out."""
+    for r in rows:
+        r.setdefault("raw2", r["m2"])
+        r.setdefault("raw16", r["m16"])
+        r.setdefault("rawFails", list(r["fails"]))
+    curves = tone_curves(rows, work_dirs)
+    if True:
+        for r in rows:
+            od = work_dirs[r["id"]]
+            for tag, key, raw in (("a2", "m2", "raw2"), ("b16", "m16", "raw16")):
+                vp, ap = od / "vanilla" / f"{r['id']}__{tag}__c.png", od / "atlas" / f"{r['id']}__{tag}__c.png"
+                if vp.exists() and ap.exists():
+                    r[key] = pair_metrics(vp, ap, curves, face_labels(r, tag, Image.open(vp).size))
+                else:
+                    r[key] = r[raw]
+            judge(r)
+    return curves
 
 
 def font(size):
@@ -392,16 +658,19 @@ def font(size):
         return ImageFont.load_default()
 
 
-def heat(v_png, a_png, size):
-    v, a = Image.open(v_png), Image.open(a_png).resize(Image.open(v_png).size)
-    d = lab(a) - lab(v)
+def heat(v_png, a_png, size, curves=None, labels=None):
+    v = load_rgb(v_png)
+    a = load_rgb(a_png, (v.shape[1], v.shape[0]))
+    if curves:
+        v = apply_curves(v, labels if labels is not None and labels.shape == v.shape[:2] else np.zeros(v.shape[:2], dtype=np.uint8), curves)
+    d = lab_arr(a) - lab_arr(v)
     d = np.sqrt(((d - np.median(d.reshape(-1, 3), axis=0)) ** 2).sum(-1))  # the shape difference: lighting level removed
     t = np.clip(d / 30.0, 0, 1)
     rgb = np.stack([t * 255, (1 - np.abs(t - 0.5) * 2) * 160, (1 - t) * 90], axis=-1).astype(np.uint8)
     return Image.fromarray(rgb).resize((size, size), Image.NEAREST)
 
 
-def failure_sheets(rows, work_dirs, folder, per=24, tile=200):
+def failure_sheets(rows, work_dirs, folder, per=24, tile=200, curves=None):
     """Worst first, failures only: label | vanilla 2 m | atlas 2 m | dE heat | vanilla 16 m | atlas 16 m | heat."""
     bad = sorted([r for r in rows if r["fails"]], key=lambda r: -r["score"])
     sheets = []
@@ -424,7 +693,7 @@ def failure_sheets(rows, work_dirs, folder, per=24, tile=200):
                     x = 330 + k * 3 * tile
                     img.paste(Image.open(vp).convert("RGB").resize((tile, tile), Image.NEAREST), (x, y))
                     img.paste(Image.open(ap).convert("RGB").resize((tile, tile), Image.NEAREST), (x + tile, y))
-                    img.paste(heat(vp, ap, tile), (x + 2 * tile, y))
+                    img.paste(heat(vp, ap, tile, curves, face_labels(r, tag, Image.open(vp).size) if curves else None), (x + 2 * tile, y))
         f = folder / f"failures-{p // per + 1:02d}.png"
         img.save(f)
         sheets.append(f)
@@ -435,11 +704,25 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
     import results
     work = folder / "work"
     where = {r["id"]: Path(r["dir"]) for r in rows}
-    sheets = failure_sheets(rows, where, folder)
+    curves = apply_look(rows, where)
+    sheets = failure_sheets(rows, where, folder, curves=curves)
     failing = [r for r in rows if r["fails"]]
+    raw_failing = [r for r in rows if r["rawFails"]]
     worst = sorted(failing, key=lambda r: -r["score"])[:5]
+    causes = {}
+    for r in failing:
+        for c in r.get("causes") or ["other"]:
+            causes[c] = causes.get(c, 0) + 1
+    by_class = {}
+    for r in rows:
+        k = by_class.setdefault(r.get("class", "?"), {"groups": 0, "failing": 0})
+        k["groups"] += 1
+        k["failing"] += 1 if r["fails"] else 0
+    look = {"curves": curves, "medianOffsetL2m": round(float(np.median([r["raw2"]["offsetL"] for r in rows if r["raw2"]] or [0])), 1)}
     (folder / "report.json").write_text(json.dumps({"limits": LIMITS, "pitL": PIT_L, "groups": len(rows), "failing": len(failing),
-                                                    "rows": rows}, indent=1), encoding="utf-8")
+                                                    "rawFailing": len(raw_failing), "causes": causes, "byClass": by_class, "look": look,
+                                                    "rows": rows}, indent=1),
+                                        encoding="utf-8")
     # the failures' crops stay (they are the evidence); everything else is dropped
     keep = {r["id"] for r in failing}
     fail_dir = folder / "failures"
@@ -451,6 +734,10 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
                 src = od / m / f"{r['id']}__{tag}__c.png"
                 if src.exists():
                     shutil.copy2(src, fail_dir / f"{r['id']}__{m}__{tag}.png")
+    infos = folder / "info"
+    for f in list(work.glob("b*/*.info.txt")) + list(work.glob("b*/*.describe.txt")) + list(work.glob("b*/*.probe.txt")):  # (atlas's own report at each batch's shots: kept, small)
+        infos.mkdir(exist_ok=True)
+        shutil.copy2(f, infos / f"{f.parent.name}-{f.name}")
     shutil.rmtree(work, ignore_errors=True)
     if RESUME["dir"]:
         shutil.rmtree(RESUME["dir"], ignore_errors=True)
@@ -474,7 +761,8 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
     structural = [r for r in failing if r.get("structure", 0) > 1]
     metrics = {"groups": len(rows), "failing": len(failing), "structureFailing": len(structural),
                "toneOnlyFailing": len(failing) - len(structural),
-               "medianOffsetL2m": round(float(np.median([r["m2"]["offsetL"] for r in rows if r["m2"]] or [0])), 1),
+               "medianOffsetL2m": look["medianOffsetL2m"], "rawFailing": len(raw_failing), "causes": causes, "byClass": by_class,
+               "lookCurves": {k: {"x": [round(x) for x in c["x"]], "y": [round(y) for y in c["y"]]} for k, c in curves.items()},
                "pitFailing": len([r for r in rows if any(r[k] and r[k]["pit"] > LIMITS["pit" if k == "m2" else "pit16"] for k in ("m2", "m16"))]),
                "worst": [f"{r['id']}: {'; '.join(r['fails'][:2])}" for r in worst],
                "dEmean2m": round(float(np.mean([r["m2"]["dE"] for r in rows if r["m2"]] or [0])), 2),
@@ -527,6 +815,7 @@ def sweep_rows(g, groups, work, a, say=print):
             look = [cx + 0.5, oy + 0.5, cz + 0.5]
             steps.append({"op": "goto", "at": [eyep[0], eyep[1] - 1.62, eyep[2]], "wait": 20})
             steps.append({"op": "settle", "max": 1800, "min": 60})
+            steps.append({"op": "info", "name": f"d{dist}"})
             steps.append({"op": "shot", "name": f"d{dist}/all", "eye": eyep, "look": look, "settle": 20,
                           "targets": [{"name": gr["id"], "quad": quad(c), "at": [c[0] + 8.5, oy + 1, c[2] + 8.5], "half": 8}
                                       for gr, c in fields]})

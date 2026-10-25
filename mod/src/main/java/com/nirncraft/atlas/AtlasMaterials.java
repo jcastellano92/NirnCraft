@@ -258,6 +258,12 @@ final class AtlasMaterials {
         long key = (long) sid << 32 | (q & 0xFFFFFFFFL);
         Short have = exact.get(key);
         if (have != null) return have;
+        // a state that draws nothing in vanilla (no model quads, no fluid: a wall with no post and no arms) is air: with
+        // neither shape, textures nor brick its material was a solid cube in its colour where vanilla shows the floor
+        if (s.getFluidState().isEmpty() && AtlasShapes.quads(s).isEmpty()) {
+            exact.put(key, (short) 0);
+            return 0;
+        }
         if (nextExact > EXACT_LAST) {
             // full: the same state in its nearest tint (its shape, textures and brick), else the far state's; a plain
             // block id last (a per-block material wears the first state's shape: a fence's post, one half of a plant)
@@ -283,6 +289,7 @@ final class AtlasMaterials {
             brick = null;  // a model that cannot say: its shape then
         }
         pendingExactBricks.add(brick);
+        if (brick != null) exactBricks++;
         pendingExactOffsets.add(AtlasShapes.offsetWord(s));
         short id = (short) nextExact++;
         exact.put(key, id);
@@ -295,6 +302,7 @@ final class AtlasMaterials {
     private final Map<Integer, List<int[]>> byState = new HashMap<>();
     private final List<Integer> tintPalette = new ArrayList<>();
     private long exactFull;
+    private int exactBricks;  // the exact materials that carry a brick (a non-cube block's micro-voxels)
     /** Distinct biome tints the exact materials take (the rest snap to the nearest): bounds tinted ids per state. */
     static final int TINT_PALETTE = 40;
     /** A biome tint within this much a channel of one in use is that one. */
@@ -338,9 +346,17 @@ final class AtlasMaterials {
         return (short) best[1];
     }
 
+    /** Which block state an exact (or palette) material id was handed out for (debugging: the id as the core holds it). */
+    synchronized String whoIs(int id) {
+        for (var e : exact.entrySet())
+            if ((e.getValue() & 0xFFFF) == id) return net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(Block.stateById((int) (e.getKey() >> 32))) + " tint=" + Integer.toHexString((int) (long) e.getKey());
+        for (var e : ids.entrySet()) if ((e.getValue() & 0xFFFF) == id) return "palette " + e.getKey();
+        return id == 0 ? "air" : "?";
+    }
+
     /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
     synchronized String state() {
-        return "exactIds{used=" + (nextExact - EXACT_FIRST) + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
+        return "exactIds{used=" + (nextExact - EXACT_FIRST) + " bricks=" + exactBricks + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
                 + " fullLookups=" + exactFull + " palette=" + (next - FIRST) + "/" + (LAST - FIRST + 1) + " paletteFull=" + paletteFull + "}";
     }
 

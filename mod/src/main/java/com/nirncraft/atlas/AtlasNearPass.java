@@ -434,11 +434,14 @@ public final class AtlasNearPass {
         jitterX = halton(ji, 2) - 0.5f;
         jitterY = halton(ji, 3) - 0.5f;
         Minecraft mc = Minecraft.getInstance();
+        // the sections vanilla re-meshes this frame (blocks or light changed): their chunks to atlas again. Whether or not
+        // atlas draws this frame (the gallery and a safe mode switch it off for a while): a block changed then is atlas's
+        // world all the same, and the notification is not repeated when atlas draws again
+        if (mc.level != null)
+            for (var u : mc.gameRenderer.gameRenderState().levelRenderState.sectionUpdateRenderStates)
+                AtlasClientSections.changed(net.minecraft.world.level.ChunkPos.pack(
+                        net.minecraft.core.SectionPos.x(u.sectionNode()), net.minecraft.core.SectionPos.z(u.sectionNode())));
         if (!active || mc.level == null || AtlasClient.irisPackInUse() || mc.gameRenderer.useImprovedTransparency()) return;
-        // the sections vanilla re-meshes this frame (blocks or light changed): their chunks to atlas again
-        for (var u : mc.gameRenderer.gameRenderState().levelRenderState.sectionUpdateRenderStates)
-            AtlasClientSections.changed(net.minecraft.world.level.ChunkPos.pack(
-                    net.minecraft.core.SectionPos.x(u.sectionNode()), net.minecraft.core.SectionPos.z(u.sectionNode())));
         if (!skyPassRuns(mc)) return;
         LevelRenderer lr = mc.levelRenderer;
         visible.clear();

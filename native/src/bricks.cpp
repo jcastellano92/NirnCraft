@@ -453,6 +453,14 @@ uint64_t BrickStore::revision() const {
     return revision_;
 }
 
+void BrickStore::stats(uint32_t& voxels, uint32_t& sheets, uint32_t& table) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    voxels = sheets = 0;
+    for (const auto& r : byMat_) voxels += r ? 1u : 0u;
+    for (const auto& r : cross_) sheets += r ? 1u : 0u;
+    table = uint32_t(std::max(std::max(byMat_.size(), cross_.size()), offset_.size()));
+}
+
 size_t BrickStore::bricks() const {
     std::lock_guard<std::mutex> lock(mu_);
     size_t n = 0;

@@ -158,6 +158,8 @@ struct AtlasContext {
     BrickStore bricks;
     std::vector<uint32_t> bricksPacked = std::vector<uint32_t>(1, 0u);
     uint64_t bricksRevision = 0, bricksStoreRevision = 0;
+    uint32_t textureTicks = 0;  // atlas_set_texture_ticks + 1 (0: never set: the frame's timeSec clocks the animations)
+    uint32_t ablateExtra = 0;  // atlas_debug_ablate: bits OR-ed into the measurement switches (ATLAS_ABLATE) from the host
     std::vector<uint32_t> materialLights;  // per material its light word (bricks.hpp), the last packed
     uint64_t materialLightsHash = 0;
     bool gridLights = false;  // some material emits: the grid's emitters are lights (gridLightMain)
@@ -447,6 +449,14 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         ctx->info = ctx->backend->info();
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
+        if (!ctx->info.empty() && ctx->info.back() == '}') {
+            // (abi 0.18) the bricks the context holds: materials with a voxel brick, with sheets, the table's length
+            uint32_t withBrick = 0, withCross = 0, table = 0;
+            ctx->bricks.stats(withBrick, withCross, table);
+            char bb[160];
+            std::snprintf(bb, sizeof bb, ",\"brickMats\":{\"voxels\":%u,\"sheets\":%u,\"table\":%u}", withBrick, withCross, table);
+            ctx->info.insert(ctx->info.size() - 1, bb);
+        }
         if (ctx->world.groupsWanted.load() && !ctx->info.empty() && ctx->info.back() == '}') {
             // (abi 0.14) the content-shaped groups: regions with a tree, their memory, the last update's builds
             World::GroupStats g = ctx->world.groupStats();
@@ -1279,7 +1289,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // (read every frame: a measurement interleaves its variants in one process, atlas_render nlablate=)
         const char* v = std::getenv("ATLAS_ABLATE");
-        const uint32_t ablate = v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
+        const uint32_t ablate = (v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u) | ctx->ablateExtra;
         std::memcpy(&g.jitter[3], &ablate, 4);
         // ATLAS_LOD=mode,minCos,bias (measurements): the continuous level's threshold pattern (atlas_far.slang gLodXi),
         // the grazing widening's least cos (0.5 by default: at most one level), a bias added to every ray's level
@@ -1327,6 +1337,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
+    std::memcpy(&g.weatherParams[2], &ctx->textureTicks, 4);  // (bits: atlas_bricks.slang brickOf's clock, 0 unset)
     {
         ATLAS_ZONE_MIN("api:lightControl", 50);
         lightControl(ctx, f, a, g);
@@ -2007,6 +2018,41 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
     *tier = s.raw ? 1u : s.packed ? 2u : 0u;
     if (s.raw) std::copy(s.raw->mats.begin(), s.raw->mats.end(), out);
     else if (s.packed) unpackSection(s.packed->data(), out);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_texture_ticks(AtlasContext* ctx, uint32_t ticks) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->textureTicks = ticks == 0xFFFFFFFFu ? 1u : ticks + 1u;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_debug_ablate(AtlasContext* ctx, uint32_t bits) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->ablateExtra = bits;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint32_t out[6]) {
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    // what the kernels' tables say of material `mat`: its brick word (0 none, bit 30 sheets, bit 31 frames), its texture
+    // slot (0 none), its class, the brick table's length, whether it has a voxel brick / sheets in the store
+    std::vector<uint32_t> packed;
+    uint64_t rev = 0;
+    ctx->bricks.pack(~0ull, true, ctx->materialLights, packed, rev);
+    out[0] = mat < packed[0] ? packed[1 + mat] : 0u;
+    out[1] = mat + 1 < ctx->texturesPacked.size() && mat < ctx->texturesPacked[0] ? ctx->texturesPacked[1 + mat] : 0u;
+    out[2] = mat < ctx->palette.size() ? uint32_t(ctx->palette[mat].emisClass[1]) : 255u;
+    out[3] = packed[0];
+    uint32_t v = 0, sh = 0, t = 0;
+    ctx->bricks.stats(v, sh, t);
+    out[4] = v;
+    out[5] = sh;
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

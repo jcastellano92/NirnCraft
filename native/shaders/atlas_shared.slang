@@ -61,7 +61,7 @@ struct FrameGpu {
     float4 sunDir;          // world, towards the sun; w = time in seconds
     float4 params;          // near-field end, max distance, lod bias, pixel angle (radians)
     uint4 dims;             // width, height, flags, lod count
-    float4 weatherParams;   // rain factor, 0, 0, far actor count
+    float4 weatherParams;   // rain factor, lights, z (bits) the texture ticks + 1 (0 unset: atlas_set_texture_ticks), far actor count
     LodGpu lods[MAX_LODS];
     float4 prevViewProj[4];  // last frame's camera-relative view-projection (columns), for cloud reprojection
     float4 prevCam;          // last frame's camera relative to this frame's camInt

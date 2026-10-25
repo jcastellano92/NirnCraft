@@ -172,7 +172,8 @@ final class AtlasGallery {
     // ---------------------------------------------------------------------------------------------------- script
     private static List<JsonObject> steps = new ArrayList<>();
     private static int idx, waitTicks, shots;
-    private static boolean running, stepStarted, shotArmed;
+    private static boolean running, stepStarted, shotArmed, awaiting;
+    private static int awaitSpent;
     private static int framesLeft;
     private static Path outDir;
     private static String scriptName = "";
@@ -267,6 +268,76 @@ final class AtlasGallery {
             case "settle" -> {  // atlas's own state quiet (AtlasRoute.settle): the gallery waits while it runs
                 AtlasRoute.beginSettle(mc, (current.has("max") ? current.get("max").getAsInt() : 600) + " "
                         + (current.has("min") ? current.get("min").getAsInt() : 40));
+                idx++;
+            }
+            case "info" -> {  // atlas's own report at this moment (the grid's coverage per level among it), to <name>.info.txt
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".info.txt"), com.nirncraft.atlas.AtlasClient.debugInfo());
+                } catch (java.io.IOException | RuntimeException e) {
+                    NirnCraft.LOGGER.warn("gallery info failed", e);
+                }
+                idx++;
+            }
+            case "describe" -> {  // what atlas makes of each listed state, to <name>.describe.txt
+                var out = new StringBuilder();
+                var reg = mc.level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BLOCK);
+                for (JsonElement e : current.getAsJsonArray("states")) {
+                    try {
+                        var st = net.minecraft.commands.arguments.blocks.BlockStateParser.parseForBlock(reg, e.getAsString(), false).blockState();
+                        out.append(com.nirncraft.atlas.AtlasClient.describeState(st)).append('\n');
+                    } catch (Exception ex) {
+                        out.append(e.getAsString()).append(" ERROR ").append(ex).append('\n');
+                    }
+                }
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".describe.txt"), out.toString());
+                } catch (java.io.IOException ex) {
+                    NirnCraft.LOGGER.warn("gallery describe failed", ex);
+                }
+                idx++;
+            }
+            case "await" -> {  // until the core holds every listed block as the client has it (at most `max` ticks)
+                if (!awaiting) {
+                    awaiting = true;
+                    awaitSpent = 0;
+                }
+                int unmet = 0;
+                for (JsonElement e : current.getAsJsonArray("blocks")) {
+                    var a = e.getAsJsonArray();
+                    if (!com.nirncraft.atlas.AtlasClient.coreHolds(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt())) unmet++;
+                }
+                int max = current.has("max") ? current.get("max").getAsInt() : 1200;
+                if (unmet == 0 || awaitSpent >= max) {
+                    if (unmet > 0) NirnCraft.LOGGER.warn("Autotest live: gallery await gave up after {} ticks with {} blocks not in the core", awaitSpent, unmet);
+                    else NirnCraft.LOGGER.info("Autotest live: gallery await: the core holds every block after {} ticks", awaitSpent);
+                    awaiting = false;
+                    idx++;
+                } else {
+                    awaitSpent += 10;
+                    waitTicks = 10;
+                }
+            }
+            case "prop" -> {  // a system property for a measurement (null value clears it)
+                String k = current.get("name").getAsString();
+                if (current.has("value") && !current.get("value").isJsonNull()) System.setProperty(k, current.get("value").getAsString());
+                else System.clearProperty(k);
+                idx++;
+            }
+            case "probe" -> {  // each listed block as the client, the feed and the core have it, to <name>.probe.txt
+                var out = new StringBuilder();
+                for (JsonElement e : current.getAsJsonArray("blocks")) {
+                    var a = e.getAsJsonArray();
+                    try {
+                        out.append(com.nirncraft.atlas.AtlasClient.probeBlock(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt())).append(System.lineSeparator());
+                    } catch (RuntimeException ex) {
+                        out.append("probe failed ").append(ex).append(System.lineSeparator());
+                    }
+                }
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".probe.txt"), out.toString());
+                } catch (java.io.IOException ex) {
+                    NirnCraft.LOGGER.warn("gallery probe failed", ex);
+                }
                 idx++;
             }
             case "mode" -> {

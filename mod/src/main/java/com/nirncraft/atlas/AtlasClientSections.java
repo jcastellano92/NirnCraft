@@ -261,6 +261,12 @@ final class AtlasClientSections {
 
     private static long readNs, readCount, dirtyCount;
 
+    /** Where a chunk is in the feed (debugging): queued to read, read and waiting, up, real. */
+    static String chunkFlags(int cx, int cz) {
+        long k = ChunkPos.pack(cx, cz);
+        return (QUEUED.contains(k) ? "Q" : "") + (UP.contains(k) ? "U" : "") + (REAL.contains(k) ? "R" : "");
+    }
+
     /** The feed's state for atlas-info: queued to read, read and waiting for the worker, up. */
     static String state() {
         int ready;
