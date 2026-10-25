@@ -824,7 +824,7 @@ final class AtlasClientGen implements AutoCloseable {
                         // slots, and the store let go the farthest of the chunks still waiting for their neighbours (a chunk
                         // lost for good: `done` held it, nothing asked again): 800 of 1793 chunks came out, the spawn area never.
                         int[] stNow = gen.storeStats();
-                        if (stNow != null && stNow.length > 1 && stNow[1] >= 64) {
+                        if (stNow != null && stNow.length > 1 && stNow[1] > 0) {  // (one patch in the store at a time: with 64 waiting, patches overlapped in 768 slots and none of them could take a neighbour: 112 waiting, held 768, 1221 of 1793 up and no more)
                             long before = storeFinished;
                             directBatch(new int[0], ids, flags, info, false);  // (what waits runs on, and comes out)
                             if (storeFinished == before) LockSupport.parkNanos(2_000_000L);
