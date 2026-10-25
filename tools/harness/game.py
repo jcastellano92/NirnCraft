@@ -370,6 +370,13 @@ def ensure_current():
         if running():
             close()
         shutil.copy2(NATIVE_SHIPPED, dev)
+    # The core also loads <game>/atlas-shaders/*.spv over its own kernels (the shader_watch --game dev loop,
+    # vk_backend hotReload): a folder left there makes every live run draw that day's shaders (2026-10-25: the gallery
+    # measured Oct 20's far kernel for days, no bricks in it). Moved aside for the run.
+    moved = clear_dev_shaders(GAME, running=running, close=close)
+    if moved:
+        log(f"  dev shaders moved aside to {moved.name} (they shadow the core's own kernels)")
+        tr.step("auto_dev_shaders")
     try:
         if sync_pack():
             log("  shader pack updated from its source")
@@ -512,6 +519,19 @@ def reload_resources(paths=None):
     if n and running():
         actions(["resources"], timeout=900)
     return n
+
+
+def clear_dev_shaders(game_dir, running=lambda: False, close=lambda: None):
+    """Moves <game_dir>/atlas-shaders aside (atlas-shaders.off-<stamp>) when it holds kernels: the core reads them in
+    place of its own once, at its first frame, so the client is closed first. Returns the new path, or None."""
+    d = Path(game_dir) / "atlas-shaders"
+    if not d.is_dir() or not any(d.glob("*.spv")):
+        return None
+    if running():
+        close()
+    to = d.with_name("atlas-shaders.off-" + time.strftime("%Y%m%d-%H%M%S"))
+    d.rename(to)
+    return to
 
 
 BUILD_BUSY_WAIT_S = 1200  # another build holds the lock (an agent, a hand build): wait for it, do not fail the run
