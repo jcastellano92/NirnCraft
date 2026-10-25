@@ -132,20 +132,23 @@ public final class AtlasClient {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasFallback.FEATURE,
                 () -> AtlasFallback.register(e)));
         NeoForge.EVENT_BUS.addListener(AtlasClient::afterOpaque);
+        AtlasRecorder.init();  // the flight recorder: client tick zone, /nirncraft-atlas-trace
         AtlasNearPass.init(modBus);
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.register(e)));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent e) ->
                 AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.extract(e)));
         // after atlas's frame (or its absence): our near terrain into the frame, atlas's far frame behind it
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOW,
-                (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE,
+                (RenderLevelStageEvent.AfterOpaqueBlocks e) -> AtlasGuard.run(AtlasNearPass.FEATURE, Z_COMPOSITE,
                         () -> AtlasNearPass.composite(e.getRenderPass())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
-                AtlasGuard.run("atlas client tick", () -> {
+                AtlasGuard.run("atlas client tick", Z_TICK_HOOK, () -> {
                     AtlasTargets.flushClear();
                     AtlasFarField.restMs = com.nirncraft.render.quality.QualityClient.workerRestMs();
                     if (farField != null) AtlasClientSections.tick(Minecraft.getInstance());  // the loaded chunks' blocks
+                    long pz = AtlasRecorder.begin();
                     profileTick();
+                    AtlasRecorder.end(Z_PROFILE, pz, 100_000);
                 }));
         AtlasClientSections.init();
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
@@ -162,7 +165,7 @@ public final class AtlasClient {
         // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
-                AtlasGuard.run("atlas loading phase", () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
+                AtlasGuard.run("atlas loading phase", Z_LOADING, () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             AtlasLoadingScreen.disarm();
             serverWorldId = 0;
@@ -259,6 +262,15 @@ public final class AtlasClient {
      * there), or null when the near pass calls it right after its G-buffer (it composites atlas itself).
      */
     static void renderFar(LevelRenderState state, com.mojang.renderpearl.api.commands.RenderPass pass) {
+        long rz = AtlasRecorder.begin();
+        try {
+            renderFarBody(state, pass);
+        } finally {
+            AtlasRecorder.end(Z_RENDER_FAR, rz);
+        }
+    }
+
+    private static void renderFarBody(LevelRenderState state, com.mojang.renderpearl.api.commands.RenderPass pass) {
         farThisFrame = false;
         nearLitThisFrame = false;
         if (failed) return;
@@ -336,9 +348,15 @@ public final class AtlasClient {
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
                 return;
             }
+            long fz = AtlasRecorder.begin();
             feedWeather();
+            AtlasRecorder.end(Z_WEATHER, fz, 50_000);
+            fz = AtlasRecorder.begin();
             AtlasAir.update(mc, lib, ctx);  // the air at the eye (the sky, the sun through it, the haze)
+            AtlasRecorder.end(Z_AIR, fz, 50_000);
+            fz = AtlasRecorder.begin();
             feedActors(mc.level);
+            AtlasRecorder.end(Z_ACTORS, fz, 50_000);
             int budget = quality.lightBudget();
             if (budget != lightBudget) {
                 lightBudget = budget;
@@ -471,6 +489,7 @@ public final class AtlasClient {
             long g0 = System.nanoTime();
             ctx.glRender(frame, io);
             long g1 = System.nanoTime();
+            AtlasRecorder.end(Z_GL_RENDER, g0);
             glRenderMs += ((g1 - g0) * 1e-6 - glRenderMs) * 0.05;  // (eased: atlas-info's wall time in the call)
             if (lastFrameNs != 0) frameWallMs += ((g1 - lastFrameNs) * 1e-6 - frameWallMs) * 0.05;
             lastFrameNs = g1;
@@ -537,6 +556,7 @@ public final class AtlasClient {
             AtlasCacheWipe.applyIfPending(mc);  // (-Dnirncraft.atlas.wipeCache, /nirncraft-atlas-wipecache)
             if (lib == null) {
                 lib = loadLibrary(mc.gameDirectory.toPath());
+                AtlasRecorder.start(libPath, mc.gameDirectory.toPath());
                 // the pipelines warm from the instance's cache (the loading phase): seconds, not minutes, after the first run
                 if (lib != null && lib.setPipelineCache(mc.gameDirectory.toPath().resolve("atlas-cache").resolve("pipelines.bin")))
                     com.nirncraft.NirnCraft.LOGGER.info("atlas: pipelines kept in atlas-cache/pipelines.bin");
@@ -960,6 +980,14 @@ public final class AtlasClient {
      * temporal resolve a jittered far field would visibly shake by a pixel.
      */
     private static double glRenderMs, frameWallMs;
+    // flight recorder zones (AtlasRecorder)
+    private static final AtlasRecorder.Zone Z_INFO = AtlasRecorder.zone("atlas:info (ctx.info)"), Z_STATE_SECTIONS = AtlasRecorder.zone("atlas:state sections"),
+            Z_STATE_EDITS = AtlasRecorder.zone("atlas:state edits"), Z_STATE_GEN = AtlasRecorder.zone("atlas:state clientGen");
+    private static final AtlasRecorder.Zone Z_RENDER_FAR = AtlasRecorder.zone("atlas:renderFrame"),
+            Z_GL_RENDER = AtlasRecorder.zone("atlas:ctx.glRender"), Z_WEATHER = AtlasRecorder.zone("atlas:feedWeather"),
+            Z_AIR = AtlasRecorder.zone("atlas:air"), Z_ACTORS = AtlasRecorder.zone("atlas:feedActors"),
+            Z_COMPOSITE = AtlasRecorder.zone("atlas:nearPass.composite"), Z_TICK_HOOK = AtlasRecorder.zone("atlas:tickHook"),
+            Z_PROFILE = AtlasRecorder.zone("atlas:profileTick"), Z_LOADING = AtlasRecorder.zone("atlas:loadingPhase.tick");
     private static long lastFrameNs;
 
     private static final boolean PROFILE = Boolean.getBoolean("nirncraft.atlas.profile");
@@ -987,12 +1015,23 @@ public final class AtlasClient {
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;
+        long iz = AtlasRecorder.begin();
         String core = c != null ? c.info() : "no context";
+        AtlasRecorder.end(Z_INFO, iz, 1_000_000);
         var lvl = Minecraft.getInstance().level;
         String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
                 lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
-        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + AtlasClientSections.state() + " " + (materials != null ? materials.state() + " " : "") + AtlasEditsClient.state() + " " + AtlasClientGen.state() + " core=" + core;
+        long sz = AtlasRecorder.begin();
+        String sections = AtlasClientSections.state();
+        AtlasRecorder.end(Z_STATE_SECTIONS, sz, 1_000_000);
+        sz = AtlasRecorder.begin();
+        String edits = AtlasEditsClient.state();
+        AtlasRecorder.end(Z_STATE_EDITS, sz, 1_000_000);
+        sz = AtlasRecorder.begin();
+        String gen = AtlasClientGen.state();
+        AtlasRecorder.end(Z_STATE_GEN, sz, 1_000_000);
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " core=" + core + " " + AtlasRecorder.state();
     }
 
     private static void jitter(AtlasNative.Context ctx, boolean on) {

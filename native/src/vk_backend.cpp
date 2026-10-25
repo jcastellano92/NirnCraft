@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "flight_recorder.hpp"  // the flight recorder: zones and GPU timestamps
 #include "atlas_cloud_spv.h"
 #include "atlas_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
 #include "atlas_nearlight_spv.h"  // generated: its nearLightMain and nearUpsampleMain (the half-resolution near light)
@@ -347,6 +348,7 @@ struct Slot {
     VkCommandBuffer cmd = VK_NULL_HANDLE;
     VkFence fence = VK_NULL_HANDLE;
     VkQueryPool query = VK_NULL_HANDLE;
+    fr::GpuTimeline gt;  // the flight recorder's per-pass timestamps of this slot's frame
     bool inFlight = false;
     VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
@@ -426,6 +428,7 @@ public:
                 release(s.vgRankBack);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
+                s.gt.destroy();
             }
             for (auto& b : shared_) release(b);
             release(vgSat_);
@@ -647,6 +650,7 @@ public:
                 q.queryType = VK_QUERY_TYPE_TIMESTAMP;
                 q.queryCount = 4;  // the frame; the level-0 grid's build
                 if (vkCreateQueryPool(dev_, &q, nullptr, &s.query) != VK_SUCCESS) s.query = VK_NULL_HANDLE;  // no GPU timer
+                s.gt.create(dev_);
             }
             VkDescriptorSetLayout layouts[3] = {farSetLayout_, publishSetLayout_, ingestSetLayout_};
             VkDescriptorSet sets[3];
@@ -857,6 +861,7 @@ public:
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
         Slot& s = slots_[frameIndex_ % SLOTS];
+        ATLAS_ZONE("vk:glRender");
         auto tg0 = std::chrono::steady_clock::now();
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         auto tg1 = std::chrono::steady_clock::now();
@@ -890,8 +895,11 @@ public:
         if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, nearKind, err)) return false;
         refreshDescriptors(s);
 
-        if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
-            return false;
+        {
+            ATLAS_ZONE_MIN("gl:linearizeNearDepth", 100);
+            if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
+                return false;
+        }
         if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
@@ -920,10 +928,14 @@ public:
             layouts[IMAGES] = GL_LAYOUT_GENERAL_EXT;
             nTex++;
         }
-        gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
-        gl_.Flush();
+        {
+            ATLAS_ZONE_MIN("gl:signalSemaphore+flush", 100);
+            gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
+            gl_.Flush();
+        }
 
         begin(s);
+        ATLAS_ZONE("vk:recordAndSubmit");
         imageBarriers(s.cmd, true);
         uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
@@ -933,6 +945,7 @@ public:
             vkCmdPushConstants(s.cmd, ingestLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "nearIngest");
         }
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
         computeBarrier(s.cmd);
@@ -947,8 +960,11 @@ public:
         frameIndex_++;
 
         // GL commands after this point wait for the Vulkan frame
-        gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
-        copyToCaller(io, w, h, nearLight);
+        {
+            ATLAS_ZONE_MIN("gl:waitSemaphore+copyToCaller", 100);
+            gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
+            copyToCaller(io, w, h, nearLight);
+        }
         auto tg3 = std::chrono::steady_clock::now();
         auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
             v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
@@ -1132,6 +1148,7 @@ public:
 
     bool stageScene(const PackedScene& sc) override {
         if (lost_) return false;
+        ATLAS_ZONE_MIN("vk:stageScene", 50);
         std::lock_guard<std::mutex> lock(sceneMu_);
         int c = current_ == 0 ? 1 : 0;
         if (copies_[c].lastFrame > completedFrame_.load()) return false;  // a frame may still read it
@@ -1170,6 +1187,7 @@ private:
     }
 
     bool waitFence(VkFence f, const char* what, std::string& err) {
+        ATLAS_ZONE_MIN("wait:gpuFence", 100);
         return vkOk(vkWaitForFences(dev_, 1, &f, VK_TRUE, FENCE_TIMEOUT_NS), what, err);
     }
 
@@ -1523,6 +1541,10 @@ private:
             enable.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
             budgetExt_ = true;
         }
+        if (has(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME)) {  // the flight recorder places GPU zones on the host clock
+            enable.push_back(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME);
+            calibratedTs_ = true;
+        }
         if (has(MEM_EXT) && has(SEM_EXT)) {
             enable.push_back(MEM_EXT);
             enable.push_back(SEM_EXT);
@@ -1574,6 +1596,7 @@ private:
             return vkOk(cr, "vkCreateDevice", err);
         }
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
+        fr::gpuInit(dev_, timestampPeriod_, 64, calibratedTs_);
         if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, genFamily_ == family_ ? 1 : 0, &genQueue_);
         if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
@@ -1641,6 +1664,7 @@ private:
             }
         }
         auto t0 = std::chrono::steady_clock::now();
+        ATLAS_ZONE("vk:createPipeline");
         VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cp, nullptr, out);
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
@@ -1682,6 +1706,7 @@ private:
     // at every 250 ms) the far, cloud and sun map pipelines are rebuilt from them. The bindings must stay the same (a
     // layout change needs a build); a file that fails keeps the running pipelines.
     void hotReload() {
+        ATLAS_ZONE_MIN("vk:hotReload", 100);
         // ATLAS_SHADER_DIR, else a folder named atlas-shaders in the working directory (the game's: a dev instance opts
         // in by having it, where a launcher's environment settings are unreliable)
         static const char* dir = [] {
@@ -1784,6 +1809,7 @@ private:
     }
 
     bool prepare(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool readback, std::string& err) {
+        ATLAS_ZONE("vk:prepare");
         hotReload();
         uint32_t w = frame.dims[0], h = frame.dims[1];
         size_t px = size_t(w) * h;
@@ -1844,14 +1870,35 @@ private:
         releaseRetired(false);
         if (!stageVoxGrid(s, in, err)) return false;
         vgOpen_ = true;  // (cleared by the frame's submit)
-        if (!shared_[B_TEX].buf || (in.textures && in.texturesRevision != texRevision_)) {
-            // a new texture set: into a new buffer; frames in flight keep the old one until they are done (no wait)
-            retire(shared_[B_TEX]);
-            static const uint32_t none = 0u;
-            const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
-            size_t n = in.textures && !in.textures->empty() ? in.textures->size() : 1;
-            if (!upload(shared_[B_TEX], src, n * 4, false, Mem::HostWrite, err)) return false;
-            texRevision_ = in.textures ? in.texturesRevision : 0;
+        {
+            const bool texNew = in.textures && in.texturesRevision != texRevision_;
+            const size_t texWords = in.textures && !in.textures->empty() ? in.textures->size() : 1;
+            const bool texFull = !shared_[B_TEX].buf || in.texturesGeneration != texGeneration_ || (texNew && texWords * 4 > shared_[B_TEX].size);
+            if (texFull) {
+                // the first set, a slot rewritten, or the set outgrew the buffer: into a new buffer (with room to grow); frames in
+                // flight keep the old one until they are done (no wait)
+                retire(shared_[B_TEX]);
+                static const uint32_t none = 0u;
+                const uint32_t* src = in.textures && !in.textures->empty() ? in.textures->data() : &none;
+                if (!ensure(shared_[B_TEX], VkDeviceSize(texWords) * 4 * 6 / 5, false, Mem::HostWrite, err)) return false;
+                std::memcpy(shared_[B_TEX].map, src, texWords * 4);
+                texRevision_ = in.textures ? in.texturesRevision : 0;
+                texGeneration_ = in.texturesGeneration;
+                texUploadedWords_ = texWords;
+            } else if (texNew) {
+                // texturepack.hpp: slots are only ever appended and the table has a fixed length, so what changed is the table and the
+                // tail: copied in place (frames in flight read slots that were there before)
+                ATLAS_ZONE_MIN("vk:textures delta", 100);
+                const uint32_t* src = in.textures->data();
+                size_t table = std::min<size_t>(texWords, size_t(src[0]) + 1);
+                std::memcpy(shared_[B_TEX].map, src, table * 4);
+                if (texWords > texUploadedWords_) {
+                    size_t from = std::max(texUploadedWords_, table);
+                    std::memcpy(static_cast<char*>(shared_[B_TEX].map) + from * 4, src + from, (texWords - from) * 4);
+                }
+                texUploadedWords_ = texWords;
+                texRevision_ = in.texturesRevision;
+            }
         }
         if (!shared_[B_BRICKS].buf || (in.bricks && in.bricksRevision != brickRevision_)) {
             // new bricks: a new buffer, as the textures (frames in flight keep the old one)
@@ -1915,6 +1962,7 @@ private:
     }
 
     void refreshDescriptors(Slot& s) {
+        ATLAS_ZONE_MIN("vk:refreshDescriptors", 100);
         const SceneCopy& sc = copies_[current_];
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
         VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
@@ -2028,6 +2076,7 @@ private:
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(s.cmd, &bi);
+        s.gt.begin(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);  // (after the GL-ready wait, like the frame query below)
         if (s.query) {
             vkCmdResetQueryPool(s.cmd, s.query, 0, 4);
             // at the compute stage, which the GL-ready semaphore wait blocks: the time is atlas's own work only
@@ -2085,6 +2134,7 @@ private:
     // Takes the grid's next batch (prepare: the slot was waited) into the slot's host buffers; recordVoxGrid records
     // the copies and kernels. The far set binds the grid's buffers always (16-byte stand-ins until there is a grid).
     bool stageVoxGrid(Slot& s, const FrameInputs& in, std::string& err) {
+        ATLAS_ZONE("vk:stageVoxGrid");
         auto c0 = std::chrono::steady_clock::now();
         bool ok = stageVoxGridTimed(s, in, err);
         vgStageMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
@@ -2106,7 +2156,10 @@ private:
                 const uint32_t* j = r + size_t(k) * 4;
                 if ((j[1] & 3u) == VG_UNIFORM && j[2] != ~0u && j[2] != VG_COLUMN) hits.push_back({j[0], j[2], s.vgGens[k], j[1] >> 2});
             }
-            if (!hits.empty()) in.voxgrid->gpuUniform(hits);
+            if (!hits.empty()) {
+                ATLAS_ZONE_MIN("grid:gpuUniform", 100);
+                in.voxgrid->gpuUniform(hits);
+            }
         }
         s.vgResultN = 0;
         // (and the raw sections it packed: to the world's warm tier)
@@ -2120,6 +2173,7 @@ private:
                 done.push_back({s.vgPackKeys[k].first, s.vgPackKeys[k].second, rec[0],
                                 std::make_shared<const std::vector<uint32_t>>(rec + 1, rec + 1 + n)});
             }
+            ATLAS_ZONE_MIN("grid:packedResults", 100);
             in.voxgrid->packedResults(done);
         }
         s.vgPackRead = 0;
@@ -2129,6 +2183,7 @@ private:
             uint32_t na = std::min({r[512], s.vgRankBudget, RANK_MAXL}), ne = std::min({r[513], r[518], RANK_MAXL});
             std::vector<uint32_t> admits(r + RANK_LISTS, r + RANK_LISTS + na);
             std::vector<uint32_t> evicts(r + RANK_LISTS + RANK_MAXL, r + RANK_LISTS + RANK_MAXL + ne);
+            ATLAS_ZONE_MIN("grid:rankResults", 100);
             in.voxgrid->rankResults(admits, evicts, r[514], 255u - std::min(r[517], 255u));
         }
         s.vgRankRead = false;
@@ -2148,6 +2203,7 @@ private:
                 const char* e = std::getenv("ATLAS_VOXGRID_BUDGET");  // sections built a frame at most
                 return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
+            ATLAS_ZONE_MIN("grid:take", 100);
             b = g->take(budget);
         }
         bool work = b.clear || !b.jobs.empty() || b.coarse();
@@ -2463,6 +2519,7 @@ private:
             }
         }
         if (s.query) vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 3);
+        s.gt.mark(cmd, "voxgrid");
     }
 
     void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false) {
@@ -2518,31 +2575,38 @@ private:
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lightPipe_[2]);
             vkCmdDispatch(s.cmd, s.lightTiles, 1, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "lights");
         }
         if (clouds) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, cloudPipe_);
             uint32_t dv = cloudDiv_;
             vkCmdDispatch(s.cmd, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8, 1);
             computeBarrier(s.cmd);
+            s.gt.mark(s.cmd, "clouds");
         }
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        s.gt.mark(s.cmd, "far");
         if (nearSplit) {
             // the near light: one pixel of each 2 x 2 traced, then the other three filled (both after the far pass:
             // the upsample darkens the air it wrote over covered surfaces)
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearLightPipe_);
             vkCmdDispatch(s.cmd, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearLight");
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearUpPipe_);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearUpsample");
             computeBarrier(s.cmd);  // then its history (every pixel complete before any is blended)
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, nearTempPipe_);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            s.gt.mark(s.cmd, "nearTemporal");
         }
         if (sunDispatchRows_) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, sunPipe_);
             vkCmdDispatch(s.cmd, (sunSize_ + 7) / 8, (sunDispatchRows_ + 1 + 7) / 8, 1);
+            s.gt.mark(s.cmd, "sunMap");
         }
         prevSlot_ = int(&s - slots_);
     }
@@ -2557,6 +2621,7 @@ private:
 
     bool submit(Slot& s, VkSemaphore* wait, VkSemaphore* signal, std::string& err) {
         if (s.query) vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 1);
+        s.gt.mark(s.cmd, "publish");
         vkEndCommandBuffer(s.cmd);
         // the GL-ready wait blocks every stage that touches the shared images: the passes and the sun map copy
         VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -2574,7 +2639,9 @@ private:
         }
         vkResetFences(dev_, 1, &s.fence);
         {
+            ATLAS_ZONE_MIN("vk:queueSubmit", 100);
             std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
+            s.gt.submitted();
             if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (frame)", err)) return false;
             vgOpen_ = false;  // (the grid's batch is on its way)
         }
@@ -2589,6 +2656,8 @@ private:
         if (!s.inFlight) return true;
         if (!waitFence(s.fence, "frame wait", err)) return false;
         s.inFlight = false;
+        static const uint32_t gpuTrack = fr::trackId("GPU frames");
+        s.gt.resolve("gpu frame", gpuTrack);
         // frames complete in submission order on our single queue
         if (s.frameNumber > completedFrame_.load()) completedFrame_.store(s.frameNumber);
         if (s.query && gpuMs) {
@@ -2916,6 +2985,7 @@ private:
         b = {};
     }
     void releaseRetired(bool all) {
+        ATLAS_ZONE_MIN("vk:releaseRetired", 100);
         for (size_t i = 0; i < retired_.size();) {
             if (all || retired_[i].frame <= completedFrame_.load()) {
                 release(retired_[i].b);
@@ -2928,6 +2998,7 @@ private:
     }
 
     void release(Buf& b) {
+        ATLAS_ZONE_MIN("vk:releaseBuffer", 100);
         if (b.map) vkUnmapMemory(dev_, b.mem);
         if (b.buf) vkDestroyBuffer(dev_, b.buf, nullptr);
         if (b.mem) {
@@ -2939,6 +3010,7 @@ private:
 
     // vkAllocateMemory with the bookkeeping atlas_memory_info reports (and the test hook's view of it)
     VkResult allocate(const VkMemoryAllocateInfo& ma, VkDeviceMemory& mem) {
+        ATLAS_ZONE_MIN("vk:vkAllocateMemory", 100);
         mem = VK_NULL_HANDLE;
         VkResult r = vkAllocateMemory(dev_, &ma, nullptr, &mem);
         if (r == VK_SUCCESS) allocated_ += ma.allocationSize;
@@ -2951,6 +3023,7 @@ private:
     bool ensure(Buf& b, VkDeviceSize size, bool uniform, Mem kind, std::string& err) {
         size = size < 16 ? 16 : size;
         if (b.buf && b.size >= size && b.kind == kind) return true;
+        ATLAS_ZONE_MIN("vk:ensure (new buffer)", 100);
         // a descriptor can only see maxStorageBufferRange bytes (lavapipe and some mobile-class parts: 128 MB)
         bool bound = kind != Mem::Staging && kind != Mem::HostRead;
         VkDeviceSize limit = uniform ? props_.limits.maxUniformBufferRange : maxStorageRange_;
@@ -3027,6 +3100,7 @@ private:
     // Scene arrays -> staging (CPU) -> device-local buffers (GPU copy). The caller holds sceneMu_ and guarantees no
     // frame reads this copy. wait: block until the copy is done (render-thread fallback).
     bool uploadScene(SceneCopy& c, const PackedScene& sc, bool wait, std::string& err) {
+        ATLAS_ZONE(wait ? "vk:uploadScene (render thread)" : "vk:uploadScene");
         if (c.uploading && !waitFence(c.uploadFence, "scene upload wait", err)) return false;
         c.uploading = false;
         const void* src[BINDINGS] = {};
@@ -3092,6 +3166,7 @@ private:
     }
 
     bool upload(Buf& b, const void* data, size_t bytes, bool uniform, Mem kind, std::string& err) {
+        ATLAS_ZONE_MIN("vk:upload", 100);
         if (!ensure(b, bytes, uniform, kind, err)) return false;
         if (bytes && !b.map) return fail(err, "upload into an unmapped buffer");
         if (bytes) std::memcpy(b.map, data, bytes);
@@ -3099,6 +3174,7 @@ private:
     }
 
     std::atomic<uint64_t> allocated_{0};  // device memory allocated by this backend (bytes)
+    bool calibratedTs_ = false;           // VK_EXT_calibrated_timestamps enabled (flight recorder)
     bool budgetExt_ = false;              // VK_EXT_memory_budget enabled
     VkInstance inst_ = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT messenger_ = VK_NULL_HANDLE;
@@ -3142,7 +3218,8 @@ private:
     size_t vgWords_ = 0;      // chunk words of every level the buffers hold
     uint32_t vgCap_ = 0;      // slots of every level
     VkDeviceSize vgSatBytes_ = 0;
-    uint64_t texRevision_ = ~0ull;
+    uint64_t texRevision_ = ~0ull, texGeneration_ = 0;
+    size_t texUploadedWords_ = 0;  // the texture buffer holds this many words of the host's set (texturepack.hpp)
     uint64_t brickRevision_ = ~0ull;
     double vgStageMs_ = 0, vgStageMaxMs_ = 0;
     double vgLastMs_ = 0, vgMsTotal_ = 0;

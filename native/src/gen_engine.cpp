@@ -23,6 +23,7 @@
 
 #include "atlas/atlas.h"
 #include "backend.hpp"
+#include "flight_recorder.hpp"
 #include "parallel.hpp"
 #include "voxgrid.hpp"
 #include "gencache.hpp"
@@ -526,6 +527,7 @@ public:
                            &tab_, &info_, &map_, &jobs_, &bad_, &far_})
                 release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
+            gt_.destroy();
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
@@ -1723,6 +1725,7 @@ private:
             qp.queryCount = QUERIES;
             if (vkCreateQueryPool(dev_, &qp, nullptr, &queries_) != VK_SUCCESS) timestamps_ = false;
         }
+        if (timestamps_) gt_.create(dev_);  // the flight recorder's timestamps of each submission
         // the per-batch buffers (fixed: MAX_CHUNKS chunks; K up to 16 interpolated inputs); the readback holds the
         // ids, MAX_CHUNKS flags, then the section infos
         bool ok = ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, MAX_CHUNKS * 8, true, err) &&
@@ -1910,7 +1913,9 @@ private:
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(cmd_, &bi);
+        gt_.begin(cmd_);
     }
+    fr::GpuTimeline gt_;
     // ---- the GPU budget ----
     // The generator shares the card with the frames, and a long kernel in front of a frame is a long frame: the
     // submissions are paced by a token bucket of GPU milliseconds filled by wall time at a duty that follows the frame
@@ -2000,7 +2005,11 @@ private:
         return waited;
     }
     bool submitWait(std::string& err) {
-        paceAcquire();
+        ATLAS_ZONE("gen:submitWait");
+        {
+            ATLAS_ZONE_MIN("wait:genPace", 100);
+            paceAcquire();
+        }
         auto sub0 = std::chrono::steady_clock::now();
         struct Charge {
             VulkanEngine* e;
@@ -2016,24 +2025,35 @@ private:
                 if (warnMs > 0.0 && ms > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", ms, e->phase_.c_str());
             }
         } charge{this, sub0};
+        if (gt_.active()) gt_.mark(cmd_, fr::intern(phase_.c_str()));
         vkEndCommandBuffer(cmd_);
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.commandBufferCount = 1;
         si.pCommandBuffers = &cmd_;
         vkResetFences(dev_, 1, &fence_);
         VkResult r;
-        if (queueMu_) {
-            std::lock_guard<std::mutex> q(*queueMu_);
-            r = vkQueueSubmit(queue_, 1, &si, fence_);
-        } else {
-            r = vkQueueSubmit(queue_, 1, &si, fence_);
+        {
+            ATLAS_ZONE_MIN("gen:queueSubmit", 100);
+            gt_.submitted();
+            if (queueMu_) {
+                std::lock_guard<std::mutex> q(*queueMu_);
+                r = vkQueueSubmit(queue_, 1, &si, fence_);
+            } else {
+                r = vkQueueSubmit(queue_, 1, &si, fence_);
+            }
         }
         if (r != VK_SUCCESS) {
             dead_ = r == VK_ERROR_DEVICE_LOST;
             return fail(err, "vkQueueSubmit failed (" + std::to_string(int(r)) + ")");
         }
         auto w0 = std::chrono::steady_clock::now();
-        VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
+        VkResult w;
+        {
+            ATLAS_ZONE("wait:genFence");
+            w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
+        }
+        static const uint32_t genTrack = fr::trackId("GPU gen");
+        if (w == VK_SUCCESS) gt_.resolve("gpu gen", genTrack);
         if (double ws = msSince(w0); ws > 500.0)  // (a submission near the watchdog's 2 s: split the work further)
             std::fprintf(stderr, "TRACE warn gen submission took %.0f ms (%s)\n", ws, phase_.c_str());
         if (w != VK_SUCCESS) {

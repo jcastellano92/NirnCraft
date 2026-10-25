@@ -40,6 +40,25 @@ import java.util.stream.IntStream;
  * {@code .ores=false} leaves ores to the server (the public / secret split).</p>
  */
 final class AtlasClientGen implements AutoCloseable {
+    // flight recorder zones (AtlasRecorder): the generator thread's loop
+    private volatile double[] statPage, statPace;
+
+    /** The generator thread's own reading of the native counters (their calls take the generator's lock, held a whole batch). */
+    private void refreshStats() {
+        try {
+            if (devicePages) statPage = gen.pageStats();
+            statPace = gen.paceStats();
+        } catch (RuntimeException e) {
+            // (the next pass)
+        }
+    }
+
+    private static final AtlasRecorder.Zone Z_PLAN = AtlasRecorder.zone("gen:plan"), Z_REPORTS = AtlasRecorder.zone("gen:gridReports"),
+            Z_DIRECT = AtlasRecorder.zone("gen:directBatch"), Z_PRUNE = AtlasRecorder.zone("gen:prune"), Z_FAR = AtlasRecorder.zone("gen:farStep"),
+            Z_PAGES = AtlasRecorder.zone("gen:pages"), Z_CACHE = AtlasRecorder.zone("gen:fromCache"), Z_RUN = AtlasRecorder.zone("gen:gen.run"),
+            Z_RUN_STORE = AtlasRecorder.zone("gen:gen.runStore"), Z_CLAIM = AtlasRecorder.zone("gen:claimSections"),
+            Z_INGEST = AtlasRecorder.zone("gen:gen.ingest (into the grid)"), Z_DECORATE = AtlasRecorder.zone("gen:decorate (features)");
+
     static final boolean ON = Boolean.getBoolean("nirncraft.atlas.clientGen");
     /** The window, within the grid's level 0 (ATLAS_VOXGRID_D sections, voxgrid.cpp: 8..128, 64): wider, its edge
      *  chunks would be dropped and wanted again without end. */
@@ -598,12 +617,12 @@ final class AtlasClientGen implements AutoCloseable {
             r = c.ready.size();
         }
         long now = System.nanoTime(), j = c.jumpNs;
-        double[] dp = c.devicePages ? c.gen.pageStats() : null;
+        double[] dp = c.devicePages ? c.statPage : null;  // (cached by the generator thread: the native call waits for its lock, seconds)
         String pagesNow = dp == null ? "java" : String.format("device %d in %.0f ms", (long) dp[0], dp[1]);
         if (c.farOn) pagesNow += String.format(", far %d tiles %d/%d chunks taken %.0f ms busy %d, partial %d (retried %d), from the cache %d",
                 c.farTiles, c.farTaken, c.farChunks, c.farMs, c.farBusy, c.farPartial.size(), c.farRetried, c.farCached);
         pagesNow += String.format(", cached chunks %d (%d sections)", c.cachedChunks, c.cachedSections);
-        double[] pace = c.gen.paceStats();
+        double[] pace = c.statPace;
         if (pace != null)
             pagesNow += String.format(", budget{frame %.1f ms duty %.2f used %.0f waited %.0f (far %.0f) longest %.0f ms, %d submissions}",
                     pace[0], pace[1], pace[2], pace[3], pace[4], pace[5], (long) pace[6]);
@@ -667,6 +686,7 @@ final class AtlasClientGen implements AutoCloseable {
         Planned cur = null;
         while (running) {
             try {
+                refreshStats();
                 int waiting;
                 synchronized (ready) {
                     waiting = ready.size();
@@ -685,20 +705,31 @@ final class AtlasClientGen implements AutoCloseable {
                     for (int i = 0; i < cur.batch.length; i += 2) done.remove(ChunkPos.pack(cur.batch[i], cur.batch[i + 1]));
                     cur = null;
                 }
+                long rz = AtlasRecorder.begin();
                 if (cur == null) cur = plan(camCx, camCz, fresh ? FIRST_BATCH : BATCH);
+                AtlasRecorder.end(Z_PLAN, rz, 50_000);
                 terrainBusy = cur != null;
+                rz = AtlasRecorder.begin();
                 if (direct) gridReports();
+                AtlasRecorder.end(Z_REPORTS, rz, 50_000);
                 if (cur == null && direct && storeOn) {
                     // nothing new to generate: the store's ready chunks still go out (64 a call)
                     long before = storeFinished;
+                    rz = AtlasRecorder.begin();
                     directBatch(new int[0], ids, flags, info, false);
+                    AtlasRecorder.end(Z_DIRECT, rz, 50_000);
                     if (storeFinished != before) continue;
                 }
                 if (cur == null) {
+                    rz = AtlasRecorder.begin();
                     if (direct) pruneDirect(camCx, camCz);
                     else prune(camCx, camCz);
+                    AtlasRecorder.end(Z_PRUNE, rz, 50_000);
                     // the near window done: the far terrain (a tile a turn, so a move is answered at once)
-                    if (farOn && farStep()) continue;
+                    rz = AtlasRecorder.begin();
+                    boolean farMoved = farOn && farStep();
+                    AtlasRecorder.end(Z_FAR, rz, 50_000);
+                    if (farMoved) continue;
                     for (Thread t : featureWorkers) LockSupport.unpark(t);
                     LockSupport.parkNanos(20_000_000L);
                     continue;
@@ -708,15 +739,24 @@ final class AtlasClientGen implements AutoCloseable {
                 int[] miss = made[0];
                 for (int i = 0; i < miss.length / 3; i++) gen.putPage(miss[i * 3], miss[i * 3 + 1], miss[i * 3 + 2] != 0, made[i + 1]);
                 long t1 = System.nanoTime();
+                AtlasRecorder.end(Z_PAGES, t0, 50_000);
                 int[] batch = cur.batch;
                 // the next batch's pages while this one is on the GPU
+                rz = AtlasRecorder.begin();
                 Planned next = plan(camCx, camCz, BATCH);
+                AtlasRecorder.end(Z_PLAN, rz, 50_000);
                 int n = batch.length / 2;
                 if (direct) {
                     if (fresh) firstBatchPagesNs = t1;
+                    rz = AtlasRecorder.begin();
                     directBatch(batch, ids, flags, info, fresh);
+                    AtlasRecorder.end(Z_DIRECT, rz, 0, n);
+                    rz = AtlasRecorder.begin();
                     pruneDirect(camCx, camCz);
+                    AtlasRecorder.end(Z_PRUNE, rz, 50_000);
+                    rz = AtlasRecorder.begin();
                     if (farOn && (chunks / BATCH) % 4 == 3) farStep();  // the far terrain between near batches too
+                    AtlasRecorder.end(Z_FAR, rz, 50_000);
                     chunks += n;
                     pagesMade += miss.length / 3;
                     pageMs += (t1 - t0) / 1e6;
@@ -776,7 +816,9 @@ final class AtlasClientGen implements AutoCloseable {
             // (the chunk store) only the misses go into it: it makes the neighbourhood their stages read by itself
             // (atlas_gen_run_store), so a cached chunk is never made again nor packed again (the churn: every chunk
             // through the store, its neighbours sent back to the start by each new one)
+            long cz = AtlasRecorder.begin();
             batch = fromCache(batch, info);
+            AtlasRecorder.end(Z_CACHE, cz, 50_000);
             if (batch.length == 0 && !storeOn) return;
         }
         int n = batch.length / 2;
@@ -790,7 +832,9 @@ final class AtlasClientGen implements AutoCloseable {
             // is ready: the rest of this call works on those
             int[] outXZ = new int[AtlasGenNative.RUN_CHUNKS * 2];
             AtlasGenNative.Times[] tt = new AtlasGenNative.Times[1];
+            long gz = AtlasRecorder.begin();
             int m = gen.runStore(batch, outXZ, null, flags, info, tt);
+            AtlasRecorder.end(Z_RUN_STORE, gz, 0, batch.length / 2);
             gt = tt[0];
             storeFinished += m;
             batch = java.util.Arrays.copyOf(outXZ, m * 2);
@@ -800,7 +844,9 @@ final class AtlasClientGen implements AutoCloseable {
                 return;
             }
         } else {
+            long gz = AtlasRecorder.begin();
             gt = gen.run(batch, wantIds ? ids : null, flags, info);
+            AtlasRecorder.end(Z_RUN, gz, 0, n);
         }
         long td = System.nanoTime();
         gpuMs += (td - tg) / 1e6;
@@ -808,6 +854,7 @@ final class AtlasClientGen implements AutoCloseable {
         readbackMs += gt.readbackMs();
         long[] masks = new long[n];
         int ccx = camCx, ccz = camCz;
+        long claimZ = AtlasRecorder.begin();
         for (int i = 0; i < n; i++) {
             int cx = batch[i * 2], cz = batch[i * 2 + 1];
             if (flags[i] != 0) {
@@ -841,10 +888,12 @@ final class AtlasClientGen implements AutoCloseable {
             masks[i] = m;
         }
         decodeMs += (System.nanoTime() - td) / 1e6;
+        AtlasRecorder.end(Z_CLAIM, claimZ, 50_000);
         long tu = System.nanoTime();
         long[] asked = masks.clone();
         int sent = gen.ingest(masks);
         long t1 = System.nanoTime();
+        AtlasRecorder.end(Z_INGEST, tu, 0, sent);
         boolean refused = false;
         for (int i = 0; i < n; i++) {
             long lost = asked[i] & ~masks[i];
@@ -1392,7 +1441,9 @@ final class AtlasClientGen implements AutoCloseable {
                 long t0 = System.nanoTime();
                 int bx = ChunkPos.getX(k), bz = ChunkPos.getZ(k);
                 try {
+                    long dz = AtlasRecorder.begin();
                     features.decorate(bx, bz, window);
+                    AtlasRecorder.end(Z_DECORATE, dz);
                 } finally {
                     synchronized (decorating) {
                         decorated.add(k);

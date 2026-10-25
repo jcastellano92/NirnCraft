@@ -78,7 +78,13 @@ public:
     // every section of columns [sx0, sx1) x [sz0, sz1) the tiers hold (the cold ones read back into warm)
     void inRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, PackedIds>>& out);
     // over budget, or outside `keep` regions (of 256 blocks) of the camera's: the farthest go (cold, dropped)
+    // Plans the spill (which sections leave warm) and returns at once; drainSpills does the disk work in slices.
+    // Nothing here writes a file: the caller holds the world's lock, which the render thread also takes.
     void enforce(int camSx, int camSz, int keepRegions);
+    // Spills planned sections to the cold tier (or drops them) for about budgetMs; true when more are waiting. The caller
+    // holds the world's lock for one slice at a time and lets go between slices.
+    bool drainSpills(double budgetMs);
+    bool spillPending() const { return spillNext_ < spillQueue_.size(); }
     Stats stats() const;
     uint64_t warmBytes() const { return warmBytes_; }
 
@@ -125,6 +131,8 @@ private:
     uint64_t coldBudget_ = 2ull << 30, coldBytes_ = 0, clock_ = 0, deltaBytes_ = 0;
     // the kept regions (enforce's): the cold tier is read back only inside them (what warm would let go again at once)
     int keepRx_ = 0, keepRz_ = 0, keep_ = -1;
+    std::vector<Key3> spillQueue_;  // enforce's plan: sections to let go of, nearest the end last
+    size_t spillNext_ = 0;
     std::unordered_map<uint64_t, ColdRegion> cold_;
     std::unordered_map<Key3, LayerPtr, Key3Hash> layers_;
     std::unordered_map<uint64_t, uint64_t> dltBytes_;  // (a region's .dlt file length, its live bytes: compaction)
