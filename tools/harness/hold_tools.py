@@ -316,8 +316,9 @@ def arrival(runner, s):
     # 1. a far, never visited spot: held at the destination, released there
     far = (5200.0, 220.0, -4100.0)
     one_arrival(g, "far", ["ui close", "command tp @p %d %d %d" % far], "teleport command", far, fails, m)
-    # 2. back near it (100 blocks, already resident): held, and ready at once (the screen should not show)
-    warm = (5100.0, 220.0, -4100.0)
+    # 2. 40 blocks from it (the jump threshold is 24 in this group; the chunks around the destination are already in): held, and
+    #    ready at once, so the screen never shows
+    warm = (5160.0, 220.0, -4100.0)
     h = one_arrival(g, "warm", ["command tp @p %d %d %d" % warm], "teleport command", warm, fails, m)
     if h and m.get("warmScreen"):
         fails.append(f"warm: the loading screen showed for a destination that was already resident (held {m['warmMs']} ms)")
