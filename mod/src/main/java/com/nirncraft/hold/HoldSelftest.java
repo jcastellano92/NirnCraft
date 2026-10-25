@@ -63,6 +63,7 @@ final class HoldSelftest {
             for (ServerPlayer p : List.of(held, viewer, control)) {
                 p.getPersistentData().remove("nirncraft_hold");
                 p.setGameMode(GameType.SURVIVAL);
+                p.setPermanentlyInvulnerable(true);  // (the stand-in factory's default)
             }
         }
         return problems;
@@ -71,7 +72,8 @@ final class HoldSelftest {
     private static ServerPlayer standIn(ServerLevel level, String name, Vec3 at) {
         ServerPlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes(name.getBytes()), "[" + name + "]"));
         p.setGameMode(GameType.SURVIVAL);
-        p.setInvulnerable(false);  // (stand-ins are permanently invulnerable: the damage and targeting checks need them not to be)
+        com.nirncraft.core.SkyData.get(p).setRace(com.nirncraft.core.Race.NORD);  // (a raceless player is protected while the race menu is pending)
+        p.setPermanentlyInvulnerable(false);  // (stand-ins are permanently invulnerable: the damage and targeting checks need them not to be)
         p.getPersistentData().remove("nirncraft_hold");
         p.setPos(at.x, at.y, at.z);
         p.setHealth(p.getMaxHealth());
@@ -89,7 +91,7 @@ final class HoldSelftest {
         if (zombie.getTarget() != held) problems.add("before the hold the zombie cannot target the player (the check could not fail)");
         zombie.setTarget(null);
         float health = held.getHealth();
-        held.hurtServer(level, level.damageSources().mobAttack(zombie), 3f);
+        held.hurtServer(level, level.damageSources().generic(), 3f);  // (not mobAttack: a peaceful world scales that to 0)
         if (held.getHealth() >= health) problems.add("before the hold the damage did nothing (the check could not fail)");
         held.setHealth(health);
 
