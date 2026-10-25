@@ -2090,6 +2090,7 @@ private:
         bool refine = false;  // (perUnit refined from it: a whole part)
         double est = 0.0;     // its GPU ms as charged when submitted (corrected when it retires)
         bool unpaced = false;  // (the loading phase's bake, pace class 2: charged no tokens, so the near work after it owes none)
+        bool far = false;      // (pace class 1: charged to the far bucket)
         int part = -1;  // (a store stage's part) its index in partUs_
         int sliceKind = -1;       // (a sliced dispatch: sliceOf's kind) its slice's units, for the next slices' size
         uint32_t sliceUnits = 0;
@@ -2197,7 +2198,7 @@ private:
         // (charged its estimate when submitted; now its own time, but never more than the estimate: a submission the
         // frames held back (the GPU theirs first) took longer without doing more, and charging that rationed the
         // generator to nothing at 1440p. The frames are kept by the duty's control, not by this charge)
-        if (!s.unpaced) pace_.tokens += s.est - std::min(gpu, std::max(s.est, 0.05));
+        if (!s.unpaced) (s.far ? pace_.tokensFar : pace_.tokens) += s.est - std::min(gpu, std::max(s.est, 0.05));
         inFlightMs_ = std::max(0.0, inFlightMs_ - s.est);
         pace_.usedMs += gpu;
         lastSubMs_ = gpu;
@@ -2330,7 +2331,8 @@ private:
         // else the recent submissions'; corrected to its own GPU time when it retires)
         s.est = s.perUnit && *s.perUnit > 0.0 && s.units > 0.0 ? *s.perUnit * s.units : subEma_;
         s.unpaced = pace_.cls == 2 || boost_.load(std::memory_order_relaxed);  // (the loading phase takes no tokens from the work after it)
-        if (!s.unpaced) pace_.tokens -= s.est;
+        s.far = pace_.cls == 1;
+        if (!s.unpaced) (s.far ? pace_.tokensFar : pace_.tokens) -= s.est;
         inFlightMs_ += s.est;
         s.value = value;
         s.pending = true;
@@ -2370,7 +2372,11 @@ private:
     // for it to be 10 ms full. A wait is bounded (300 ms; a probe 1.3 s: a budget, not a stall); ATLAS_GEN_PACE=0 turns
     // it off; ATLAS_GEN_PACE_TRACE=1 prints the controller every 5 s.
     struct Pacer {
-        double tokens = 20.0, periodMs = 0.0, duty = 0.5;
+        // Two buckets. The near window (class 0) owns `tokens`: it refills at the duty, and at least 4 ms of GPU a frame period
+        // whatever the frames are doing (nearFloor): slow frames used to cut the duty to a tenth and the near window with it, 4
+        // chunks a second where the generator makes 78. The far path (class 1: far tiles, the coarse bake, level 2) only gets
+        // `tokensFar`, what the near bucket could not hold (it is full: the near window has nothing to make).
+        double tokens = 20.0, tokensFar = 20.0, periodMs = 0.0, duty = 0.5;
         std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
         uint64_t sampleFrames = 0, lastFrames = 0;
         std::chrono::steady_clock::time_point lastFrameAt = last;  // (when the frame counter last moved)
@@ -2573,7 +2579,13 @@ private:
                 std::fprintf(stderr, "TRACE gen slices:%s\n", sl.c_str());
             }
         }
-        pace_.tokens = std::min(30.0, pace_.tokens + dt * pace_.duty);
+        // near first: the duty, or the floor of 4 ms a frame period when the frames are slow (the share of a period 4 ms is)
+        double nearFloor = pace_.periodMs > 0.0 ? std::clamp(4.0 / pace_.periodMs, 0.1, 0.5) : 0.0;
+        pace_.tokens += dt * std::max(pace_.duty, nearFloor);
+        if (pace_.tokens > 30.0) {  // (the near bucket is full: the far path has the rest)
+            pace_.tokensFar = std::min(30.0, pace_.tokensFar + (pace_.tokens - 30.0));
+            pace_.tokens = 30.0;
+        }
     }
     double lastSubMs_ = 0.0, slicedMs_ = 0.0;
     // (bounded dispatches) a dispatch in slices of its units (a pass's chunks, a far tile pass's groups), a submission
@@ -2666,7 +2678,8 @@ private:
             }
             pace_.lastSubAt = std::chrono::steady_clock::now();
         }
-        while ((pace_.tokens < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
+        double& bucket = pace_.cls == 1 ? pace_.tokensFar : pace_.tokens;
+        while ((bucket < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
             if (pace_.probing && !pace_.probeDrained) {
                 // (the probe times the frames alone: ours in flight done first, then from the next frame)
                 std::string e;
@@ -2675,7 +2688,7 @@ private:
                 pace_.probeFrames = backend_ ? backend_->framesSubmitted() : 0;
                 pace_.probeAt = std::chrono::steady_clock::now();
             }
-            double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
+            double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - bucket) / std::max(pace_.duty, 0.05)));
             std::this_thread::sleep_for(std::chrono::microseconds(int64_t(ms * 1000.0)));
             waited = msSince(t0);
             pace_.lastSubAt = std::chrono::steady_clock::now();
