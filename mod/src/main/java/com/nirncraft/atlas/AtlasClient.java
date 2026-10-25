@@ -1008,6 +1008,20 @@ public final class AtlasClient {
     }
 
     /**
+     * Whether the core holds this block as the client has it: true for air and for a block atlas does not keep
+     * (nearId 0), else the core's material there is not air. Render thread (the gallery's "await").
+     */
+    public static boolean coreHolds(int x, int y, int z) {
+        var mc = Minecraft.getInstance();
+        var s = mc.level == null ? null : mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z));
+        if (s == null || s.isAir() || AtlasClientSections.nearIdOf(s) == 0) return true;
+        var c = ctx;
+        if (c == null) return true;
+        short[] ids = c.debugSection(x >> 4, y >> 4, z >> 4);
+        return ids == null || ids[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] != 0;
+    }
+
+    /**
      * One block as the three layers have it (the gallery's "probe" op): the client's state, the near id the feed would
      * give it, and the material the core holds there now.
      */

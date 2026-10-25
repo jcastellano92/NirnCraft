@@ -294,6 +294,7 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
         for mode in ("vanilla", "atlas"):
             steps.append({"op": "mode", "name": mode, "wait": 100})
             if mode == "atlas":  # (what was placed is up in atlas: nothing pending, the grid's counters still)
+                steps.append({"op": "await", "max": 1200, "blocks": [list(cell(i)) for i in range(len(batch))]})
                 steps.append({"op": "settle", "max": 900, "min": 40})
                 steps.append({"op": "info", "name": f"b{b:03d}-atlas"})
                 steps.append({"op": "probe", "name": f"b{b:03d}-atlas", "blocks": [list(cell(i)) for i in range(len(batch))]})

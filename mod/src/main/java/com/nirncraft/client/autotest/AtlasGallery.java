@@ -172,7 +172,8 @@ final class AtlasGallery {
     // ---------------------------------------------------------------------------------------------------- script
     private static List<JsonObject> steps = new ArrayList<>();
     private static int idx, waitTicks, shots;
-    private static boolean running, stepStarted, shotArmed;
+    private static boolean running, stepStarted, shotArmed, awaiting;
+    private static int awaitSpent;
     private static int framesLeft;
     private static Path outDir;
     private static String scriptName = "";
@@ -294,6 +295,27 @@ final class AtlasGallery {
                     NirnCraft.LOGGER.warn("gallery describe failed", ex);
                 }
                 idx++;
+            }
+            case "await" -> {  // until the core holds every listed block as the client has it (at most `max` ticks)
+                if (!awaiting) {
+                    awaiting = true;
+                    awaitSpent = 0;
+                }
+                int unmet = 0;
+                for (JsonElement e : current.getAsJsonArray("blocks")) {
+                    var a = e.getAsJsonArray();
+                    if (!com.nirncraft.atlas.AtlasClient.coreHolds(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt())) unmet++;
+                }
+                int max = current.has("max") ? current.get("max").getAsInt() : 1200;
+                if (unmet == 0 || awaitSpent >= max) {
+                    if (unmet > 0) NirnCraft.LOGGER.warn("Autotest live: gallery await gave up after {} ticks with {} blocks not in the core", awaitSpent, unmet);
+                    else NirnCraft.LOGGER.info("Autotest live: gallery await: the core holds every block after {} ticks", awaitSpent);
+                    awaiting = false;
+                    idx++;
+                } else {
+                    awaitSpent += 10;
+                    waitTicks = 10;
+                }
             }
             case "probe" -> {  // each listed block as the client, the feed and the core have it, to <name>.probe.txt
                 var out = new StringBuilder();
