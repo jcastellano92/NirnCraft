@@ -717,9 +717,13 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     uint wcls = uint(palette[mat].emisClass.y);
                     bool seeWater = ((frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && wcls == 2u) || primaryPassesWater(wcls, t);
                     // a block with a micro-voxel brick (a door, a rail, a torch: atlas_bricks.slang): its 1/16 voxels
-                    // (a waterlogged fence, bars or candle is a water-class material with a brick: the brick is seen through
-                    // the water; plain water has none)
-                    uint br = gPrimary && (!seeWater || wcls == 2u) ? brickOf(mat) : 0u;
+                    // (a waterlogged fence, stair or candle is a water-class material with a brick: water fills its cell
+                    // around the brick, so a ray from the air meets the water first, as plain water's (voxelStops below:
+                    // the surface, then farMain traces on through it), and the pass through the water meets the brick;
+                    // plain water has none. Its brick at once drew it dry: no water in a waterlogged block)
+                    uint br0 = gPrimary ? brickOf(mat) : 0u;
+                    bool logged = wcls == 2u && br0 != 0u;
+                    uint br = (logged ? seeWater : !seeWater) ? br0 : 0u;
                     if (br != 0u) {
                         // (its walk is up to 48 micro-voxels: counted against the ray's budget as a few steps)
                         gTr.steps += 4u;
@@ -733,7 +737,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                             gTr.hasAlbedo = 1u;
                             return TRACE_HIT;
                         }
-                    } else if (sh != 0u && !seeWater) {
+                    } else if (sh != 0u && !seeWater && !logged) {
                         float tHit;
                         int ax = entryAxis(v, ro, d, inv, stepPos);
                         int3 q;

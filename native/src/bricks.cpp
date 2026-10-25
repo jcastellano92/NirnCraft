@@ -250,6 +250,39 @@ std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCoun
     };
     std::vector<Plane> planes;
     std::vector<AtlasBrickQuad> rest;
+    // an axis-aligned quad with no volume behind it: another quad of the material faces the other way on the same plane
+    // over the same rectangle (a zero-thickness element's two faces: a crop's four planes, a ladder, a rail, a vine,
+    // redstone dust). Voxelised it was a slab 1/16 thick, a crop a stack of chunky slabs up close: a sheet like a cross's
+    auto axisOf = [](const AtlasBrickQuad& q, float& at, float lo[2], float hi[2]) {
+        int a = -1;
+        for (int k = 0; k < 3 && a < 0; k++)
+            if (std::fabs(q.pos[0][k] - q.pos[1][k]) < 1e-4f && std::fabs(q.pos[0][k] - q.pos[2][k]) < 1e-4f &&
+                std::fabs(q.pos[0][k] - q.pos[3][k]) < 1e-4f)
+                a = k;
+        if (a < 0) return -1;
+        at = q.pos[0][a];
+        for (int j = 0; j < 2; j++) {
+            int k = (a + 1 + j) % 3;
+            lo[j] = std::min(std::min(q.pos[0][k], q.pos[1][k]), std::min(q.pos[2][k], q.pos[3][k]));
+            hi[j] = std::max(std::max(q.pos[0][k], q.pos[1][k]), std::max(q.pos[2][k], q.pos[3][k]));
+        }
+        return a;
+    };
+    auto zeroThick = [&](uint32_t qi) {
+        float at, lo[2], hi[2];
+        int a = axisOf(quads[qi], at, lo, hi);
+        if (a < 0 || quads[qi].dir < 0 || quads[qi].dir > 5) return false;
+        for (uint32_t oj = 0; oj < quadCount; oj++) {
+            const AtlasBrickQuad& o = quads[oj];
+            if (oj == qi || o.material != m || o.dir < 0 || o.dir > 5 || (o.dir ^ 1) != quads[qi].dir) continue;  // (dir pairs: 0/1, 2/3, 4/5)
+            float at2, lo2[2], hi2[2];
+            if (axisOf(o, at2, lo2, hi2) != a || std::fabs(at2 - at) > 1e-3f) continue;
+            if (std::fabs(lo2[0] - lo[0]) < 1e-3f && std::fabs(hi2[0] - hi[0]) < 1e-3f && std::fabs(lo2[1] - lo[1]) < 1e-3f &&
+                std::fabs(hi2[1] - hi[1]) < 1e-3f)
+                return true;
+        }
+        return false;
+    };
     for (uint32_t qi = 0; qi < quadCount; qi++) {
         const AtlasBrickQuad& q = quads[qi];
         if (q.material != m) continue;
@@ -259,7 +292,7 @@ std::vector<uint32_t> crossRecord(const AtlasBrickQuad* quads, uint32_t quadCoun
         float nl = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
         if (nl < 1e-8f) continue;
         for (float& v : n) v /= nl;
-        if (std::max(std::fabs(n[0]), std::max(std::fabs(n[1]), std::fabs(n[2]))) > 0.999f) {
+        if (std::max(std::fabs(n[0]), std::max(std::fabs(n[1]), std::fabs(n[2]))) > 0.999f && !zeroThick(qi)) {
             rest.push_back(q);
             continue;
         }
