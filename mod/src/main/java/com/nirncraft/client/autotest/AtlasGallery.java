@@ -283,11 +283,9 @@ final class AtlasGallery {
                 for (JsonElement e : current.getAsJsonArray("states")) {
                     try {
                         var st = net.minecraft.commands.arguments.blocks.BlockStateParser.parseForBlock(reg, e.getAsString(), false).blockState();
-                        out.append(com.nirncraft.atlas.AtlasClient.describeState(st)).append('
-');
+                        out.append(com.nirncraft.atlas.AtlasClient.describeState(st)).append('\n');
                     } catch (Exception ex) {
-                        out.append(e.getAsString()).append(" ERROR ").append(ex).append('
-');
+                        out.append(e.getAsString()).append(" ERROR ").append(ex).append('\n');
                     }
                 }
                 try {
