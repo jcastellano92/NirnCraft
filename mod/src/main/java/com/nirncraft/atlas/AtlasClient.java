@@ -414,6 +414,7 @@ public final class AtlasClient {
                 com.nirncraft.NirnCraft.LOGGER.debug("atlas: sky glow not set: {}", e.toString());
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
+            applyAblate(ctx);
             if (AtlasNearPass.owns()) {
                 // the near pass's temporal resolve: atlas samples the same sub-pixel point as our G-buffer (in its pixels)
                 float sc = (float) farScaleX();
@@ -1094,8 +1095,8 @@ public final class AtlasClient {
 
     private static int ablateSet = 0;
 
-    private static void jitter(AtlasNative.Context ctx, boolean on) {
-        // (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE)
+    /** (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE) */
+    private static void applyAblate(AtlasNative.Context ctx) {
         int ab = Integer.getInteger("nirncraft.atlas.ablate", 0);
         if (ab != ablateSet) {
             ablateSet = ab;
@@ -1105,6 +1106,10 @@ public final class AtlasClient {
                 com.nirncraft.NirnCraft.LOGGER.debug("atlas: ablate not set: {}", e.toString());
             }
         }
+    }
+
+    private static void jitter(AtlasNative.Context ctx, boolean on) {
+        // (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE)
         try {
             if (on) {
                 // the offset the pack's vertices took this frame (the index published last frame), in atlas pixels
