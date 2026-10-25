@@ -1,8 +1,11 @@
 package com.nirncraft.atlas;
 
+import com.nirncraft.hold.client.HoldClient;
 import com.nirncraft.inventory.client.SkyUi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -18,17 +21,26 @@ import net.minecraft.network.chat.Component;
  *   <li>the horizon: the coarse levels' tiles, from the cache or generated (not waited for past a few seconds once the
  *       spawn area is in).</li>
  * </ol>
- * Then control goes to the player. Esc skips it; it never holds longer than {@link #MAX_SECONDS} (a stall, a machine
- * where atlas cannot start). Off with {@code -Dnirncraft.atlas.loadingScreen=false}.
+ * Then control goes to the player. Under the player hold (docs/PLAYER-HOLD.md) this screen is the hold's face: it
+ * reports ready to the server only when {@link AtlasReady} says everything above is truly loaded, and closes when the
+ * server releases the player. It never lets go by itself: on a failure or after {@link #MAX_SECONDS} it says what is
+ * wrong and offers Retry or "Enter anyway" (the player's explicit choice, logged; only once the vanilla terrain around
+ * the player is in); Esc opens the game menu (to leave). Without a hold (disabled on the server) it closes when ready,
+ * as before. Off, without a hold, with {@code -Dnirncraft.atlas.loadingScreen=false}.
  */
 final class AtlasLoadingScreen extends Screen {
     static final boolean ON = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.loadingScreen"));
-    static final int MAX_SECONDS = 180, HORIZON_GRACE_SECONDS = 8;
+    static final int MAX_SECONDS = 180;
     private static volatile boolean armed;
 
-    private final long openedNs = System.nanoTime();
-    private long nearDoneNs;
+    private long openedNs = System.nanoTime();
     private String lastLine = "";
+    private boolean sentReady;          // the server was told (the screen waits for its release)
+    private long sentAtNs, checkedNs;
+    private String problem;             // a failure or a timeout: what is wrong (the hold stays)
+    private String pending = "";
+    private boolean isReady, failed, vanillaIn;
+    private Button retry, enter;
 
     private AtlasLoadingScreen() {
         super(Component.literal("Preparing the world"));
@@ -48,37 +60,126 @@ final class AtlasLoadingScreen extends Screen {
         armed = false;
     }
 
-    /** (client tick) Opens the screen when armed and the world is in. */
+    /** (client tick) Opens the screen when armed or held, and the world is in. */
     static void tick(Minecraft mc) {
-        if (!armed || mc.level == null || mc.player == null || mc.gui.screen() != null) return;
+        if (mc.level == null || mc.player == null || mc.gui.screen() != null) return;
+        if (!HoldClient.held() && !armed) return;
         armed = false;
         mc.gui.setScreen(new AtlasLoadingScreen());
     }
 
     @Override
+    protected void init() {
+        retry = addRenderableWidget(Button.builder(Component.literal("Retry"), b -> retry()).bounds(width / 2 - 154, height / 2 + 110, 150, 20).build());
+        enter = addRenderableWidget(Button.builder(Component.literal("Enter anyway"), b -> enterAnyway()).bounds(width / 2 + 4, height / 2 + 110, 150, 20).build());
+        retry.visible = enter.visible = problem != null;
+    }
+
+    @Override
     public boolean isPauseScreen() {
-        return true;  // (single player: nothing moves while the world comes in)
+        return !HoldClient.held();  // (a hold: the world runs and protects the player; without one, nothing moves while it comes in)
     }
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return true;  // (skip: the world fills in around the player as before)
+        return false;  // (never skipped: Esc opens the game menu, see keyPressed)
+    }
+
+    @Override
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        if (event.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {  // (the way out: Save and Quit, or back to this screen)
+            minecraft.gui.setScreen(new PauseScreen(true));
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    /** Retry: try atlas again if its failure could be transient, and wait afresh. */
+    private void retry() {
+        AtlasClient.retry();
+        openedNs = System.nanoTime();
+        problem = null;
+        retry.visible = enter.visible = false;
+    }
+
+    /** The player's own choice to go on without a complete loading (logged on both sides). */
+    private void enterAnyway() {
+        com.nirncraft.NirnCraft.LOGGER.warn("atlas loading phase: the player entered anyway ({})", problem);
+        if (HoldClient.held()) {
+            HoldClient.sendReady(true);
+            sentReady = true;
+            sentAtNs = System.nanoTime();
+            problem = null;
+            retry.visible = enter.visible = false;
+        } else {
+            minecraft.gui.setScreen(null);
+        }
+    }
+
+    /** Vanilla's own readiness: the chunks around the player are in (the fallback when atlas cannot be waited for). */
+    private boolean vanillaReady() {
+        if (minecraft.level == null || minecraft.player == null) return false;
+        int cx = minecraft.player.blockPosition().getX() >> 4, cz = minecraft.player.blockPosition().getZ() >> 4;
+        for (int dx = -2; dx <= 2; dx++)
+            for (int dz = -2; dz <= 2; dz++)
+                if (!minecraft.level.getChunkSource().hasChunk(cx + dx, cz + dz)) return false;
+        return true;
+    }
+
+    /** Re-reads the readiness (atlas_info is read: a few times a second at most). */
+    private void check() {
+        long now = System.nanoTime();
+        if (now - checkedNs < 250_000_000L) return;
+        checkedNs = now;
+        vanillaIn = vanillaReady();
+        failed = false;
+        if (!vanillaIn) {
+            isReady = false;
+            pending = "the terrain around you is arriving";
+        } else if (AtlasClient.offByChoice()) {  // (atlas is off by the player's setting: nothing more to wait for)
+            isReady = true;
+            pending = "";
+        } else if (AtlasReady.offForSession()) {
+            isReady = false;
+            failed = true;
+            String why = AtlasClient.offReason();
+            pending = "Infinite ATLAS stopped: " + (why == null ? "it is off for this session" : why);
+        } else {
+            pending = AtlasReady.pending();
+            isReady = pending.isEmpty();
+        }
     }
 
     @Override
     public void tick() {
         double s = (System.nanoTime() - openedNs) / 1e9;
-        AtlasClientGen.Progress p = AtlasClientGen.progress();
-        boolean failed = AtlasClient.failedForSession();
-        if (p != null && p.nearDone() && nearDoneNs == 0) nearDoneNs = System.nanoTime();
-        boolean horizonDone = p != null && (p.farTotal() == 0 || p.far() >= p.farTotal()
-                || (nearDoneNs != 0 && (System.nanoTime() - nearDoneNs) / 1e9 > HORIZON_GRACE_SECONDS));
-        boolean done = failed || s > MAX_SECONDS || (p != null && p.nearDone() && horizonDone);
-        if (!done && !AtlasClientGen.ON) done = true;
-        if (done) {
-            com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: {} after {} s ({})", failed ? "atlas off" : s > MAX_SECONDS ? "gave up"
-                    : "ready", String.format("%.1f", s), p == null ? "no generator" : p.describe());
+        check();
+        boolean held = HoldClient.held();
+        if (!held && (isReady || sentReady)) {  // released by the server (or never held and ready): the world is the player's
+            com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: ready after {} s ({})", String.format("%.1f", s),
+                    AtlasClientGen.progress() == null ? "no generator" : AtlasClientGen.progress().describe());
             minecraft.gui.setScreen(null);
+            return;
+        }
+        if (isReady) {
+            problem = null;
+            if (held && (!sentReady || (System.nanoTime() - sentAtNs) / 1e9 > 2)) {  // (again until the release arrives: a lost message)
+                if (HoldClient.sendReady(false) && !sentReady) {
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: ready after {} s, told the server", String.format("%.1f", s));
+                    sentReady = true;
+                }
+                sentAtNs = System.nanoTime();
+            }
+        } else if (!sentReady) {
+            if (failed) problem = pending;
+            else if (s > MAX_SECONDS) problem = "Loading is taking longer than expected (" + pending + ")";
+            else problem = null;
+        }
+        if (retry != null) {
+            retry.visible = problem != null;
+            enter.visible = problem != null;
+            enter.active = vanillaIn;
+            retry.active = !failed || AtlasClient.canRetry();
         }
     }
 
@@ -100,7 +201,20 @@ final class AtlasLoadingScreen extends Screen {
             double far = Math.min(1.0, p.far() / (double) p.farTotal());
             y = line(g, cx, y, "Horizon", p.far() + " / " + p.farTotal() + " tiles" + (p.farCached() > 0 ? " (" + p.farCached() + " from the cache)" : ""), far);
         }
-        g.centeredText(font, Component.literal("Esc: skip"), cx, y + 10, SkyUi.DIM);
+        if (problem != null) {
+            int ty = y + 6;
+            for (var line : font.split(Component.literal(problem), Math.min(360, width - 40))) {
+                g.centeredText(font, line, cx, ty, 0xFFE07050);
+                ty += font.lineHeight + 2;
+            }
+            g.centeredText(font, Component.literal(vanillaIn ? "You stay held (invisible, untouchable) until you choose."
+                    : "You stay held until the terrain around you has arrived."), cx, ty + 4, SkyUi.DIM);
+        } else {
+            String held = HoldClient.held() ? (sentReady ? "Entering the world" : "Preparing the world: you are not in play yet") : "";
+            if (!pending.isEmpty()) held += (held.isEmpty() ? "" : " - ") + pending;
+            g.centeredText(font, Component.literal(held), cx, y + 6, SkyUi.DIM);
+        }
+        g.centeredText(font, Component.literal("Esc: game menu"), cx, y + 26, SkyUi.DIM);
         String text = nearText;
         if (!text.equals(lastLine)) lastLine = text;
         super.extractRenderState(g, mouseX, mouseY, partialTick);

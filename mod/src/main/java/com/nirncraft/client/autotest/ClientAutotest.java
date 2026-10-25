@@ -274,11 +274,11 @@ public final class ClientAutotest {
     /** When the world last finished loading (the harness's "loading is done" signal; 0 while loading). */
     private static long worldReadyAt;
     private static final java.util.Set<String> LOADING_SCREENS = java.util.Set.of("LevelLoadingScreen",
-            "ReceivingLevelScreen", "IntroLoadingScreen", "GenericMessageScreen", "ProgressScreen");
+            "ReceivingLevelScreen", "IntroLoadingScreen", "AtlasLoadingScreen", "GenericMessageScreen", "ProgressScreen");
 
     static boolean loading(Minecraft mc) {
         var screen = mc.gui.screen();
-        return mc.level == null || mc.player == null
+        return mc.level == null || mc.player == null || com.nirncraft.hold.client.HoldClient.held()
                 || screen != null && LOADING_SCREENS.contains(screen.getClass().getSimpleName());
     }
 
@@ -374,6 +374,7 @@ public final class ClientAutotest {
         if (!liveStarted) {
             // The dedicated QA controller grants op after login; never silently run privileged setup before that.
             if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;
+            if (com.nirncraft.hold.client.HoldClient.held()) return;  // the player is held until loading completes: the setup (spectator, intro skip) runs after the release
             liveStarted = true;
             mc.gui.setScreen(null);
             // a test client shows the world, not text: HUD (and with it every NirnCraft card, banner and hint) hidden

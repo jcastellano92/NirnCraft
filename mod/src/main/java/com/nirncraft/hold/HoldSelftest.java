@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.GameType;
@@ -48,7 +47,7 @@ final class HoldSelftest {
         ServerPlayer held = standIn(level, "hold-test-held", home);
         ServerPlayer viewer = standIn(level, "hold-test-viewer", home.add(3, 0, 0));
         ServerPlayer control = standIn(level, "hold-test-control", home.add(0, 0, 3));
-        Zombie zombie = EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
+        Zombie zombie = (Zombie) net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
         if (zombie == null) {
             problems.add("could not make a zombie");
             return problems;
@@ -128,7 +127,7 @@ final class HoldSelftest {
         BlockPos below = BlockPos.containing(home).below();
         if (!NeoForge.EVENT_BUS.post(new BreakBlockEvent(level, below, level.getBlockState(below), held)).isCanceled())
             problems.add("a held player's block breaking was not cancelled");
-        if (!NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(held, 0, 100, 0)).isCanceled())
+        if (!NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(held, level, 0, 100, 0)).isCanceled())
             problems.add("a teleport of a held player was not cancelled");
 
         // frozen: moved, they are put back; a hold with nobody reporting stays a hold

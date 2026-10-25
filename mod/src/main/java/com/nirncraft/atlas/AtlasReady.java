@@ -3,7 +3,6 @@ package com.nirncraft.atlas;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
-import net.minecraft.client.Minecraft;
 import java.io.StringReader;
 
 /**
@@ -52,8 +51,9 @@ public final class AtlasReady {
         var rd = info.has("ready") && info.get("ready").isJsonObject() ? info.getAsJsonObject("ready") : null;
         if (rd == null) return "atlas_info lacks the ready block (an older library)";
         if (rd.get("pipelinesBuilding").getAsInt() != 0) return "pipelines still building off the render thread";
-        var mc = Minecraft.getInstance();
-        if (AtlasLoadingScreen.waiting() || mc.gui.screen() instanceof AtlasLoadingScreen) return "loading phase not over";
+        // (the loading screen itself is not a condition: under the player hold it stays up until the server releases the
+        // player, which happens because this is ready; its work is the generator and grid conditions below)
+        if (AtlasLoadingScreen.waiting()) return "loading phase not over";
         if (AtlasClientGen.ON) {
             var p = AtlasClientGen.progress();
             if (p == null || !p.running()) return "generator not running";

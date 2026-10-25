@@ -828,6 +828,23 @@ public final class AtlasClient {
         return failed ? lastStatus : null;
     }
 
+    /** A failure that could be transient (memory, a lost device, a frame error): the hold's Retry can try atlas again. */
+    static boolean canRetry() {
+        return failed && (offKind == AtlasStatusLine.Off.MEMORY || offKind == AtlasStatusLine.Off.DEVICE_LOST || offKind == AtlasStatusLine.Off.ERROR);
+    }
+
+    /** The hold's Retry: atlas starts afresh after a transient failure (false when it cannot help). */
+    static boolean retry() {
+        if (!canRetry()) return false;
+        failed = false;
+        offKind = null;
+        losses = 0;
+        retryAt = 0;
+        shrunk = null;
+        lastStatus = null;
+        return true;
+    }
+
     /** Off for the rest of the session: one status line (WARN), a notice where the player can act on it. */
     private static void offForSession(String reason, AtlasStatusLine.Off kind, Throwable t) {
         failed = true;
