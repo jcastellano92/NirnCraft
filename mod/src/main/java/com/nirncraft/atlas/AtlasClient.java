@@ -1063,6 +1063,8 @@ public final class AtlasClient {
             short[] ids = c.debugSection(x >> 4, y >> 4, z >> 4);
             int m = ids == null ? -1 : ids[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] & 0xFFFF;
             b.append(" core=").append(m).append(' ').append(materials != null && m > 0 ? materials.whoIs(m) : "");
+            int[] dm = m > 0 ? c.debugMaterial(m) : null;
+            if (dm != null) b.append(" tables{brick=").append(Integer.toHexString(dm[0])).append(" tex=").append(dm[1]).append(" cls=").append(dm[2]).append(" bricks=").append(dm[4]).append('/').append(dm[5]).append('}');
         }
         b.append(" chunk=").append(AtlasClientSections.chunkFlags(x >> 4, z >> 4));
         return b.toString();

@@ -753,6 +753,9 @@ ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint3
 /* Test hook: a section's ids as the host holds them now (out: 4096 ids), and where (*tier: 0 none, 1 raw: an upload
    not yet packed, 2 packed in the warm tier or read back from the cold one). */
 ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, uint16_t* out, uint32_t* tier);
+/* Test hook: what the kernels' tables hold of material `mat`: out[0] its brick word (0 none, bit 30 sheets, bit 31 frames),
+   [1] its texture slot (0 none), [2] its class, [3] the brick table's length, [4] materials with a voxel brick, [5] with sheets. */
+ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint32_t out[6]);
 ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
                                                 const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted);
 /* Test hook (the GPU generator's sections without the generator): `count` sections given to the grid through a buffer

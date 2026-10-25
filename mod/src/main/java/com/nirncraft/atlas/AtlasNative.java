@@ -143,7 +143,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setEclipse, setJitter, setShapes, setTextures, debugSection, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setEclipse, setJitter, setShapes, setTextures, debugSection, debugMaterial, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -233,6 +233,7 @@ public final class AtlasNative {
         setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setTextures = bindOptional(l, lib, "atlas_set_material_textures", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         debugSection = bindOptional(l, lib, "atlas_debug_section", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
+        debugMaterial = bindOptional(l, lib, "atlas_debug_material", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS));
         setPreExposure = bindOptional(l, lib, "atlas_set_pre_exposure", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
         uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
@@ -1070,6 +1071,20 @@ public final class AtlasNative {
                 check((int) debugSection.invokeExact(ptr, sx, sy, sz, out, tier), "atlas_debug_section");
                 short[] r = new short[4096];
                 MemorySegment.copy(out, JAVA_SHORT, 0, r, 0, 4096);
+                return r;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** What the kernels' tables hold of a material (atlas.h atlas_debug_material): brick word, texture slot, class, table length, bricks, sheets; null without the hook. */
+        public int[] debugMaterial(int mat) {
+            if (debugMaterial == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(24, 4);
+                check((int) debugMaterial.invokeExact(ptr, mat, out), "atlas_debug_material");
+                int[] r = new int[6];
+                for (int i = 0; i < 6; i++) r[i] = out.get(JAVA_INT, 4L * i);
                 return r;
             } catch (Throwable t) {
                 throw rethrow(t);

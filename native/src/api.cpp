@@ -2019,6 +2019,27 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
     ATLAS_CATCH(ctx)
 }
 
+ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint32_t out[6]) {
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    // what the kernels' tables say of material `mat`: its brick word (0 none, bit 30 sheets, bit 31 frames), its texture
+    // slot (0 none), its class, the brick table's length, whether it has a voxel brick / sheets in the store
+    std::vector<uint32_t> packed;
+    uint64_t rev = 0;
+    ctx->bricks.pack(~0ull, true, ctx->materialLights, packed, rev);
+    out[0] = mat < packed[0] ? packed[1 + mat] : 0u;
+    out[1] = mat + 1 < ctx->texturesPacked.size() && mat < ctx->texturesPacked[0] ? ctx->texturesPacked[1 + mat] : 0u;
+    out[2] = mat < ctx->palette.size() ? uint32_t(ctx->palette[mat].emisClass[1]) : 255u;
+    out[3] = packed[0];
+    uint32_t v = 0, sh = 0, t = 0;
+    ctx->bricks.stats(v, sh, t);
+    out[4] = v;
+    out[5] = sh;
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
 ATLAS_API AtlasStatus atlas_debug_gpu_sections(AtlasContext* ctx, uint32_t count, const int32_t* pos, const uint16_t* ids,
                                                const uint32_t* uniform, uint8_t* accepted) {
     if (!ctx || !pos || (count && !ids)) return ATLAS_ERR_ARG;
