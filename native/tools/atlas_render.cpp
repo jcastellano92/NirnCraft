@@ -64,6 +64,9 @@
 #include "pack_look.hpp"
 #include "png.hpp"
 
+extern "C" ATLAS_API const char* atlas_fr_dump(const char* reason);  // (flight_recorder.cpp)
+extern "C" ATLAS_API void atlas_fr_frame(void);
+
 namespace {
 
 constexpr double PI = 3.14159265358979323846;
@@ -974,12 +977,14 @@ int main(int argc, char** argv) {
                     return 4;
                 }
                 f.flags = keepFlags;
+                atlas_fr_frame();  // (ATLAS_RECORDER=1: the recorder's frames, per pass GPU times in its dump below)
                 atlas_get_stats(ctx, &st);
                 if (smp == 0 && i < frames) {
                     (other ? otherTimes : times).push_back(st.lastFrameMs);
                     if (!other) best = std::min(best, st.lastFrameMs);
                 }
             }
+            if (smp == 0 && std::getenv("ATLAS_RECORDER")) std::fprintf(stderr, "flight recorder: %s\n", atlas_fr_dump("atlas_render"));
             // vgcheck=1: the same frame with level 0 from the SVDAG regions (the grid off): where either hits, the hit
             // distance and the surface word (normal, class) compared pixel by pixel
             if (smp == 0 && num(a, "vgcheck", 0) > 0) {

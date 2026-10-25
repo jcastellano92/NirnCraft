@@ -1617,6 +1617,17 @@ private:
                 timeline_ = true;
             }
         }
+        // (dev: ATLAS_PIPE_STATS=1) each pipeline's executable statistics (registers, local memory...) on stderr
+        VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR statsF{
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR};
+        if (std::getenv("ATLAS_PIPE_STATS") && std::getenv("ATLAS_PIPE_STATS")[0] == '1' &&
+            has(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME)) {
+            enable.push_back(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME);
+            statsF.pipelineExecutableInfo = VK_TRUE;
+            statsF.pNext = const_cast<void*>(dci.pNext);
+            dci.pNext = &statsF;
+            pipeStats_ = true;
+        }
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
         VkResult cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
@@ -1686,6 +1697,67 @@ private:
     // Every compute pipeline is made here: timed (a TRACE line each: which one the driver's own compile spends on; a
     // new far kernel took ~6 min in NVIDIA's JIT once, then its disk cache), and through a pipeline cache of our own
     // when ATLAS_PIPELINE_CACHE names a file (read once, written back after each pipeline that took long)
+    // (ATLAS_PIPE_STATS=1) the driver's statistics of a pipeline's executables, one line each
+    bool pipeStats_ = false;
+    void pipelineStats(VkPipeline p, const char* name) {
+        auto props = reinterpret_cast<PFN_vkGetPipelineExecutablePropertiesKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutablePropertiesKHR"));
+        auto stats = reinterpret_cast<PFN_vkGetPipelineExecutableStatisticsKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutableStatisticsKHR"));
+        if (!props || !stats) return;
+        VkPipelineInfoKHR pi{VK_STRUCTURE_TYPE_PIPELINE_INFO_KHR};
+        pi.pipeline = p;
+        uint32_t n = 0;
+        if (props(dev_, &pi, &n, nullptr) != VK_SUCCESS) return;
+        for (uint32_t e = 0; e < n; e++) {
+            VkPipelineExecutableInfoKHR ei{VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INFO_KHR};
+            ei.pipeline = p;
+            ei.executableIndex = e;
+            uint32_t m = 0;
+            if (stats(dev_, &ei, &m, nullptr) != VK_SUCCESS || m == 0) continue;
+            std::vector<VkPipelineExecutableStatisticKHR> st(m, {VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_STATISTIC_KHR});
+            if (stats(dev_, &ei, &m, st.data()) != VK_SUCCESS) continue;
+            std::string line;
+            for (const auto& x : st) {
+                char b[160];
+                if (x.format == VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_UINT64_KHR)
+                    std::snprintf(b, sizeof b, " %s=%llu;", x.name, (unsigned long long)x.value.u64);
+                else if (x.format == VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_INT64_KHR)
+                    std::snprintf(b, sizeof b, " %s=%lld;", x.name, (long long)x.value.i64);
+                else if (x.format == VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_FLOAT64_KHR)
+                    std::snprintf(b, sizeof b, " %s=%.3f;", x.name, x.value.f64);
+                else
+                    std::snprintf(b, sizeof b, " %s=%s;", x.name, x.value.b32 ? "true" : "false");
+                line += b;
+            }
+            std::fprintf(stderr, "TRACE pipestats %s[%u]:%s\n", name, e, line.c_str());
+            // (ATLAS_PIPE_IR=<dir>: the driver's internal representations of it, one file each)
+            const char* irDir = std::getenv("ATLAS_PIPE_IR");
+            auto irs = reinterpret_cast<PFN_vkGetPipelineExecutableInternalRepresentationsKHR>(
+                vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutableInternalRepresentationsKHR"));
+            uint32_t ni = 0;
+            if (!irDir || !*irDir || !irs || irs(dev_, &ei, &ni, nullptr) != VK_SUCCESS || ni == 0) continue;
+            std::vector<VkPipelineExecutableInternalRepresentationKHR> ir(ni, {VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INTERNAL_REPRESENTATION_KHR});
+            if (irs(dev_, &ei, &ni, ir.data()) != VK_SUCCESS) continue;
+            std::vector<std::vector<char>> data(ni);
+            for (uint32_t k = 0; k < ni; k++) {
+                data[k].resize(ir[k].dataSize + 1, 0);
+                ir[k].pData = data[k].data();
+            }
+            if (irs(dev_, &ei, &ni, ir.data()) != VK_SUCCESS) continue;
+            static int seq = 0;
+            for (uint32_t k = 0; k < ni; k++) {
+                char path[1024];
+                std::snprintf(path, sizeof path, "%s/%02d-%s-%u-%s.txt", irDir, seq, name, e, ir[k].name);
+                if (FILE* f = std::fopen(path, "wb")) {
+                    std::fwrite(data[k].data(), 1, ir[k].dataSize, f);
+                    std::fclose(f);
+                }
+                std::fprintf(stderr, "TRACE pipeir %s: %s (%s, %zu bytes, text %d)\n", path, ir[k].name, ir[k].description,
+                             size_t(ir[k].dataSize), int(ir[k].isText));
+            }
+            seq++;
+        }
+    }
+
     VkResult makePipeline(const VkComputePipelineCreateInfo& cp, VkPipeline* out, const char* name) {
         if (!pipeCacheTried_) {
             pipeCacheTried_ = true;
@@ -1716,9 +1788,13 @@ private:
         }
         auto t0 = std::chrono::steady_clock::now();
         ATLAS_ZONE("vk:createPipeline");
-        VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cp, nullptr, out);
+        VkComputePipelineCreateInfo cs = cp;
+        if (pipeStats_) cs.flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
+        if (pipeStats_ && std::getenv("ATLAS_PIPE_IR")) cs.flags |= VK_PIPELINE_CREATE_CAPTURE_INTERNAL_REPRESENTATIONS_BIT_KHR;
+        VkResult r = vkCreateComputePipelines(dev_, pipeCache_, 1, &cs, nullptr, out);
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
+        if (pipeStats_ && r == VK_SUCCESS) pipelineStats(*out, name);
         if (pipeCache_ && (s > 0.25 || pipeCacheFresh_)) {
             size_t n = 0;
             if (vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) == VK_SUCCESS && n) {
