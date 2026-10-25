@@ -144,7 +144,9 @@ public final class ArcaneRegistry {
             registerMoreIngredientFlora(id);
             ingredient(id);
         }
-        for (Map.Entry<String, String> entry : REGIONAL_FLORA_DROPS.entrySet()) {
+        // (sorted: Map.ofEntries iterates in an order salted per JVM launch, which numbered these 14 blocks differently at every
+        // launch and made every cache keyed by block ids (the atlas materials, the self-baking cache) unreadable on the next)
+        for (Map.Entry<String, String> entry : new java.util.TreeMap<>(REGIONAL_FLORA_DROPS).entrySet()) {
             registerRegionalFloraBlock(entry.getKey(), entry.getValue());
         }
     }

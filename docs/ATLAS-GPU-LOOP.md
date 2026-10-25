@@ -118,6 +118,19 @@ Stage-1 slicing comes first, since the bake and the idle baker run the same gene
 - This is also stage 2's **floor**: where level-0 data exists, `vgDownMain` replaces the stand-ins with true
   downsampled voxels.
 
+**Built (atlas-bake, 2026-10-25): the floor.** `native/src/gen_bake.cpp` plans every far tile of levels 6 to 3, then 2, that
+touches the map's bounds (TamrielMap: x -15360..12800, z -5120..16384; 229 tiles in 3-6, 588 in 2), coarsest level first and
+the nearest the spawn first within a level, and makes each through `atlas_gen_far_ingest` into the existing far cache
+(`f<lod>.<rx>.<rz>.gch`, set `gen-<fingerprint>/` of the world's store: seed plus the generator's fingerprint, another
+fingerprint is another set and the old one is deleted). `AtlasCoarseBake.java` runs it: levels 3-6 in the loading phase (the
+loading screen shows the tiles done; its submissions are unpaced while the screen holds the player), level 2 after control
+from the near window's idle time (paced as the far field is), and its thread loads every known tile of the coarse levels'
+windows into the grid from disk, coarsest level first, nearest first, and goes on as the windows slide; `farStep` only
+makes the tiles it does not own (the live fallback). Every far record is marked a stand-in (bit 31 of the record's word
+clear); `GenCache::putFarTile/putCoarse(..., standIn=false)` writes true data, which replaces a stand-in on disk. Per-stage,
+per-region fingerprints (step 7) are not built: any change of the fingerprint rebakes everything, and a changed decoration
+stage rebakes the horizon too (the far tiles need their own set).
+
 **Near.** The self-baking cache plus an **idle baker**: the RequestRing's tail along the predicted path, then a
 spiral, run only from the pacer's idle tokens in bake-only mode. A full level-0 Tamriel is ~5.3 GB and ~40 GPU-min once
 trees are fixed: optional.
