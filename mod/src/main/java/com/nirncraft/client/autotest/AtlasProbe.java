@@ -134,7 +134,7 @@ final class AtlasProbe {
         if (v.has("settled")) o.addProperty("gridSettled", v.get("settled").getAsBoolean());
         JsonObject cov = obj(v, "coverage");
         if (cov != null) {
-            for (String k : new String[]{"holes", "partial", "columns", "slotsUsed", "slotCap", "farReach"}) if (cov.has(k)) o.add(k, cov.get(k));
+            for (String k : new String[]{"holes", "partial", "columns", "slotsUsed", "slotCap", "farReach", "l0Near6", "nearHoles", "nearReach"}) if (cov.has(k)) o.add(k, cov.get(k));
         }
         JsonObject tiers = obj(v, "tiers");
         if (tiers != null) {

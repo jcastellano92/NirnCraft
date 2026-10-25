@@ -415,6 +415,18 @@ def summarize(data):
     m["loadSubs"] = parse_subs(ld.get("subs"))
     m["routeSubs"] = parse_subs(data.get("subs"))
     m["loadBake"] = ld.get("bake")
+    # the near-first gate: level-0 columns within 6 chunks of the camera that hold no data, per second: none while walking and
+    # sprinting, and gone within 2 s of the end of the flight
+    ser = [(r["sec"], r.get("phase"), (r.get("atlas") or {}).get("l0Near6")) for r in secs]
+    ser = [(t, ph, v) for t, ph, v in ser if v is not None]
+    m["l0Near6"] = {}
+    for t, ph, v in ser:
+        m["l0Near6"][ph] = max(m["l0Near6"].get(ph, 0), v)
+    fly = [t for t, ph, v in ser if ph == "fly"]
+    fly_end = (max(fly) + 1) if fly else None
+    after = [(t, v) for t, ph, v in ser if fly_end is not None and t >= fly_end]
+    clean = next((t for t, v in after if v == 0), None)
+    m["l0Near6RecoverS"] = None if clean is None or fly_end is None else clean - fly_end
     m["verify"] = {k: last_of(k) for k in ("verifyChunks", "verifyChunksDiffered", "verifyTiles", "verifyTilesDiffered")}
     queued = [d for d in data.get("dumps") or [] if "queued behind" in d.get("verdict", "")]
     m["dumps"] = len(data.get("dumps") or [])
@@ -460,6 +472,11 @@ def summarize(data):
                          f"> {BAR['genSubmissionMs']:g}")
     if (m["verify"]["verifyChunksDiffered"] or 0) + (m["verify"]["verifyTilesDiffered"] or 0):
         fails.append(f"the idle verifier found cached data that the generator no longer makes: {m['verify']} (a cache key that missed a change)")
+    for ph in ("walk", "sprint"):
+        if (m["l0Near6"].get(ph) or 0) > 0:
+            fails.append(f"level-0 holes within 6 chunks of the camera while the {ph} (up to {m['l0Near6'][ph]})")
+    if ser and fly_end is not None and (m["l0Near6RecoverS"] is None or m["l0Near6RecoverS"] > 2.0):
+        fails.append(f"level-0 holes near the camera not gone within 2 s of the end of the flight ({m['l0Near6RecoverS']})")
     if m["dumpsQueuedBehindGen"]:
         fails.append(f"{m['dumpsQueuedBehindGen']} frame(s) over 50 ms queued behind the generator (recorder dumps)")
     if m["p99"] > BAR["p99"]:
