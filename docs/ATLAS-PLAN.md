@@ -77,6 +77,13 @@ distance. As numbers:
 
 A stage is done when its bar passes in the real game, not offline.
 
+### Merge gate (2026-10-25)
+
+A step merges when it's proven, not in big batches. The gate before a renderer step merges:
+- route frame times: no worse than atlas-render's;
+- a gallery class sample: its pass count may not drop, so speed never quietly costs looks;
+- the step's moving capture: no new ghosting or shimmer.
+
 ### Frame budget (2026-10-25)
 
 At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
