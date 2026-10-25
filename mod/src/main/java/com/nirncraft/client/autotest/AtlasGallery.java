@@ -317,6 +317,12 @@ final class AtlasGallery {
                     waitTicks = 10;
                 }
             }
+            case "prop" -> {  // a system property for a measurement (null value clears it)
+                String k = current.get("name").getAsString();
+                if (current.has("value") && !current.get("value").isJsonNull()) System.setProperty(k, current.get("value").getAsString());
+                else System.clearProperty(k);
+                idx++;
+            }
             case "probe" -> {  // each listed block as the client, the feed and the core have it, to <name>.probe.txt
                 var out = new StringBuilder();
                 for (JsonElement e : current.getAsJsonArray("blocks")) {

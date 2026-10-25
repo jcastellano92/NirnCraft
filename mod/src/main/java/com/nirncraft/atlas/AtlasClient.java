@@ -1092,7 +1092,19 @@ public final class AtlasClient {
         return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " core=" + core + " " + AtlasRecorder.state();
     }
 
+    private static int ablateSet = 0;
+
     private static void jitter(AtlasNative.Context ctx, boolean on) {
+        // (measurements: -Dnirncraft.atlas.ablate=<bits>, or set at run time by the gallery, as ATLAS_ABLATE)
+        int ab = Integer.getInteger("nirncraft.atlas.ablate", 0);
+        if (ab != ablateSet) {
+            ablateSet = ab;
+            try {
+                ctx.debugAblate(ab);
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.debug("atlas: ablate not set: {}", e.toString());
+            }
+        }
         try {
             if (on) {
                 // the offset the pack's vertices took this frame (the index published last frame), in atlas pixels

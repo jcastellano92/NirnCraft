@@ -158,6 +158,7 @@ struct AtlasContext {
     BrickStore bricks;
     std::vector<uint32_t> bricksPacked = std::vector<uint32_t>(1, 0u);
     uint64_t bricksRevision = 0, bricksStoreRevision = 0;
+    uint32_t ablateExtra = 0;  // atlas_debug_ablate: bits OR-ed into the measurement switches (ATLAS_ABLATE) from the host
     std::vector<uint32_t> materialLights;  // per material its light word (bricks.hpp), the last packed
     uint64_t materialLightsHash = 0;
     bool gridLights = false;  // some material emits: the grid's emitters are lights (gridLightMain)
@@ -1287,7 +1288,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // (read every frame: a measurement interleaves its variants in one process, atlas_render nlablate=)
         const char* v = std::getenv("ATLAS_ABLATE");
-        const uint32_t ablate = v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
+        const uint32_t ablate = (v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u) | ctx->ablateExtra;
         std::memcpy(&g.jitter[3], &ablate, 4);
         // ATLAS_LOD=mode,minCos,bias (measurements): the continuous level's threshold pattern (atlas_far.slang gLodXi),
         // the grazing widening's least cos (0.5 by default: at most one level), a bias added to every ray's level
@@ -2017,6 +2018,13 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
     else if (s.packed) unpackSection(s.packed->data(), out);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_debug_ablate(AtlasContext* ctx, uint32_t bits) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->ablateExtra = bits;
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint32_t out[6]) {

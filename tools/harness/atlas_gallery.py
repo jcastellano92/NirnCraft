@@ -17,6 +17,7 @@ import fnmatch
 import hashlib
 import json
 import math
+import os
 import re
 import shutil
 import time
@@ -285,6 +286,8 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
         steps = []
         if b == 0:
             steps.append({"op": "window", "w": WINDOW[0], "h": WINDOW[1]})
+        if os.environ.get("NIRNCRAFT_GALLERY_ABLATE"):  # (a measurement: bits into the core's ATLAS_ABLATE switches)
+            steps.append({"op": "prop", "name": "nirncraft.atlas.ablate", "value": os.environ["NIRNCRAFT_GALLERY_ABLATE"]})
         steps += [{"op": "goto", "at": [ox, oy + 6, oz], "wait": 30},
                   {"op": "place", "items": [dict(zip("xyz", cell(i)), state=gr["state"], w=3, d=3) for i, gr in enumerate(batch)],
                    "wait": 60}]

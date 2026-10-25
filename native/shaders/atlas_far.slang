@@ -435,6 +435,9 @@ static const uint VG_UNIFORM = 3u;  // one id throughout (bits 2-17), no slot: r
 // under the host's TAA, which averages a part-covered texel's coverage)
 static float gAlphaXi = 0.5;
 // (ATLAS_ABLATE 134217728, measurements: level 0 from the SVDAG regions alone, as before the grid)
+// (ATLAS_ABLATE 33554432, measurements: a primary hit's albedo says what drew it: green a brick, red a shape's micro-voxels, blue
+// a textured cube, yellow the groups' boxes)
+bool dbgPath() { return (asuint(frame.jitter.w) & 33554432u) != 0u; }
 bool vgOn() { return frame.vgOrigin.w != 0 && (asuint(frame.jitter.w) & 134217728u) == 0u; }
 
 // the cell of the window's chunk c (logical, from its origin): in memory at (c + origin) mod D (voxgrid.hpp phys), so
@@ -726,7 +729,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                             gTr.mat = mat;
                             gTr.axis = bh.axis;
                             gTr.lod = 0;
-                            gTr.albedo = bh.albedo;
+                            gTr.albedo = dbgPath() ? float3(0.0, 0.5, 0.0) : bh.albedo;
                             gTr.hasAlbedo = 1u;
                             return TRACE_HIT;
                         }
@@ -765,6 +768,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                             gTr.albedo = cellAlbedo(mat | G_CELL_SHAPED, f, q);
                             gTr.hasAlbedo = 1u;
                             vgTexel(mat, ro + d * tHit - float3(v), d, ax, gChordT + tHit);
+                            if (dbgPath()) gTr.albedo = float3(0.5, 0.0, 0.0);
                             return TRACE_HIT;
                         }
                     } else if (voxelStops(mat, v, v + gBlock, 0, ro, d, inv, stepPos, t)) {
@@ -773,6 +777,7 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                         gTr.axis = entryAxis(v, ro, d, inv, stepPos);
                         gTr.lod = 0;
                         if (gPrimary) vgTexel(mat, ro + d * t - float3(v), d, gTr.axis, gChordT + t);
+                        if (dbgPath() && gPrimary) gTr.albedo = float3(0.0, 0.0, 0.5), gTr.hasAlbedo = 1u;
                         return TRACE_HIT;
                     }
                     lo = v;
@@ -1096,6 +1101,7 @@ int traceLodRegions(int lod, float3 p0, float3 d, float len, out float uncExit) 
                 }
                 if (got == 1) {
                     gTr.lod = lod;
+                    if (dbgPath() && gPrimary) gTr.albedo = float3(0.5, 0.5, 0.0), gTr.hasAlbedo = 1u;
                     return TRACE_HIT;
                 }
                 if (got == 2) return TRACE_UNCOVERED;  // (uncExit 1e30: given up along this ray at this level)
