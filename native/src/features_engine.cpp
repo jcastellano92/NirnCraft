@@ -829,7 +829,7 @@ public:
         // floor's 64 chunks, 260 parts a tile. The floor is 5 to 7 ms and the time hardly moves with the chunks up to a few
         // hundred, so the part grows by a quarter while it runs under 85 % of the limit (twice the budget, 8 ms: what a
         // submission may take) and is cut to the share of it when it ran over.
-        const double limit = budget * 1.5;  // (6 ms: under the 8 ms a submission may take, as parts run up to a third over)
+        const double limit = budget * 2.0;  // (8 ms: what a submission may take; a limit of 6 ms made twice the parts for the same minutes)
         if (c.n <= 0.0) c.n = 256.0;
         for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
             double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
