@@ -28,6 +28,7 @@ final class HoldProbe {
         float health;
         double x, y, z;
         boolean aggro;
+        net.minecraft.world.Difficulty difficulty;
     }
 
     private HoldProbe() {}
@@ -39,6 +40,8 @@ final class HoldProbe {
         Run r = RUNS.get(p.getUUID());
         if (held == SPAWN_AT && r == null) {
             r = new Run();
+            r.difficulty = level.getServer().getWorldData().getDifficulty();
+            level.getServer().setDifficulty(net.minecraft.world.Difficulty.NORMAL, true);  // (a peaceful world would remove the husk at once)
             r.health = p.getHealth();
             r.x = p.getX();
             r.y = p.getY();
@@ -71,6 +74,7 @@ final class HoldProbe {
                     ? "PASS (husk beside the held player for " + (JUDGE_AT - SPAWN_AT) + " ticks: no target, no damage, not sent to another player, not moved)"
                     : "FAIL (" + why + ")");
             r.mob.discard();
+            if (r.difficulty != null) level.getServer().setDifficulty(r.difficulty, true);
             RUNS.remove(p.getUUID());
         }
     }

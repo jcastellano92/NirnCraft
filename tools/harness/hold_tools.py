@@ -48,6 +48,12 @@ def run(runner, s, v, fp):
         fails, metrics = [str(e)[:400]], {}
     for f in fails:
         print(f"  FAIL {s['id']}: {f}", flush=True)
+    if fails:  # the hold's own log lines of this client, for the diagnosis
+        try:
+            tail = [l for l in fresh_log(runner.game).splitlines() if re.search(r"hold|Hold|atlas loading|Autotest live|RaceScreen|Intro", l)][-25:]
+            print("  log: " + chr(10).join("       " + x[:230] for x in tail).lstrip(), flush=True)
+        except OSError:
+            pass
     return results.record(s["id"], v, "hold", "fail" if fails else "pass", metrics, fp, extra={"fails": fails})
 
 
@@ -156,7 +162,7 @@ def returning(runner, s):
     if d > 0.5:
         fails.append(f"the mid-session hold released {d:.1f} blocks from where it held")
     # the server-side rules on stand-in players, through this (integrated) server: hidden, untargetable, no damage, pinned ...
-    g.actions(["command nirncraft-hold selftest"], timeout=180)
+    g.actions(["try nirncraft-hold selftest"], timeout=180)
     sm = wait_for(r"Hold selftest: (\d+) problems", g, 120)
     if not sm:
         fails.append("the hold selftest printed no result")
@@ -183,7 +189,8 @@ def never_ready(runner, s):
         fails.append(probe.group(0)[:300])
     else:
         m["probe"] = probe.group(0)[:160]
-    time.sleep(60)  # a client that never reports stays held (a minute more)
+    wait_for(r"is still held \(\d+ s\)", g, 100, samples)  # a client that never reports stays held (logged every 30 s)
+    time.sleep(10)
     txt = fresh_log(g)
     c = client_status()
     m["screen"], m["held"] = c.get("screen"), c.get("held")
