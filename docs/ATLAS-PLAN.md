@@ -5,6 +5,23 @@ order-of-work sections of ATLAS-STATUS.md, ATLAS-ENGINE.md §3 and ATLAS-RENDERE
 history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the checklist of everything Minecraft draws
 (ATLAS-RENDER-INVENTORY) and the decision log.
 
+## North star (owner, 2026-10-25)
+
+Read this before choosing any step. The world is visible to the true horizon, with the planet's curvature, and
+detail flows smoothly from your feet to that horizon with no seam. It's fast and scales sensibly with resolution and
+hardware.
+
+- **Content:** every vanilla and NirnCraft block and element, water included, looks like Minecraft up close.
+- **Light and look:** great light (GI, interiors and exteriors), with our sky, distant fog and dynamic atmosphere kept,
+  or adapted to work.
+- **Servers:** it works there too, with world speed, update rate and scale not possible before.
+- **Supported, built when their stage comes:** distant storms and 3D cloud weather, far entities changing, fast AI
+  pathing, water.
+
+**How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
+experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
+gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
+
 ## 0. Principles (owner, 2026-10-24)
 
 1. **One system for everything.** Our renderer draws every pixel of the world, near and far: blocks, fluids,
