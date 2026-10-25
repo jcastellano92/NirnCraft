@@ -83,7 +83,9 @@ public final class AtlasReady {
             var p = AtlasClientGen.progress();
             if (p == null || !p.running()) return "generator not running";
             if (!p.nearDone()) return "spawn area " + p.near() + " of " + p.nearTotal() + " chunks";
-            if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (coarse bake) " + p.far() + " of " + p.farTotal() + " tiles";
+            var bk = AtlasCoarseBake.progress();  // (levels 3-6: the whole-map bake's own count, made or read; farStep makes the finer levels')
+            if (bk != null && bk.phase() > 0 && !bk.loaded()) return "horizon (coarse bake) " + bk.done() + " of " + bk.total() + " tiles";
+            if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (finer levels) " + p.far() + " of " + p.farTotal() + " tiles";
         }
         var v = info.has("voxgrid") && info.get("voxgrid").isJsonObject() ? info.getAsJsonObject("voxgrid") : null;
         if (v == null) {  // (the level-0 grid exists in the unified / client-generated modes; the plain far field has none to wait for)

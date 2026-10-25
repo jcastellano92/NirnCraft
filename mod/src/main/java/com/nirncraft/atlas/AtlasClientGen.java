@@ -1264,11 +1264,21 @@ final class AtlasClientGen implements AutoCloseable {
     static Progress progress() {
         AtlasClientGen c = active;
         if (c == null) return null;
-        int farTotal = c.farOn ? 6 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1) : 0;
+        int farTotal = c.farOn ? 6 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1) : 0, farUp = Math.min(c.farDone.size(), farTotal);
+        // the tiles of levels 3-6 are the coarse bake's (AtlasCoarseBake: its own gate, `loaded`): farStep only counts the finer
+        // levels' tiles it makes, so the far gate is those, of their share (it waited for 150 when 50 could ever be done)
+        AtlasCoarseBake.Progress bk = AtlasCoarseBake.progress();
+        if (c.farOn && bk != null && bk.phase() > 0) {
+            farTotal = 2 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1);
+            int up = 0;
+            for (long k : c.farDone)
+                if ((int) (k >>> 56) < AtlasCoarseBake.LOAD_LO) up++;
+            farUp = Math.min(up, farTotal);
+        }
         // the spawn area the loading gate waits for: the chunks within SPAWN_RADIUS of where the player joined (nearest first
         // the generator makes them); the rest of the window goes on while the player plays
         int spawnTotal = windowChunks(SPAWN_RADIUS), spawnUp = c.jumpNs == 0 ? 0 : c.countUp(SPAWN_RADIUS);
-        return new Progress(camSet, spawnUp, spawnTotal, c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal), Math.min(c.farDone.size(), farTotal), farTotal,
+        return new Progress(camSet, spawnUp, spawnTotal, c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal), farUp, farTotal,
                 c.cachedChunks, c.farCached, c.chunks);
     }
 
