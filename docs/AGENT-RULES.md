@@ -240,6 +240,17 @@ Read these first:
   and wait for the orchestrator's `--gate-resolve` (allow = one run of that label). Example live call:
   `py -3 E:/NirnCraft-scratch/locks/heavy.py --exclusive --loop outer --why "finished bake slicing: confirm route" "bake2 game: route" -- py -3 tools/harness/harness.py run atlas-route`
 
+  **Watching your own jobs (no Haiku needed):** `heavy.py --follow <label-substring>` (run it in the background or under
+  a Monitor) streams your jobs' events: queued, position, started, phase, counters, `NO PROGRESS`, finished rc.
+  `heavy.py --status [label-substring]` is the one-shot snapshot: your place in the queue, each job ahead (phase, last
+  output and last progress, process alive and CPU). Progress decides, never time alone: output, a phase or counter
+  change, CPU in the job's process tree, or files written all count, so a long job that is moving is never "stuck".
+  Only a stall (no progress for 10 min by default, `gate-rules.json`) reaches Haiku. If you think a job is stuck, run
+  `heavy.py --stuck "<what I wait on, why it looks stuck>" [label-substring]`: Haiku answers normal (with an ETA and a
+  "re-check at HH:MM"), stuck (diagnosis) or unsure; the last two escalate to the orchestrator automatically. At the
+  ETA run `heavy.py --recheck` to verify; a second "normal" with no progress since counts as unsure. Haiku only
+  reports; it never kills or changes a job.
+
 * **Process feedback (2026-10-25).** When a rule, the gate, the harness or any step of the process slows you down or
   makes no sense, say so: `py -3 E:/NirnCraft-scratch/locks/feedback.py "<what, and your suggestion>"`. The orchestrator
   sees it within about 5 minutes and changes the process. Keep working meanwhile.
