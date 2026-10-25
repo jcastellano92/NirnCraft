@@ -221,6 +221,13 @@ be re-measured after the first fix.
   voxgrid to the log), `atlas-unified on|off`, `far-timeline start` / `far-timeline dump NAME`, `capture-inside TAG`
   (clip tests), `camera-travel TAG TICKS X Y Z LX LY LZ` (moving captures every 10 ticks). The eye is 1.62 above the
   feet; conditional poses: `try execute ... if block ~ ~ ~ #minecraft:leaves run tp ...` (the last success wins).
+- **Flight recorder** (always on in a dev instance; native/src/flight_recorder.hpp, Java `AtlasRecorder`): CPU zones on every
+  thread (native `ATLAS_ZONE("name")`, Java `AtlasRecorder.begin()` / `end(ZONE, t)`), Vulkan timestamps per frame pass and per
+  generator submission, GC pauses. A frame over 50 ms (`-Dnirncraft.atlas.recorder.spikeMs`, at most one dump per
+  `.gapSec` = 10 s) writes the 30 s around it to `.minecraft/atlas-trace/<time>/`: `summary.txt` (the frame, a verdict naming
+  the long pole, the top zones by thread, the GPU passes) and `trace.json` (open in https://ui.perfetto.dev). `/nirncraft-atlas-trace`
+  dumps on demand (`status` prints its counters). Off: `-Dnirncraft.atlas.recorder=false`. Zone names starting `wait:` are time spent
+  waiting (the verdict separates them from work); add a zone around any suspect call and the next dump shows it.
 - Passive profiler while someone plays: `nirncraft.atlas.profile=true` appends atlas-info with the player's position
   every 2 s to `.minecraft/atlas-profile.log`.
 - Offline: `atlas_render.exe` (primarynear=2, seq=static,turn,walk, interleave, lightsynth=N; see the agents' commits),

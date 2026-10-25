@@ -241,6 +241,8 @@ public:
     };
     // (the sections an edit layer's base made: for the grid, VoxGrid::put)
     using Made = std::vector<std::pair<Key3, std::shared_ptr<const Section>>>;
+    // Never waits for the world's lock (the render thread calls it): when the lock is busy, results that need no `made` go to an
+    // inbox the next holder of the lock applies (update, the spiller, the next call)
     void packedDone(const std::vector<PackDone>& done, Made* made = nullptr);
     // Edits are kept as layers over their generated base (SectionStore's EditLayer). An edit of a section the host does
     // not hold (the generator's own, on the GPU) waits for its base: the grid packs it on the GPU and reads it back
@@ -463,6 +465,16 @@ private:
     bool coveredByFiner(const Key3& k, const int centreRegion[MAX_LODS][2]) const;  // its extent inside lod - 1's window
     // (budgeted updates) the packer thread: the scene packed from the latest centre it was handed, off the update
     std::thread packerThread_;
+    // the warm tier's spill to disk, in slices with mu_ let go between them (SectionStore::drainSpills)
+    std::thread spillThread_;
+    std::mutex inboxMu_;  // (never held long: pack results that found mu_ busy wait here)
+    std::vector<PackDone> inbox_;
+    std::atomic<bool> inboxFull_{false};
+    void packedApply(const std::vector<PackDone>& done, Made* made);  // (mu_ held)
+    void drainInbox();                                                 // (mu_ held)
+    std::condition_variable spillCv_;
+    bool spillStop_ = false;
+    void spiller();
     std::mutex packMu_;
     std::condition_variable packCv_;
     bool packWanted_ = false;                   // (packMu_)

@@ -205,6 +205,12 @@ public final class AtlasNearPass {
         return Identifier.fromNamespaceAndPath("nirncraft", path);
     }
 
+    // flight recorder zones (AtlasRecorder)
+    private static final AtlasRecorder.Zone Z_TAKE = AtlasRecorder.zone("nearPass:takeSections"),
+            Z_GBUFFER = AtlasRecorder.zone("nearPass:drawGbuffer (with atlas frame)"), Z_COPY_SKY = AtlasRecorder.zone("nearPass:copySky"),
+            Z_TRANSLUCENT = AtlasRecorder.zone("nearPass:drawTranslucent"), Z_END_FRAME = AtlasRecorder.zone("nearPass:endFrame"),
+            Z_RESOLVE = AtlasRecorder.zone("nearPass:resolve"), Z_TEMPORAL = AtlasRecorder.zone("nearPass:temporal");
+
     static void init(IEventBus modBus) {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> {
             e.registerPipeline(RESOLVE);
@@ -219,8 +225,8 @@ public final class AtlasNearPass {
             e.register(ENTITY, AtlasNearPass::entityPipeline);
             e.register(SHADOW, AtlasNearPass::shadowPipeline);
         });
-        NeoForge.EVENT_BUS.addListener((RenderFrameEvent.Pre e) -> AtlasGuard.run(FEATURE, AtlasNearPass::takeSections));
-        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterSky e) -> AtlasGuard.run(FEATURE,
+        NeoForge.EVENT_BUS.addListener((RenderFrameEvent.Pre e) -> AtlasGuard.run(FEATURE, Z_TAKE, AtlasNearPass::takeSections));
+        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterSky e) -> AtlasGuard.run(FEATURE, Z_GBUFFER,
                 () -> drawGbuffer(e)));
         // the finished sky (after every sky listener: NirnCraft's stars, moons and aurora), copied for the reflections
         // inside a block: our volume (atlasInside) instead of vanilla's flat block texture over the screen
@@ -229,10 +235,10 @@ public final class AtlasNearPass {
                 e.setCanceled(true);
         });
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, (RenderLevelStageEvent.AfterSky e) ->
-                AtlasGuard.run(FEATURE, AtlasNearPass::copySky));
-        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterTranslucentFeatures e) -> AtlasGuard.run(FEATURE,
+                AtlasGuard.run(FEATURE, Z_COPY_SKY, AtlasNearPass::copySky));
+        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterTranslucentFeatures e) -> AtlasGuard.run(FEATURE, Z_TRANSLUCENT,
                 () -> drawTranslucent(e.getRenderPass())));
-        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel e) -> AtlasGuard.run(FEATURE,
+        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel e) -> AtlasGuard.run(FEATURE, Z_END_FRAME,
                 AtlasNearPass::endFrame));
     }
 
@@ -534,8 +540,12 @@ public final class AtlasNearPass {
         drawn = true;
         // atlas's frame now, on our depth (outside vanilla's main pass), then our resolve into our own frame
         AtlasClient.renderFar(e.getLevelRenderState(), null);
+        long rz = AtlasRecorder.begin();
         resolve(AtlasClient.farTargetsThisFrame(), AtlasClient.nearLitThisFrame());
+        AtlasRecorder.end(Z_RESOLVE, rz);
+        rz = AtlasRecorder.begin();
         temporal(cam);
+        AtlasRecorder.end(Z_TEMPORAL, rz);
         projUbo.rotate();
     }
 

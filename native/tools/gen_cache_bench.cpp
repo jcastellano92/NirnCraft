@@ -16,7 +16,9 @@
 #include <fstream>
 #include <map>
 #include <tuple>
+#include <array>
 #include <atomic>
+#include <mutex>
 #include <set>
 #include <thread>
 #include <string>
@@ -251,6 +253,235 @@ static int storeMode(AtlasContext* ctx, AtlasGen* g, AtlasFrame& f, AtlasFrameOu
     return 0;
 }
 
+// ---- walk=1: a player walking, as the mod does it ----
+// A render thread (the game's frames: atlas_update + atlas_render back to back at w x h, the camera moving at `speed`
+// blocks a second along +x) feeds the frame cadence; the main thread plans the near window and the far tiles the way
+// AtlasClientGen does (nearest chunks first, 64 a batch, the cache first; the far tile nearest by distance in tiles,
+// each tile from the cache or made; the tiles of a level the camera left a tile of forgotten), until `seconds` are up.
+// A line every 2 s: the frames since the last (p50, p99, max ms), the chunks and tiles done, the coverage (holes per
+// level, far reach), the grid's staging time, the budget.
+static int walkMode(AtlasContext* ctx, AtlasGen* g, double x0, double z0, double y, int R, double speed, double seconds, int w, int h) {
+    std::atomic<bool> stop{false};
+    std::atomic<double> camX{x0}, camZ{z0};
+    std::mutex fm;
+    std::vector<std::pair<double, float>> frameLog;  // (time s, ms)
+    double tStart = nowMs();
+    std::thread render([&] {
+        AtlasFrame f{};
+        f.cameraPos[1] = y;
+        atlas::cameraMatrix(90, -30, 70, double(w) / h, f.invViewProj);  // (east, down a little: the way it walks)
+        f.width = uint32_t(w);
+        f.height = uint32_t(h);
+        f.maxDistance = 40000;
+        f.sunDir[1] = 1;
+        f.lodBias = 1;
+        std::vector<uint32_t> img(size_t(w) * h);
+        AtlasFrameOutput o{img.data(), nullptr, nullptr};
+        double last = nowMs();
+        while (!stop) {
+            double now = nowMs();
+            double dt = std::min(0.25, (now - last) / 1000.0);
+            last = now;
+            camX = camX + speed * dt;
+            f.cameraPos[0] = camX;
+            f.cameraPos[2] = camZ;
+            double c[3] = {f.cameraPos[0], y, f.cameraPos[2]};
+            atlas_update(ctx, c, 0);
+            double t0 = nowMs();
+            atlas_render(ctx, &f, &o);
+            double ms = nowMs() - t0;
+            std::lock_guard<std::mutex> l(fm);
+            frameLog.push_back({(nowMs() - tStart) / 1000.0, float(ms)});
+        }
+    });
+    std::set<std::pair<int, int>> done;
+    std::map<std::tuple<int, int, int>, std::array<int, 3>> farWin;  // tile -> the window it was made under
+    const uint32_t INFO = 164;
+    std::vector<uint32_t> info(64 * INFO), flags(64), kinds(256 * 22 * 2);
+    std::vector<uint8_t> hit(64);
+    auto masksOf = [&](const uint32_t* row) {
+        int highest = -1;
+        for (int s = 0; s < 40; s++)
+            if (row[4 + s * 4 + 2] == 1) highest = s;
+        uint64_t m = 0;
+        bool started = false;
+        for (int s = 0; s <= highest; s++) {
+            uint32_t kind = row[4 + s * 4 + 2];
+            if (kind == 2 || (kind == 0 && !started)) continue;
+            started = true;
+            m |= uint64_t(1) << s;
+        }
+        return m;
+    };
+    uint64_t nearGen = 0, nearCache = 0, farMade = 0, farCached = 0, farTaken = 0, farChunks = 0;
+    double lastReport = 0;
+    size_t reportedFrames = 0;
+    size_t todo = 0;
+    while ((nowMs() - tStart) / 1000.0 < seconds) {
+        double cx = camX, cz = camZ;
+        int ccx = int(std::floor(cx / 16)), ccz = int(std::floor(cz / 16));
+        bool didWork = false;
+        // the near window: forget what is far, plan the nearest not done
+        for (auto it = done.begin(); it != done.end();)
+            it = std::abs(it->first - ccx) > R + 2 || std::abs(it->second - ccz) > R + 2 ? done.erase(it) : std::next(it);
+        std::vector<std::pair<int, std::pair<int, int>>> cand;
+        for (int dz = -R; dz <= R; dz++)
+            for (int dx = -R; dx <= R; dx++) {
+                if (dx * dx + dz * dz > R * R || done.count({ccx + dx, ccz + dz})) continue;
+                int d2 = dx * dx + dz * dz + (dx < 0 ? 2 * dx * dx : 0);  // (ahead before behind)
+                cand.push_back({d2, {ccx + dx, ccz + dz}});
+            }
+        std::sort(cand.begin(), cand.end());
+        todo = cand.size();
+        if (!cand.empty()) {
+            std::vector<int32_t> batch;
+            for (size_t i = 0; i < cand.size() && batch.size() < 128; i++) {
+                batch.push_back(cand[i].second.first), batch.push_back(cand[i].second.second);
+                done.insert(cand[i].second);
+            }
+            uint32_t n = uint32_t(batch.size() / 2);
+            atlas_gen_cache_lookup(g, batch.data(), n, info.data(), hit.data());
+            std::vector<int32_t> hits, miss;
+            std::vector<uint64_t> hm;
+            for (uint32_t i = 0; i < n; i++) {
+                if (hit[i]) {
+                    hits.push_back(batch[i * 2]), hits.push_back(batch[i * 2 + 1]);
+                    hm.push_back(masksOf(info.data() + size_t(i) * INFO));
+                } else {
+                    miss.push_back(batch[i * 2]), miss.push_back(batch[i * 2 + 1]);
+                }
+            }
+            if (!hits.empty()) {
+                std::vector<uint64_t> asked = hm;
+                uint32_t sent = 0;
+                atlas_gen_cache_ingest(g, hits.data(), uint32_t(hits.size() / 2), hm.data(), &sent);
+                for (size_t i = 0; i < hm.size(); i++) {
+                    if (asked[i] & ~hm[i]) done.erase({hits[i * 2], hits[i * 2 + 1]});
+                    else nearCache++;
+                }
+            }
+            if (!miss.empty()) {
+                uint32_t m = uint32_t(miss.size() / 2);
+                AtlasGenTimes t{};
+                if (atlas_gen_run(g, miss.data(), m, nullptr, flags.data(), info.data(), &t) != ATLAS_OK) {
+                    std::fprintf(stderr, "run: %s\n", atlas_gen_last_error(g));
+                    break;
+                }
+                std::vector<uint64_t> masks(m), asked;
+                for (uint32_t i = 0; i < m; i++) masks[i] = flags[i] ? 0 : masksOf(info.data() + size_t(i) * INFO);
+                asked = masks;
+                uint32_t sent = 0;
+                AtlasStatus s = atlas_gen_ingest(g, masks.data(), &sent, nullptr);
+                for (uint32_t i = 0; i < m; i++) {
+                    if (s != ATLAS_OK || (asked[i] & ~masks[i])) done.erase({miss[i * 2], miss[i * 2 + 1]});
+                    else nearGen++;
+                }
+            }
+            didWork = true;
+        } else {
+            // the far tiles that cover each level's window, the nearest (in tiles of its level) first; a tile made when
+            // part of it lay outside the window is asked for again once the window slid over 16 more of its columns
+            // (and when the level was placed afresh)
+            double best = 1e30;
+            int bk = 0, btx = 0, btz = 0;
+            int bwin[6] = {};
+            for (int k = 1; k <= 6; k++) {
+                int win[6];
+                atlas_gen_coarse_window(g, k, win);
+                if (!win[3]) continue;
+                int span = 256 << k;
+                int ox = win[0], oz = win[1], D = win[2];
+                auto cover = [&](int tx, int tz, int wox, int woz) {
+                    int ovx = std::max(0, std::min(16 * (tx + 1), wox + D) - std::max(16 * tx, wox));
+                    int ovz = std::max(0, std::min(16 * (tz + 1), woz + D) - std::max(16 * tz, woz));
+                    return ovx * ovz;
+                };
+                auto fdv = [](int a) { return a >= 0 ? a / 16 : -((-a + 15) / 16); };
+                for (int tz = fdv(oz); tz <= fdv(oz + D - 1); tz++)
+                    for (int tx = fdv(ox); tx <= fdv(ox + D - 1); tx++) {
+                        auto it = farWin.find({k, tx, tz});
+                        int now = cover(tx, tz, ox, oz);
+                        if (now == 0) continue;
+                        if (it != farWin.end()) {
+                            const auto& sw = it->second;  // (window origin x, z and jumps at its making)
+                            if (sw[2] == win[4] && now - cover(tx, tz, sw[0], sw[1]) < 16) continue;
+                        }
+                        double ex = (tx + 0.5) * span - cx, ez = (tz + 0.5) * span - cz;
+                        double d = std::sqrt(ex * ex + ez * ez) / span + k * 0.01;
+                        if (d < best) {
+                            best = d, bk = k, btx = tx, btz = tz;
+                            for (int q = 0; q < 6; q++) bwin[q] = win[q];
+                        }
+                    }
+            }
+            for (auto it = farWin.begin(); it != farWin.end();) {
+                // (tiles no window covers any more are forgotten)
+                int win[6];
+                atlas_gen_coarse_window(g, std::get<0>(it->first), win);
+                int tx = std::get<1>(it->first), tz = std::get<2>(it->first);
+                bool out = tx * 16 + 15 < win[0] - 16 || tx * 16 > win[0] + win[2] + 16 || tz * 16 + 15 < win[1] - 16 || tz * 16 > win[1] + win[2] + 16;
+                it = out ? farWin.erase(it) : std::next(it);
+            }
+            if (bk) {
+                int32_t t[2] = {btx, btz};
+                uint8_t served = 0;
+                uint32_t ch = 0, tk = 0;
+                atlas_gen_far_cache_ingest(g, bk, t, 1, &served, &ch, &tk);
+                if (served) {
+                    farCached++;
+                } else {
+                    uint32_t mixed = 0, taken = 0, ff = 0;
+                    uint32_t rows = (44u + (1u << bk) - 1u) >> bk;
+                    AtlasStatus s = atlas_gen_far_ingest(g, bk, t, 1, 2000, kinds.data(), &mixed, &taken, &ff, nullptr);
+                    if (s == ATLAS_OK) {
+                        farMade++;
+                        farChunks += 256 * rows, farTaken += taken;
+                    } else {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        continue;  // (busy: later)
+                    }
+                }
+                farWin[{bk, btx, btz}] = {bwin[0], bwin[1], bwin[4]};
+                didWork = true;
+            }
+        }
+        if (!didWork) std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        double now = (nowMs() - tStart) / 1000.0;
+        if (now - lastReport >= 2.0) {
+            lastReport = now;
+            std::vector<float> ms;
+            {
+                std::lock_guard<std::mutex> l(fm);
+                for (size_t i = reportedFrames; i < frameLog.size(); i++) ms.push_back(frameLog[i].second);
+                reportedFrames = frameLog.size();
+            }
+            std::sort(ms.begin(), ms.end());
+            std::string inf = atlas_info(ctx);
+            size_t cp = inf.find("\"coverage\":");
+            std::string cov = cp == std::string::npos ? "" : inf.substr(cp, inf.find("\"columns\"", cp) - cp) + "\"_\":0},";
+            double st = 0, stMax = 0, tkMax = 0;
+            if (size_t p = inf.find("\"stageCpuMs\":"); p != std::string::npos) st = std::atof(inf.c_str() + p + 13);
+            if (size_t p = inf.find("\"stageCpuMaxMs\":"); p != std::string::npos) stMax = std::atof(inf.c_str() + p + 16);
+            if (size_t p = inf.find("\"stageCpuRecentMs\":"); p != std::string::npos) tkMax = std::atof(inf.c_str() + p + 19);
+            AtlasGenPaceStats ps{};
+            atlas_gen_pace_stats(g, &ps);
+            std::printf("{\"t\":%.0f,\"x\":%.0f,\"frames\":{\"n\":%zu,\"p50\":%.1f,\"p99\":%.1f,\"max\":%.1f},\"near\":{\"generated\":%llu,"
+                        "\"cached\":%llu,\"todo\":%zu},\"far\":{\"made\":%llu,\"cached\":%llu,\"tilesDone\":%zu},%s\"stageCpuMs\":%.2f,"
+                        "\"stageCpuMaxMs\":%.1f,\"stageRecentMs\":%.1f,\"pace\":{\"period\":%.1f,\"duty\":%.2f,\"used\":%.0f,\"waited\":%.0f,\"longest\":%.0f,\"in\":\"%s\"}}\n",
+                        now, camX.load(), ms.size(), ms.empty() ? 0 : ms[ms.size() / 2], ms.empty() ? 0 : ms[ms.size() * 99 / 100],
+                        ms.empty() ? 0 : ms.back(), (unsigned long long)nearGen, (unsigned long long)nearCache, todo,
+                        (unsigned long long)farMade, (unsigned long long)farCached, farWin.size(), cov.c_str(), st, stMax, tkMax, ps.periodMs,
+                        ps.duty, ps.usedMs, ps.waitedMs, ps.maxSubmissionMs, ps.maxPhase);
+            std::fflush(stdout);
+        }
+    }
+    stop = true;
+    render.join();
+    (void)farTaken;
+    (void)farChunks;
+    return 0;
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         std::fprintf(stderr, "gen_cache_bench <dump dir> <cache dir|-> [x=] [z=] [radius=] [seed=]\n");
@@ -275,7 +506,9 @@ int main(int argc, char** argv) {
     }
     std::vector<AtlasMaterial> mats(256, AtlasMaterial{{0.5f, 0.5f, 0.5f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
     atlas_set_materials(ctx, 1, mats.data(), uint32_t(mats.size()));
-    if (cache != "-") atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
+    // order=game: the cache directory set after the generator and its fingerprint, as the mod does (startFor)
+    bool lateCache = arg(argc, argv, "order", "") == "game";
+    if (cache != "-" && !lateCache) atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
     AtlasGen* g = nullptr;
     if (atlas_gen_create_for(ctx, &g) != ATLAS_OK) {
         std::fprintf(stderr, "no generator on the context's device\n");
@@ -295,7 +528,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     // fp=<n>: the caller's part of the fingerprint (atlas_gen_set_fingerprint: another generator, another cache)
-    if (!arg(argc, argv, "fp", "").empty()) atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
+    atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));  // (arms the cache)
+    if (cache != "-" && lateCache) atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
     double tReady = nowMs();
     // the frame: above the spawn, looking down the slope (the grid places its window on the first)
     AtlasFrame f{};
@@ -339,6 +573,15 @@ int main(int argc, char** argv) {
                 if (bgCap > ms) std::this_thread::sleep_for(std::chrono::microseconds(int64_t((bgCap - ms) * 1000.0)));
             }
         });
+    }
+    if (arg(argc, argv, "walk", "0") != "0") {
+        // (the main flow's own frames stop: the walk's render thread owns the context from here)
+        int r = walkMode(ctx, g, x, z, f.cameraPos[1], R, std::atof(arg(argc, argv, "speed", "20").c_str()),
+                         std::atof(arg(argc, argv, "seconds", "60").c_str()), std::atoi(arg(argc, argv, "w", "640").c_str()),
+                         std::atoi(arg(argc, argv, "h", "360").c_str()));
+        atlas_gen_destroy(g);
+        atlas_destroy(ctx);
+        return r;
     }
     if (arg(argc, argv, "store", "0") != "0") {
         int r = storeMode(ctx, g, f, out, ccx, ccz, R, arg(argc, argv, "old", "0") != "0",

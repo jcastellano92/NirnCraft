@@ -26,6 +26,13 @@ final class AtlasGuard {
         }
     }
 
+    /** As {@link #run}, recorded as a flight-recorder zone (the hooks the near pass and the client tick run every frame). */
+    static void run(String feature, AtlasRecorder.Zone zone, Runnable hook) {
+        long t = AtlasRecorder.begin();
+        run(feature, hook);
+        AtlasRecorder.end(zone, t);
+    }
+
     /** Turns a feature off with its one WARN line (later calls are silent). True the first time. */
     static boolean disable(String feature, Throwable t) {
         if (!OFF.add(feature)) return false;

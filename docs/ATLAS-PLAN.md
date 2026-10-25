@@ -23,6 +23,11 @@ history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the che
    and high-end machines alike. Nothing pops on or off. The same holds for entities, players, light and physical
    interactions: they scale by importance and distance, not by hard limits.
 7. **Realistic light at every distance**, from the same light system near and far.
+8. **One generator (owner, 2026-10-24).** Far is the real world downsampled, never a second guess. The coarse levels
+   are made on the GPU from level-0 chunks of the one exact generator. The coarse "far path" generator is only a
+   placeholder: it fills places the level-0 bake hasn't reached, is marked as a stand-in, and fades out (refinement
+   dissolve) when true downsampled data arrives. The background baker bakes the whole map at level 0, nearest first;
+   once the map is complete the far path isn't needed.
 
 The stages below reach this end state in order. Early stages may keep vanilla drawing some things (composited
 into our frame) only as a step; stage 4 and stage 5 remove every one of those steps.
@@ -81,6 +86,19 @@ against the watchdog, uniform cells taking no slot, the 16³ micro-brick for non
 
 One stage at a time. Nothing from a later stage starts early. **Frozen until stage 3 passes:** far settlements and
 overlays, new generator features, entities as bricks, multiplayer, baked light, weather.
+
+### The GPU-driven loop and the baked world (2026-10-24)
+
+[ATLAS-GPU-LOOP.md](ATLAS-GPU-LOOP.md) holds the design: the CPU only kicks submissions and does file I/O, every request,
+schedule, ingest and codec runs on the GPU, the baked world is the main path, and live generation is the fallback. Its
+twelve steps feed the stages:
+
+- **Stage 1** (steps 1-3): wide, resumable trees; no `submitWait`.
+- **Stage 2** (steps 4-10): the GPU region format and codec, the whole-map coarse bake as the floor, per-stage
+  fingerprints with a verifier, the GPU request ring and idle baker, GPU scheduling and ingest.
+- **Stage 5, started now on separate files** (steps 11-12): the integrated server fed from the GPU world, and
+  collisions agreeing.
+
 
 ### Stage 0: tools that tell the truth (small, first)
 

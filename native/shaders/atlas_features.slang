@@ -28,7 +28,8 @@ struct FeatParams {
     uint first;    // featMain: 1 the feature's first dispatch (seed, start), 0 a later one (resume)
     uint budget;   // featMain: placements a thread makes in this dispatch (the rest the next: the GPU watchdog)
     uint store;    // 1: the generator's chunk store (atlas.h atlas_gen_add_store_stage): chunkIds its terrain (generator
-                   // ids, STORE_TERRAIN_W a slot, y -64..575), outIds its blocks, outWide its aux, targets a slot list
+                   // ids, STORE_TERRAIN_W a slot, y -64..575), outIds its blocks, outWide its aux, targets a slot list;
+                   // | 2: an ore vein's blocks decided by featVeinMain on many threads (VEIN_*), applied the next round
 };
 [[vk::push_constant]] ConstantBuffer<FeatParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> fprog;
@@ -1014,6 +1015,29 @@ bool adjacentAir(int x, int y, int z) {
     if (bis(blockAt(x - 1, y, z), B_AIR)) return true;
     return bis(blockAt(x + 1, y, z), B_AIR);
 }
+// (the vein kernel) whether an ore placement's block loop may run on many threads: see placeOre
+static const uint VEIN_PENDING = 0x5645494Eu;  // M_LINE[0]: a vein waits for featVeinMain and its next round's apply
+static const uint VEIN_W = 12288u;             // its tested indices (SCR_TESTED: the first visit's key; SCR_TREE: the fate)
+[noinline]
+bool veinFits(uint cfg, int size, float discard, uint nt, int sizeXZ, int sizeY) {
+    if (!(discard <= 0.0f || discard >= 1.0f) || size > 64 || sizeXZ > 31 || sizeY > 15 || nt > 254u) return false;
+    if (uint(sizeXZ + 1) * uint(sizeY + 1) * uint(sizeXZ + 1) > 12288u) return false;  // (the kernel's threads)
+    for (uint t = 0; t < nt; t++) {
+        uint te = cfg + 3u + t * 4u;
+        if (fprog[te] != RT_SET || inSet(fprog[te + 1], AIR)) return false;
+        if (discard >= 1.0f) {
+            // (the air test reads neighbours: no target may be air of any kind, no replacement either)
+            if (bis(fprog[te + 3], B_AIR)) return false;
+            uint nb = hdr(H_NBLOCKS), set = fprog[te + 1];
+            for (uint w = 0; w * 32u < nb; w++) {
+                uint bits = fprog[set + w];
+                for (uint b = 0; b < 32u && bits != 0u; b++)  // (no FindILsb: spv_exact admits no such instruction)
+                    if ((bits >> b & 1u) != 0u && w * 32u + b < nb && bis(w * 32u + b, B_AIR)) return false;
+            }
+        }
+    }
+    return true;
+}
 [noinline]
 bool placeOre(uint cfg, int ox, int oy, int oz) {
     int size = int(fprog[cfg]);
@@ -1065,6 +1089,19 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
                 else scrSetD(data + uint(i1) * 8u + 6u, -1.0l);
             }
         }
+    }
+    // (the store, | 2) the block loop on the vein kernel's threads (featVeinMain), when no draw of the random falls in
+    // it (discard 0 or 1, no random targets) and no target matches air: then each position's fate is its own (its
+    // block, its neighbours' airness: this vein turns no air into ore), and only the first visit of each tested
+    // index counts (vanilla's BitSet, aliasing kept), as here. Its writes come at the origin's next round.
+    if ((params.store & 2u) != 0u && veinFits(cfg, size, discard, nt, sizeXZ, sizeY)) {
+        uint v = sG.base + SCR_MISC + M_LINE;
+        scratch[v + 1u] = cfg;
+        scratch[v + 2u] = uint(xStart); scratch[v + 3u] = uint(yStart); scratch[v + 4u] = uint(zStart);
+        scratch[v + 5u] = uint(sizeXZ); scratch[v + 6u] = uint(sizeY); scratch[v + 7u] = uint(size);
+        scratch[v + 8u] = asuint(discard); scratch[v + 9u] = nt;
+        scratch[v] = VEIN_PENDING;
+        return true;
     }
     // the tested marks: a stamp per index of this placement
     uint stamp = scratch[sG.base + SCR_META + 2u] + 1u;
@@ -3136,6 +3173,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
         if (uint(mi) >= nm) {
             placeFeature<T>(rec, x, y, z);
             placed++;
+            if ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING) break;  // (the vein kernel next)
             continue;
         }
         uint m = mods + uint(mi) * MOD_W;
@@ -3299,6 +3337,12 @@ void featBody<let T : uint>(uint o) {
     uint meta = sG.base + SCR_META;
     sRA = meta + 6u;
     bool first = params.first != 0u;
+    if ((params.store & 2u) != 0u) {
+        // (a vein of the round before: its writes first; none can wait at a feature's first round, whatever the
+        // trees left in M_LINE)
+        if (first) scratch[sG.base + SCR_MISC + M_LINE] = 0u;
+        else veinApply();
+    }
     if (first) {
         // applyBiomeDecoration: the feature runs when a biome the 3 x 3 holds lists it at this step
         uint here = fprog[rec + R_HERE];
@@ -3312,6 +3356,7 @@ void featBody<let T : uint>(uint o) {
         if (scratch[meta + 10u] != 1u) return;  // the random is still in meta 6..9
     }
     bool more = runPlaced<T>(rec, first, params.budget);
+    more = more || ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING);  // (its writes next round)
     scratch[meta + 10u] = more ? 1u : 2u;
     if (more) InterlockedAdd(counters[0], 1u);
 }
@@ -3367,6 +3412,98 @@ void featLakeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
 [numthreads(1, 1, 1)]
 void featOneMain(uint3 id : SV_DispatchThreadID) {
     if (id.x < uint(params.origins)) featBody<0u>(id.x);
+}
+
+// ---- an ore vein on many threads (the store, params.store | 2) --------------------------------------------------------
+// placeOre left the vein's spheres (M_ORE) and its box (M_LINE: pending, cfg, xStart, yStart, zStart, sizeXZ, sizeY,
+// size, discard, targets); featVeinMain's three passes (params.k) decide its blocks, a thread a position of the box:
+// 0 clears the indices' words, 1 keeps each tested index's first visit (the smallest key: sphere, then x, y, z as the
+// serial loops go), 2 decides that visit's block into the index's fate (target + 1 << 24 | the position). The origin's
+// next round writes them (veinApply) before anything else.
+[noinline]
+uint veinKeyOf(int x, int y, int z) {
+    uint v = sG.base + SCR_MISC + M_LINE, data = sG.base + SCR_MISC + M_ORE;
+    int xStart = int(scratch[v + 2u]), yStart = int(scratch[v + 3u]), zStart = int(scratch[v + 4u]);
+    int sizeXZ = int(scratch[v + 5u]), sizeY = int(scratch[v + 6u]), size = int(scratch[v + 7u]);
+    for (int i = 0; i < size; i++) {
+        double rr = scrD(data + uint(i) * 8u + 6u);
+        if (rr < 0.0l) continue;
+        double xx = scrD(data + uint(i) * 8u), yy = scrD(data + uint(i) * 8u + 2u), zz = scrD(data + uint(i) * 8u + 4u);
+        int xMin = imax(floorD_N(xx - rr), xStart), yMin = imax(floorD_N(yy - rr), yStart), zMin = imax(floorD_N(zz - rr), zStart);
+        int xMax = imax(floorD_N(xx + rr), xMin), yMax = imax(floorD_N(yy + rr), yMin), zMax = imax(floorD_N(zz + rr), zMin);
+        if (x < xMin || x > xMax || y < yMin || y > yMax || z < zMin || z > zMax) continue;
+        double xd = divD_N(double(x) + 0.5l - xx, rr);
+        if (!(xd * xd < 1.0l)) continue;
+        double yd = divD_N(double(y) + 0.5l - yy, rr);
+        if (!(xd * xd + yd * yd < 1.0l)) continue;
+        double zd = divD_N(double(z) + 0.5l - zz, rr);
+        if (!(xd * xd + yd * yd + zd * zd < 1.0l) || y < MIN_Y || y > MAX_Y) continue;
+        // (the top bit: a key never equals the serial loop's stamps, which share SCR_TESTED)
+        return 0x80000000u | uint(i) << 14 | uint(x - xStart) << 9 | uint(y - yStart) << 5 | uint(z - zStart);
+    }
+    return 0xFFFFFFFFu;
+}
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (g.y >= uint(params.origins)) return;
+    sG = orgOf(g.y);
+    uint v = sG.base + SCR_MISC + M_LINE;
+    if (scratch[v] != VEIN_PENDING) return;
+    uint id = g.x * 64u + t.x;
+    if (params.k == 0u) {
+        if (id < VEIN_W) {
+            scratch[sG.base + SCR_TESTED + id] = 0xFFFFFFFFu;
+            scratch[sG.base + SCR_TREE + id] = 0u;
+        }
+        return;
+    }
+    int sizeXZ = int(scratch[v + 5u]), sizeY = int(scratch[v + 6u]);
+    uint nx = uint(sizeXZ + 1), ny = uint(sizeY + 1);
+    if (id >= nx * ny * nx) return;
+    int xo = int(id % nx), yo = int((id / nx) % ny), zo = int(id / (nx * ny));
+    int x = int(scratch[v + 2u]) + xo, y = int(scratch[v + 3u]) + yo, z = int(scratch[v + 4u]) + zo;
+    uint key = veinKeyOf(x, y, z);  // (the first sphere that visits it)
+    if (key == 0xFFFFFFFFu) return;
+    int b = xo + yo * sizeXZ + zo * sizeXZ * sizeY;  // (vanilla's index: aliases kept)
+    if (b < 0 || b >= 12288) {
+        if (params.k == 1u) InterlockedOr(scratch[sG.base + SCR_META + 1u], FL_STACK);  // (as the serial loop's flag)
+        return;
+    }
+    uint bi = uint(b);
+    if (params.k == 1u) {
+        InterlockedMin(scratch[sG.base + SCR_TESTED + bi], key);
+        return;
+    }
+    if (scratch[sG.base + SCR_TESTED + bi] != key) return;  // (an earlier visit of its index had it)
+    if (!writable(x, y, z)) return;
+    uint cfg = scratch[v + 1u], nt = scratch[v + 9u];
+    float discard = asfloat(scratch[v + 8u]);
+    uint state = blockAt(x, y, z);
+    for (uint tt = 0; tt < nt; tt++) {
+        uint te = cfg + 3u + tt * 4u;
+        if (!inSet(fprog[te + 1], state)) continue;
+        if (discard >= 1.0f && adjacentAir(x, y, z)) continue;
+        scratch[sG.base + SCR_TREE + bi] = (tt + 1u) << 24 | uint(xo) << 10 | uint(yo) << 5 | uint(zo);
+        return;
+    }
+}
+// (featBody, the store | 2) a vein's decided blocks into the origin's writes (the positions are distinct: the order
+// of the writes does not matter), then no vein pending
+[noinline]
+void veinApply() {
+    uint v = sG.base + SCR_MISC + M_LINE;
+    if (scratch[v] != VEIN_PENDING) return;
+    uint cfg = scratch[v + 1u];
+    int xStart = int(scratch[v + 2u]), yStart = int(scratch[v + 3u]), zStart = int(scratch[v + 4u]);
+    for (uint bi = 0; bi < VEIN_W; bi++) {
+        uint r = scratch[sG.base + SCR_TREE + bi];
+        if (r == 0u) continue;
+        uint tt = (r >> 24) - 1u;
+        int x = xStart + int((r >> 10) & 31u), y = yStart + int((r >> 5) & 31u), z = zStart + int(r & 31u);
+        setBlock(x, y, z, fprog[cfg + 3u + tt * 4u + 3u], false);
+    }
+    scratch[v] = 0u;
 }
 
 // ---- the store (atlas.h atlas_gen_add_store_stage) ------------------------------------------------------------------

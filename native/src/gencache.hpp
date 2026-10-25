@@ -15,11 +15,13 @@
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "world.hpp"  // Key3
@@ -37,6 +39,7 @@ public:
         uint64_t chunkWrites = 0, sectionWrites = 0, chunkHits = 0, chunkMisses = 0, sectionReads = 0;
         uint64_t farWrites = 0, farHits = 0, farMisses = 0;
         uint64_t hashErrors = 0;  // (records whose ids did not match their hash: refused, generated again)
+        uint64_t chunkIncomplete = 0;  // (misses of a chunk whose header is there, a section of it not yet)
         double encodeMs = 0, decodeMs = 0;
     };
     GenCache();
@@ -52,9 +55,11 @@ public:
     bool chunk(int cx, int cz, uint32_t* info);
     bool hasChunk(int cx, int cz);  // (its header, whether complete or not)
     bool complete(int cx, int cz);  // (its header and every section with blocks: from the index alone)
-    // a chunk made again (its stages' data changed): its header and sections no longer known (the new ones, written
-    // after, are the newest records: those a later scan keeps)
-    void forget(int cx, int cz);
+    // a chunk made again (its stages' data changed): its header and sections no longer known, and a tombstone on disk
+    // (a later scan drops what came before it; the new ones, written after, are kept). Only a chunk written this
+    // session: one from disk was made with its stages' data (the generator bakes nothing where data is still to come,
+    // atlas_gen_set_no_bake), and forgetting it made every relaunch generate a settlement again. Returns whether.
+    bool forget(int cx, int cz);
     // a section's packed words from disk (null: none)
     std::shared_ptr<const std::vector<uint32_t>> section(const Key3& k);
     // The far terrain (the grid's coarse levels, atlas_gen_far_ingest): a level-lod tile's chunk kinds (16 x 16 columns x
@@ -95,7 +100,7 @@ private:
         std::unordered_map<uint64_t, uint32_t> baked;
     };
     struct Job {
-        int type = 1;  // 0 chunk, 1 section, 2 far tile, 3 coarse chunk
+        int type = 1;  // 0 chunk, 1 section, 2 far tile, 3 coarse chunk, 4 a chunk's tombstone
         bool isChunk = false;
         Key3 k;
         std::vector<uint32_t> info;
@@ -120,6 +125,9 @@ private:
         return uint64_t(0x80u | uint32_t(lod)) << 56 | uint64_t(uint32_t(d(tx)) & 0xFFFFFFu) << 28 | (uint32_t(d(tz)) & 0xFFFFFFFu);
     }
     static uint64_t chunkKey(int cx, int cz) { return uint64_t(uint32_t(cx)) << 32 | uint32_t(cz); }
+    std::unordered_set<uint64_t> fresh_;  // (chunks whose header this session wrote: chunkKey)
+    std::vector<std::filesystem::path> oldSets_;  // (other sets in the root: deleted at this one's first write)
+    void dropOldSets();  // (caller holds mu_)
     std::string regionPath(uint64_t rk) const;
     Region& region(uint64_t rk);  // (caller holds mu_; scanned on first use)
     void writerLoop();

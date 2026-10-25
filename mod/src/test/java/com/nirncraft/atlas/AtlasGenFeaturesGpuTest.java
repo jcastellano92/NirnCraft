@@ -295,6 +295,15 @@ class AtlasGenFeaturesGpuTest {
             }
             if (eq) same++;
         }
+        // NIRNCRAFT_FEAT_STORE_HASH=<file>: each raster chunk's blocks hashed, sorted (two runs compared: a path against
+        // another, e.g. ATLAS_FEAT_VEINS=0 against the vein kernel)
+        String hashOut = System.getenv("NIRNCRAFT_FEAT_STORE_HASH");
+        if (hashOut != null) {
+            StringBuilder hs = new StringBuilder();
+            a.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> hs.append(String.format("%d %d %08x%n",
+                    ChunkPos.getX(e.getKey()), ChunkPos.getZ(e.getKey()), java.util.Arrays.hashCode(e.getValue()))));
+            Files.writeString(Path.of(hashOut), hs.toString());
+        }
         report.append(String.format("store: %d chunks asked, raster finished %d, shuffled finished %d, both %d, alike %d, %d blocks differ; "
                 + "the features changed %d blocks of the raster's chunks%n", square.size(), a.size(), b.size(), both, same, diffBlocks, featBlocks));
         System.out.println(String.format("TRACE done store-batch-edges alike %d of %d chunks, %d blocks differ, %d blocks by the features", same, both,
