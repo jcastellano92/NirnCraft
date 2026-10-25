@@ -1060,14 +1060,33 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
 // p0), TRACE_MISS, TRACE_UNCOVERED with uncExit (from p0) as the regions report it, or TRACE_CAPPED: its steps spent
 // (COARSE_RUN_STEPS over all its runs and levels: a grid starved of level-0 chunks made this 24 x 6 walks of 4096 steps a
 // ray, a 5 s GPU timeout).
+// whether level grid g holds camera-relative p: its chunk there in the window and not UNLOADED (one word)
+bool vgHoldsAt(VgGrid g, float3 p) {
+    int3 v = (int3(floor(p)) + frame.camInt.xyz - g.origin) >> g.k;
+    if (any(v < int3(0, 0, 0)) || v.x >= g.X * 16 || v.y >= g.Y * 16 || v.z >= g.Z * 16) return false;
+    return (vgChunks[vgCellG(g, v >> 4)] & 3u) != VG_UNLOADED;
+}
+
 int vgCoarseRun(float3 p0, float3 d, float u0, float u1, out float uncExit) {
     uncExit = 1e30;
     float u = u0;
     uint cap = min(RAY_STEPS, cTr.steps + COARSE_RUN_STEPS);
     for (int it = 0; it < 24 && u < u1; it++) {
+        // the finest coarse level holding the point (one chunk word a level) is where the walk starts: a gap costs a jump
+        // to the level that answers, not a walk and an unloaded run's scan on every finer level that does not (one walk
+        // call site below: the split build inlines it)
+        int kFrom = 1;
+        {
+            float3 pu = p0 + d * u;
+            for (int k = 1; k <= 6; k++)
+                if (vgLevelOn(k) && ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) != 0 && vgHoldsAt(vgGrid(k), pu)) {
+                    kFrom = k;
+                    break;
+                }
+        }
         bool on = false;
         float next = u1;  // (where some level holds data again)
-        for (int k = 1; k <= 6; k++) {
+        for (int k = kFrom; k <= 6; k++) {
             if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
             VgGrid gk = vgGrid(k);
             float uk;
