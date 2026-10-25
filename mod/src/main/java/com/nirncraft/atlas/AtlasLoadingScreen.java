@@ -67,7 +67,7 @@ final class AtlasLoadingScreen extends Screen {
     }
 
     /** An arrival that is ready within this long never shows the screen (a warm teleport stays instant). */
-    static final long ARRIVAL_SHOW_MS = 600;
+    static final long ARRIVAL_SHOW_MS = 1500;  // (vanilla itself sends the destination's chunks about 0.6 to 0.9 s after the teleport)
     private static AtlasLoadingScreen quiet;  // (polling an arrival's readiness before the screen is due)
 
     /** (client tick) Opens the screen when armed or held, and the world is in. */

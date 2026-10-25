@@ -180,13 +180,14 @@ final class HoldSelftest {
         p.setGameMode(GameType.SURVIVAL);
         p.setPos(home.x, home.y, home.z);
         PlayerHold.watchJump(p, true);                       // the first reading
-        p.setPos(home.x + 30, home.y, home.z);               // a short move: not an arrival
-        if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a 30 block move held the player");
-        Vec3 far = new Vec3(home.x + 400, home.y - 20, home.z + 250);
+        double hop = PlayerHold.JUMP_BLOCKS / 2;
+        p.setPos(home.x + hop, home.y, home.z);              // a short move: not an arrival
+        if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a " + (int) hop + " block move held the player");
+        Vec3 far = new Vec3(home.x + hop + PlayerHold.JUMP_BLOCKS + 400, home.y - 20, home.z + 250);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(p, p.level(), far.x, far.y, far.z));
         p.setPos(far.x, far.y, far.z);                       // a teleport command: far
         if (!PlayerHold.watchJump(p, true) || !PlayerHold.isHeld(p)) {
-            problems.add("a 470 block teleport did not hold the player");
+            problems.add("a far teleport did not hold the player");
             return;
         }
         String d = PlayerHold.describe(p);
@@ -199,7 +200,7 @@ final class HoldSelftest {
         // a dimension change and a respawn hold likewise
         if (!PlayerHold.arriveForTests(p, "dimension test") || !PlayerHold.isHeld(p)) problems.add("the dimension arrival did not hold");
         PlayerHold.release(p, "selftest arrivals");
-        info.add("arrivals: 30 blocks free, 470 blocks held at the destination and released there");
+        info.add("arrivals: " + (int) hop + " blocks free, " + (int) (PlayerHold.JUMP_BLOCKS + 400 + hop) + " blocks held at the destination and released there");
     }
 
     private static boolean damageCancelled(ServerPlayer p, DamageSource src) {
