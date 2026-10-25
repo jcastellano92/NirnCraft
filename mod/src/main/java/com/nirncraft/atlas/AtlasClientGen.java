@@ -197,6 +197,8 @@ final class AtlasClientGen implements AutoCloseable {
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
     // (direct) the chunk store with the decoration's stages: chunks come out of it decorated (atlas_gen_run_store)
     private volatile boolean storeOn;
+    /** The integrated server's chunks, from the store (docs/ATLAS-GPU-LOOP.md section 4): null unless the store is on. */
+    private volatile AtlasServerGen serverGen;
     private volatile java.lang.foreign.MemorySegment featStages;
     private volatile long storeFinished;
     // stats (atlas-info)
@@ -422,6 +424,13 @@ final class AtlasClientGen implements AutoCloseable {
             c.cacheArm = cacheArm;
             c.storeOn = stages != null;
             c.featStages = stages;
+            if (c.storeOn && direct && com.nirncraft.atlas.server.AtlasServerMode.gpuChunks()) {
+                // the server's AtlasChunkGenerator takes its chunks from the store, on this generator's worker
+                c.serverGen = new AtlasServerGen(c, prog.blocks, c.farIds, ow);
+                com.nirncraft.atlas.server.AtlasServerFeed.bind(g, c.serverGen);
+                com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the integrated server's chunks come from the GPU store ({})",
+                        g instanceof com.nirncraft.atlas.server.AtlasChunkGenerator ? "AtlasChunkGenerator" : "this world's generator is not the atlas one: unused");
+            }
             // the far chunks carry the decoration's trees (its far stage, unless ATLAS_FEAT_FAR=0): no stand-in canopy
             AtlasTileUpload.noDressingCanopy = stages != null && far() && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
@@ -523,7 +532,17 @@ final class AtlasClientGen implements AutoCloseable {
         return c != null && c.ctx != null && c.uploader.isAlive();
     }
 
-    private void wake() {
+    /** (diagnostics) the store's held / waiting / ready chunks. */
+    String storeLine() {
+        try {
+            int[] s = gen.storeStats();
+            return "store{held=" + s[0] + " waiting=" + s[1] + " ready=" + s[2] + "}";
+        } catch (RuntimeException e) {
+            return "store{?}";
+        }
+    }
+
+    void wake() {
         LockSupport.unpark(worker);
         LockSupport.unpark(uploader);
         for (Thread t : featureWorkers) LockSupport.unpark(t);
@@ -751,6 +770,7 @@ final class AtlasClientGen implements AutoCloseable {
         if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
         // the whole-map coarse bake and the boot load of the far tiles (its own thread; farStep keeps the tiles it does not own)
         if (cacheArm && farOn) bake = AtlasCoarseBake.start(gen);
+        if (serverGen != null) serverGen.up();
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -760,6 +780,21 @@ final class AtlasClientGen implements AutoCloseable {
         while (running) {
             try {
                 refreshStats();
+                // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
+                if (serverGen != null && direct && storeOn) {
+                    boolean served = false;
+                    try {
+                        serverGen.prioritize(gen);
+                        served = serveServer(ids, flags, info);
+                    } catch (RuntimeException e) {  // (the server's chunks never stop the camera's: Java makes them from now on)
+                        com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the server feed is off", e);
+                        AtlasServerGen sg = serverGen;
+                        serverGen = null;
+                        com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
+                        sg.close();
+                    }
+                    if (served) continue;
+                }
                 long ln = System.nanoTime();
                 if (ln - loopLogNs > 20_000_000_000L) {
                     // (dev: the worker's state to the log every 20 s)
@@ -964,149 +999,42 @@ final class AtlasClientGen implements AutoCloseable {
      * of its misses (seconds a call).
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
+        directBatch(batch, ids, flags, info, first, defer, false);
+    }
+
+    /** The server's requests that are ready go into the store ahead of the window's chunks: its answer comes from the next calls. */
+    private boolean serveServer(int[] ids, int[] flags, int[] info) {
+        int[] b = serverGen.take(16);
+        if (b.length == 0) return false;
+        for (int i = 0; i < b.length; i += 2) done.add(ChunkPos.pack(b[i], b[i + 1]));  // (claimed: the window does not plan them too)
+        directBatch(b, ids, flags, info, false, false, true);
+        return true;
+    }
+
+    private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer, boolean server) {
         long finished = storeFinished;
-        directBatchRun(batch, ids, flags, info, first, defer);
+        directBatchRun(batch, ids, flags, info, first, defer, server);
         if (batch.length > 0 || storeFinished != finished) nearTurns++;  // (a turn at the generator: the bake waits for one)
     }
 
     /** Calls of the near window that did something (a batch in, or chunks out of the store): the bake's turn-taking while the screen holds. */
     private volatile long nearTurns;
 
-    /**
-     * The spawn window after a jump, chunks the store let go before they came out (its slots are few: 768 for a window of
-     * 1793, and a chunk dropped while waiting for neighbours stays in `done`, so nothing asks again): once the near work is idle
-     * and the window is still short, the ones not up are forgotten here so that the plan makes them again. Every 4 s at most.
-     */
-    private long reconcileNs;
-
-    /**
-     * The loading phase's order: the spawn area's nearest rings, then the horizon (the coarse levels), then the window's outer
-     * rings. While the screen holds the player and the spawn area is in but the horizon is not, the outer rings wait (the GPU is
-     * the bake's: they went on beside it, and the player waited for both); they follow once the horizon is loaded, in play.
-     */
-    private boolean outerRingsWait() {
-        if (!AtlasLoadingScreen.holding() || windowUpNs != 0) return false;
-        Progress p = progress();
-        if (p == null || !p.nearDone()) return false;
-        AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
-        return b != null && b.phase() > 0 && !b.loaded();
-    }
-
-    /**
-     * A chunk of the spawn window that atlas does not upload itself counts as in: one not proven exact (the server's blocks
-     * supply it) or one whose loaded blocks are up already. The window was never "up" while a couple of them stood in it.
-     */
-    private void markCovered(int cx, int cz) {
-        if (jumpNs != 0 && inWindow(cx, cz, jumpCx, jumpCz, RADIUS)) {
-            upSinceJump.add(ChunkPos.pack(cx, cz));
-            if (windowUpNs == 0 && upSinceJump.size() >= windowChunks()) windowUpNs = System.nanoTime();
-        }
-    }
-
-    private void reconcileWindow() {
-        long now = System.nanoTime();
-        if (windowUpNs != 0 || jumpNs == 0 || now - reconcileNs < 4_000_000_000L || now - nearWorkNs < 3_000_000_000L || !deferred.isEmpty()) return;
-        reconcileNs = now;
-        int lost = 0;
-        for (int dz = -RADIUS; dz <= RADIUS; dz++)
-            for (int dx = -RADIUS; dx <= RADIUS; dx++) {
-                if (dx * dx + dz * dz > RADIUS * RADIUS) continue;
-                long k = ChunkPos.pack(jumpCx + dx, jumpCz + dz);
-                if (!upSinceJump.contains(k) && done.remove(k)) lost++;
-            }
-        if (lost > 0) com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: {} chunks of the spawn window were not up after the near work went idle: asked again", lost);
-    }
-
-    // ---- the idle verifier ----
-    // The generation and bake caches are keyed by what produces the data (the generator's sources, its data inputs, the seed:
-    // cmake/buildhash.cmake ATLAS_GEN_HASH), not by the whole native build, so a render-kernel rebuild keeps them. A file the
-    // key does not name that does change what the generator makes would serve stale data: so once the load is over and the
-    // window idle, every VERIFY_S seconds one cached chunk or one cached stand-in far tile (alternately) is made again apart
-    // from the cache and compared (a chunk: every section's hash and kind; a tile: every chunk's kind and uniform material).
-    // A difference is counted (verify{} of the profile line / atlas-info) and what differed is made again.
-    static final double VERIFY_S = Double.parseDouble(System.getProperty("nirncraft.atlas.verify.seconds", "12"));
-    private long verifyNs;
-    private int verifyTurn;
-    private final java.util.Random verifyRnd = new java.util.Random(0x5EED);
-
-    private void verifyStep() {
-        if (!gen.verifySupported() || VERIFY_S <= 0 || !AtlasLoadStats.finished() || AtlasLoadingScreen.holding() || !camSet) return;
-        long now = System.nanoTime();
-        if (now - verifyNs < (long) (VERIFY_S * 1e9)) return;
-        verifyNs = now;
-        try {
-            if ((verifyTurn++ & 1) == 0) verifyChunk();
-            else verifyTile();
-        } catch (RuntimeException e) {
-            com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: {}", e.toString());
-        }
-    }
-
-    private void verifyChunk() {
-        int r = RADIUS / 2;
-        for (int tries = 0; tries < 24; tries++) {
-            int cx = camCx + verifyRnd.nextInt(2 * r + 1) - r, cz = camCz + verifyRnd.nextInt(2 * r + 1) - r;
-            int[] xz = {cx, cz}, cached = new int[AtlasGenNative.INFO_WORDS];
-            byte[] hit = new byte[1];
-            if (gen.cacheLookup(xz, cached, hit) == 0 || hit[0] == 0) continue;
-            int[] outXZ = new int[AtlasGenNative.RUN_CHUNKS * 2], fl = new int[AtlasGenNative.RUN_CHUNKS];
-            int[] made = new int[AtlasGenNative.RUN_CHUNKS * AtlasGenNative.INFO_WORDS];
-            int m = 0;
-            for (int call = 0; call < 8 && m == 0; call++) m = gen.runStore(call == 0 ? xz : new int[0], outXZ, null, fl, made, null);
-            if (m > 0) gen.ingest(new long[m]);  // (nothing sent: the batch is released)
-            // (the store brings out whatever else was ready too, packed and not sent: asked for again, else holes in the window)
-            for (int i = 0; i < m; i++)
-                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz) done.remove(ChunkPos.pack(outXZ[i * 2], outXZ[i * 2 + 1]));
-            for (int i = 0; i < m; i++) {
-                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz || fl[i] != 0) continue;
-                int o = i * AtlasGenNative.INFO_WORDS;
-                boolean same = true;
-                for (int w = 0; w < 3 && same; w++) same = made[o + w] == cached[w];
-                for (int sec = 0; sec < 40 && same; sec++)
-                    for (int w = 0; w < 3 && same; w++) same = made[o + 4 + sec * 4 + w] == cached[4 + sec * 4 + w];
-                gen.verifyNote(!same);
-                if (!same) {
-                    com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: cached chunk ({}, {}) differs from the generator's: made again", cx, cz);
-                    regenerate(new long[]{ChunkPos.pack(cx, cz)});
-                }
-                return;
-            }
-            return;
-        }
-    }
-
-    private void verifyTile() {
-        int[] t = AtlasCoarseBake.sampleKnownTile(verifyRnd);
-        if (t == null) return;
-        int res = gen.verifyFarTile(t[0], t[1], t[2]);
-        if (res == 1) {
-            com.nirncraft.NirnCraft.LOGGER.warn("atlas verifier: cached far tile level {} ({}, {}) differs from the generator's: baked again", t[0], t[1], t[2]);
-            AtlasCoarseBake.dropped(t[0], t[1], t[2]);  // (the grid's copy is put again from the cache)
-        }
-    }
-
-    /** {chunks checked, chunks that differed, tiles checked, tiles that differed} of the verifier, as a profile block. */
-    private String verifyLine() {
-        long[] v = gen.verifyStats();
-        return v == null ? null : String.format("verify{chunks %d differed %d, tiles %d differed %d}", v[0], v[1], v[2], v[3]);
-    }
-
     static long nearTurns() {
         AtlasClientGen c = active;
         return c == null ? 0 : c.nearTurns;
     }
 
-    /** Whether the near window has nothing to make or send now (the bake need not wait for it). */
     static boolean nearIdleNow() {
         AtlasClientGen c = active;
         return c == null || c.nearIdle && c.deferred.isEmpty();
     }
 
-    private void directBatchRun(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
+    private void directBatchRun(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer, boolean server) {
         if (batch.length > 0) nearWorkNs = System.nanoTime();
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before
-        if (gen.cacheSupported()) {
+        if (gen.cacheSupported() && !server) {  // (the server's chunks skip the cache: it holds sections, the server needs the ids)
             // (the chunk store) only the misses go into it: it makes the neighbourhood their stages read by itself
             // (atlas_gen_run_store), so a cached chunk is never made again nor packed again (the churn: every chunk
             // through the store, its neighbours sent back to the start by each new one)
@@ -1132,7 +1060,10 @@ final class AtlasClientGen implements AutoCloseable {
             AtlasGenNative.Times[] tt = new AtlasGenNative.Times[1];
             long gz = AtlasRecorder.begin();
             generatedChunks += n;  // (these chunks the cache did not have: through the store's stages)
-            int m = gen.runStore(batch, outXZ, null, flags, info, tt);
+            AtlasServerGen sg = serverGen;
+            boolean idsForServer = sg != null && sg.pending();
+            int m = gen.runStore(batch, outXZ, idsForServer ? ids : null, flags, info, tt);
+            if (idsForServer && m > 0) sg.delivered(outXZ, m, ids, flags, info);
             AtlasRecorder.end(Z_RUN_STORE, gz, 0, batch.length / 2);
             gt = tt[0];
             storeFinished += m;
@@ -1927,6 +1858,11 @@ final class AtlasClientGen implements AutoCloseable {
         running = false;
         if (active == this) active = null;
         if (bake != null) bake.stop();
+        AtlasServerGen sg = serverGen;
+        if (sg != null) {
+            com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
+            sg.close();
+        }
         List<Thread> all = new ArrayList<>(featureWorkers);
         all.add(worker);
         all.add(uploader);

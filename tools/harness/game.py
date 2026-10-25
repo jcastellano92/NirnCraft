@@ -243,6 +243,11 @@ def _launch(group, groups, limit=900):
     _iris_enable()
     cfg = groups.get(group, {})
     jvm = dict(cfg.get("jvm", {}))
+    # NIRNCRAFT_HARNESS_JVM="k=v,k=v": flags for this run only (an A/B of one flag, a private world or cache folder that
+    # leaves the shared instance's kept world and atlas-cache to the other agents)
+    for kv in filter(None, os.environ.get("NIRNCRAFT_HARNESS_JVM", "").split(",")):
+        k, _, v = kv.partition("=")
+        jvm[k.strip()] = v.strip()
     if "nirncraft.autotest.world" not in jvm and (group == "live" or cfg.get("keptWorld")):
         jvm.update({"nirncraft.autotest.world": kept_world(), "nirncraft.autotest.keepWorld": "true"})
     if os.environ.get("NIRNCRAFT_ATLAS_DUMP"):  # (dev) the generator's program, map and decoration program to that folder (AtlasClientGen.dumpWords)

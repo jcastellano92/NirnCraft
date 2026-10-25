@@ -90,7 +90,8 @@ public final class Painter {
 
     /**
      * Set while the client's overlays record a dungeon's blocks (AtlasOverlayTapes.recordRaw, over a level with no
-     * world behind it): no mobs and no minecarts (entities, not blocks). Unset during real world generation.
+     * world behind it): mobs and minecarts only where that level hands out the real server level and keeps them
+     * (AtlasSideCapture), else none. Unset during real world generation.
      */
     public static final ThreadLocal<Boolean> RECORDING = new ThreadLocal<>();
 
@@ -381,7 +382,7 @@ public final class Painter {
     @Nullable
     private Mob spawn(@Nullable String id, int x, int y, int z, float yaw, @Nullable String name,
                       @Nullable java.util.function.Consumer<Mob> setup, boolean essential) {
-        if (RECORDING.get() != null) return null;
+        if (RECORDING.get() != null && level.getLevel() == null) return null;  // (a recording level that keeps mobs: AtlasSideCapture)
         if (!essential) {
             if (mood == Pacing.EMPTY) return null;
             if (mood == Pacing.SLEEP) {
@@ -445,7 +446,7 @@ public final class Painter {
 
     /** A chest minecart with loot (mines). */
     public void chestMinecart(int x, int y, int z, Identifier loot) {
-        if (!ok(x, y, z) || RECORDING.get() != null) return;
+        if (!ok(x, y, z) || (RECORDING.get() != null && level.getLevel() == null)) return;
         MinecartChest cart = new net.minecraft.world.entity.vehicle.minecart.MinecartChest(net.minecraft.world.entity.EntityTypes.CHEST_MINECART, level.getLevel());
         cart.setPos( x + 0.5, y + 0.5, z + 0.5);
         cart.setLootTable(net.minecraft.resources.ResourceKey.create(Registries.LOOT_TABLE, loot), hash(x, y, z, 77));

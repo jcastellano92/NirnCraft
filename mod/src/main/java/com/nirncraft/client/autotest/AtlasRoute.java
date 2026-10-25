@@ -62,6 +62,7 @@ final class AtlasRoute {
     private static int[] captureTicks = new int[0];
     private static final ConcurrentHashMap<Integer, JsonObject> samples = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Integer, JsonObject> where = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Integer, JsonObject> collide = new ConcurrentHashMap<>();  // (phases with "collide": the grid against the client level)
     private static JsonArray captures = new JsonArray();
     private static long began;
     // display restore
@@ -231,6 +232,7 @@ final class AtlasRoute {
         threadCpu.clear();
         cpuPrev.clear();
         CPU.execute(() -> cpuReading("start", true));
+        collide.clear();
         captures = new JsonArray();
         frames.clear();
         cpu.clear();
@@ -245,6 +247,7 @@ final class AtlasRoute {
         startDelay = display.has("resizedFrom") ? 80 : 0;  // (the window takes its new size on a later event poll)
         if (startDelay == 0) measureDisplay(mc);
         began = System.currentTimeMillis();
+        com.nirncraft.atlas.server.AtlasServerStats.begin();  // (the integrated server's ticks, CPU and chunks over the route)
         running = true;
         NirnCraft.LOGGER.info("Autotest live: route {} started ({} ticks, {} captures)", tag, phaseStart[phases.size()], captureTicks.length);
     }
@@ -360,6 +363,20 @@ final class AtlasRoute {
                 String prevPhase = before != null ? before.get("phase").getAsString() : ph.get("name").getAsString();
                 CPU.execute(() -> cpuReading(prevPhase, false));
             }
+            if (ph.has("collide") && ph.get("collide").getAsBoolean()) {
+                // atlas's level 0 against the client level under the player (the walk's collision agreement): the client
+                // level read here, the grid read back from the GPU on the sampler thread
+                int[] want = com.nirncraft.atlas.AtlasCollide.expected(mc, (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z), 2, 3, 2);
+                SAMPLER.execute(() -> {
+                    try {
+                        collide.put(sec, com.nirncraft.atlas.AtlasCollide.compare(want));
+                    } catch (RuntimeException e) {
+                        var err = new JsonObject();
+                        err.addProperty("error", e.toString());
+                        collide.put(sec, err);
+                    }
+                });
+            }
             if (SAMPLING.compareAndSet(false, true)) {
                 SAMPLER.execute(() -> {
                     try {
@@ -471,6 +488,8 @@ final class AtlasRoute {
             if (w != null) for (var e : w.entrySet()) row.add(e.getKey(), e.getValue());
             var a = samples.get(s);
             if (a != null) row.add("atlas", a);
+            var cc = collide.get(s);
+            if (cc != null) row.add("collide", cc);
             secs.add(row);
         }
         out.add("seconds", secs);
@@ -493,6 +512,8 @@ final class AtlasRoute {
             byPhase.add(phases.get(i).get("name").getAsString(), row);
         }
         out.add("phases", byPhase);
+        var srv = mc.getSingleplayerServer();
+        out.add("server", com.nirncraft.atlas.server.AtlasServerStats.end(srv));
         worst.sort((a, b) -> Float.compare(b[0], a[0]));
         var ws = new JsonArray();
         for (int i = 0; i < Math.min(25, worst.size()); i++) {

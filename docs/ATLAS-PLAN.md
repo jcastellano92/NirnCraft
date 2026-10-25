@@ -40,6 +40,18 @@ gate, and a new one replaces a slower one. The process itself keeps improving, a
    and high-end machines alike. Nothing pops on or off. The same holds for entities, players, light and physical
    interactions: they scale by importance and distance, not by hard limits.
 7. **Realistic light at every distance**, from the same light system near and far.
+10. **Pixels drive everything (owner, 2026-10-25).** Every detail, resolution, refresh and residency decision comes from
+    the pixel footprint at the current resolution, FOV and zoom, never a fixed distance or ring. Small and huge things
+    simplify at the same pixel size.
+    - Open item: each level's data window, and the generator's near radius, should be sized from the footprint (the
+      distance where that level's voxel is about 1 px), not a fixed chunk count. It's a focused core change after the
+      current far-view steps.
+    - Residency by touch: the GPU knows which cells the rays touched in the last frames, and only those need to stay in
+      VRAM. Untouched cells (rock under the feet while on the surface, the far side of a mountain) drop to compressed
+      host or disk tiers until a ray needs them. A memory and loading win, not render time: drawing already touches
+      only what rays reach. Viewport and occlusion drive it, but "touched" includes the secondary rays (shadows, bounce,
+      water reflections reach behind and above the camera), plus a look-ahead margin from the camera's motion and turn
+      rate, so a fast turn, a shadow or a reflection never meets a hole.
 9. **Never freeze, and say truly what is loading (owner, 2026-10-25).** No pipeline compile or bake work on the render
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
@@ -76,6 +88,41 @@ distance. As numbers:
 | Scale | Stress scenes: ocean, mountains, dense forest, caves, night with many lights, Imperial City, fast flight | Each within the frame bar; frame time ≤ vanilla at its default distance |
 
 A stage is done when its bar passes in the real game, not offline.
+
+### Merge gate (2026-10-25)
+
+A step merges when it's proven by the numbers its own fast loop already measures, promptly, not in big batches.
+
+**Later, once it works here (owner, 2026-10-25):** cross-vendor exactness, scaling to lower resolutions and 8 GB cards,
+a moving-capture check per temporal change, a gallery no-drop rule on merges, and the cache lifecycle for players
+(in-save storage, a budget, estimates, warnings). These are parked, not dropped: they'd slow the iteration now.
+
+**The cache lifecycle, as the owner wants it (2026-10-25):**
+- **Budget:** a per-world disk budget chosen at world creation, default 5 GB (2 GB and up selectable). The more you
+  play, the more is baked and the faster the world loads, until it runs like butter.
+- **Smart removal:** least useful first (far from where you play, long unvisited), never the coarse whole-map levels.
+- **Smart updates:** a game update rebakes only what its changed generator stages affect (per-stage fingerprints). A
+  server you join sends its world's changes as deltas over the shared bake, cached locally. Your own world's edits are
+  deltas too, so changes load as fast as the rest.
+- **Location:** stored with the world (deleting the world deletes it), with an estimate shown at creation and a warning
+  when disk is low.
+
+### Frame budget (2026-10-25)
+
+At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
+the reserved slices stay free for what comes later:
+
+| Part | Budget |
+|---|---|
+| Terrain, near to horizon | 6-8 ms |
+| Lighting (sun, sky, bounce, lights) | ~3 ms |
+| Entities and effects (far movers as points, emitters in the light list) | 1-2 ms |
+| **Reserved:** clouds and weather (volumetric, amortised, same trace) | ~2 ms |
+| Post-processing | ~1 ms |
+
+Far edits re-ingest only the changed sections and their coarse levels (microseconds to a ms each). Far fires and
+lightning go in the light layer; far battles are points or silhouettes. In game the renderer was 25-29 ms on
+2026-10-25: the far-view work (sky exit, amortised far field) is what frees the reserve.
 
 ## 2. Why we keep not getting there
 
@@ -141,6 +188,15 @@ follows the design without new tests.
 - **(F) Coarse-voxel appearance:** directional opacity, a self-occlusion factor and a tight sub-box per coarse voxel,
   so thin things (fences, grass) neither vanish nor swell far off, and forests don't brighten when they coarsen. Test
   together with (C), offline, on the gallery sweep (from an outside review, 2026-10-25).
+
+- **(G) An amortised far field (owner, 2026-10-25):** beyond a few km, trace the far pixels at a fraction of the rate
+  (a rotating subset per frame, reprojected) or into a slowly refreshed horizon cache of the same trace (same image,
+  less often: not a second renderer).
+  - Far lights (cities, fires, lava, volcanoes, lightning) from the light list as an emissive layer composited every
+    frame, so they stay live.
+  - Sky light from the atmosphere model.
+  - Far players and creatures as points or silhouettes drawn every frame.
+  - Test right after the sky and height exit, on the horizon view: far pass ms, plus a still-and-moving capture.
 
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
