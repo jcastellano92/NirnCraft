@@ -729,7 +729,7 @@ struct SmoothHit {
 
 // The density's crossing along ro + d u (grid-local voxel units, u the walk's parameter) for u in [u0, u1), from the
 // cell of eight voxel centres around each sample (the last cell's corners kept: a march stays in two or three cells).
-// ([noinline]: one copy wherever traceVoxGrid is inlined; it reads no thread-private static, its inputs are arguments)
+// ([noinline]: one copy for traceView's inlined copies; it reads no thread-private static, its inputs are arguments)
 [noinline]
 SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, bool skipWater) {
     SmoothHit sh;
@@ -818,8 +818,10 @@ SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, boo
     return sh;
 }
 
-// (TraceResult.hasAlbedo) bit 0 its albedo is the hit's own, bit 1 a smooth normal in bits 16-31 (octahedral, 8 bits each)
+// (TraceResult.hasAlbedo) bit 0 its albedo is the hit's own, bit 1 a smooth normal in bits 16-31 (octahedral, 8 bits each),
+// bit 2 alone: a coarse level's cube that wants its smooth surface (traceView's smoothPrimaryHit clears it)
 static const uint HIT_SMOOTH_N = 2u;
+static const uint HIT_SMOOTH_WANT = 4u;
 uint packSmoothN(float3 n) {
     float2 e = octEncode(n);
     return 1u | HIT_SMOOTH_N | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
@@ -922,32 +924,16 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     if (g.k > 0) {
                         // a coarse level's voxel: a cube of its material (the regions' levels' rule), unless it is wider
                         // than the primary ray's footprint: then the level's smooth surface (coarseSmoothHit)
+                        // (the smooth surface itself is found once the view ray is done, traceView's smoothPrimaryHit: in
+                        // the walk, a call inside the divergent step loop, it cost the horizon view's far pass 0.7 s)
                         float foot = (cChordT + t) * frame.params.w * frame.params.z;
                         bool smooth = cPrimary && vs >= SMOOTH_COARSE_PX * foot && (cAblate & 32u) == 0u;
-                        bool stops = voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t);
-                        if (stops && smooth) {
-                            // (from a voxel before the cube's entry: a concave corner's surface stands in front of it;
-                            // to a voxel and a half past it, within this walk: a convex edge's lies inside)
-                            float span = length(d) > 1e-12 ? 1.0 / length(d) : 1.0;  // (the parameter across one voxel)
-                            bool skipW = cSkipWater || (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
-                            SmoothHit shit = coarseSmoothHit(g, ro, d, max(u0, t - span), min(t + 1.5 * span, u1), skipW);
-                            if (shit.hit) {
-                                float3 an = abs(shit.n);
-                                cTr.t = shit.t;
-                                cTr.mat = mat;
-                                cTr.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
-                                cTr.lod = g.k;
-                                cTr.albedo = shit.albedo;
-                                cTr.hasAlbedo = packSmoothN(shit.n);
-                                cTr.steps = steps;
-                                return TRACE_HIT;
-                            }
-                            // (no crossing near it: the ray passes this voxel's corner, the walk goes on)
-                        } else if (stops) {
+                        if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
                             cTr.t = t;
                             cTr.mat = mat;
                             cTr.axis = entryAxis(v, ro, d, inv, stepPos);
                             cTr.lod = g.k;
+                            if (smooth) cTr.hasAlbedo = HIT_SMOOTH_WANT;
                             return TRACE_HIT;
                         }
                         lo = v;
@@ -1674,6 +1660,9 @@ float lodResidentDist(float level) {
 
 // the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
 static float gHitLod = 0.0;
+// where the stretch that hit starts along the view ray (smoothPrimaryHit searches no further back: a finer level, or this
+// level's walk, found air before it)
+static float gHitFrom = 0.0;
 
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
 // Each stretch of the ray takes the level of its continuous level (lodFromFootprint at its distance, lodResident at its
@@ -1703,7 +1692,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
     float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this stretch
     // (a grazing hit's second look: the coarser level over [t, grazeEnd), the finer hit kept for when it has none)
     bool graze = false;
-    float grazeEnd = 0.0, fineT = 0.0;
+    float grazeEnd = 0.0, fineT = 0.0, fineFrom = 0.0;
     TraceResult fine = gTr;
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
@@ -1738,8 +1727,12 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
         int r = traceLod(lod, a, d, len, uncExit);
         if (graze) {
             // the coarser level's surface near the grazing hit, else the finer hit as it was
-            if (r == TRACE_HIT) return t + gTr.t;
+            if (r == TRACE_HIT) {
+                gHitFrom = t;
+                return t + gTr.t;
+            }
             gTr = fine;
+            gHitFrom = fineFrom;
             return fineT;
         }
         if (r == TRACE_HIT) {
@@ -1755,6 +1748,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
                 float s2 = float(1 << k2);
                 fine = gTr;
                 fineT = th;
+                fineFrom = t;
                 graze = true;
                 lod = k2;
                 grazeEnd = min(th + 3.0 * s2, t1);
@@ -1763,6 +1757,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
                 gTr.hasAlbedo = 0u;  // (the coarser level's own surface: not the finer hit's texel)
                 continue;
             }
+            gHitFrom = t;
             return th;
         }
         if (r == TRACE_UNCOVERED) {
@@ -1802,12 +1797,57 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
     return -1.0;
 }
 
+// A coarse level's cube hit by a primary ray where its voxel is wider than the pixel (traceVoxGrid's HIT_SMOOTH_WANT): its
+// level's smooth surface (coarseSmoothHit) along the ray's tangent there (its parameter the view ray's), from a voxel
+// before the cube's entry (a concave corner's surface stands in front of it; never before the hitting stretch's start,
+// gHitFrom) to a voxel and a half past it (a convex edge's lies inside; never past t1). Once a ray, after its walk: one
+// call where the warp's rays are done, not one inside the walk's divergent loop. Returns the hit, or -1: no crossing (the
+// ray passes the voxel's corner: traceView walks on past it).
+float smoothPrimaryHit(float3 o, float3 dir, float t1, float tHit) {
+    gTr.hasAlbedo = 0u;
+    int k = clamp(gTr.lod, 1, 6);
+    VgGrid g = vgGrid(k);
+    float vs = float(1 << k);
+    float R = frame.camFrac.w;
+    float kc = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+    float3 tg = dir + float3(0, 2.0 * kc * tHit, 0);
+    float3 ro = (worldAt(o, dir, kc, tHit) - float3(g.origin - frame.camInt.xyz)) / vs;
+    bool skipW = gSkipWater || (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
+    SmoothHit sh = coarseSmoothHit(g, ro, tg / vs, -min(vs, max(tHit - gHitFrom, 0.0)), min(1.5 * vs, max(t1 - tHit, 0.0)), skipW);
+    if (!sh.hit) return -1.0;
+    float3 an = abs(sh.n);
+    gTr.t += sh.t;
+    gTr.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
+    gTr.albedo = sh.albedo;
+    gTr.hasAlbedo = packSmoothN(sh.n);
+    return tHit + sh.t;
+}
+
 // The view's ray (traceViewBody): a primary ray (gPrimary) from its own start (gSecT 0: the distance of a chord's
 // start along the view ray is gChordT + gSecT)
 float traceView(float3 o, float3 dir, float t0, float t1, float lodDither) {
     gPrimary = true;
     gSecT = 0.0;
-    float r = traceViewBody(o, dir, t0, t1, lodDither);
+    float r = -1.0;
+    // (one walk call site: a smooth search that finds no crossing walks on once from a voxel and a half past the cube,
+    // its second miss keeps the cube)
+    for (int pass = 0; pass < 2; pass++) {
+        r = traceViewBody(o, dir, t0, t1, lodDither);
+        if (r < 0.0 || gTr.hasAlbedo != HIT_SMOOTH_WANT) break;
+        float vs = float(1 << clamp(gTr.lod, 1, 6));
+        float rs = smoothPrimaryHit(o, dir, t1, r);
+        if (rs >= 0.0) {
+            r = rs;
+            break;
+        }
+        if (pass == 1) break;  // (the cube)
+        t0 = r + 1.5 * vs;
+        if (t0 >= t1) {
+            r = -1.0;
+            break;
+        }
+        gTr.axis = -1;
+    }
     gPrimary = false;
     return r;
 }
