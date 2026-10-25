@@ -114,8 +114,18 @@ follows the design without new tests.
 | Server communicates elements | Coalesced position-based edits plus entity state by interest; bake shared by region hashes (designed) | Edits stored as deltas; sharing not built | None until multiplayer; design in ATLAS-WORLD-STORE §2 |
 | Same world for collisions | The server fed from the GPU generator; level-0 ids against the client level | Built on atlas-server; 0 mismatches over 7,500 blocks | None (server speed is the generator's) |
 
-Rules for tests from here: one experiment per open risk, run when its stage starts; the route, gallery and relaunch are
-the standing gates; no other new tests unless a gate can't answer a question.
+**Supported, not built (owner, 2026-10-25).** E2-E5 aren't features to build now. They're checks that the core leaves
+room for them, so none forces a redesign later. Each is a design check against the core's interfaces:
+- the trace loop has a slot for a second structure (the entity BVH) and for density volumes;
+- the light binning takes a per-frame list;
+- the frame has the controller's knobs (resolution, lod bias, ray and light budgets, per-entity detail);
+- the grid's levels accept transient splats.
+
+A micro-benchmark runs only if the design check finds a likely blocker. Only E1 is a measurement, because it decides
+the core itself.
+
+Rules for tests from here: the route, gallery and relaunch are the standing gates; E1 now; E2-E5 as design checks,
+done when the core settles; no other new tests unless a gate can't answer a question.
 
 ## 4. The stages
 
