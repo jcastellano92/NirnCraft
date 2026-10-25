@@ -85,6 +85,16 @@ A step merges when it's proven by the numbers its own fast loop already measures
 a moving-capture check per temporal change, a gallery no-drop rule on merges, and the cache lifecycle for players
 (in-save storage, a budget, estimates, warnings). These are parked, not dropped: they'd slow the iteration now.
 
+**The cache lifecycle, as the owner wants it (2026-10-25):**
+- **Budget:** a per-world disk budget chosen at world creation, default 5 GB (2 GB and up selectable). The more you
+  play, the more is baked and the faster the world loads, until it runs like butter.
+- **Smart removal:** least useful first (far from where you play, long unvisited), never the coarse whole-map levels.
+- **Smart updates:** a game update rebakes only what its changed generator stages affect (per-stage fingerprints). A
+  server you join sends its world's changes as deltas over the shared bake, cached locally. Your own world's edits are
+  deltas too, so changes load as fast as the rest.
+- **Location:** stored with the world (deleting the world deletes it), with an estimate shown at creation and a warning
+  when disk is low.
+
 ### Frame budget (2026-10-25)
 
 At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
