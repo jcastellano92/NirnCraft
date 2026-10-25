@@ -151,6 +151,7 @@ public final class AtlasClient {
                     AtlasRecorder.end(Z_PROFILE, pz, 100_000);
                 }));
         AtlasClientSections.init();
+        AtlasTextureClock.init(modBus);
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
             if (guard != null) guard.stopped();  // a clean exit is not a crash
             stop();
@@ -415,6 +416,11 @@ public final class AtlasClient {
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
             applyAblate(ctx);
+            try {
+                ctx.setTextureTicks((int) AtlasTextureClock.ticks());  // (animated bricks: the frame vanilla shows)
+            } catch (RuntimeException e) {
+                com.nirncraft.NirnCraft.LOGGER.debug("atlas: texture ticks not set: {}", e.toString());
+            }
             if (AtlasNearPass.owns()) {
                 // the near pass's temporal resolve: atlas samples the same sub-pixel point as our G-buffer (in its pixels)
                 float sc = (float) farScaleX();

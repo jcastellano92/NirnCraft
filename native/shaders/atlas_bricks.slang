@@ -10,8 +10,8 @@
 
 [[vk::binding(40, 0)]] StructuredBuffer<uint> brickData;
 
-// Material mat's brick (its first word in brickData), 0 when it has none; an animated one's frame by the frame's time
-// (frame.sunDir.w, seconds: 20 game ticks a second)
+// Material mat's brick (its first word in brickData), 0 when it has none; an animated one's frame by the host's texture
+// ticks (atlas_set_texture_ticks: the frame its raster shows), else by the frame's time (frame.sunDir.w, 20 ticks a second)
 uint brickOf(uint mat) {
     uint n = brickData[0];
     uint b = mat < n ? brickData[1u + mat] : 0u;
@@ -20,7 +20,8 @@ uint brickOf(uint mat) {
         b &= 0x7FFFFFFFu;
         uint h = brickData[b];
         uint frames = max(h & 0xFFFFu, 1u), ticks = max(h >> 16, 1u);
-        uint f = uint(max(frame.sunDir.w, 0.0) * 20.0 / float(ticks)) % frames;
+        uint tk = asuint(frame.weatherParams.z);
+        uint f = (tk != 0u ? (tk - 1u) / ticks : uint(max(frame.sunDir.w, 0.0) * 20.0 / float(ticks))) % frames;
         b = brickData[b + 1u + f];
     }
     return b;

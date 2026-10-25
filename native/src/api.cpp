@@ -158,6 +158,7 @@ struct AtlasContext {
     BrickStore bricks;
     std::vector<uint32_t> bricksPacked = std::vector<uint32_t>(1, 0u);
     uint64_t bricksRevision = 0, bricksStoreRevision = 0;
+    uint32_t textureTicks = 0;  // atlas_set_texture_ticks + 1 (0: never set: the frame's timeSec clocks the animations)
     uint32_t ablateExtra = 0;  // atlas_debug_ablate: bits OR-ed into the measurement switches (ATLAS_ABLATE) from the host
     std::vector<uint32_t> materialLights;  // per material its light word (bricks.hpp), the last packed
     uint64_t materialLightsHash = 0;
@@ -1336,6 +1337,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
+    std::memcpy(&g.weatherParams[2], &ctx->textureTicks, 4);  // (bits: atlas_bricks.slang brickOf's clock, 0 unset)
     {
         ATLAS_ZONE_MIN("api:lightControl", 50);
         lightControl(ctx, f, a, g);
@@ -2018,6 +2020,13 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
     else if (s.packed) unpackSection(s.packed->data(), out);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_texture_ticks(AtlasContext* ctx, uint32_t ticks) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->textureTicks = ticks == 0xFFFFFFFFu ? 1u : ticks + 1u;
+    return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_debug_ablate(AtlasContext* ctx, uint32_t bits) {

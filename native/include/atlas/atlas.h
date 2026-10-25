@@ -659,6 +659,13 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
                                                 uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
                                                 const uint32_t* texels, uint32_t texelCount, const float* emission);
 /*
+ * (abi 0.18, optional) The texture animation clock: the host's texture ticks since its block atlas was last built.
+ * Vanilla starts every animated sprite at its first frame there and moves each one tick on every frame that ticks the
+ * game (TextureAtlas.cycleAnimationFrames), so an animated brick or sheet (bricks.hpp) shows the frame the host's raster
+ * shows. Never set: the frame's timeSec x 20 (a clock of its own, a frame vanilla does not show).
+ */
+ATLAS_API AtlasStatus atlas_set_texture_ticks(AtlasContext* ctx, uint32_t ticks);
+/*
  * (abi 0.16) Pre-exposure: the GL path's half-float images (colour: radiance and the near field's inscatter; the near
  * light's irradiance) are written multiplied by this (the host's exposure for the coming frame), so physical light
  * spanning sunlight to starlight stays within half precision; transmittances, depths and the near light's visibility
