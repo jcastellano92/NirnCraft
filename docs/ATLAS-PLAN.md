@@ -198,6 +198,13 @@ follows the design without new tests.
   - Far players and creatures as points or silhouettes drawn every frame.
   - Test right after the sky and height exit, on the horizon view: far pass ms, plus a still-and-moving capture.
 
+- **(H) Smoothness computed when a level is built, not per frame:**
+  - first choice: contour planes per coarse voxel (Laine & Karras, Efficient Sparse Voxel Octrees), so the trace is one
+    ray-plane test;
+  - fallback: a stored normal plus corner densities, solved directly;
+  - the far terrain as height fields with max-height pyramids, which also gives the sky exit.
+  - Test offline on the saved scene against the current look, after the levels-1-2 completeness experiment.
+
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
 
