@@ -67,7 +67,7 @@ def launch_nowait(runner, group):
     g = runner.game
     g.ensure_current()  # the current build installed (once per run), as ensure() does
     if g.running():
-        g.close()
+        safe_close(g)
         time.sleep(3)
     g._iris_enable()
     cfg = runner.groups.get(group, {})
@@ -106,6 +106,19 @@ def wait_for(pattern, g, limit, samples=None):
             raise RuntimeError("the client exited while waiting for: " + pattern)
         time.sleep(0.5)
     return None
+
+
+def safe_close(g, limit=420):
+    """Closes the client; a slow shutdown (a fresh world's server saving, the opening's cottage preparation on the server
+    thread) is waited for, not a test failure: the checks have run by now."""
+    try:
+        g.close()
+    except RuntimeError:
+        t0 = time.monotonic()
+        while g.running() and time.monotonic() - t0 < limit:
+            time.sleep(3)
+        if g.running():
+            raise
 
 
 def dist(a, b):
@@ -170,7 +183,7 @@ def returning(runner, s):
         m["selftestProblems"] = int(sm.group(1))
         if int(sm.group(1)):
             fails += re.findall(r"Hold selftest problem: (.*)", fresh_log(g))[:6] or ["the hold selftest reported problems"]
-    g.close()
+    safe_close(g)
     return fails, m
 
 
@@ -204,7 +217,7 @@ def never_ready(runner, s):
         fails.append("the server never logged 'still held'")
     if "Autotest live: ready" in txt:
         fails.append("the autotest began its setup while the player was held")
-    g.close()
+    safe_close(g)
     time.sleep(3)
     txt = fresh_log(g)
     if "left while held" not in txt or "real state was restored" not in txt:
@@ -238,5 +251,5 @@ def first_join(runner, s):
     m["raceScreenSamplesAfterRelease"] = len(seen)
     if not seen:
         fails.append("the character select never appeared after the release")
-    g.close()
+    safe_close(g)
     return fails, m
