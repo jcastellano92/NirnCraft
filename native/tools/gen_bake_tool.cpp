@@ -65,6 +65,8 @@ static std::string jsonBytes(const uint64_t b[8]) {
     return s;
 }
 
+static const char bytes_nl[] = {10, 0};
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         std::fprintf(stderr, "gen_bake_tool <dump dir> <cache dir> [mode=bake|load] [x= z= seed= fp= lod2= bg= bgcap=]\n");
@@ -300,6 +302,11 @@ int main(int argc, char** argv) {
             for (uint32_t c = 0; c < n; c++) {
                 const uint32_t* row = info.data() + size_t(c) * INFO;
                 int lowest = int(row[0]), top = int(row[1]);
+                if (at == 0 && c < 3) {  // (a look at the first rows: lowest ground, top, biome, kinds by section)
+                    std::fprintf(stderr, "ROW chunk %d,%d lowest %d top %d biome %u kinds ", batch[c * 2], batch[c * 2 + 1], lowest, top, row[2]);
+                    for (int sct = 0; sct < 40; sct++) std::fprintf(stderr, "%u", row[4 + sct * 4 + 2]);
+                    std::fprintf(stderr, bytes_nl);
+                }
                 flagged += flags[c] != 0;
                 uint64_t m = 0;
                 for (int sct = 0; sct < 40; sct++) {

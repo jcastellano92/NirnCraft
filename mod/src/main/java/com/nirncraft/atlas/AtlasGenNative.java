@@ -39,7 +39,7 @@ final class AtlasGenNative {
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
     private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake;
     // the whole-map coarse bake (atlas_gen_bake_*, atlas_gen_far_known; AtlasCoarseBake): null in a library without them
-    private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown;
+    private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown, fingerprintParts, paceBoost;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
     private final MethodHandle storeEnable, runStore, storeKeep, storeStats, featAttach, featDestroy, featOverlays;
     /** Columns of a far tile (atlas_gen_tiles). */
@@ -104,6 +104,10 @@ final class AtlasGenNative {
         bakeInfo = bk ? bind(l, lib, "atlas_gen_bake_info", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
         bakeEnd = bk ? bind(l, lib, "atlas_gen_bake_end", FunctionDescriptor.of(JAVA_INT, ADDRESS)) : null;
         farKnown = bk ? bind(l, lib, "atlas_gen_far_known", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT)) : null;
+        fingerprintParts = lib.find("atlas_gen_fingerprint_parts").isPresent()
+                ? bind(l, lib, "atlas_gen_fingerprint_parts", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        paceBoost = lib.find("atlas_gen_pace_boost").isPresent()
+                ? bind(l, lib, "atlas_gen_pace_boost", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         boolean st = lib.find("atlas_gen_run_store").isPresent();
         storeEnable = st ? bind(l, lib, "atlas_gen_store_enable", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         runStore = st ? bind(l, lib, "atlas_gen_run_store", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS, ADDRESS,
@@ -448,6 +452,30 @@ final class AtlasGenNative {
                 check((int) farCacheIngest.invokeExact(ptr, lod, a.allocateFrom(JAVA_INT, tx, tz), 1, served, ch, tk), "atlas_gen_far_cache_ingest");
                 if (served.get(JAVA_BYTE, 0) == 0) return null;
                 return new FarIngest(tk.get(JAVA_INT, 0), ch.get(JAVA_INT, 0), 0, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** The cache set's key in its parts (build, program, ingest table, map, extra, stages, whole, stage count) as hex; null without. */
+        String fingerprintParts() {
+            if (fingerprintParts == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment o = a.allocate(8L * 8);
+                check((int) fingerprintParts.invokeExact(ptr, o), "atlas_gen_fingerprint_parts");
+                return String.format("build %016x program %016x ingest %016x map %016x extra %016x stages %016x (%d) whole %016x", o.get(JAVA_LONG, 0),
+                        o.get(JAVA_LONG, 8), o.get(JAVA_LONG, 16), o.get(JAVA_LONG, 24), o.get(JAVA_LONG, 32), o.get(JAVA_LONG, 40), o.get(JAVA_LONG, 56),
+                        o.get(JAVA_LONG, 48));
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** While on, the far field's submissions are not paced (a loading screen holds the player: atlas_gen_pace_boost). */
+        void paceBoost(boolean on) {
+            if (paceBoost == null) return;
+            try {
+                int s = (int) paceBoost.invokeExact(ptr, on ? 1 : 0);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

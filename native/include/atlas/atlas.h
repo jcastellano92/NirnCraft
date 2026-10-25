@@ -978,6 +978,11 @@ typedef struct AtlasGenBakeInfo {
     double makeMs;    /* wall time inside atlas_gen_far_ingest */
 } AtlasGenBakeInfo;
 ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz);
+/* The cache set's key in its parts (out[8]): build, program, ingest table, map, extra, stages, the whole, stage count. */
+ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out);
+/* While on, the far field's submissions (atlas_gen_far_ingest, so the bake) are not paced and take nothing from the near
+   work's budget: for a loading screen that holds the player, where no frame is to be protected. */
+ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on);
 ATLAS_API AtlasStatus atlas_gen_bake_begin(AtlasGen* h, const AtlasGenBakeSpec* spec, AtlasGenBakeInfo* out);
 /* Makes the next maxTiles tiles not yet known (each one atlas_gen_far_ingest, paced as the far field is: the leftovers of
    the GPU budget). Returns early with info.busy set; call again after a frame. */

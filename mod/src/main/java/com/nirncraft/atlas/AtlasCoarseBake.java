@@ -40,6 +40,8 @@ final class AtlasCoarseBake implements Runnable {
     /** The map's bounds in blocks (TamrielMap: the generator's map inputs), grown by MARGIN. */
     static final int MIN_X = TamrielMap.MIN_X, MIN_Z = TamrielMap.MIN_Z, MAX_X = TamrielMap.MAX_X, MAX_Z = TamrielMap.MAX_Z;
     static final int MARGIN = Integer.getInteger("nirncraft.atlas.bake.margin", 0);
+    /** Measurements of the loading phase without its screen (the harness closes it): the bake's submissions unpaced throughout. */
+    static final boolean BOOST = Boolean.getBoolean("nirncraft.atlas.bake.boost") || "1".equals(System.getenv("NIRNCRAFT_ATLAS_BAKE_BOOST"));
     /** Measurements: level 2 is made whether or not the near window has work (the worst case for the frames). */
     static final boolean ALWAYS = Boolean.getBoolean("nirncraft.atlas.bake.always") || "1".equals(System.getenv("NIRNCRAFT_ATLAS_BAKE_ALWAYS"));
 
@@ -196,17 +198,23 @@ final class AtlasCoarseBake implements Runnable {
             return;
         }
         info = b;
+        com.nirncraft.NirnCraft.LOGGER.info("atlas coarse bake: the cache set's key: {}", gen.fingerprintParts());
         loadTotal = b.total();
         loadDone = b.knownTotal();
         phase = 1;
         com.nirncraft.NirnCraft.LOGGER.info("atlas coarse bake: levels {}-{} over [{}, {}) x [{}, {}), {} tiles, {} on disk already, from ({}, {})",
                 LOAD_LO, LOAD_HI, MIN_X - MARGIN, MAX_X + MARGIN, MIN_Z - MARGIN, MAX_Z + MARGIN, b.total(), b.knownTotal(), centreX, centreZ);
         // levels 3-6: tiles on disk are loaded, the others made (and loaded as they are made), the loading phase
+        boolean boost = false;
         while (running) {
             servePass(8);
             if (loadDone >= loadTotal) break;
+            // (the loading screen holds the player: no frame to protect, the card is the bake's)
+            boolean hold = BOOST || AtlasLoadingScreen.holding();
+            if (hold != boost) gen.paceBoost(boost = hold);
             step(1, true);
         }
+        if (boost) gen.paceBoost(false);
         if (!running) return;
         loadedNs = System.nanoTime();
         phase = 2;
