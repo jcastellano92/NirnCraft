@@ -849,7 +849,7 @@ public:
             }();
             double ms = double(b->lastPartUs) / 1000.0;
             uint32_t& bud = featBudget_[partRoundRec_];
-            uint32_t phase = partPhase_;  // (0 the feature's round; 1..3 its vein's passes)
+            uint32_t phase = partPhase_;  // (0 the feature's round; 1..5 its vein's passes, in order 3, 0, 1, 2, 4)
             // dev: ATLAS_FEAT_PART_TRACE=1: per placed feature its rounds' time and budget, to stderr every 20 s
             static const bool ptrace = std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
             if (ptrace) {
@@ -882,11 +882,13 @@ public:
                 }
                 partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
             }
-            if (partVein_ && phase < 3) {
-                // the round's vein passes, a dispatch a part (featVeinMain: clear, first visits, fates)
+            if (partVein_ && phase < 5) {
+                // the round's vein passes, a dispatch a part (featVeinMain: the spheres' pair loop, a group an origin;
+                // then clear, first visits, fates, and the fates into the origin's table)
+                static const uint32_t order[5] = {3, 0, 1, 2, 4};
                 partPhase_ = phase + 1;
-                p.k = phase;
-                dispatch(S_VEIN, (VEIN_W + 63) / 64, n);
+                p.k = order[phase];
+                dispatch(S_VEIN, order[phase] == 3 ? 1u : (VEIN_W + 63) / 64, n);
                 p.k = 0;
                 return ATLAS_GEN_STAGE_MORE;
             }
@@ -908,8 +910,13 @@ public:
         if (step < STEP_AUX) {
             std::string err;
             if (!ensure(left_, 64, true, err)) return 3;
+            static const bool treePhasesOn = [] {
+                const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
+                return !(e && e[0] == '0');
+            }();
             auto it = featBudget_.find(step);
-            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = types_[step] == 4 ? 1u : 64u);
+            // (trees: an operation budget with the commit in phases, else one tree a round as before)
+            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = types_[step] == 4 ? (treePhasesOn ? 512u : 1u) : 64u);
             vkCmdFillBuffer(cmd, cnt_.buf, 0, 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
@@ -922,6 +929,12 @@ public:
             partVein_ = veins && types_[step] == 1;
             partPhase_ = 0;
             if (partVein_) p.store = 3u;
+            // a tree's commit in phases over the rounds (its budget: operations, not placements); ATLAS_FEAT_TREE_PHASES=0 off
+            static const bool treePhases = [] {
+                const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
+                return !(e && e[0] == '0');
+            }();
+            if (treePhases && types_[step] == 4) p.store = 5u;
             runStep(cmd, p, dispatch, step, partRound_ == 0, bud);
             p.store = 1u;
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
