@@ -38,7 +38,8 @@ final class AtlasLoadingScreen extends Screen {
     private boolean sentReady;          // the server was told (the screen waits for its release)
     private long sentAtNs, checkedNs;
     private String problem;             // a failure or a timeout: what is wrong (the hold stays)
-    private String pending = "";
+    private String pending = "", lastPending = "-";
+    private long lastPendingLogNs;
     private boolean isReady, failed, vanillaIn;
     private Button retry, enter;
 
@@ -154,6 +155,11 @@ final class AtlasLoadingScreen extends Screen {
     public void tick() {
         double s = (System.nanoTime() - openedNs) / 1e9;
         check();
+        if (!pending.equals(lastPending) && (System.nanoTime() - lastPendingLogNs) / 1e9 >= 5) {  // (what the hold waits on, for the logs)
+            lastPending = pending;
+            lastPendingLogNs = System.nanoTime();
+            com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: {} s, {}", String.format("%.1f", s), pending.isEmpty() ? "ready" : "waiting for: " + pending);
+        }
         boolean held = HoldClient.held();
         if (!held && (isReady || sentReady)) {  // released by the server (or never held and ready): the world is the player's
             com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: ready after {} s ({})", String.format("%.1f", s),

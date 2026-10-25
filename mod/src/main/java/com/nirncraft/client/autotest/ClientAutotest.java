@@ -372,10 +372,11 @@ public final class ClientAutotest {
                         java.nio.file.StandardCopyOption.ATOMIC_MOVE);
             } catch (Exception ignored) {}
         }
-        if (!liveStarted) {
+        // the player is held until loading completes: the setup (spectator, intro skip) runs after the release; the action
+        // queue (a harness "stop", a probe) still works meanwhile
+        if (!liveStarted && !com.nirncraft.hold.client.HoldClient.held()) {
             // The dedicated QA controller grants op after login; never silently run privileged setup before that.
             if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;
-            if (com.nirncraft.hold.client.HoldClient.held()) return;  // the player is held until loading completes: the setup (spectator, intro skip) runs after the release
             liveStarted = true;
             mc.gui.setScreen(null);
             // a test client shows the world, not text: HUD (and with it every NirnCraft card, banner and hint) hidden

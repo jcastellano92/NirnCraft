@@ -61,7 +61,10 @@ public final class AtlasReady {
             if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (coarse bake) " + p.far() + " of " + p.farTotal() + " tiles";
         }
         var v = info.has("voxgrid") && info.get("voxgrid").isJsonObject() ? info.getAsJsonObject("voxgrid") : null;
-        if (v == null) return "grid not started";
+        if (v == null) {  // (the level-0 grid exists in the unified / client-generated modes; the plain far field has none to wait for)
+            if (AtlasNearPass.unified() || AtlasClientGen.ON) return "grid not started";
+            return "";
+        }
         if (v.has("settled") && !v.get("settled").getAsBoolean()) return "grid not settled since its last move";
         for (String k : new String[]{"pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections"})
             if (v.has(k) && v.get(k).getAsLong() > 0) return "grid " + k + " " + v.get(k).getAsLong();
