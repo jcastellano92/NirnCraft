@@ -709,6 +709,12 @@ public:
     double frameGpuMs() const override { return frameGpuEma_.load(); }
     std::atomic<double> frameGpuEma_{0.0};
     uint64_t framesCompleted() const override { return completedFrame_.load(); }
+    // whether the last frame submitted is still on the GPU (its fence, read under the queue's lock; the client generator
+    // fills the gaps between frames)
+    bool frameOnGpu() override {
+        std::lock_guard<std::mutex> q(queueMu_);
+        return lastFrameFence_ && vkGetFenceStatus(dev_, lastFrameFence_) == VK_NOT_READY;
+    }
 
     bool memoryInfo(MemoryInfo& m, std::string&) override {
         VkPhysicalDeviceMemoryBudgetPropertiesEXT budget{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT};
@@ -2707,12 +2713,13 @@ private:
             si.signalSemaphoreCount = 1;
             si.pSignalSemaphores = signal;
         }
-        vkResetFences(dev_, 1, &s.fence);
         {
             ATLAS_ZONE_MIN("vk:queueSubmit", 100);
             std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
+            vkResetFences(dev_, 1, &s.fence);  // (under the lock: frameOnGpu reads the last frame's fence)
             s.gt.submitted();
             if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (frame)", err)) return false;
+            lastFrameFence_ = s.fence;
             vgOpen_ = false;  // (the grid's batch is on its way)
         }
         s.inFlight = true;
@@ -3330,6 +3337,7 @@ private:
     int current_ = -1, staged_ = -1;
     std::mutex sceneMu_;
     std::mutex queueMu_;  // vkQueueSubmit from the render and staging threads
+    VkFence lastFrameFence_ = VK_NULL_HANDLE;  // (under queueMu_) the last frame submitted's
     VkCommandPool uploadPool_ = VK_NULL_HANDLE;
     std::atomic<uint64_t> frameCounter_{0};  // (atomic: the client generator reads it, framesSubmitted)
     int staleFrames_ = 0;

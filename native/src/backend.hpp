@@ -170,6 +170,7 @@ public:
     // the frames' own GPU time (their timestamps, eased), ms; 0 unknown (the generator's budget reads the GPU's idle share)
     virtual double frameGpuMs() const { return 0.0; }
     virtual uint64_t framesCompleted() const { return 0; }
+    virtual bool frameOnGpu() { return false; }  // the last frame submitted still on the GPU
     // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
     virtual bool readSunMap(std::vector<float>& out, std::string& err) {
         err = "no sun map";

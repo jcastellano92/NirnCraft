@@ -752,21 +752,27 @@ public:
                 dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
                 return 0;
             }
+            // (a unit: a tree record over a slice of 4096 of the tile's chunks)
             farRecs_.clear();
             for (uint32_t rec : dispatch_)
-                if (rec < types_.size() && types_[rec] == 4u) farRecs_.push_back(rec);
+                if (rec < types_.size() && types_[rec] == 4u)
+                    for (uint32_t t0 = 0; t0 < side * side; t0 += FAR_SLICE) farRecs_.push_back({rec, t0});
             farCursor_ = 0;
         }
         for (uint32_t i = 0; i < std::max(1u, units) && farCursor_ < farRecs_.size(); i++) {
-            p.rec = farRecs_[farCursor_++];
-            dispatch(S_FARTREES, groups);
+            p.rec = farRecs_[farCursor_].first;
+            p.first = farRecs_[farCursor_].second;
+            farCursor_++;
+            dispatch(S_FARTREES, (std::min(FAR_SLICE, side * side - p.first) + GROUP - 1) / GROUP);
         }
         if (farCursor_ < farRecs_.size()) return ATLAS_GEN_STAGE_MORE;
         p.rec = 0;
+        p.first = 0;
         dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
         return 0;
     }
-    std::vector<uint32_t> farRecs_;  // (the far stage in parts) the program's tree records, and the next one
+    static constexpr uint32_t FAR_SLICE = 4096;
+    std::vector<std::pair<uint32_t, uint32_t>> farRecs_;  // (the far stage in parts) (tree record, first chunk) units, the next
     size_t farCursor_ = 0;
 
     // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)

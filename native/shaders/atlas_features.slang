@@ -4895,7 +4895,7 @@ void featFarPlacesMain(uint3 id : SV_DispatchThreadID) {
 void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
     int lod = int(params.k);
     int side = lod <= 4 ? (16 << lod) : 256;  // chunks a tile side evaluated
-    uint t = id.x;
+    uint t = id.x + params.first;  // (params.first: the first chunk of this dispatch's slice; a chunk's trees are its own)
     if (t >= uint(side * side)) return;
     int per = lod <= 4 ? 1 : (1 << (lod - 4));  // chunks a column side (lod > 4: one stands for them)
     int cx = params.origins * (16 << lod) + int(t % uint(side)) * per + (per >> 1);

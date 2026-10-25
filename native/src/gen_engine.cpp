@@ -2117,15 +2117,17 @@ private:
         // the budget pays the submission's GPU time (its timestamps): its wall time also holds the time it queued behind
         // the frames, and at 1440p that charged the generator for the frames' work until it made nothing (a route at 13
         // ms frames: no chunk in 160 s)
-        pace_.tokens += s.est - gpu;  // (charged its estimate when submitted: now its own time)
+        // (charged its estimate when submitted; now its own time, but never more than the estimate: a submission the
+        // frames held back (the GPU theirs first) took longer without doing more, and charging that rationed the
+        // generator to nothing at 1440p. The frames are kept by the duty's control, not by this charge)
+        pace_.tokens += s.est - std::min(gpu, std::max(s.est, 0.05));
         inFlightMs_ = std::max(0.0, inFlightMs_ - s.est);
         pace_.usedMs += gpu;
         lastSubMs_ = gpu;
-        subEma_ = subEma_ * 0.8 + gpu * 0.2;
-        if (s.refine && s.perUnit && s.units > 0.0) {
-            double per = gpu / s.units;
-            *s.perUnit = *s.perUnit <= 0.0 ? per : *s.perUnit * 0.7 + per * 0.3;
-        }
+        // (the time a unit and a submission's as the shortest seen lately: quick down, slow up, the same reason)
+        auto low = [](double was, double v) { return was <= 0.0 ? v : (v < was ? was * 0.5 + v * 0.5 : was * 0.95 + v * 0.05); };
+        subEma_ = low(subEma_, gpu);
+        if (s.refine && s.perUnit && s.units > 0.0) *s.perUnit = low(*s.perUnit, gpu / s.units);
         if (s.sliceKind >= 0 && s.sliceUnits > 0) sliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
         if (s.part >= 0 && size_t(s.part) < partUs_.size()) {
             partUs_[size_t(s.part)] = uint32_t(std::min(gpu * 1000.0, 4e9));
@@ -2277,11 +2279,14 @@ private:
     // time each), so it may fill whatever the frames leave; the pacer only keeps the frames within their target. A token
     // bucket of GPU milliseconds fills at a duty, and the duty follows the frames (additive increase, multiplicative
     // decrease): each 200 ms window the frame period (backend_->framesSubmitted) is held against what the frames may
-    // take: their own period x (1 + ATLAS_GEN_SLACK (0.15)) + 1 ms (ATLAS_GEN_TARGET_MS (20) until that is known).
-    // Their own period is measured in probes: every 4 s (or 25 frames) the generator drains and holds back for a few
-    // frames (paceAcquire waits it out), and whenever it was idle anyway. No frames at all (loading, a paused game): 95 %
+    // take: ATLAS_GEN_TARGET_MS (20), or their own period x (1 + ATLAS_GEN_SLACK (0.15)) + 1 ms when that is longer
+    // (the duty never below 0.1: frames slower than the target on their own still leave the generator a share). Their
+    // own period: a window's when the generator
+    // was idle all through it (the last 10 s), else the shortest window period of the last 10 s (or, ATLAS_GEN_PROBES=1,
+    // probes: every 4 s it drains and holds back for a few frames). No frames at all (loading, a paused game): 95 %
     // of the time. Each submission is charged an estimate when submitted (its own GPU time when it retires), and at
-    // most ATLAS_GEN_AHEAD_MS (6) of them is in flight. Near work waits for the bucket to be empty or better, far work
+    // most ATLAS_GEN_AHEAD_MS (4) of them is in flight, and none is submitted while a frame is on the GPU (a frame period
+    // at most: ATLAS_GEN_GAPS=0 off). Near work waits for the bucket to be empty or better, far work
     // for it to be 10 ms full. A wait is bounded (300 ms; a probe 1.3 s: a budget, not a stall); ATLAS_GEN_PACE=0 turns
     // it off; ATLAS_GEN_PACE_TRACE=1 prints the controller every 5 s.
     struct Pacer {
@@ -2299,6 +2304,9 @@ private:
         bool init = false;
         // the frames' own period (probes), what they may take, the probe under way
         double baseMs = 0.0, allowMs = 0.0;
+        double recent[50] = {};  // (the last 10 s of window periods)
+        uint32_t recentAt = 0;
+        std::chrono::steady_clock::time_point baseAt = last;
         bool probing = false, probeMarked = false, probeDrained = false;
         uint64_t probeFrames = 0, probes = 0;
         std::chrono::steady_clock::time_point probeAt = last, probeMarkAt = last, lastSubAt = last, traceAt = last;
@@ -2370,14 +2378,26 @@ private:
                 pace_.duty = 0.95;  // (no frames: loading, a paused game: the card is ours)
             } else {
                 // (idle for the whole window: this window's period is the frames' own)
-                if (msBetween(pace_.lastSubAt, now) > win + 50.0) pace_.baseMs = ease(pace_.baseMs, p);
-                // (what the frames may take: their own period and the slack; until it is known, the target)
-                pace_.allowMs = pace_.baseMs > 0.0 ? pace_.baseMs * (1.0 + slack) + 1.0 : target;
+                if (msBetween(pace_.lastSubAt, now) > win + 50.0) {
+                    pace_.baseMs = ease(pace_.baseMs, p);
+                    pace_.baseAt = now;
+                }
+                // (else the shortest period of the last 10 s: the generator only ever lengthens it)
+                pace_.recent[pace_.recentAt++ % 50] = p;
+                double shortest = 1e9;
+                for (double r : pace_.recent)
+                    if (r > 0.0) shortest = std::min(shortest, r);
+                double own = pace_.baseMs > 0.0 && msBetween(pace_.baseAt, now) < 10000.0 ? pace_.baseMs : shortest;
+                // (what the frames may take: the target, or their own period and the slack when that is longer)
+                pace_.allowMs = std::max(target, own * (1.0 + slack) + 1.0);
                 if (per <= pace_.allowMs) pace_.duty = std::min(0.95, pace_.duty + 0.04);
-                else pace_.duty = std::max(0.03, pace_.duty * (per > pace_.allowMs * 1.5 ? 0.5 : 0.8));
+                else pace_.duty = std::max(0.1, pace_.duty * (per > pace_.allowMs * 1.5 ? 0.5 : 0.8));  // (a tenth at least)
             }
             pace_.gpuMs = backend_ ? backend_->frameGpuMs() : 0.0;
-            if (!pace_.probing && per > 0.0 && msBetween(pace_.probeAt, now) > std::max(4000.0, 25.0 * per) &&
+            // (probes: ATLAS_GEN_PROBES=1; off by default: the hold keeps the generator's lock, and threads that ask the
+            // generator anything wait with it, frames included)
+            static const bool probes = std::getenv("ATLAS_GEN_PROBES") && std::getenv("ATLAS_GEN_PROBES")[0] == '1';
+            if (probes && !pace_.probing && per > 0.0 && msBetween(pace_.probeAt, now) > std::max(4000.0, 25.0 * per) &&
                 msBetween(pace_.lastSubAt, now) < 200.0) {
                 pace_.probing = true;
                 pace_.probeMarked = false;
@@ -2453,15 +2473,27 @@ private:
             return !e || std::atoi(e) != 0;
         }();
         if (!on || !shared_ || !backend_) return 0.0;
+        pace_.lastSubAt = std::chrono::steady_clock::now();  // (busy from here: a window with a wait in it is not the frames' own)
         paceUpdate();
         double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
         auto t0 = std::chrono::steady_clock::now();
         // (the work in flight ahead of the frames: at most ATLAS_GEN_AHEAD_MS (6) of it, estimated)
-        static const double ahead = envMs("ATLAS_GEN_AHEAD_MS", 6.0);
+        static const double ahead = envMs("ATLAS_GEN_AHEAD_MS", 4.0);
         while (inFlightMs_ > ahead && waited < 300.0) {
             std::string e;
             if (!waitOldest(e, true)) break;
             waited = msSince(t0);
+        }
+        // (the gaps between frames: not while a frame is on the GPU, a frame period at most, then one part anyway: a
+        // GPU the frames keep busy still gets its share; ATLAS_GEN_GAPS=0 off)
+        static const bool gaps = !(std::getenv("ATLAS_GEN_GAPS") && std::getenv("ATLAS_GEN_GAPS")[0] == '0');
+        if (gaps && pace_.periodMs > 0.0) {
+            double cap = std::min(100.0, std::max(8.0, pace_.periodMs)), g0 = waited;
+            while (backend_->frameOnGpu() && waited - g0 < cap) {
+                std::this_thread::sleep_for(std::chrono::microseconds(500));
+                waited = msSince(t0);
+            }
+            pace_.lastSubAt = std::chrono::steady_clock::now();
         }
         while ((pace_.tokens < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
             if (pace_.probing && !pace_.probeDrained) {
@@ -2475,6 +2507,7 @@ private:
             double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
             std::this_thread::sleep_for(std::chrono::microseconds(int64_t(ms * 1000.0)));
             waited = msSince(t0);
+            pace_.lastSubAt = std::chrono::steady_clock::now();
             paceUpdate();
         }
         pace_.waitedMs += waited;
