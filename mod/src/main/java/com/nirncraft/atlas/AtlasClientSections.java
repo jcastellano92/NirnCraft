@@ -158,7 +158,18 @@ final class AtlasClientSections {
     }
 
     /** Client thread, each tick while atlas runs: the queued chunks read (nearest first), within the budget. */
+    private static final AtlasRecorder.Zone Z_TICK = AtlasRecorder.zone("sections:tick");
+
     static void tick(Minecraft mc) {
+        long rz = AtlasRecorder.begin();
+        try {
+            tickBody(mc);
+        } finally {
+            AtlasRecorder.end(Z_TICK, rz, 50_000);
+        }
+    }
+
+    private static void tickBody(Minecraft mc) {
         if (!ON || (QUEUED.isEmpty() && DIRTY.isEmpty()) || mc.level == null || mc.player == null) return;
         if (mc.level.dimension() != Level.OVERWORLD) {  // (left without its chunks' unloads: nothing is waiting)
             QUEUED.clear();

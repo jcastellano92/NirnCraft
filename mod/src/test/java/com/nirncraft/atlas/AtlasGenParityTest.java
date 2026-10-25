@@ -1132,6 +1132,157 @@ class AtlasGenParityTest {
     }
 
     /**
+     * The generated world kept across launches (NIRNCRAFT_TEST_WORLD=tamriel): AtlasClientGen as the game starts it (the
+     * store's decoration, the overlays attached, the materials log, the self-baking cache in one directory) with a camera
+     * that walks from stop to stop; the second launch (a new context, a new generator, the same directory) walks the same
+     * stops and fails if it generates any chunk or far tile: the first launch's is all on disk. Prints each launch's
+     * times to the window and to the settled horizon, and the cache's counters.
+     */
+    @Test
+    void clientGenRelaunch(MinecraftServer server) throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("tamriel".equals(System.getenv("NIRNCRAFT_TEST_WORLD")), "the flat test world");
+        if (server.overworld() == null) {
+            server.submit(() -> {
+                try {
+                    java.lang.reflect.Method m = MinecraftServer.class.getDeclaredMethod("createLevels");
+                    m.setAccessible(true);
+                    m.invoke(server);
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException(e);
+                }
+            }).join();
+        }
+        Path lib = Path.of(System.getenv("NIRNCRAFT_ATLAS_LIB"));
+        Path dir = Path.of(System.getenv().getOrDefault("NIRNCRAFT_GEN_CACHE_DIR", Files.createTempDirectory("atlas-relaunch").toString()));
+        int launches = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_RELAUNCH_COUNT", "2"));
+        int stops = Integer.parseInt(System.getenv().getOrDefault("NIRNCRAFT_RELAUNCH_STOPS", "6"));
+        boolean farWanted = !"false".equalsIgnoreCase(System.getenv("NIRNCRAFT_GEN_FAR"));
+        System.setProperty("nirncraft.atlas.clientGen.far", String.valueOf(farWanted));
+        System.setProperty("nirncraft.atlas.cacheDir", dir.toString());
+        AtlasNative atlas = AtlasNative.load(lib);
+        StringBuilder report = new StringBuilder();
+        long[] second = null;
+        for (int launch = 1; launch <= launches; launch++) {
+            long tLaunch = System.nanoTime();
+            try (AtlasNative.Context ctx = atlas.create(AtlasGenNative.BACKEND_VULKAN)) {
+                AtlasMaterials mats = new AtlasMaterials();
+                mats.persistTo(dir.resolve("materials.log"));
+                // as the game: the structures as stages of the generator's batches, before its program compiles
+                AtlasOverlayLive.register(lib, server);
+                AtlasClientGen cg = AtlasClientGen.startFor(server, lib, ctx, mats);
+                if (cg == null) throw new IllegalStateException("no client generator");
+                double[] cam = {0.5, 0.5};
+                java.util.concurrent.atomic.AtomicBoolean rendering = new java.util.concurrent.atomic.AtomicBoolean(true);
+                java.util.concurrent.atomic.AtomicLong frames = new java.util.concurrent.atomic.AtomicLong();
+                String[] renderError = {null};
+                List<Float> frameMs = new ArrayList<>();  // (each frame's update + render, ms: the render thread's)
+                Thread renderer = new Thread(() -> {
+                    AtlasNative.Frame f = new AtlasNative.Frame();
+                    f.width = 320;
+                    f.height = 180;
+                    f.maxDistance = 2000;
+                    new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 320f / 180, 0.05f, 4000f)
+                            .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
+                    int[] color = new int[320 * 180];
+                    float[] depth = new float[320 * 180];
+                    long nextFrame = System.nanoTime();
+                    while (rendering.get()) {
+                        f.x = cam[0];
+                        f.y = 160;
+                        f.z = cam[1];
+                        try {
+                            long r0 = System.nanoTime();
+                            ctx.update(f.x, f.y, f.z, frames.get() == 0 ? 0 : 2);
+                            ctx.render(f, color, null, depth);
+                            synchronized (frameMs) {
+                                frameMs.add((System.nanoTime() - r0) / 1e6f);
+                            }
+                            frames.incrementAndGet();
+                            // (a 60 Hz cadence, as vsync: the frame's own time out of the 16.7 ms)
+                            long left = nextFrame - System.nanoTime();
+                            if (left > 0) Thread.sleep(left / 1_000_000L, (int) (left % 1_000_000L));
+                            nextFrame = Math.max(nextFrame + 16_666_667L, System.nanoTime());
+                        } catch (InterruptedException e) {
+                            return;
+                        } catch (Throwable t) {
+                            renderError[0] = t.toString();
+                            return;
+                        }
+                    }
+                }, "test render");
+                renderer.setDaemon(true);
+                renderer.start();
+                double tWindow = -1, tHorizon = -1, tSettled = -1;
+                try {
+                    long t0 = System.nanoTime();
+                    for (int stop = 0; stop < stops; stop++) {
+                        // a walk to the stop at 30 blocks a second, then the settle: nothing generated or served for 2.5 s
+                        double target = stop * 96.0;
+                        AtlasClientGen.follow(cam[0], cam[1], 0f);  // (the first stop too: no camera, no window)
+                        while (cam[0] < target + 0.5) {
+                            cam[0] = Math.min(target + 0.5, cam[0] + 30 * 0.05);
+                            AtlasClientGen.follow(cam[0], cam[1], 0f);
+                            Thread.sleep(50);
+                        }
+                        long[] last = AtlasClientGen.counters();
+                        long still = System.nanoTime();
+                        long stopStart = System.nanoTime();
+                        while ((System.nanoTime() - stopStart) / 1e9 < 120) {
+                            Thread.sleep(250);
+                            long[] now = AtlasClientGen.counters();
+                            if (now[0] != last[0] || now[1] != last[1]) {  // (the near window's: far tiles go on meanwhile)
+                                last = now;
+                                still = System.nanoTime();
+                            }
+                            double[] j = cg.jumpTimes();
+                            if (tWindow < 0 && j[1] >= 0) tWindow = (System.nanoTime() - t0) / 1e9;
+                            // settled: the worker has nothing left in the window and nothing changed for a second
+                            boolean[] idle = AtlasClientGen.idle();
+                            if (idle != null && idle[0] && (System.nanoTime() - still) / 1e9 > 1.0) break;
+                        }
+                        if (stop == 0) tSettled = (System.nanoTime() - t0) / 1e9 - 1.0;
+                        report.append(String.format("  launch %d stop %d (x %.0f): %.1f s  generated %d, from cache %d, far made %d, far cached %d%n",
+                                launch, stop, cam[0], (System.nanoTime() - t0) / 1e9, last[0], last[1], last[2], last[3]));
+                        progress("relaunch " + launch, stop + 1, stops);
+                    }
+                    // the horizon settled (the far state unchanged for 4 s), as the jump test
+                    long f0 = System.nanoTime();
+                    String st = "";
+                    while (farWanted && (System.nanoTime() - f0) / 1e9 < 240) {
+                        boolean[] idle = AtlasClientGen.idle();
+                        if (idle != null && idle[0] && idle[1]) break;
+                        Thread.sleep(250);
+                    }
+                    tHorizon = (System.nanoTime() - t0) / 1e9;
+                    report.append(String.format("launch %d: first radius settled after %.1f s (window up %.1f s), horizon settled after %.1f s (%d frames)%n  %s%n", launch,
+                            tSettled, tWindow, tHorizon, frames.get(), AtlasClientGen.state()));
+                    if (renderError[0] != null) report.append("  render thread: ").append(renderError[0]).append(System.lineSeparator());
+                    float[] ms;
+                    synchronized (frameMs) {
+                        ms = new float[frameMs.size()];
+                        for (int i = 0; i < ms.length; i++) ms[i] = frameMs.get(i);
+                    }
+                    java.util.Arrays.sort(ms);
+                    if (ms.length > 0)
+                        report.append(String.format("  frames (render thread, update + render): p50 %.1f p99 %.1f max %.1f ms; %s%n", ms[ms.length / 2],
+                                ms[(int) (ms.length * 0.99)], ms[ms.length - 1], ctx.info().replaceAll("(?s).*(\"stageCpuMs\"[^}]*?\"stageScale\":[0-9.]+).*?(\"takePhases\":\\{[^}]*\\}).*", "$1 $2")));
+                    if (launch == 2) second = AtlasClientGen.counters();
+                } finally {
+                    cg.close();
+                    rendering.set(false);
+                    renderer.join(5000);
+                }
+            }
+            report.append(String.format("launch %d total %.1f s (close included)%n", launch, (System.nanoTime() - tLaunch) / 1e9));
+        }
+        String out = System.getenv("NIRNCRAFT_GEN_PARITY_OUT");
+        if (out != null) Files.writeString(Path.of(out + ".relaunch.txt"), report.toString());
+        System.out.println(report);
+        if (second != null)
+            org.junit.jupiter.api.Assertions.assertEquals(0, second[0] + second[2], "the second launch generated chunks or far tiles the first had made:\n" + report);
+    }
+
+    /**
      * GPU -> GPU (atlas_gen_create_for, atlas_gen_run, atlas_gen_ingest): the kernels' section infos against the Java
      * decode they replace (AtlasClientGen.decode / putGen: the lowest ground, highest top, each section's kind and its
      * hash, the tints' biome), then the sections device to device into one context against the same materials uploaded

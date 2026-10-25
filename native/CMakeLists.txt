@@ -478,7 +478,7 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
              "sapply:featStoreApplyMain" "mask:featMaskMain" "farplaces:featFarPlacesMain" "fartrees:featFarTreesMain"
-             "farcanopy:featFarCanopyMain")
+             "farcanopy:featFarCanopyMain" "vein:featVeinMain")
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)
@@ -541,3 +541,6 @@ if(WIN32)
   target_link_libraries(pack_lab PRIVATE atlas_core opengl32)
   target_include_directories(pack_lab PRIVATE src)
 endif()
+
+# the flight recorder (docs/ATLAS-PLAN.md stage 0.2): always-on CPU zones and GPU timestamps, spike dumps
+target_sources(atlas_core PRIVATE src/flight_recorder.cpp src/texturepack.cpp)

@@ -52,6 +52,7 @@ struct FrameInputs {
     VoxGrid* voxgrid = nullptr;               // the level-0 grid's books: the backend takes its batches (voxgrid.hpp)
     const std::vector<uint32_t>* textures = nullptr;  // the near field's textures, packed (voxgrid.hpp packTextures)
     uint64_t texturesRevision = 0;
+    uint64_t texturesGeneration = 0;  // bumped when a slot already there was rewritten (texturepack.hpp): upload it all again
     const std::vector<uint32_t>* bricks = nullptr;  // (abi 0.18) the bricks, packed (bricks.hpp BrickStore::pack)
     uint64_t bricksRevision = 0;
     bool gridLights = false;  // (abi 0.18) some material emits: the grid's emitters become lights (gridLightMain)
@@ -127,6 +128,8 @@ public:
         uint32_t lastSections = 0, lastJobs = 0;
         bool lastStates = false;
         double stageCpuMs = 0, stageCpuMaxMs = 0;  // the render thread's share (taking a batch, staging it): last, worst
+        double stageCpuRecentMs = 0;                // (the worst of the last 2-4 s)
+        double takeMs = 0, takeMaxMs = 0;           // (and of it the grid's take(): the books, the ranking lists, the batch)
     };
     virtual VoxGridTimes voxgridTimes() const { return {}; }
     // The game path's wall time on the render thread, eased (ms): waiting for the slot's previous frame, preparing
@@ -163,6 +166,8 @@ public:
     virtual bool sharedDevice(SharedDevice&) { return false; }
     // frames submitted, and the last one known complete (any thread)
     virtual uint64_t framesSubmitted() const { return 0; }
+    // the frames' own GPU time (their timestamps, eased), ms; 0 unknown (the generator's budget reads the GPU's idle share)
+    virtual double frameGpuMs() const { return 0.0; }
     virtual uint64_t framesCompleted() const { return 0; }
     // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
     virtual bool readSunMap(std::vector<float>& out, std::string& err) {

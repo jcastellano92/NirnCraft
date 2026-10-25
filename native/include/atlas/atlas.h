@@ -877,6 +877,8 @@ ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* o
  * its edit layer over it. No generation for those chunks.
  */
 ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra);
+/* (the call also arms the cache: no fingerprint reaches the world before it, so call it once the program, the stages,
+   the ingest table and the map are in; a change after it, a stage added or removed, opens another set) */
 ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit);
 ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
                                              uint32_t* outSections);
@@ -893,9 +895,16 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
 /* Free slots in the grid's coarse level `level` (1..6): a far tile it refused chunks of is asked for again when there is
    room for them. */
 ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level);
+/* A coarse level's window now: out[6] = origin x, z, side (chunks of the level), placed (1), jumps (how often it was placed
+   afresh: what was given before is gone), rows. The far tiles to ask for are those that cover its columns. */
+ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out);
 typedef struct AtlasGenPaceStats {
     double periodMs, duty, tokensMs, usedMs, waitedMs, farWaitedMs, maxSubmissionMs;
     uint64_t submissions;
+    char maxPhase[48];  /* what the longest submission held (a pass, a store stage, a far stage ...) */
+    double frameGpuMs;  /* the frames' own GPU time (timestamps, eased): the period's rest is the generator's to share */
+    double recentMaxMs; /* the longest submission of the last 10-20 s, and what it held */
+    char recentPhase[48];
 } AtlasGenPaceStats;
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
 typedef struct AtlasGenCacheStats {
@@ -904,9 +913,14 @@ typedef struct AtlasGenCacheStats {
     double encodeMs, decodeMs;
     uint64_t farWrites, farHits, farMisses;
     uint64_t hashErrors;  /* records whose ids did not match the GPU's content hash: refused (generated again) */
+    uint64_t chunkWrites; /* chunk headers written this session */
+    uint64_t queued;      /* records waiting to be written */
+    uint64_t chunkIncomplete; /* of the misses: a chunk whose header is there and a section of it not (yet) */
 } AtlasGenCacheStats;
 /* (waits for the cache's writes first) */
 ATLAS_API AtlasStatus atlas_gen_cache_stats(AtlasGen* h, AtlasGenCacheStats* out);
+/* The same without waiting for the writes (a profile line's: the queue shows in `queued`). */
+ATLAS_API AtlasStatus atlas_gen_cache_peek(AtlasGen* h, AtlasGenCacheStats* out);
 /* The map of Nirn for the kernels (AtlasGenMap: words[0] = 'AMAP'), uploaded once; copied. With a program that carries
    the page passes' inputs (AtlasGenProgram: the climate entries, the fields' kinds, the height noises) the generator
    then makes every page itself on its device (atlas_page.slang) before each batch's terrain: atlas_gen_missing_pages
@@ -1062,7 +1076,14 @@ typedef struct AtlasGenStoreBatch {
                                       atlas_gen.slang quartBiome's layout; the columns' map region and elevation) */
     uint64_t program;              /* VkBuffer: the generator program's words */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+    /* (version 2) a stage may record its work in parts, one submission each (the generator's GPU budget: a part of
+       about 4 ms): it records `units` of its own units of work (0: all) and returns ATLAS_GEN_STAGE_MORE while some are
+       left; the generator submits, then calls it again with the same chunks and part + 1. part 0 starts the work. */
+    uint32_t part;
+    uint32_t units;
+    uint32_t lastPartUs; /* the part before's GPU time, microseconds (0 at part 0): a stage may fit its parts to it */
 } AtlasGenStoreBatch;
+#define ATLAS_GEN_STAGE_MORE 0x4D4F5245 /* a store stage's return: part recorded, call again */
 typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* batch);
 /*
  * A far stage (atlas_gen_add_far_stage): called in the far chunks' passes (atlas_gen_far, atlas_gen_far_ingest) once a
@@ -1115,8 +1136,12 @@ ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ
    store for it to pass them all. */
 ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h);
 /* Chunks to be made again (their stages' data changed: a settlement's tapes arrived): the self-baking cache forgets
-   them, the store sends them back through its stages (packed again once through). */
+   those it wrote this session (one from disk was made with the data: nothing is baked inside a no-bake box), the store
+   sends them back through its stages (packed again once through). */
 ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count);
+/* Boxes (minCx, minCz, maxCx, maxCz each, inclusive) whose chunks the self-baking cache does not keep: their stages'
+   data is still to come (a settlement's tapes not ready); replaces the last set (count 0: none). */
+ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count);
 /* Since the generator was made: chunks generated into the store, store stage runs (per chunk), chunks packed out. */
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs);
 /* Drops the store's chunks outside [minCx, maxCx] x [minCz, maxCz] (asked for again, they are generated again). */

@@ -616,33 +616,57 @@ void SectionStore::drop(std::unordered_map<Key3, Rec, Key3Hash>::iterator it) {
 }
 
 void SectionStore::enforce(int camSx, int camSz, int keepRegions) {
-    // outside the kept regions: out of warm (to disk, or dropped)
+    // outside the kept regions: out of warm (to disk, or dropped). Only planned here: the disk work (a file append a
+    // section, compactions) took seconds under the world's lock that the render thread takes too, so drainSpills does it
+    // in slices with the lock let go between them
     int crx = fdivs(camSx * 16, 256), crz = fdivs(camSz * 16, 256);
+    bool sameView = crx == keepRx_ && crz == keepRz_ && keepRegions == keep_;
     keepRx_ = crx, keepRz_ = crz, keep_ = keepRegions;
-    for (auto it = warm_.begin(); it != warm_.end();) {
-        int rx = fdivs(it->first.x * 16, 256), rz = fdivs(it->first.z * 16, 256);
+    if (spillPending() && sameView) return;  // (the plan stands: no rescan of warm each update)
+    spillQueue_.clear();
+    spillNext_ = 0;
+    uint64_t freed = 0;
+    for (auto& [k, r] : warm_) {
+        int rx = fdivs(k.x * 16, 256), rz = fdivs(k.z * 16, 256);
         if (std::abs(rx - crx) > keepRegions || std::abs(rz - crz) > keepRegions) {
-            auto next = std::next(it);
-            drop(it);
-            it = next;
-        } else {
-            ++it;
+            spillQueue_.push_back(k);
+            freed += uint64_t(r.words ? r.words->size() : 0) * 4;
         }
     }
-    if (warmBytes_ > warmBudget_) {
+    if (warmBytes_ - std::min(warmBytes_, freed) > warmBudget_) {
         // over budget: the farthest first (Chebyshev, in sections), until a tenth under it (no churn each update)
         std::vector<std::pair<int, Key3>> order;
         order.reserve(warm_.size());
-        for (auto& [k, r] : warm_) order.push_back({std::max(std::abs(k.x - camSx), std::abs(k.z - camSz)), k});
+        for (auto& [k, r] : warm_) {
+            int rx = fdivs(k.x * 16, 256), rz = fdivs(k.z * 16, 256);
+            if (std::abs(rx - crx) > keepRegions || std::abs(rz - crz) > keepRegions) continue;  // (planned already)
+            order.push_back({std::max(std::abs(k.x - camSx), std::abs(k.z - camSz)), k});
+        }
         std::sort(order.begin(), order.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
-        uint64_t target = warmBudget_ - warmBudget_ / 10;
+        uint64_t target = warmBudget_ - warmBudget_ / 10, left = warmBytes_ - std::min(warmBytes_, freed);
         for (auto& [d, k] : order) {
-            if (warmBytes_ <= target) break;
+            if (left <= target) break;
             auto it = warm_.find(k);
-            if (it != warm_.end()) drop(it);
+            if (it == warm_.end()) continue;
+            spillQueue_.push_back(k);
+            left -= std::min<uint64_t>(left, uint64_t(it->second.words ? it->second.words->size() : 0) * 4);
         }
     }
+    if (spillQueue_.empty()) coldBudget();
+}
+
+bool SectionStore::drainSpills(double budgetMs) {
+    auto t0 = std::chrono::steady_clock::now();
+    while (spillNext_ < spillQueue_.size()) {
+        auto it = warm_.find(spillQueue_[spillNext_++]);
+        if (it != warm_.end()) drop(it);  // (gone meanwhile: replaced or erased)
+        if (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() >= budgetMs) break;
+    }
+    if (spillNext_ < spillQueue_.size()) return true;
+    spillQueue_.clear();
+    spillNext_ = 0;
     coldBudget();
+    return false;
 }
 
 SectionStore::Stats SectionStore::stats() const {

@@ -17,6 +17,8 @@
 #include "atlas/atlas.h"
 #include "air.hpp"
 #include "backend.hpp"
+#include "flight_recorder.hpp"
+#include "texturepack.hpp"
 #include "gencache.hpp"
 #include "atlas_build_hash.h"
 #include "bricks.hpp"
@@ -148,7 +150,9 @@ struct AtlasContext {
     std::string cacheDir;
     uint64_t cacheSeed = 0, cacheHostBytes = 0, cacheDiskBytes = 0;
     uint32_t cacheGenVersion = 0;
-    std::vector<uint32_t> texturesPacked = std::vector<uint32_t>(1, 0u);  // packTextures of the world's TextureSet
+    // the near field's textures for the kernels (texturepack.hpp): a slot a material, packed on a worker thread as they arrive
+    TexturePack texPack;
+    std::vector<uint32_t> texturesPacked;
     uint64_t texturesRevision = 0;
     // (abi 0.18) the micro-voxel bricks (atlas_set_material_bricks), packed for the kernels once each revision
     BrickStore bricks;
@@ -434,7 +438,12 @@ ATLAS_API const char* atlas_build_info(void) {
 ATLAS_API const char* atlas_info(AtlasContext* ctx) {
     if (!ctx) return "{}";
     try {
-        std::lock_guard<std::mutex> lock(ctx->mu);
+        ATLAS_ZONE_MIN("api:info", 100);
+        std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
+        {
+            ATLAS_ZONE_MIN("wait:ctxLock (info)", 100);
+            lock.lock();
+        }
         ctx->info = ctx->backend->info();
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
@@ -482,11 +491,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
-                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"baking\":%zu,%s",
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"stageCpuRecentMs\":%.3f,\"takeMs\":%.3f,\"takeMaxMs\":%.3f,\"stageScale\":%.2f,\"baking\":%zu,%s%s",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, v.bakeQueued(), v.refineInfo().c_str());
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), v.bakeQueued(), v.phaseInfo().c_str(), v.refineInfo().c_str());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
@@ -684,6 +693,7 @@ ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_
     if (!ctx || !mats) return ATLAS_ERR_ARG;
     ATLAS_TRY
     // (the grid's books share the world's stored copy: one section's ids once in memory, whatever reads them)
+    ATLAS_ZONE_MIN("api:uploadSection", 30);
     std::shared_ptr<const Section> sec = ctx->world.putSection(sx, sy, sz, mats);
     ctx->voxgrid.put(sx, sy, sz, VgIds(sec, &sec->mats));
     return ATLAS_OK;
@@ -900,6 +910,7 @@ ATLAS_API AtlasStatus atlas_set_actors(AtlasContext* ctx, const AtlasActor* a, u
 ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], double budgetMs) {
     if (!ctx || !centre) return ATLAS_ERR_ARG;
     ATLAS_TRY
+    ATLAS_ZONE("api:update");
     double ms = 0;
     // the level-0 grid: the columns its window entered read from the world here when the render thread could not (its
     // lock busy); what it gave up is the CPU's level 0 again only on the CPU backend (on a device the grid's coarse
@@ -915,7 +926,10 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
         const char* e = std::getenv("ATLAS_VOXGRID_LEVEL0");  // (as buildInputs: before the first frame too)
         ctx->world.gridOwnsLevel0 = ctx->voxgrid.enabled && (!e || std::atoi(e) != 0);
     }
-    ctx->world.update(centre, budgetMs, &ms);
+    {
+        ATLAS_ZONE("world:update");
+        ctx->world.update(centre, budgetMs, &ms);
+    }
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
     // a lost device stages nothing (the render thread reports the loss)
@@ -1004,12 +1018,22 @@ ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* f) {
 ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
-    std::lock_guard<std::mutex> lock(ctx->mu);
+    fr::frame();  // the flight recorder's frame boundary: one atlas frame a game frame
+    ATLAS_ZONE("api:glRender");
+    std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
+    {
+        ATLAS_ZONE_MIN("wait:ctxLock", 50);
+        lock.lock();
+    }
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
     auto tb0 = std::chrono::steady_clock::now();
-    AtlasStatus st = buildInputs(ctx, f, in);
+    AtlasStatus st;
+    {
+        ATLAS_ZONE("api:buildInputs");
+        st = buildInputs(ctx, f, in);
+    }
     ctx->glInputsMs += (std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb0).count() - ctx->glInputsMs) * 0.05;
     if (st != ATLAS_OK) return st;
     in.preExposure = ctx->preExposure;
@@ -1155,7 +1179,10 @@ static void lightControl(AtlasContext* ctx, const AtlasFrame* f, const float fwd
 
 static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
     auto tq = std::chrono::steady_clock::now();
-    in.sceneHold = ctx->world.packed();
+    {
+        ATLAS_ZONE_MIN("api:world.packed", 50);
+        in.sceneHold = ctx->world.packed();
+    }
     easeMs(ctx->inSnapMs, tq);
     in.scene = in.sceneHold.get();
     if (in.scene->lodCount == 0) return ctx->fail(ATLAS_ERR_STATE, "call atlas_update before atlas_render");
@@ -1267,6 +1294,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // the view's horizontal forward: the world builds what lies behind the camera after what it sees (World::setView)
         float hl = std::sqrt(a[0] * a[0] + a[2] * a[2]);
+        ATLAS_ZONE_MIN("api:setView", 50);
         if (hl > 1e-4f) {
             ctx->world.setView(a[0] / hl, a[2] / hl);
             ctx->voxgrid.setView(a[0] / hl, a[2] / hl);
@@ -1299,7 +1327,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
-    lightControl(ctx, f, a, g);
+    {
+        ATLAS_ZONE_MIN("api:lightControl", 50);
+        lightControl(ctx, f, a, g);
+    }
     // last frame's view-projection (inverted back from its inverse) and camera, whenever the frames are comparable:
     // the near light's history reprojects through them (with or without clouds: weather off left it no camera, and
     // every pixel's history was refused); temporal.y the clouds' own history, which also needs the same cloud pass
@@ -1397,6 +1428,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
             float h = air::altitudeOf(c, float(f->cameraPos[1]));
             lv.hazeDensity = (c.rayleigh.y * std::exp(-h / air::H_RAYLEIGH) + c.mieExt.y * std::exp(-h * c.invHMie)) * c.airScale;
             auto tl = std::chrono::steady_clock::now();
+            ATLAS_ZONE_MIN("api:lights", 50);
             if (ctx->backend->gpuLights()) {
                 // culled, ranked and binned on the GPU (atlas_far.slang lightCullMain): only the index goes up, when it
                 // changes; weatherParams.y says there are lights at all
@@ -1419,13 +1451,20 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     ctx->voxgrid.coarseLevels = std::min(ctx->voxgrid.coarseLevels, std::max(0, ctx->world.lodCount - 1));
     ctx->voxgrid.stoneMat = ctx->world.stoneMat;
     auto tgr = std::chrono::steady_clock::now();
-    ctx->voxgrid.frame(g.camInt, ctx->world);
+    {
+        ATLAS_ZONE_MIN("api:voxgrid.frame", 50);
+        ctx->voxgrid.frame(g.camInt, ctx->world);
+    }
     easeMs(ctx->inGridMs, tgr);
+    ATLAS_ZONE_MIN("api:buildInputs tail (grid levels, packing, textures, bricks)", 100);
+    {
+        ATLAS_ZONE_MIN("api:voxgrid.origin+levelFrame", 100);
     ctx->voxgrid.origin(g.vgOrigin);
     g.vgDims[0] = uint32_t(ctx->voxgrid.D);
     g.vgDims[1] = uint32_t(ctx->voxgrid.H);
     g.vgDims[2] = uint32_t(ctx->voxgrid.D);
     for (int k = 1; k < VG_LEVELS; k++) ctx->voxgrid.levelFrame(k, g.vgLevel[k - 1]);
+    }
     // the coarse levels own the real blocks at their levels: the CPU builds those levels' regions from the tiles alone
     // and no longer rebuilds them (nor digests) per section (World::gridCoarse)
     ctx->world.gridCoarse = ctx->voxgrid.levels() - 1;  // (atlas_update sets it before the first frame too)
@@ -1438,7 +1477,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     ctx->world.gridOwnsLevel0 = ownLevel0 && ctx->voxgrid.enabled;
     // (the host's tiers: uploads packed on the GPU where the grid owns every level's real blocks; the CPU backend and
     // the CPU's own level paths keep raw sections)
-    ctx->world.setPackOnGpu(ctx->backend->onDevice() && ctx->world.gridOwnsReal() && ctx->voxgrid.packBudget > 0);
+    {
+        ATLAS_ZONE_MIN("api:world.setPackOnGpu", 100);
+        ctx->world.setPackOnGpu(ctx->backend->onDevice() && ctx->world.gridOwnsReal() && ctx->voxgrid.packBudget > 0);
+    }
     // (bit 2: the grid owns every level's real blocks, World::gridOwnsReal: level 0's regions are the tiles' alone)
     // (bit 4: a run of level-0 chunks the grid does not hold yet traced in its coarse levels, atlas_far.slang traceLod;
     // ATLAS_VOXGRID_FALLBACK=0, measurements: the regions as before)
@@ -1451,16 +1493,14 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
         auto ttx = std::chrono::steady_clock::now();
-        std::shared_ptr<const TextureSet> ts = ctx->world.textures();
+        if (ctx->texPack.sync(ctx->texturesPacked)) ctx->texturesRevision++;  // (the slots the worker finished; never waits)
         easeMs(ctx->inTexMs, ttx);
-        if (ts->revision != ctx->texturesRevision) {
-            packTextures(*ts, ctx->texturesPacked);
-            ctx->texturesRevision = ts->revision;
-        }
         in.textures = &ctx->texturesPacked;
         in.texturesRevision = ctx->texturesRevision;
+        in.texturesGeneration = ctx->texPack.generation();
         // the materials' lights (gridLightMain): every emitter at its level in its colour (its brick's glowing
         // micro-voxels, else its palette colour), checked against the palette each frame (cheap: a word a material)
+        ATLAS_ZONE_MIN("api:materialLights", 100);
         std::vector<uint32_t>& lw = ctx->materialLights;
         lw.assign(ctx->palette.size(), 0u);
         uint64_t lh = 0xcbf29ce484222325ull;
@@ -1483,6 +1523,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         bool lightsMoved = lh != ctx->materialLightsHash;
         ctx->materialLightsHash = lh;
         uint64_t sr = ctx->bricksStoreRevision;
+        ATLAS_ZONE_MIN("api:bricks.pack", 50);
         if (ctx->bricks.pack(sr, lightsMoved, lw, ctx->bricksPacked, sr)) {
             ctx->bricksStoreRevision = sr;
             ctx->bricksRevision++;
@@ -1751,7 +1792,7 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
         std::memcpy(t->faces, textures + size_t(i) * 6 * 256, sizeof t->faces);
         v[i] = std::move(t);
     }
-    ctx->world.setTextures(first, v);
+    ctx->texPack.submit(first, v);  // (packed off the render thread, merged a few a frame: texturepack.hpp)
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
