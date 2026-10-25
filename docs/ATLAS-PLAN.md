@@ -142,6 +142,15 @@ follows the design without new tests.
   so thin things (fences, grass) neither vanish nor swell far off, and forests don't brighten when they coarsen. Test
   together with (C), offline, on the gallery sweep (from an outside review, 2026-10-25).
 
+- **(G) An amortised far field (owner, 2026-10-25):** beyond a few km, trace the far pixels at a fraction of the rate
+  (a rotating subset per frame, reprojected) or into a slowly refreshed horizon cache of the same trace (same image,
+  less often: not a second renderer).
+  - Far lights (cities, fires, lava, volcanoes, lightning) from the light list as an emissive layer composited every
+    frame, so they stay live.
+  - Sky light from the atmosphere model.
+  - Far players and creatures as points or silhouettes drawn every frame.
+  - Test right after the sky and height exit, on the horizon view: far pass ms, plus a still-and-moving capture.
+
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
 
