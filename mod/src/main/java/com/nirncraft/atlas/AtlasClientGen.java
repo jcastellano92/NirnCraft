@@ -767,7 +767,7 @@ final class AtlasClientGen implements AutoCloseable {
         }
         // the self-baking cache's fingerprint, now that the generator is whole (program, stages, ingest, map): the
         // generator's completed by the far identity (world generation and painting code)
-        if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
+        if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.generatorIdentity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
         // the whole-map coarse bake and the boot load of the far tiles (its own thread; farStep keeps the tiles it does not own)
         if (cacheArm && farOn) bake = AtlasCoarseBake.start(gen);
         if (serverGen != null) serverGen.up();
