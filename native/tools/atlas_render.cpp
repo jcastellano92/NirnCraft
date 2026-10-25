@@ -885,7 +885,9 @@ int main(int argc, char** argv) {
                 AtlasStats sw{};
                 atlas_get_stats(ctx, &sw);
                 if (voxgridPending(ctx) <= 0 && (updateBudget <= 0 || sw.regionsDirty == 0)) break;
-                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - w0).count() > 60.0) break;
+                // (ATLAS_RENDER_SETTLE_S: a longer wait, as when a shader folder's driver compile ran inside the first frame)
+                static const double settleS = std::getenv("ATLAS_RENDER_SETTLE_S") ? std::atof(std::getenv("ATLAS_RENDER_SETTLE_S")) : 60.0;
+                if (std::chrono::duration<double>(std::chrono::steady_clock::now() - w0).count() > settleS) break;
                 if (updateBudget > 0) std::this_thread::sleep_for(std::chrono::milliseconds(16));  // (a frame's time)
             }
             std::fprintf(stderr, "atlas_render: settled in %.0f ms, %d frames, longest update %.1f ms\n",

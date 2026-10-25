@@ -43,6 +43,7 @@
 #include "atlas_lightbin_spv.h"
 #include "atlas_gridlight_spv.h"
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
+#include "atlas_farsplit_spv.h" // generated: farMain for the unified field's split frames (ATLAS_FAR_SPLIT)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
 #include "atlas_vg_section_spv.h"  // generated: the level-0 grid's build kernels (atlas_voxgrid.slang)
@@ -410,6 +411,9 @@ public:
             // a hung device may still run atlas's work: destroying what it uses (or waiting for it) could crash or
             // freeze the game, so everything is left to the driver and the process exit (a few hundred MB at most)
             std::fprintf(stderr, "[atlas] the GPU hung: the Vulkan device is abandoned, not destroyed\n");
+            // (a thread left joinable would terminate the process: the builds only read what is never freed here)
+            if (farSplitThread_.joinable()) farSplitThread_.detach();
+            if (reloadThread_.joinable()) reloadThread_.detach();
             return;
         }
         if (dev_) {
@@ -457,6 +461,9 @@ public:
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
             if (reloadThread_.joinable()) reloadThread_.join();  // a shader reload still building
+            if (farSplitThread_.joinable()) farSplitThread_.join();  // (the split frames' far kernel still building)
+            if (farSplitPipe_) vkDestroyPipeline(dev_, farSplitPipe_, nullptr);
+            if (farSplitShader_) vkDestroyShaderModule(dev_, farSplitShader_, nullptr);
             for (int i = 0; i < RELOAD_KERNELS; i++) {  // (built and never swapped in)
                 if (reloadPipe_[i]) vkDestroyPipeline(dev_, reloadPipe_[i], nullptr);
                 if (reloadMod_[i]) vkDestroyShaderModule(dev_, reloadMod_[i], nullptr);
@@ -555,6 +562,32 @@ public:
         if (!createPipe(atlas_far_spv, atlas_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err,
                         "farMain"))
             return false;
+        // the split frames' far kernel (the game's unified field: atlas_far.slang ATLAS_FAR_SPLIT, every trace inlined, its
+        // state in registers: about half the far pass's time). Its driver compile takes a minute or two the first time (the
+        // pipeline cache keeps it), so it is built on a thread and the general far kernel draws until it is ready;
+        // ATLAS_FAR_SPLIT_KERNEL=0: never
+        if (!(std::getenv("ATLAS_FAR_SPLIT_KERNEL") && std::getenv("ATLAS_FAR_SPLIT_KERNEL")[0] == '0')) {
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = atlas_farsplit_spv_size;
+            smci.pCode = atlas_farsplit_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &farSplitShader_) == VK_SUCCESS) {
+                farSplitThread_ = std::thread([this] {
+                    VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+                    cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+                    cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+                    cp.stage.module = farSplitShader_;
+                    cp.stage.pName = "main";
+                    cp.layout = farLayout_;
+                    VkPipeline p = VK_NULL_HANDLE;
+                    if (makePipeline(cp, &p, "farMain (split frames)") == VK_SUCCESS) {
+                        farSplitPipe_ = p;
+                        farSplitReady_.store(true, std::memory_order_release);
+                    }
+                });
+                // (offline timings: the frames after the first are timed on it)
+                if (std::getenv("ATLAS_SHADER_WAIT") && *std::getenv("ATLAS_SHADER_WAIT") == '1') farSplitThread_.join();
+            }
+        }
         {
             // the cloud pass: same source, same bindings, same descriptor set as the far pass
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -773,7 +806,8 @@ public:
         if (nearLight && in.nearInfo && !upload(s.bufs[B_NEAR_INFO], in.nearInfo, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
         if (deviceOnly) {
             if (!submit(s, nullptr, nullptr, err) || !waitSlot(s, gpuMs, err)) return false;
             out.color.assign(px * 4, 0.0f);
@@ -956,7 +990,8 @@ public:
             computeBarrier(s.cmd);
             s.gt.mark(s.cmd, "nearIngest");
         }
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
         computeBarrier(s.cmd);
         if (sunDispatchRows_ && sunImage_.image) copySunToImage(s.cmd);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
@@ -1015,7 +1050,8 @@ public:
         if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
         begin(s);
         hostImageBarrier(s.cmd, true);
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
         computeBarrier(s.cmd);
         uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
         std::memcpy(&pcv[3], &in.preExposure, 4);
@@ -1176,7 +1212,7 @@ public:
             return;
         }
         if (reloadThread_.joinable()) reloadThread_.join();  // (a shader reload still building)
-        if (dev_) vkDeviceWaitIdle(dev_);
+        if (dev_) vkDeviceWaitIdle(dev_);  // (the split kernel's build reads nothing freed here: not waited for)
         for (auto& s : slots_) s.inFlight = false;
         destroyInterop();
         mode_ = Interop::None;
@@ -1795,6 +1831,7 @@ private:
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
         if (pipeStats_ && r == VK_SUCCESS) pipelineStats(*out, name);
+        std::lock_guard<std::mutex> cacheLock(pipeCacheMu_);  // (the split kernel's thread writes it too)
         if (pipeCache_ && (s > 0.25 || pipeCacheFresh_)) {
             size_t n = 0;
             if (vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) == VK_SUCCESS && n) {
@@ -1863,6 +1900,7 @@ private:
                     *mods[i] = reloadMod_[i];
                 }
                 std::fprintf(stderr, "[atlas] shaders reloaded from %s\n", dir);
+                farReloaded_ = true;  // (the split frames draw with it too)
             }
             for (int i = 0; i < K; i++) reloadPipe_[i] = VK_NULL_HANDLE, reloadMod_[i] = VK_NULL_HANDLE;
             return;
@@ -2677,7 +2715,7 @@ private:
         s.gt.mark(cmd, "voxgrid");
     }
 
-    void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false) {
+    void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds, bool nearSplit = false, bool lit = false) {
         recordVoxGrid(s);  // the level-0 grid's changes first (the barrier below orders them before the far pass)
         // the previous frame (other slot) wrote the surfaces this one's cloud pass reads, and will next overwrite
         // ours: order against everything submitted before
@@ -2739,7 +2777,10 @@ private:
             computeBarrier(s.cmd);
             s.gt.mark(s.cmd, "clouds");
         }
-        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
+        // (the split frames of the unified field: their own far kernel once built; never once a shader folder reloaded the
+        // far kernel, the dev loop's edits are drawn with)
+        bool splitKernel = nearSplit && lit && !farReloaded_ && farSplitReady_.load(std::memory_order_acquire);
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, splitKernel ? farSplitPipe_ : farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
         s.gt.mark(s.cmd, "far");
         if (nearSplit) {
@@ -3342,6 +3383,7 @@ private:
     VkDevice dev_ = VK_NULL_HANDLE;
     VkPipelineCache pipeCache_ = VK_NULL_HANDLE;  // (makePipeline: ATLAS_PIPELINE_CACHE)
     bool pipeCacheFresh_ = false;
+    std::mutex pipeCacheMu_;
     std::deque<Buf> debugBufs_;                    // (debugDeviceBuffer)
     bool pipeCacheTried_ = false;
     bool vgOpen_ = false;  // (a grid batch staged and not yet submitted)
@@ -3357,6 +3399,12 @@ private:
     VkDescriptorSetLayout farSetLayout_ = VK_NULL_HANDLE, publishSetLayout_ = VK_NULL_HANDLE, ingestSetLayout_ = VK_NULL_HANDLE;
     VkPipelineLayout farLayout_ = VK_NULL_HANDLE, publishLayout_ = VK_NULL_HANDLE, ingestLayout_ = VK_NULL_HANDLE;
     VkPipeline farPipe_ = VK_NULL_HANDLE, publishPipe_ = VK_NULL_HANDLE, ingestPipe_ = VK_NULL_HANDLE;
+    // (the split frames' far kernel: built on its thread, used once ready; farReloaded_: a shader folder's far kernel)
+    VkShaderModule farSplitShader_ = VK_NULL_HANDLE;
+    VkPipeline farSplitPipe_ = VK_NULL_HANDLE;
+    std::thread farSplitThread_;
+    std::atomic<bool> farSplitReady_{false};
+    bool farReloaded_ = false;
     VkPipeline cloudPipe_ = VK_NULL_HANDLE;
     VkPipeline sunPipe_ = VK_NULL_HANDLE;
     VkShaderModule sunShader_ = VK_NULL_HANDLE;
