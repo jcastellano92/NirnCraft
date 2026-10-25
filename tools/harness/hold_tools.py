@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS = {"returning": "hold-returning", "never": "hold-never-ready", "first": "hold-first-join"}
+SCRIPTS = {"returning": "hold-returning", "never": "hold-never-ready", "first": "hold-first-join", "arrival": "hold-arrival"}
 POS = r"(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)"
 
 
@@ -34,6 +34,8 @@ def scenes():
          "title": "A returning player is held at login and released by the client's ready at the same place; a mid-session hold likewise"},
         {**common, "id": "hold-never-ready", "group": "hold-never", "hold_tool": "never",
          "title": "A client that never reports ready stays held: a mob beside the player does nothing, nobody else sees them"},
+        {**common, "id": "hold-arrival", "group": "hold", "hold_tool": "arrival",
+         "title": "Teleports hold the player at the destination: a far unvisited spot, a warm one, and a respawn; released there"},
         {**common, "id": "hold-first-join", "group": "hold-intro", "hold_tool": "first",
          "title": "First join: the character select starts only after the client is ready (opening kept)"},
     ]
@@ -41,7 +43,7 @@ def scenes():
 
 def run(runner, s, v, fp):
     import results
-    fn = {"returning": returning, "never": never_ready, "first": first_join}[s["hold_tool"]]
+    fn = {"returning": returning, "never": never_ready, "first": first_join, "arrival": arrival}[s["hold_tool"]]
     try:
         fails, metrics = fn(runner, s)
     except RuntimeError as e:
@@ -255,4 +257,84 @@ def first_join(runner, s):
         safe_close(g)
     except RuntimeError as e:  # (with the character select up the client takes minutes to quit: not the hold's failure)
         m["closeSlow"] = str(e)[:80]
+    return fails, m
+
+
+# ---------------------------------------------------------------------------------------------------------------- arrival
+HELD_RX = re.compile(r"hold: (\S+) is held at " + POS + r" until [^\n]*\[([^\]]*)\]")
+REL_RX = re.compile(r"hold: (\S+) released after (\d+) ticks \((\d+) ms\) at " + POS)
+
+
+def holds(txt):
+    """[(held x y z, reason, released x y z or None, ms or None)] in log order (the n-th hold with the n-th release)."""
+    h, r = HELD_RX.findall(txt), REL_RX.findall(txt)
+    out = []
+    for i, x in enumerate(h):
+        rel = r[i] if i < len(r) else None
+        out.append({"at": x[1:4], "reason": x[4], "released": rel[3:6] if rel else None, "ms": int(rel[2]) if rel else None})
+    return out
+
+
+def one_arrival(g, label, actions, expect_reason, near, fails, m, limit=240):
+    """Runs the actions, waits for the next hold + release, checks the reason, the place and the quiet/screen outcome."""
+    n = len(holds(fresh_log(g)))
+    mark = len(fresh_log(g))
+    g.actions(actions, timeout=180)
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < limit:
+        hs = holds(fresh_log(g))
+        if len(hs) > n and hs[n]["released"]:
+            break
+        time.sleep(1)
+    else:
+        fails.append(f"{label}: no hold released within {limit} s")
+        return None
+    h = holds(fresh_log(g))[n]
+    new = fresh_log(g)[mark:]
+    m[label + "Reason"] = h["reason"]
+    m[label + "Ms"] = h["ms"]
+    m[label + "Screen"] = "the screen shows" in new
+    m[label + "Quiet"] = "no screen" in new
+    if expect_reason not in h["reason"]:
+        fails.append(f"{label}: held for {h['reason']!r}, expected {expect_reason!r}")
+    if dist(h["at"], h["released"]) > 0.5:
+        fails.append(f"{label}: released {dist(h['at'], h['released']):.1f} blocks from where it was held")
+    if near is not None and dist(h["released"], near) > 3.5:
+        fails.append(f"{label}: released at {h['released']}, not at the destination {near}")
+    return h
+
+
+def arrival(runner, s):
+    g = runner.game
+    fails, m = [], {}
+    launch_nowait(runner, s["group"])
+    if not wait_for(r"hold: \S+ released after", g, 600):
+        return ["the login hold was never released"], m
+    wait_for(r"Autotest live: ready", g, 120)
+    import atlas_tools
+    atlas_tools.wait_alive(g)
+    # 1. a far, never visited spot: held at the destination, released there
+    far = (5200.0, 220.0, -4100.0)
+    one_arrival(g, "far", ["ui close", "command tp @p %d %d %d" % far], "teleport command", far, fails, m)
+    # 2. back near it (100 blocks, already resident): held, and ready at once (the screen should not show)
+    warm = (5100.0, 220.0, -4100.0)
+    h = one_arrival(g, "warm", ["command tp @p %d %d %d" % warm], "teleport command", warm, fails, m)
+    if h and m.get("warmScreen"):
+        fails.append(f"warm: the loading screen showed for a destination that was already resident (held {m['warmMs']} ms)")
+    if h and h["ms"] > 3000:
+        fails.append(f"warm: the arrival took {h['ms']} ms")
+    # 3. a respawn: die in survival, respawn from the server (the Respawn click), held where the mod puts them
+    g.actions(["command gamemode survival @p", "wait 20", "command kill @p", "wait 40"], timeout=120)
+    one_arrival(g, "respawn", ["command nirncraft-hold respawn @p"], "respawn", None, fails, m)
+    g.actions(["command gamemode spectator @p"], timeout=60)
+    # 4. the server-side rules on stand-ins, with the arrival hold on
+    g.actions(["try nirncraft-hold selftest"], timeout=180)
+    sm = wait_for(r"Hold selftest: (\d+) problems", g, 120)
+    if not sm:
+        fails.append("the hold selftest printed no result")
+    else:
+        m["selftestProblems"] = int(sm.group(1))
+        if int(sm.group(1)):
+            fails += re.findall(r"Hold selftest problem: (.*)", fresh_log(g))[:6]
+    safe_close(g)
     return fails, m
