@@ -13,7 +13,8 @@ native/build.ps1. The CPU backend is compiled C++ and does not reload.
 --game also writes them to the preview instance's .minecraft/atlas-shaders, which the game's atlas_core reloads from
 when it exists (no environment needed), and keeps native/build/Release/atlas_core.dll copied to .minecraft/atlas-dev,
 which the game loads instead of the jar's core at its next start (AtlasLibrary: a native change is a restart, not a
-jar build).
+jar build). Every harness live run moves .minecraft/atlas-shaders aside first (game.clear_dev_shaders): left there, the
+folder made every later run draw with its kernels.
 """
 import argparse
 import os
