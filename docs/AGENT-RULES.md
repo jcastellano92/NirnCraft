@@ -234,3 +234,9 @@ Read these first:
 
   A live run in the inner loop, or a route per change, is a process bug: say why if you need one.
 
+  **Enforced by `heavy.py` (2026-10-25):** a live-labelled job must declare `--loop middle|outer --why "<one line>"`
+  before the `--`, or it is refused (exit 3, `[gate] DENIED`); middle runs also face hard checks and a Haiku judge.
+  There is no override: if a denial is wrong, run `heavy.py --gate-escalate "<why>" "<label>"`, keep working offline,
+  and wait for the orchestrator's `--gate-resolve` (allow = one run of that label). Example live call:
+  `py -3 E:/NirnCraft-scratch/locks/heavy.py --exclusive --loop outer --why "finished bake slicing: confirm route" "bake2 game: route" -- py -3 tools/harness/harness.py run atlas-route`
+
