@@ -59,6 +59,7 @@ def fresh_log(g):
 def launch_nowait(runner, group):
     """Starts the client for `group` without waiting for the world to be ready (a held client never becomes ready)."""
     g = runner.game
+    g.ensure_current()  # the current build installed (once per run), as ensure() does
     if g.running():
         g.close()
         time.sleep(3)
@@ -150,6 +151,15 @@ def returning(runner, s):
     m["midSessionDriftBlocks"] = round(d, 2)
     if d > 0.5:
         fails.append(f"the mid-session hold released {d:.1f} blocks from where it held")
+    # the server-side rules on stand-in players, through this (integrated) server: hidden, untargetable, no damage, pinned ...
+    g.actions(["command nirncraft-hold selftest"], timeout=180)
+    sm = wait_for(r"Hold selftest: (\d+) problems", g, 120)
+    if not sm:
+        fails.append("the hold selftest printed no result")
+    else:
+        m["selftestProblems"] = int(sm.group(1))
+        if int(sm.group(1)):
+            fails += re.findall(r"Hold selftest problem: (.*)", fresh_log(g))[:6] or ["the hold selftest reported problems"]
     g.close()
     return fails, m
 

@@ -90,10 +90,8 @@ final class HoldSelftest {
         zombie.setTarget(held);
         if (zombie.getTarget() != held) problems.add("before the hold the zombie cannot target the player (the check could not fail)");
         zombie.setTarget(null);
-        float health = held.getHealth();
-        held.hurtServer(level, level.damageSources().generic(), 3f);  // (not mobAttack: a peaceful world scales that to 0)
-        if (held.getHealth() >= health) problems.add("before the hold the damage did nothing (the check could not fail)");
-        held.setHealth(health);
+        // (damage goes through the event: a stand-in keeps vanilla's spawn invulnerability for ever, its tick never runs)
+        if (damageCancelled(held, level.damageSources().mobAttack(zombie))) problems.add("before the hold the damage event is already cancelled (the check could not fail)");
 
         AtomicInteger released = new AtomicInteger();
         PlayerHold.begin(held, released::incrementAndGet);
@@ -116,14 +114,11 @@ final class HoldSelftest {
         if (TargetingConditions.forCombat().range(32).test(level, zombie, held)) problems.add("the AI targeting predicate accepts the held player");
 
         // invulnerable
-        float hp = held.getHealth();
-        held.hurtServer(level, level.damageSources().mobAttack(zombie), 6f);
-        held.hurtServer(level, level.damageSources().drown(), 6f);
-        held.hurtServer(level, level.damageSources().fall(), 6f);
-        if (held.getHealth() < hp) problems.add("the held player took damage: " + hp + " -> " + held.getHealth());
-        float zhp = zombie.getHealth();
-        zombie.hurtServer(level, level.damageSources().playerAttack(held), 4f);
-        if (zombie.getHealth() < zhp) problems.add("the held player hurt a mob");
+        for (DamageSource src : List.of(level.damageSources().mobAttack(zombie), level.damageSources().drown(), level.damageSources().fall(),
+                level.damageSources().inWall(), level.damageSources().onFire()))
+            if (!damageCancelled(held, src)) problems.add("damage from " + src.getMsgId() + " reaches the held player");
+        if (!NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(zombie, level.damageSources().playerAttack(held), 4f)).isCanceled())
+            problems.add("the held player can hurt a mob");
 
         // cannot interact
         if (!NeoForge.EVENT_BUS.post(new AttackEntityEvent(held, zombie)).isCanceled()) problems.add("a held player's attack was not cancelled");
@@ -165,7 +160,12 @@ final class HoldSelftest {
         if (held.position().distanceToSqr(pinned) > 0.01) problems.add("the released player is not where the hold left them");
         zombie.setTarget(held);
         if (zombie.getTarget() != held) problems.add("a released player cannot be targeted again");
+        if (damageCancelled(held, level.damageSources().mobAttack(zombie))) problems.add("a released player's damage is still cancelled");
         info.add("hold, pin, release: ok=" + problems.isEmpty());
+    }
+
+    private static boolean damageCancelled(ServerPlayer p, DamageSource src) {
+        return NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(p, src, 4f)).isCanceled();
     }
 
     private static void crashRecord(List<String> problems, List<String> info, ServerPlayer p, Vec3 home) {
