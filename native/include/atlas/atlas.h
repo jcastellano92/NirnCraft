@@ -294,6 +294,11 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out);
    the big kernels takes seconds to minutes the first time), set before atlas_create / atlas_gen_create*; the
    ATLAS_PIPELINE_CACHE environment variable wins. NULL or "": none. (The loading phase: the game's instance.) */
 ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path);
+/* (optional: an older core lacks it) The pipelines being built, callable from any thread while atlas_create runs on another (the loading
+   screen): done of total of the context's own (the Vulkan backend's, in the order it builds them), the one being built
+   now (its name into name, cap bytes), and the split frames' far kernel, built after the context on its own thread
+   (split: 0 none, 1 building, 2 ready, 3 failed). Counts, not time: total is the backend's list of kernels. */
+ATLAS_API void atlas_pipeline_progress(uint32_t* done, uint32_t* total, char* name, uint32_t cap, uint32_t* split);
 /* The native build's content hash (its sources and shaders): part of every cache's key (the self-baking cache, the
    horizon cache, the cold tier's generated records), so a code change starts them fresh. */
 ATLAS_API uint64_t atlas_build_hash(void);

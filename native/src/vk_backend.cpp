@@ -60,6 +60,7 @@
 #include "atlas_vg_rank_spv.h"
 #include "atlas_vg_rankcut_spv.h"
 #include "atlas_vg_ranklist_spv.h"
+#include "atlas/atlas.h"  // (atlas_pipeline_progress)
 #include "backend.hpp"
 #include "gl_api.hpp"
 #include "gl_near.hpp"
@@ -67,6 +68,15 @@
 #include "voxgrid.hpp"
 
 namespace atlas {
+// (atlas_pipeline_progress) the context's pipelines as the backend builds them: done of total (its list of kernels,
+// counted at its first build: the loading screen's real progress), the one being built, the split frames' far kernel
+namespace pipeprog {
+std::atomic<uint32_t> done{0}, total{0}, split{0};
+std::mutex mu;
+char name[96] = "";
+// the Vulkan backend's kernels built during atlas_create (corrected at its end if the list changed)
+constexpr uint32_t INIT_KERNELS = 26;
+}  // namespace pipeprog
 namespace {
 
 // ---- platform shim: the one place the two interop flavours differ -------------------------------------------------
@@ -553,6 +563,8 @@ public:
     }
 
     bool init(std::string& err) {
+        pipeprog::done.store(0);
+        pipeprog::total.store(pipeprog::INIT_KERNELS);
         if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) return false;
         probeInterop();
         // far kernel: binding 0 uniform, the rest storage buffers
@@ -571,6 +583,7 @@ public:
             smci.codeSize = atlas_farsplit_spv_size;
             smci.pCode = atlas_farsplit_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &farSplitShader_) == VK_SUCCESS) {
+                pipeprog::split.store(1);
                 farSplitThread_ = std::thread([this] {
                     VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
                     cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
@@ -582,6 +595,9 @@ public:
                     if (makePipeline(cp, &p, "farMain (split frames)") == VK_SUCCESS) {
                         farSplitPipe_ = p;
                         farSplitReady_.store(true, std::memory_order_release);
+                        pipeprog::split.store(2);
+                    } else {
+                        pipeprog::split.store(3);
                     }
                 });
                 // (offline timings: the frames after the first are timed on it)
@@ -1822,6 +1838,11 @@ private:
                 }
             }
         }
+        bool counted = std::strcmp(name, "reloaded") != 0 && !std::strstr(name, "split");
+        if (counted) {
+            std::lock_guard<std::mutex> l(pipeprog::mu);
+            std::snprintf(pipeprog::name, sizeof pipeprog::name, "%s", name);
+        }
         auto t0 = std::chrono::steady_clock::now();
         ATLAS_ZONE("vk:createPipeline");
         VkComputePipelineCreateInfo cs = cp;
@@ -1831,6 +1852,10 @@ private:
         double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         std::fprintf(stderr, "TRACE done pipeline:%s %.2fs\n", name, s);
         if (pipeStats_ && r == VK_SUCCESS) pipelineStats(*out, name);
+        if (counted) {
+            uint32_t d = pipeprog::done.fetch_add(1) + 1;
+            if (d > pipeprog::total.load()) pipeprog::total.store(d);  // (more kernels than the list knew)
+        }
         std::lock_guard<std::mutex> cacheLock(pipeCacheMu_);  // (the split kernel's thread writes it too)
         if (pipeCache_ && (s > 0.25 || pipeCacheFresh_)) {
             size_t n = 0;
@@ -3520,3 +3545,23 @@ std::unique_ptr<Backend> makeVulkanBackend(std::string& err) {
 }
 
 }  // namespace atlas
+
+// (atlas.h) the pipelines being built: callable from any thread while atlas_create runs on another
+ATLAS_API void atlas_pipeline_progress(uint32_t* done, uint32_t* total, char* name, uint32_t cap, uint32_t* split) {
+    if (done) *done = atlas::pipeprog::done.load();
+    if (total) *total = atlas::pipeprog::total.load();
+    if (split) *split = atlas::pipeprog::split.load();
+    if (name && cap) {
+        std::lock_guard<std::mutex> l(atlas::pipeprog::mu);
+        std::snprintf(name, cap, "%s", atlas::pipeprog::name);
+    }
+}
+
+// (api.cpp, the end of atlas_create on the Vulkan backend) the list as it was built: the total is what was counted
+extern "C" void atlasPipelinesBuilt() {
+    uint32_t d = atlas::pipeprog::done.load();
+    if (d != atlas::pipeprog::total.load())
+        std::fprintf(stderr, "TRACE warn the context built %u pipelines, its list says %u (pipeprog::INIT_KERNELS)\n", d,
+                     atlas::pipeprog::total.load());
+    atlas::pipeprog::total.store(d);
+}

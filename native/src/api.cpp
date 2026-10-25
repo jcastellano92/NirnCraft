@@ -609,6 +609,8 @@ ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path) {
     return ATLAS_OK;
 }
 
+void atlasPipelinesBuilt();  // (vk_backend.cpp)
+
 ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     if (!out) return ATLAS_ERR_ARG;
     *out = nullptr;
@@ -649,6 +651,7 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
         ctx->airC = c;
         writeLut(ctx->airLut, ctx->weather);
     }
+    if (backend == ATLAS_BACKEND_VULKAN) atlasPipelinesBuilt();  // (atlas_pipeline_progress: the list as built)
     *out = ctx.release();
     return ATLAS_OK;
     ATLAS_CATCH(nullptr)
