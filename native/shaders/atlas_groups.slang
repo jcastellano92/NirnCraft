@@ -33,11 +33,23 @@ static const float G_ERR[16] = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 1
 // set by farMain for its primary rays: trace regions' groups (ATLAS_FRAME_GROUPS); the pixel's footprint per block of
 // distance and its dithered threshold; the view distance where the current chord starts
 static bool gGroups = false;
+static bool sGroups;  // (traceSecondaryCore's own)
+static bool cGroups;  // (traceLodCore's own)
 static float gGroupPa = 0.001;
+static float sGroupPa;  // (traceSecondaryCore's own)
+static float cGroupPa;  // (traceLodCore's own)
 static float gGroupTol = 1.0;
+static float sGroupTol;  // (traceSecondaryCore's own)
+static float cGroupTol;  // (traceLodCore's own)
 static float gChordT = 0.0;
-static uint gAblate = 0u;  // ATLAS_ABLATE (measurements)
-static bool gSkipWater = false;  // a second trace through translucent water: water voxels are not there
+static float sChordT;  // (traceSecondaryCore's own)
+static float cChordT;  // (traceLodCore's own)
+static uint gAblate = 0u;
+static uint sAblate;  // (traceSecondaryCore's own)
+static uint cAblate;  // (traceLodCore's own)  // ATLAS_ABLATE (measurements)
+static bool gSkipWater = false;
+static bool sSkipWater;  // (traceSecondaryCore's own)
+static bool cSkipWater;  // (traceLodCore's own)  // a second trace through translucent water: water voxels are not there
 
 uint gWord(uint w) {
     uint4 q = groupData[w >> 2];
@@ -50,19 +62,24 @@ uint gWord(uint w) {
 // the last brick looked up (a walk or a leaf's steps stay in one or two): its region and coordinates, where it is
 // (0: no brick there), its occupancy and whether it carries masks
 static uint gBrickRegion = 0xFFFFFFFFu;
+static uint cBrickRegion;  // (traceLodCore's own)
 static int gBrickKey = -1;
+static int cBrickKey;  // (traceLodCore's own)
 static uint gBrickAt = 0u;
+static uint cBrickAt;  // (traceLodCore's own)
 static uint2 gBrickOcc = uint2(0u, 0u);
+static uint2 cBrickOcc;  // (traceLodCore's own)
 static bool gBrickMasks = false;
+static bool cBrickMasks;  // (traceLodCore's own)
 
 uint voxelCell(RegionGpu r, int3 v, out uint2 mask, out uint coverAt) {
     mask = uint2(0u, 0u);
     coverAt = 0u;
     int key = (v.x >> 2) | ((v.y >> 2) << 6) | ((v.z >> 2) << 12);
-    if (key != gBrickKey || r.groups.w != gBrickRegion) {
-        gBrickKey = key;
-        gBrickRegion = r.groups.w;
-        gBrickAt = 0u;
+    if (key != cBrickKey || r.groups.w != cBrickRegion) {
+        cBrickKey = key;
+        cBrickRegion = r.groups.w;
+        cBrickAt = 0u;
         uint e = gWord(r.groups.y + uint((v.z >> 2) * 64 + (v.x >> 2)));
         int rows = int(e >> 24);
         int by = (v.y >> 2) - int((e >> 18) & 63u);
@@ -70,16 +87,16 @@ uint voxelCell(RegionGpu r, int3 v, out uint2 mask, out uint coverAt) {
         if (b != 0u) {
             // the brick: its occupancy (and with G_SLOT_MASKS which voxels carry their own micro-voxels), then the
             // cells of the occupied voxels in order, then the masked ones' micro-voxels
-            gBrickMasks = (b & G_SLOT_MASKS) != 0u;
-            gBrickAt = r.groups.w + (b & ~G_SLOT_MASKS) - 1u;
-            gBrickOcc = uint2(gWord(gBrickAt), gWord(gBrickAt + 1u));
+            cBrickMasks = (b & G_SLOT_MASKS) != 0u;
+            cBrickAt = r.groups.w + (b & ~G_SLOT_MASKS) - 1u;
+            cBrickOcc = uint2(gWord(cBrickAt), gWord(cBrickAt + 1u));
         }
     }
-    if (gBrickAt == 0u) return 0u;
-    bool masks = gBrickMasks;
-    uint at = gBrickAt;
+    if (cBrickAt == 0u) return 0u;
+    bool masks = cBrickMasks;
+    uint at = cBrickAt;
     uint i = uint((v.x & 3) + 4 * ((v.z & 3) + 4 * (v.y & 3)));
-    uint lo = gBrickOcc.x, hi = gBrickOcc.y;
+    uint lo = cBrickOcc.x, hi = cBrickOcc.y;
     uint rank;
     if (i < 32u) {
         if (((lo >> i) & 1u) == 0u) return 0u;
@@ -104,14 +121,17 @@ uint voxelCell(RegionGpu r, int3 v, out uint2 mask, out uint coverAt) {
 }
 
 // the shape of a material: its first word in groupData, or 0 (a full cube in its palette colour)
-static uint4 gHead = uint4(0u, 0u, 0u, 0u);  // groupData[0], loaded once a ray (farMain)
-uint shapeOf(uint mat) {
-    uint4 h = gHead;
+static uint4 gHead = uint4(0u, 0u, 0u, 0u);
+static uint4 sHead;  // (traceSecondaryCore's own)
+static uint4 cHead;  // (traceLodCore's own)  // groupData[0], loaded once a ray (farMain)
+// (head: groupData[0], each trace world's own copy of it: gHead, cHead)
+uint shapeOfIn(uint4 h, uint mat) {
     if (mat >= h.z) return 0u;
     uint s = gWord(h.x + mat);
     return s == 0u ? 0u : (h.y + (s - 1u) * 32u) * 4u;
 }
-
+uint shapeOf(uint mat) { return shapeOfIn(gHead, mat); }
+uint shapeOfC(uint mat) { return shapeOfIn(cHead, mat); }  // (traceLodCore's)
 uint hashU(uint x) {
     x ^= x >> 16;
     x *= 0x7feb352dU;
@@ -141,11 +161,11 @@ Vox voxelAt(RegionGpu r, int3 v) {
     Vox x;
     x.alphaAt = 0u;
     x.cell = voxelCell(r, v, x.bits, x.coverAt);
-    if (gSkipWater && x.cell != 0u && uint(palette[x.cell & G_CELL_MATERIAL].emisClass.y) == 2u) x.cell = 0u;
+    if (cSkipWater && x.cell != 0u && uint(palette[x.cell & G_CELL_MATERIAL].emisClass.y) == 2u) x.cell = 0u;
     if ((x.cell & G_CELL_MASKED) != 0u || x.cell == 0u) return x;
     x.bits = uint2(0xFFFFFFFFu, 0xFFFFFFFFu);
     if ((x.cell & G_CELL_SHAPED) == 0u) return x;
-    uint sh = shapeOf(x.cell & G_CELL_MATERIAL);
+    uint sh = shapeOfC(x.cell & G_CELL_MATERIAL);
     if (sh == 0u) return x;
     uint4 head = groupData[sh >> 2];  // mask lo, mask hi, flags, mean (a shape starts on a uint4)
     x.bits = head.xy;
@@ -239,7 +259,7 @@ float3 srgbLinear(uint c) {
 // palette colour
 float3 cellAlbedo(uint cell, int f, int3 q) {
     uint mat = cell & G_CELL_MATERIAL;
-    uint sh = shapeOf(mat);
+    uint sh = shapeOfC(mat);
     if (sh == 0u) return palette[mat].albedoRough.rgb;
     int3 m = q & 3;
     uint c = gWord(sh + 4u + uint(f * 16 + gTexel(f, m.x, m.y, m.z)));
@@ -289,12 +309,12 @@ float cardAlpha(uint at, float u, float v, float fp) {
 
 // a hit: what the shading needs (the old path's TraceResult, plus the texel's albedo)
 void groupHit(float t, uint cell, int axis, float3 dir, int3 q) {
-    gTr.t = t;
-    gTr.mat = cell & G_CELL_MATERIAL;
-    gTr.axis = axis;
+    cTr.t = t;
+    cTr.mat = cell & G_CELL_MATERIAL;
+    cTr.axis = axis;
     int f = dir[axis] > 0.0 ? G_FACE_LOW[axis] : G_FACE_HIGH[axis];
-    gTr.albedo = cellAlbedo(cell, f, q);
-    gTr.hasAlbedo = 1u;
+    cTr.albedo = cellAlbedo(cell, f, q);
+    cTr.hasAlbedo = 1u;
 }
 
 // the ray against box [lo, hi): entry, exit and the axis of the entry plane
@@ -361,15 +381,15 @@ bool drawBox(RegionGpu r, uint4 n, float3 o, float3 d, float3 inv, int3 lo, int3
     uint code = (n[ax] >> (high ? 28u : 24u)) & 15u;
     int3 q;
     uint cell;
-    if ((gAblate & 128u) != 0u) {  // (ATLAS_ABLATE 128, measurements: the box itself, no texel walk)
-        gTr.t = te;
-        gTr.mat = 1u;
-        gTr.axis = ax;
-        gTr.albedo = float3(0.5, 0.5, 0.5);
-        gTr.hasAlbedo = 1u;
+    if ((cAblate & 128u) != 0u) {  // (ATLAS_ABLATE 128, measurements: the box itself, no texel walk)
+        cTr.t = te;
+        cTr.mat = 1u;
+        cTr.axis = ax;
+        cTr.albedo = float3(0.5, 0.5, 0.5);
+        cTr.hasAlbedo = 1u;
         return true;
     }
-    if (faceWalk(r, lo, hi, ax, high, o + d * te, o, d, int(G_ERR[code]) + 1, gTr.steps, q, cell)) {
+    if (faceWalk(r, lo, hi, ax, high, o + d * te, o, d, int(G_ERR[code]) + 1, cTr.steps, q, cell)) {
         groupHit(te, cell, ax, dir, q);
         return true;
     }
@@ -386,7 +406,7 @@ bool drawBox(RegionGpu r, uint4 n, float3 o, float3 d, float3 inv, int3 lo, int3
     if (best > u1) return false;  // it leaves past this chord: the next chord opens the box from inside
     bool high2 = d[ax2] > 0.0;
     uint code2 = (n[ax2] >> (high2 ? 28u : 24u)) & 15u;
-    if (faceWalk(r, lo, hi, ax2, high2, o + d * best, o, d, int(G_ERR[code2]) + 1, gTr.steps, q, cell)) {
+    if (faceWalk(r, lo, hi, ax2, high2, o + d * best, o, d, int(G_ERR[code2]) + 1, cTr.steps, q, cell)) {
         groupHit(best, cell, ax2, dir, q);
         return true;
     }
@@ -408,7 +428,7 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
     for (int it = 0; it < 48; it++) {
         Vox vx = voxelAt(r, v);
         uint cell = vx.cell;
-        gTr.steps++;
+        cTr.steps++;
         if (cell != 0u) {
             bool full = voxFull(vx);
             if (full) {
@@ -464,21 +484,20 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
 // One region's groups along the chord ro + rd u, u in [u0, u1] (region voxel units, as traceRegion takes them): 1 a hit
 // (gTr), 0 none, 2 the walk was cut short (its node stack full, its iteration cap, the ray's step budget): not a miss,
 // the caller answers TRACE_UNCOVERED (a dropped far child was a silent hole)
-[noinline]  // (one copy, called: see atlas_far.slang traceLod)
 int traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 dir) {
     float3 o = ro * 4.0, d = rd * 4.0;  // micro-voxels
     float3 inv = float3(abs(d.x) > 1e-12 ? 1.0 / d.x : 1e30, abs(d.y) > 1e-12 ? 1.0 / d.y : 1e30,
                         abs(d.z) > 1e-12 ? 1.0 / d.z : 1e30);
     float microBlocks = 0.25 * float(1 << r.origin.w);
     // a node is drawn when its error (blocks) is under tol x the pixel's footprint at the distance it is entered
-    float drawK = gGroupTol * gGroupPa / microBlocks;
+    float drawK = cGroupTol * cGroupPa / microBlocks;
     uint base = r.groups.x;
     uint stack[G_STACK];
     int sp = 0;
     uint node = 0u;
     bool dropped = false;
     for (int it = 0; it < 4096; it++) {
-        if (gTr.steps >= RAY_STEPS) return 2;
+        if (cTr.steps >= RAY_STEPS) return 2;
         uint4 n = groupData[base + node];
         float3 flo, fhi;
         gBox(n, flo, fhi);
@@ -487,7 +506,7 @@ int traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 di
         int ax;
         bool visit = gSlab(o, inv, flo, fhi, tn, tf, ax) && tf >= u0 && tn <= u1;
         if (visit) {
-            gTr.steps++;
+            cTr.steps++;
             float te = max(tn, u0);
             uint type = n.w >> 30;
             // the chord starts in it: its faces are behind. (A node whose face lies on the region's face, entered there:
@@ -498,7 +517,7 @@ int traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 di
             // the entry face's error, if that face has no holes; else every face's (groups.hpp: through a hole a ray
             // reaches content the entry face's error says nothing about)
             if (((n.w >> (27u + uint(ax))) & 1u) != 0u) code = (n.w >> 23u) & 15u;
-            bool fine = G_ERR[code] <= drawK * (gChordT + te);
+            bool fine = G_ERR[code] <= drawK * (cChordT + te);
             // drawn whole: a flat leaf, or any node whose error is under the pixel (not one the chord starts in);
             // stepped through: a leaf otherwise; opened: an inner node otherwise
             // (ATLAS_ABLATE 32768, measurements: never draw a node whole for its error, open or step it)
@@ -511,8 +530,8 @@ int traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 di
             // enters by, an error the size of the node itself (a far tree or chunk of a pixel or two drew 1.3 - 1.4
             // times its area); stepped, it is its own (a few rays meet it, so it costs little)
             float3 ext = fhi - flo;
-            fits = fits && (type == G_FLAT || max(ext.x, max(ext.y, ext.z)) * microBlocks > 2.0 * gGroupPa * (gChordT + te));
-            bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 32768u) == 0u) || (gAblate & 64u) != 0u);
+            fits = fits && (type == G_FLAT || max(ext.x, max(ext.y, ext.z)) * microBlocks > 2.0 * cGroupPa * (cChordT + te));
+            bool draw = !inside && (type == G_FLAT || (fine && fits && (cAblate & 32768u) == 0u) || (cAblate & 64u) != 0u);
             if (draw) {
                 if (drawBox(r, n, o, d, inv, lo, hi, flo, fhi, ax, te, u1, dir)) return 1;
             } else if (type != G_INNER) {
