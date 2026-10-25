@@ -138,6 +138,8 @@ public:
         double waitMs = 0, prepareMs = 0, recordMs = 0;
     };
     virtual GlTimes glTimes() const { return {}; }
+    // (readiness) pipelines still being built off the render thread (the dev kernel reload); 0: all built
+    virtual int pipelinesBuilding() const { return 0; }
 
     // Game path (render thread, the game's GL context current): zero-copy through shared memory and semaphores
     // when the driver pair supports it, else frames copied through host memory. Default: unsupported.
