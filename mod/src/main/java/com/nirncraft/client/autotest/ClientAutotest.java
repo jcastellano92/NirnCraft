@@ -347,6 +347,7 @@ public final class ClientAutotest {
             status.addProperty("remoteCommandSubmissions", remoteCommandSubmissions);
             status.addProperty("remoteCommandAcknowledged", false);
             status.addProperty("screen", mc.gui.screen() == null ? "game" : mc.gui.screen().getClass().getSimpleName());
+            status.addProperty("held", com.nirncraft.hold.client.HoldClient.held());
             status.addProperty("queued", LIVE_ACTIONS.size());
             status.addProperty("waitTicks", Math.max(0, liveWait));
             status.addProperty("burstFrames", burstRemaining);
@@ -387,8 +388,10 @@ public final class ClientAutotest {
             serverCommand(mc, "gamerule advance_time false");
             serverCommand(mc, "gamerule advance_weather false");
             serverCommand(mc, "gamerule send_command_feedback false");
-            serverCommand(mc, "execute as @p at @p run nirncraft-quest intro skip");
-            com.nirncraft.network.SkyNetwork.sendToServer(new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+            if (!Boolean.getBoolean("nirncraft.autotest.intro")) {  // (intro=true tests the opening itself: the character select stays)
+                serverCommand(mc, "execute as @p at @p run nirncraft-quest intro skip");
+                com.nirncraft.network.SkyNetwork.sendToServer(new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+            }
             NirnCraft.LOGGER.info("Autotest live: ready; control file {}", LIVE_FILE.toAbsolutePath());
             liveStartedAt = System.currentTimeMillis();
         }

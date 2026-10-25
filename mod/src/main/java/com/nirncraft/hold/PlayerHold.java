@@ -81,7 +81,7 @@ public final class PlayerHold {
         final GameType prevMode;
         final boolean prevNoGravity, prevInvisible, prevMayfly, prevFlying, prevMayBuild, prevInvulnerable, prevInstabuild;
         @Nullable Runnable onRelease;
-        long lastPin = Long.MIN_VALUE, lastLog;
+        long lastPin = -1_000_000L, lastLog;
         int pins;
 
         Held(long token, ServerPlayer p, GameType prevMode, boolean noGravity, boolean invisible, @Nullable Runnable onRelease) {
@@ -305,6 +305,7 @@ public final class PlayerHold {
         p.setAirSupply(p.getMaxAirSupply());
         if (p.getRemainingFireTicks() > 0) p.clearFire();
         if (p.getCamera() != p) p.setCamera(p);
+        HoldProbe.tick(p, now - h.sinceTick);
         if (now - h.lastLog >= LOG_EVERY_TICKS) {
             h.lastLog = now;
             NirnCraft.LOGGER.info("hold: {} is still held ({} s): the client has not reported ready", p.getGameProfile().name(), (now - h.sinceTick) / 20);

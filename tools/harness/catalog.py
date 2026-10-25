@@ -532,6 +532,8 @@ def load():
     scenes += loading.scenes()
     import atlas_tools  # the in-game gates for Infinite ATLAS: the scripted route, the vanilla gallery (atlas_tools.py)
     scenes += atlas_tools.scenes()
+    import hold_tools  # the player hold: held at login, released by the client's ready (hold_tools.py)
+    scenes += hold_tools.scenes()
     scenes += pose_checks(scenes)
     seam_core(scenes)
     for s in scenes:

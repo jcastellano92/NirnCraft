@@ -102,6 +102,8 @@ public final class PlayerDataEvents {
     /** Login's second half: the first-join placement and the opening's state (the character select), or the resume. */
     private static void afterLoading(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
+        NirnCraft.LOGGER.info("hold: {} is in play at {} {} {}: {}", player.getGameProfile().name(), (int) player.getX(), (int) player.getY(), (int) player.getZ(),
+                data.module("core").getBooleanOr("spawn_placed", false) ? "back at the last position (the opening resumes if unfinished)" : "first join: placement and the character select start now");
         if (!data.module("core").getBooleanOr("spawn_placed", false)) {
             data.module("core").putBoolean("spawn_placed", true);
             com.nirncraft.combat.Sheathe.setSheathed(player, true);

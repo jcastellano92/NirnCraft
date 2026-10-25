@@ -71,6 +71,7 @@ final class HoldSelftest {
     private static ServerPlayer standIn(ServerLevel level, String name, Vec3 at) {
         ServerPlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes(name.getBytes()), "[" + name + "]"));
         p.setGameMode(GameType.SURVIVAL);
+        p.setInvulnerable(false);  // (stand-ins are permanently invulnerable: the damage and targeting checks need them not to be)
         p.getPersistentData().remove("nirncraft_hold");
         p.setPos(at.x, at.y, at.z);
         p.setHealth(p.getMaxHealth());
