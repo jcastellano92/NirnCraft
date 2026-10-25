@@ -240,3 +240,7 @@ Read these first:
   and wait for the orchestrator's `--gate-resolve` (allow = one run of that label). Example live call:
   `py -3 E:/NirnCraft-scratch/locks/heavy.py --exclusive --loop outer --why "finished bake slicing: confirm route" "bake2 game: route" -- py -3 tools/harness/harness.py run atlas-route`
 
+* **Process feedback (2026-10-25).** When a rule, the gate, the harness or any step of the process slows you down or
+  makes no sense, say so: `py -3 E:/NirnCraft-scratch/locks/feedback.py "<what, and your suggestion>"`. The orchestrator
+  sees it within about 5 minutes and changes the process. Keep working meanwhile.
+
