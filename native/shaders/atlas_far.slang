@@ -1742,7 +1742,9 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
             float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
             gHitLod = rings ? float(lod) : max(lh, float(lod));
             int k2 = lodPick(lh, xi, lodCount);
-            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
+            // (a coarse cube that wants its smooth surface, HIT_SMOOTH_WANT, has no second look: its cube face's cos is
+            // the staircase's, not the surface's; the smooth surface is what the footprint asks for there)
+            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer && gTr.hasAlbedo != HIT_SMOOTH_WANT) {
                 // seen at a grazing angle, its footprint wants a coarser level: that level's surface around the hit,
                 // from a little in front of it (the next stretch)
                 float s2 = float(1 << k2);
