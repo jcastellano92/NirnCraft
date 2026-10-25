@@ -834,11 +834,11 @@ def log_summary(lines):
 
 
 # ----------------------------------------------------------------------------------------------- one scene
-BLOCKING = {"RaceScreen", "IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen",
+BLOCKING = {"RaceScreen", "IntroLoadingScreen", "AtlasLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen",
             "DisconnectedScreen", "TitleScreen"}
 
 
-LOADING = {"IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen"}
+LOADING = {"IntroLoadingScreen", "AtlasLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen"}
 
 
 def screen_blocking(limit=600):
