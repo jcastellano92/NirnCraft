@@ -360,6 +360,23 @@ def ensure_current():
                            capture_output=True, text=True)
         if r.returncode:
             raise RuntimeError("install-core failed: " + (r.stdout + r.stderr)[-600:])
+    # The game prefers <game>/atlas-dev/atlas_core.dll over the jar's core (AtlasLibrary.candidates). Several worktrees
+    # share this instance, so that file is whichever core someone copied last: make it this run's shipped core, or every
+    # live test measures another branch's code (2026-10-24: a route ran an older core for hours).
+    dev = GAME / "atlas-dev" / NATIVE_SHIPPED.name
+    if dev.exists() and NATIVE_SHIPPED.exists() and sha(dev) != sha(NATIVE_SHIPPED):
+        log(f"  atlas-dev core replaced with this run's ({ROOT.name}): it was another build's")
+        tr.step("auto_dev_core")
+        if running():
+            close()
+        shutil.copy2(NATIVE_SHIPPED, dev)
+    # The core also loads <game>/atlas-shaders/*.spv over its own kernels (the shader_watch --game dev loop,
+    # vk_backend hotReload): a folder left there makes every live run draw that day's shaders (2026-10-25: the gallery
+    # measured Oct 20's far kernel for days, no bricks in it). Moved aside for the run.
+    moved = clear_dev_shaders(GAME, running=running, close=close)
+    if moved:
+        log(f"  dev shaders moved aside to {moved.name} (they shadow the core's own kernels)")
+        tr.step("auto_dev_shaders")
     try:
         if sync_pack():
             log("  shader pack updated from its source")
@@ -502,6 +519,19 @@ def reload_resources(paths=None):
     if n and running():
         actions(["resources"], timeout=900)
     return n
+
+
+def clear_dev_shaders(game_dir, running=lambda: False, close=lambda: None):
+    """Moves <game_dir>/atlas-shaders aside (atlas-shaders.off-<stamp>) when it holds kernels: the core reads them in
+    place of its own once, at its first frame, so the client is closed first. Returns the new path, or None."""
+    d = Path(game_dir) / "atlas-shaders"
+    if not d.is_dir() or not any(d.glob("*.spv")):
+        return None
+    if running():
+        close()
+    to = d.with_name("atlas-shaders.off-" + time.strftime("%Y%m%d-%H%M%S"))
+    d.rename(to)
+    return to
 
 
 BUILD_BUSY_WAIT_S = 1200  # another build holds the lock (an agent, a hand build): wait for it, do not fail the run

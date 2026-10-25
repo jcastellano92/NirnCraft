@@ -711,9 +711,17 @@ final class AtlasClientGen implements AutoCloseable {
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
         long lastJump = 0;
         Planned cur = null;
+        long loopLogNs = 0;
         while (running) {
             try {
                 refreshStats();
+                long ln = System.nanoTime();
+                if (ln - loopLogNs > 20_000_000_000L) {
+                    // (dev: the worker's state to the log every 20 s)
+                    loopLogNs = ln;
+                    com.nirncraft.NirnCraft.LOGGER.info("atlas worker: chunks {} generated {} cached {} deferred {} near idle {} far calls {} far tiles {}, camera set {}",
+                            chunks, generatedChunks, cachedChunks, deferred.size(), nearIdle, farCalls, farTiles, camSet);
+                }
                 int waiting;
                 synchronized (ready) {
                     waiting = ready.size();
@@ -1186,6 +1194,7 @@ final class AtlasClientGen implements AutoCloseable {
      * up yet (distance in tiles of its level, finer levels first at equal distance). Returns false when all are up.
      */
     private long farRetryNs, farRetried, farTidyNs;
+    private long farCalls, farNoWin, farNone, farLogNs;  // (dev: farStep's calls, levels it found unplaced, calls with no tile)
     private final Map<Long, int[]> farWin = new HashMap<>();  // (a tile: the window's origin and jumps when it was made)
 
     /** The columns of tile (tx, tz) (16 x 16 chunks of its level) inside the window at (ox, oz) of `side` chunks. */
@@ -1198,6 +1207,14 @@ final class AtlasClientGen implements AutoCloseable {
 
     private boolean farStep() {
         double x = camX, z = camZ;
+        farCalls++;
+        long dn = System.nanoTime();
+        if (dn - farLogNs > 20_000_000_000L) {
+            // (dev: the far terrain's steps to the log every 20 s: where a horizon with nothing on it stops)
+            farLogNs = dn;
+            com.nirncraft.NirnCraft.LOGGER.info("atlas far steps {}: levels without a window {}, none to ask {}, made {}, from the cache {}, busy {}, near idle {}, deferred {}",
+                    farCalls, farNoWin, farNone, farTiles - farCached, farCached, farBusy, nearIdle, deferred.size());
+        }
         // The tiles the grid did not take whole go again with the camera still, but never as a loop: a tile waits 4 s,
         // 8 s, 16 s between tries, tries only when its level has room for the chunks it was refused, and gives up after
         // three until the target changes (the camera moves a tile at that level: the code below forgets its tries).
@@ -1232,7 +1249,10 @@ final class AtlasClientGen implements AutoCloseable {
         if (tidy) farTidyNs = nowNs;
         for (int k = 1; k <= 6; k++) {
             int[] win = gen.coarseWindow(k);
-            if (win == null || win[3] == 0) continue;
+            if (win == null || win[3] == 0) {
+                farNoWin++;
+                continue;
+            }
             int span = 256 << k, ox = win[0], oz = win[1], side = win[2];
             if (tidy) {
                 final int lk = k;
@@ -1267,7 +1287,10 @@ final class AtlasClientGen implements AutoCloseable {
                     }
                 }
         }
-        if (best < 0) return false;
+        if (best < 0) {
+            farNone++;
+            return false;
+        }
         long t0 = System.nanoTime();
         AtlasGenNative.Gen.FarIngest r;
         try {

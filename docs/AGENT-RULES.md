@@ -205,3 +205,12 @@ Read these first:
 * **Gates and the plan.** Every phase prompt lists measurable gates; never weaken one to pass it. The orchestrating
   session (not a worktree agent) merges, commits and updates the state table in `docs/world/WORLD-PLAN.md` section 7
   on every merge.
+
+* **Never copy a core into the instance's `atlas-dev` folder by hand (2026-10-24).** The game loads
+  `<game>/atlas-dev/atlas_core.dll` in preference to the jar's core. The autotest instance is shared by every
+  worktree, so a hand-copied core makes every other agent's live test run your code. The harness puts the run's own
+  shipped core there before each live run (`game.ensure_current`). For a dev run outside the harness, use
+  `-Dnirncraft.atlas.devLibrary=<your build>` instead.
+* **The same for `<game>/atlas-shaders` (2026-10-25).** The core draws with any `*.spv` there in place of its own
+  kernels (shader_watch `--game`). A folder left from 10-20 made every gallery run measure that day's far kernel (no
+  bricks). The harness moves it aside before each live run (`game.clear_dev_shaders`); never leave one there.

@@ -1078,7 +1078,8 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
         scrSetD(data + uint(i) * 8u + 4u, zz);
         scrSetD(data + uint(i) * 8u + 6u, rr);
     }
-    for (int i1 = 0; i1 < size - 1; i1++) {
+    bool toVein = (params.store & 2u) != 0u && veinFits(cfg, size, discard, nt, sizeXZ, sizeY);
+    for (int i1 = 0; i1 < size - 1 && !toVein; i1++) {  // (the vein kernel's pass 3 instead: featVeinMain)
         if (scrD(data + uint(i1) * 8u + 6u) <= 0.0l) continue;
         for (int i2 = i1 + 1; i2 < size; i2++) {
             if (scrD(data + uint(i2) * 8u + 6u) <= 0.0l) continue;
@@ -1094,7 +1095,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     // it (discard 0 or 1, no random targets) and no target matches air: then each position's fate is its own (its
     // block, its neighbours' airness: this vein turns no air into ore), and only the first visit of each tested
     // index counts (vanilla's BitSet, aliasing kept), as here. Its writes come at the origin's next round.
-    if ((params.store & 2u) != 0u && veinFits(cfg, size, discard, nt, sizeXZ, sizeY)) {
+    if (toVein) {
         uint v = sG.base + SCR_MISC + M_LINE;
         scratch[v + 1u] = cfg;
         scratch[v + 2u] = uint(xStart); scratch[v + 3u] = uint(yStart); scratch[v + 4u] = uint(zStart);
@@ -1888,158 +1889,263 @@ int64_t qPop(inout uint head) {
     head++;
     return int64_t((uint64_t(scratch[sB.queue + i * 2u + 1u]) << 32) | uint64_t(scratch[sB.queue + i * 2u]));
 }
+// The commit as resumable phases (the store, params.store | 4: a tree's commit spread over rounds within an operation
+// budget, so no dispatch waits for a whole tree; otherwise all at once, the same code): its state in M_LAKE (the
+// lakes' words: no lake runs while a tree is pending), TC_* below. The phases are the serial ones, in order, each
+// loop resumed at its cursor and each breadth-first search at its queue's head and tail.
+static const uint TREE_PENDING = 0x54524545u;  // TC_MAGIC: a tree's commit is under way
+static const uint TC_MAGIC = 0, TC_PHASE = 1, TC_X = 2, TC_Y = 3, TC_Z = 4, TC_POS = 5, TC_HEAD = 6, TC_TAIL = 7, TC_ANY = 8,
+                  TC_C = 9, TC_RES = 10;
+uint tcAt() { return sG.base + SCR_MISC + M_LAKE; }
+// begins a commit at (baseX, baseY, baseZ): the phases from the first
+void tCommitBegin(int baseX, int baseY, int baseZ) {
+    uint h = tcAt();
+    scratch[h + TC_PHASE] = 0u;
+    scratch[h + TC_X] = uint(baseX); scratch[h + TC_Y] = uint(baseY); scratch[h + TC_Z] = uint(baseZ);
+    scratch[h + TC_POS] = 0u; scratch[h + TC_HEAD] = 0u; scratch[h + TC_TAIL] = 0u; scratch[h + TC_ANY] = 0u; scratch[h + TC_C] = 0u;
+    scratch[h + TC_MAGIC] = TREE_PENDING;
+}
+// runs the commit's phases until it ends or `budget` operations are spent (a loop's step, a neighbour probed);
+// returns true when it has ended (TC_MAGIC cleared)
+[noinline]
+bool tCommitStep(uint budget) {
+    uint h = tcAt();
+    GBox box = sB.box;
+    int baseX = int(scratch[h + TC_X]), baseY = int(scratch[h + TC_Y]), baseZ = int(scratch[h + TC_Z]);
+    uint phase = scratch[h + TC_PHASE];
+    int pos = int(scratch[h + TC_POS]);
+    uint head = scratch[h + TC_HEAD], tail = scratch[h + TC_TAIL];
+    uint ops = 0;
+    bool done = false;
+    for (int guard = 0; guard < 64 && !done && ops < budget; guard++) {
+        if (phase == 0u) {
+            uint atBase = gGet(box, baseX, baseY, baseZ);
+            if ((!bis(atBase, B_SOFT) && !tIsLog(baseX, baseY, baseZ)) || bis(atBase, B_LOGS)) { scratch[h + TC_RES] = 0u; done = true; break; }
+            // logs that can be written (value 1), then rooted (value 3)
+            fmInit(sB.root, 16u);
+            pos = int(fmN(sB.logs)) - 1;
+            phase = 1u;
+        } else if (phase == 1u) {
+            for (; pos >= 0 && ops < budget; pos--, ops++) {
+                int64_t k = fmKey(sB.logs, uint(pos));
+                if (k == 0) continue;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                if (!gContains(box, x, y, z)) continue;
+                uint here = gGet(box, x, y, z);
+                if (bis(here, B_SOFT) || (fmHas(sB.anchors, k) && bis(here, B_GROUND))) fmPut(sB.root, k, 1u, sB.tmp);
+            }
+            if (pos < 0) {
+                head = 0u; tail = 0u;
+                scratch[h + TC_ANY] = 0u;
+                pos = int(fmN(sB.root)) - 1;
+                phase = 2u;
+            }
+        } else if (phase == 2u) {
+            for (; pos >= 0 && ops < budget; pos--, ops++) {
+                int64_t k = fmKey(sB.root, uint(pos));
+                if (k == 0) continue;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                if (fmHas(sB.root, posKey(x, y - 1, z))) continue;
+                if (!gContains(box, x, y - 1, z)) continue;
+                uint below = gGet(box, x, y - 1, z);
+                if (!bis(below, B_SOFT) && !bis(below, B_LOGS) && bis(below, B_SOLID) && fmVal(sB.root, uint(pos)) == 1u) {
+                    fmSetVal(sB.root, uint(pos), 3u);
+                    qPush(tail, k);
+                    scratch[h + TC_ANY] = 1u;
+                }
+            }
+            if (pos < 0) {
+                if (scratch[h + TC_ANY] == 0u) { scratch[h + TC_RES] = 0u; done = true; break; }
+                phase = 3u;
+            }
+        } else if (phase == 3u) {
+            bool full = false;
+            while (head != tail && ops < budget) {
+                int64_t k = qPop(head);
+                ops += 26u;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                    if ((dx | dy | dz) == 0) continue;
+                    int p = fmFind(sB.root, posKey(x + dx, y + dy, z + dz));
+                    if (p >= 0 && fmVal(sB.root, uint(p)) == 1u) {
+                        fmSetVal(sB.root, uint(p), 3u);
+                        qPush(tail, fmKey(sB.root, uint(p)));
+                    }
+                }
+                if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); full = true; break; }
+            }
+            if (head == tail || full) {
+                pos = int(fmN(sB.root)) - 1;
+                phase = 4u;
+            }
+        } else if (phase == 4u) {
+            // write the rooted logs
+            for (; pos >= 0 && ops < budget; pos--, ops++) {
+                int64_t k = fmKey(sB.root, uint(pos));
+                if (k == 0 || fmVal(sB.root, uint(pos)) != 3u) continue;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                uint here = gGet(box, x, y, z);
+                gSet(box, x, y, z, waterlog(fmGet(sB.logs, k, 0u), here));
+            }
+            if (pos < 0) {
+                // leaves reachable from the written logs through leaves (value: distance, 99 unknown)
+                fmInit(sB.kept, 16u);
+                head = 0u; tail = 0u;
+                pos = int(fmN(sB.root)) - 1;
+                phase = 5u;
+            }
+        } else if (phase == 5u || phase == 7u) {
+            // the written logs into the queue (the reach's seeds, then the distances')
+            for (; pos >= 0 && ops < budget; pos--, ops++) {
+                int64_t k = fmKey(sB.root, uint(pos));
+                if (k != 0 && fmVal(sB.root, uint(pos)) == 3u) qPush(tail, k);
+            }
+            if (pos < 0) phase = phase + 1u;
+        } else if (phase == 6u) {
+            bool full = false;
+            while (head != tail && ops < budget) {
+                int64_t k = qPop(head);
+                ops += 26u;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                    if ((dx | dy | dz) == 0) continue;
+                    int64_t n = posKey(x + dx, y + dy, z + dz);
+                    if (fmHas(sB.leaves, n) && gContains(box, x + dx, y + dy, z + dz) && !fmHas(sB.kept, n)) {
+                        fmPut(sB.kept, n, 99u, sB.tmp);
+                        qPush(tail, n);
+                    }
+                }
+                if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); full = true; break; }
+            }
+            if (head == tail || full) {
+                // leaf distances: breadth first from the logs through the kept leaves (logs 0)
+                head = 0u; tail = 0u;
+                pos = int(fmN(sB.root)) - 1;
+                phase = 7u;
+            }
+        } else if (phase == 8u) {
+            bool full = false;
+            while (head != tail && ops < budget) {
+                int64_t k = qPop(head);
+                ops += 6u;
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                int kp = fmFind(sB.kept, k);
+                uint d = kp >= 0 ? fmVal(sB.kept, uint(kp)) : 0u;  // a log
+                if (d >= 6u) continue;
+                // Direction.values(): down, up, north, south, west, east
+                for (uint dir = 0; dir < 6u; dir++) {
+                    int nx = x + (dir == 4u ? -1 : (dir == 5u ? 1 : 0)), ny = y + (dir == 0u ? -1 : (dir == 1u ? 1 : 0)),
+                        nz = z + (dir == 2u ? -1 : (dir == 3u ? 1 : 0));
+                    int np = fmFind(sB.kept, posKey(nx, ny, nz));
+                    if (np >= 0 && fmVal(sB.kept, uint(np)) > d + 1u) {
+                        fmSetVal(sB.kept, uint(np), d + 1u);
+                        qPush(tail, posKey(nx, ny, nz));
+                    }
+                }
+                if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); full = true; break; }
+            }
+            if (head == tail || full) {
+                pos = int(fmN(sB.kept)) - 1;
+                phase = 9u;
+            }
+        } else if (phase == 9u) {
+            for (; pos >= 0 && ops < budget; pos--, ops++) {
+                int64_t k = fmKey(sB.kept, uint(pos));
+                if (k == 0) continue;
+                uint state = fmGet(sB.leaves, k, 0u);
+                uint d = fmVal(sB.kept, uint(pos));
+                state = btrans(state, T_DIST + (d <= 6u ? d - 1u : 6u));
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                uint here = gGet(box, x, y, z);
+                if ((bis(here, B_SOFT) && !bis(here, B_LEAVES_TAG)) || bis(here, B_LEAVES_TAG)) gSet(box, x, y, z, waterlog(state, here));
+            }
+            if (pos < 0) {
+                // trimmings: hung on a written leaf or log or a trimming above, highest first (a stable sort of the
+                // table order)
+                uint ne = fmN(sB.extras), c = 0;
+                for (int q = int(ne) - 1; q >= 0; q--) {
+                    int64_t k = fmKey(sB.extras, uint(q));
+                    if (k == 0) continue;
+                    uint w = sB.sortAt + c * 3u;
+                    scratch[w] = uint(uint64_t(k) & 0xFFFFFFFFu);
+                    scratch[w + 1] = uint(uint64_t(k) >> 32u);
+                    scratch[w + 2] = fmVal(sB.extras, uint(q));
+                    c++;
+                }
+                ops += ne;
+                scratch[h + TC_C] = c;
+                pos = 1;
+                phase = 10u;
+            }
+        } else if (phase == 10u) {
+            // insertion sort by y descending (stable, like the list sort): i at pos
+            uint c = scratch[h + TC_C];
+            for (; uint(pos) < c && ops < budget; pos++) {
+                uint i = uint(pos);
+                uint a0 = scratch[sB.sortAt + i * 3u], a1 = scratch[sB.sortAt + i * 3u + 1u], a2 = scratch[sB.sortAt + i * 3u + 2u];
+                int ay = keyY(int64_t((uint64_t(a1) << 32) | uint64_t(a0)));
+                uint j = i;
+                while (j > 0u) {
+                    uint p = sB.sortAt + (j - 1u) * 3u;
+                    int py = keyY(int64_t((uint64_t(scratch[p + 1]) << 32) | uint64_t(scratch[p])));
+                    if (py >= ay) break;
+                    scratch[p + 3] = scratch[p]; scratch[p + 4] = scratch[p + 1]; scratch[p + 5] = scratch[p + 2];
+                    j--;
+                    ops++;
+                }
+                uint q = sB.sortAt + j * 3u;
+                scratch[q] = a0; scratch[q + 1] = a1; scratch[q + 2] = a2;
+                ops++;
+            }
+            if (uint(pos) >= c) {
+                fmInit(sB.placed, 16u);
+                pos = 0;
+                phase = 11u;
+            }
+        } else {
+            uint c = scratch[h + TC_C];
+            for (; uint(pos) < c && ops < budget; pos++) {
+                ops += 6u;
+                uint w = sB.sortAt + uint(pos) * 3u;
+                int64_t k = int64_t((uint64_t(scratch[w + 1]) << 32) | uint64_t(scratch[w]));
+                int x = keyX(k), y = keyY(k), z = keyZ(k);
+                bool held = false;
+                for (uint dir = 0; dir < 6u && !held; dir++) {
+                    int64_t n = posKey(x + (dir == 4u ? -1 : (dir == 5u ? 1 : 0)), y + (dir == 0u ? -1 : (dir == 1u ? 1 : 0)), z + (dir == 2u ? -1 : (dir == 3u ? 1 : 0)));
+                    int rp = fmFind(sB.root, n);
+                    if ((rp >= 0 && fmVal(sB.root, uint(rp)) == 3u) || fmHas(sB.kept, n) || fmHas(sB.placed, n)) held = true;
+                }
+                if (!held) continue;
+                if (bis(gGet(box, x, y, z), B_AIR) && gSet(box, x, y, z, scratch[w + 2])) fmPut(sB.placed, k, 1u, sB.tmp);
+            }
+            if (uint(pos) >= c) { scratch[h + TC_RES] = 1u; done = true; break; }
+        }
+    }
+    if (done) {
+        scratch[h + TC_MAGIC] = 0u;
+        return true;
+    }
+    scratch[h + TC_PHASE] = phase;
+    scratch[h + TC_POS] = uint(pos);
+    scratch[h + TC_HEAD] = head;
+    scratch[h + TC_TAIL] = tail;
+    return false;
+}
+// the commit at once (the serial path, and the store's without | 4): the same phases without a budget
 [noinline]
 bool tCommit(int baseX, int baseY, int baseZ) {
-    GBox box = sB.box;
-    uint atBase = gGet(box, baseX, baseY, baseZ);
-    if (!bis(atBase, B_SOFT) && !tIsLog(baseX, baseY, baseZ)) return false;
-    if (bis(atBase, B_LOGS)) return false;
-    // logs that can be written (value 1), then rooted (value 3)
-    fmInit(sB.root, 16u);
-    uint nl = fmN(sB.logs);
-    for (int pos = int(nl) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.logs, uint(pos));
-        if (k == 0) continue;
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        if (!gContains(box, x, y, z)) continue;
-        uint here = gGet(box, x, y, z);
-        if (bis(here, B_SOFT) || (fmHas(sB.anchors, k) && bis(here, B_GROUND))) fmPut(sB.root, k, 1u, sB.tmp);
-    }
-    uint head = 0, tail = 0;
-    bool any = false;
-    uint nr = fmN(sB.root);
-    for (int pos = int(nr) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.root, uint(pos));
-        if (k == 0) continue;
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        if (fmHas(sB.root, posKey(x, y - 1, z))) continue;
-        if (!gContains(box, x, y - 1, z)) continue;
-        uint below = gGet(box, x, y - 1, z);
-        if (!bis(below, B_SOFT) && !bis(below, B_LOGS) && bis(below, B_SOLID) && fmVal(sB.root, uint(pos)) == 1u) {
-            fmSetVal(sB.root, uint(pos), 3u);
-            qPush(tail, k);
-            any = true;
-        }
-    }
-    if (!any) return false;
-    while (head != tail) {
-        int64_t k = qPop(head);
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
-            if ((dx | dy | dz) == 0) continue;
-            int p = fmFind(sB.root, posKey(x + dx, y + dy, z + dz));
-            if (p >= 0 && fmVal(sB.root, uint(p)) == 1u) {
-                fmSetVal(sB.root, uint(p), 3u);
-                qPush(tail, fmKey(sB.root, uint(p)));
-            }
-        }
-        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
-    }
-    // write the rooted logs
-    nr = fmN(sB.root);
-    for (int pos = int(nr) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.root, uint(pos));
-        if (k == 0 || fmVal(sB.root, uint(pos)) != 3u) continue;
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        uint here = gGet(box, x, y, z);
-        gSet(box, x, y, z, waterlog(fmGet(sB.logs, k, 0u), here));
-    }
-    // leaves reachable from the written logs through leaves (value: distance, 99 unknown)
-    fmInit(sB.kept, 16u);
-    head = 0; tail = 0;
-    for (int pos = int(nr) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.root, uint(pos));
-        if (k != 0 && fmVal(sB.root, uint(pos)) == 3u) qPush(tail, k);
-    }
-    while (head != tail) {
-        int64_t k = qPop(head);
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
-            if ((dx | dy | dz) == 0) continue;
-            int64_t n = posKey(x + dx, y + dy, z + dz);
-            if (fmHas(sB.leaves, n) && gContains(box, x + dx, y + dy, z + dz) && !fmHas(sB.kept, n)) {
-                fmPut(sB.kept, n, 99u, sB.tmp);
-                qPush(tail, n);
-            }
-        }
-        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
-    }
-    // leaf distances: breadth first from the logs through the kept leaves (logs 0)
-    head = 0; tail = 0;
-    for (int pos = int(nr) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.root, uint(pos));
-        if (k != 0 && fmVal(sB.root, uint(pos)) == 3u) qPush(tail, k);
-    }
-    while (head != tail) {
-        int64_t k = qPop(head);
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        int kp = fmFind(sB.kept, k);
-        uint d = kp >= 0 ? fmVal(sB.kept, uint(kp)) : 0u;  // a log
-        if (d >= 6u) continue;
-        // Direction.values(): down, up, north, south, west, east
-        for (uint dir = 0; dir < 6u; dir++) {
-            int nx = x + (dir == 4u ? -1 : (dir == 5u ? 1 : 0)), ny = y + (dir == 0u ? -1 : (dir == 1u ? 1 : 0)),
-                nz = z + (dir == 2u ? -1 : (dir == 3u ? 1 : 0));
-            int np = fmFind(sB.kept, posKey(nx, ny, nz));
-            if (np >= 0 && fmVal(sB.kept, uint(np)) > d + 1u) {
-                fmSetVal(sB.kept, uint(np), d + 1u);
-                qPush(tail, posKey(nx, ny, nz));
-            }
-        }
-        if (tail - head > TQ_CAP) { flag(FL_TABLE_FULL); break; }
-    }
-    uint nk = fmN(sB.kept);
-    for (int pos = int(nk) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.kept, uint(pos));
-        if (k == 0) continue;
-        uint state = fmGet(sB.leaves, k, 0u);
-        uint d = fmVal(sB.kept, uint(pos));
-        state = btrans(state, T_DIST + (d <= 6u ? d - 1u : 6u));
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        uint here = gGet(box, x, y, z);
-        if ((bis(here, B_SOFT) && !bis(here, B_LEAVES_TAG)) || bis(here, B_LEAVES_TAG)) gSet(box, x, y, z, waterlog(state, here));
-    }
-    // trimmings: hung on a written leaf or log or a trimming above, highest first (a stable sort of the table order)
-    uint ne = fmN(sB.extras), c = 0;
-    for (int pos = int(ne) - 1; pos >= 0; pos--) {
-        int64_t k = fmKey(sB.extras, uint(pos));
-        if (k == 0) continue;
-        uint w = sB.sortAt + c * 3u;
-        scratch[w] = uint(uint64_t(k) & 0xFFFFFFFFu);
-        scratch[w + 1] = uint(uint64_t(k) >> 32u);
-        scratch[w + 2] = fmVal(sB.extras, uint(pos));
-        c++;
-    }
-    // insertion sort by y descending (stable, like the list sort)
-    for (uint i = 1; i < c; i++) {
-        uint a0 = scratch[sB.sortAt + i * 3u], a1 = scratch[sB.sortAt + i * 3u + 1u], a2 = scratch[sB.sortAt + i * 3u + 2u];
-        int ay = keyY(int64_t((uint64_t(a1) << 32) | uint64_t(a0)));
-        uint j = i;
-        while (j > 0u) {
-            uint p = sB.sortAt + (j - 1u) * 3u;
-            int py = keyY(int64_t((uint64_t(scratch[p + 1]) << 32) | uint64_t(scratch[p])));
-            if (py >= ay) break;
-            scratch[p + 3] = scratch[p]; scratch[p + 4] = scratch[p + 1]; scratch[p + 5] = scratch[p + 2];
-            j--;
-        }
-        uint q = sB.sortAt + j * 3u;
-        scratch[q] = a0; scratch[q + 1] = a1; scratch[q + 2] = a2;
-    }
-    fmInit(sB.placed, 16u);
-    for (uint i = 0; i < c; i++) {
-        uint w = sB.sortAt + i * 3u;
-        int64_t k = int64_t((uint64_t(scratch[w + 1]) << 32) | uint64_t(scratch[w]));
-        int x = keyX(k), y = keyY(k), z = keyZ(k);
-        bool held = false;
-        for (uint dir = 0; dir < 6u && !held; dir++) {
-            int64_t n = posKey(x + (dir == 4u ? -1 : (dir == 5u ? 1 : 0)), y + (dir == 0u ? -1 : (dir == 1u ? 1 : 0)), z + (dir == 2u ? -1 : (dir == 3u ? 1 : 0)));
-            int rp = fmFind(sB.root, n);
-            if ((rp >= 0 && fmVal(sB.root, uint(rp)) == 3u) || fmHas(sB.kept, n) || fmHas(sB.placed, n)) held = true;
-        }
-        if (!held) continue;
-        if (bis(gGet(box, x, y, z), B_AIR) && gSet(box, x, y, z, scratch[w + 2])) fmPut(sB.placed, k, 1u, sB.tmp);
-    }
-    return true;
+    tCommitBegin(baseX, baseY, baseZ);
+    for (int i = 0; i < 1000000; i++)
+        if (tCommitStep(0xFFFFFFFFu)) break;
+    return scratch[tcAt() + TC_RES] != 0u;
+}
+// (featBody, the store | 4) the pending commit of the round before, within the budget; true when it ended
+[noinline]
+bool treeResume(uint budget) {
+    uint h = tcAt();
+    if (scratch[h + TC_MAGIC] != TREE_PENDING) return true;
+    sB = treeB(gbox(int(scratch[h + TC_X]), int(scratch[h + TC_Z])));
+    return tCommitStep(budget);
 }
 
 // ---- TreeShapes: the growth forms (the species table: SPEC_W words a species) -----------------------------------
@@ -2965,6 +3071,10 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
     else if (shape == SH_BAMBOO) shBamboo(t);
     else shCrystal(t);
     if (spU(sp, S_ACCENT_TOP) != 0u && t.accent != NO_STATE) tTint(t.leaves, t.accent, double(spF(sp, S_ACCENT_CH)), true);
+    if ((params.store & 4u) != 0u) {
+        tCommitBegin(x, y, z);  // (its phases at the origin's next rounds, within their budget: featBody)
+        return true;
+    }
     return tCommit(x, y, z);
 }
 
@@ -3174,6 +3284,7 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
             placeFeature<T>(rec, x, y, z);
             placed++;
             if ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING) break;  // (the vein kernel next)
+            if ((params.store & 4u) != 0u && scratch[tcAt() + TC_MAGIC] == TREE_PENDING) break;  // (its commit next rounds)
             continue;
         }
         uint m = mods + uint(mi) * MOD_W;
@@ -3343,6 +3454,19 @@ void featBody<let T : uint>(uint o) {
         if (first) scratch[sG.base + SCR_MISC + M_LINE] = 0u;
         else veinApply();
     }
+    if ((params.store & 4u) != 0u) {
+        // (a tree's commit under way: its next phases within the round's operation budget, and nothing else this
+        // round; none can be pending at a feature's first round, whatever the lakes left in M_LAKE)
+        if (first) {
+            scratch[tcAt() + TC_MAGIC] = 0u;
+        } else if (scratch[tcAt() + TC_MAGIC] == TREE_PENDING) {
+            if (scratch[meta + 10u] != 1u) return;
+            treeResume(params.budget);
+            scratch[meta + 10u] = 1u;  // (more: the rest of the commit, or the placements after it)
+            InterlockedAdd(counters[0], 1u);
+            return;
+        }
+    }
     if (first) {
         // applyBiomeDecoration: the feature runs when a biome the 3 x 3 holds lists it at this step
         uint here = fprog[rec + R_HERE];
@@ -3355,8 +3479,9 @@ void featBody<let T : uint>(uint o) {
     } else {
         if (scratch[meta + 10u] != 1u) return;  // the random is still in meta 6..9
     }
-    bool more = runPlaced<T>(rec, first, params.budget);
+    bool more = runPlaced<T>(rec, first, (params.store & 4u) != 0u ? 1u : params.budget);  // (| 4: the budget is the commit's)
     more = more || ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING);  // (its writes next round)
+    more = more || ((params.store & 4u) != 0u && scratch[tcAt() + TC_MAGIC] == TREE_PENDING);  // (its commit next rounds)
     scratch[meta + 10u] = more ? 1u : 2u;
     if (more) InterlockedAdd(counters[0], 1u);
 }
@@ -3443,6 +3568,8 @@ uint veinKeyOf(int x, int y, int z) {
     }
     return 0xFFFFFFFFu;
 }
+groupshared uint gVeinFirst;    // (featVeinMain's pass 3: the first i2 that kills i1)
+groupshared double gVeinR[64];  // (featVeinMain's pass 3: the spheres' radii)
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
@@ -3451,6 +3578,55 @@ void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
     uint v = sG.base + SCR_MISC + M_LINE;
     if (scratch[v] != VEIN_PENDING) return;
     uint id = g.x * 64u + t.x;
+    if (params.k == 3u) {
+        // the spheres that hold another (placeOre's pair loop): for each i1 in order, the i2 after it in step, a thread
+        // each. As the serial loop goes: i2 dies (dr > 0) only before the first i2 that kills i1 (dr <= 0), and after
+        // i1's death nothing more changes in that pass (its radius -1 kills nothing)
+        if (g.x != 0u) return;
+        uint data = sG.base + SCR_MISC + M_ORE;
+        int size = int(scratch[v + 7u]);
+        int i2 = int(t.x);
+        // (the radii in groupshared memory for the pass, written back at its end: every thread reads the same r1)
+        if (i2 < size) gVeinR[i2] = scrD(data + uint(i2) * 8u + 6u);
+        for (int i1 = 0; i1 < size - 1; i1++) {
+            GroupMemoryBarrierWithGroupSync();
+            double r1 = gVeinR[i1];
+            if (t.x == 0u) gVeinFirst = uint(size);
+            GroupMemoryBarrierWithGroupSync();
+            if (r1 <= 0.0l) continue;  // (uniform: every thread read the same)
+            bool kill2 = false;
+            if (i2 > i1 && i2 < size) {
+                double r2 = gVeinR[i2];
+                if (!(r2 <= 0.0l)) {
+                    double dx = scrD(data + uint(i1) * 8u) - scrD(data + uint(i2) * 8u), dy = scrD(data + uint(i1) * 8u + 2u) - scrD(data + uint(i2) * 8u + 2u),
+                           dz = scrD(data + uint(i1) * 8u + 4u) - scrD(data + uint(i2) * 8u + 4u);
+                    double dr = r1 - r2;
+                    if (dr * dr > dx * dx + dy * dy + dz * dz) {
+                        if (dr > 0.0l) kill2 = true;
+                        else InterlockedMin(gVeinFirst, uint(i2));
+                    }
+                }
+            }
+            GroupMemoryBarrierWithGroupSync();
+            uint first = gVeinFirst;
+            if (kill2 && uint(i2) < first) gVeinR[i2] = -1.0l;
+            if (t.x == 0u && first < uint(size)) gVeinR[i1] = -1.0l;
+        }
+        GroupMemoryBarrierWithGroupSync();
+        if (i2 < size) scrSetD(data + uint(i2) * 8u + 6u, gVeinR[i2]);
+        return;
+    }
+    if (params.k == 4u) {
+        if (id >= VEIN_W) return;
+        uint r = scratch[sG.base + SCR_TREE + id];
+        if (r == 0u) return;
+        uint cfg = scratch[v + 1u], tt = (r >> 24) - 1u;
+        int x = int(scratch[v + 2u]) + int((r >> 10) & 31u), y = int(scratch[v + 3u]) + int((r >> 5) & 31u),
+            z = int(scratch[v + 4u]) + int(r & 31u);
+        htPutShared(keyOf(x, y, z), fprog[cfg + 3u + tt * 4u + 3u]);
+        InterlockedAdd(scratch[sG.base + SCR_META + 3u], 1u);  // (setBlock's count of writes)
+        return;
+    }
     if (params.k == 0u) {
         if (id < VEIN_W) {
             scratch[sG.base + SCR_TESTED + id] = 0xFFFFFFFFu;
@@ -3488,22 +3664,45 @@ void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
         return;
     }
 }
-// (featBody, the store | 2) a vein's decided blocks into the origin's writes (the positions are distinct: the order
-// of the writes does not matter), then no vein pending
+// htPut from many threads of one origin at once, each with its own key: a slot claimed by compare-exchange, the count
+// by an atomic add (as htPut: a full table flags and drops the write)
+[noinline]
+void htPutShared(uint key, uint id) {
+    uint s = htSlot(key);
+    for (uint n = 0; n < HT_CAP; n++) {
+        uint at = sG.base + SCR_HT + s * 2u;
+        uint k = scratch[at];
+        if (k == 0u) {
+            // (the count reserved first: a full table drops the write and flags, as htPut)
+            uint used;
+            InterlockedAdd(scratch[sG.base + SCR_META], 1u, used);
+            if (used >= HT_CAP * 3u / 4u) {
+                InterlockedAdd(scratch[sG.base + SCR_META], 0xFFFFFFFFu);
+                InterlockedOr(scratch[sG.base + SCR_META + 1u], FL_TABLE_FULL);
+                return;
+            }
+            uint was;
+            InterlockedCompareExchange(scratch[at], 0u, key, was);
+            if (was == 0u) {
+                scratch[at + 1u] = id;
+                return;
+            }
+            InterlockedAdd(scratch[sG.base + SCR_META], 0xFFFFFFFFu);  // (another key took the slot: not ours)
+            k = was;
+        }
+        if (k == key) {
+            scratch[at + 1u] = id;
+            return;
+        }
+        s = (s + 1u) & (HT_CAP - 1u);
+    }
+}
+// (featBody, the store | 2) a vein's blocks were written by featVeinMain's pass 4 (its threads, into the table): no
+// vein pending from here
 [noinline]
 void veinApply() {
     uint v = sG.base + SCR_MISC + M_LINE;
-    if (scratch[v] != VEIN_PENDING) return;
-    uint cfg = scratch[v + 1u];
-    int xStart = int(scratch[v + 2u]), yStart = int(scratch[v + 3u]), zStart = int(scratch[v + 4u]);
-    for (uint bi = 0; bi < VEIN_W; bi++) {
-        uint r = scratch[sG.base + SCR_TREE + bi];
-        if (r == 0u) continue;
-        uint tt = (r >> 24) - 1u;
-        int x = xStart + int((r >> 10) & 31u), y = yStart + int((r >> 5) & 31u), z = zStart + int(r & 31u);
-        setBlock(x, y, z, fprog[cfg + 3u + tt * 4u + 3u], false);
-    }
-    scratch[v] = 0u;
+    if (scratch[v] == VEIN_PENDING) scratch[v] = 0u;
 }
 
 // ---- the store (atlas.h atlas_gen_add_store_stage) ------------------------------------------------------------------

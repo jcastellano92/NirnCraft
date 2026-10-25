@@ -62,6 +62,8 @@ static Compare compare(const std::vector<float>& refC, const std::vector<float>&
 
 enum Result { PASS, FAIL, SKIP };
 
+extern "C" ATLAS_API const char* atlas_fr_dump(const char* reason);  // (flight_recorder.cpp)
+
 static Result runSuite(const std::string& data, atlas_test::Profile profile, std::string& mode) {
     atlas_test::GlContext glc;
     GlApi gl;
@@ -529,7 +531,14 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
             return FAIL;
         }
         frameMs.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
-        std::this_thread::sleep_for(std::chrono::milliseconds(8));  // the rest of a game frame
+        // the rest of a game frame: never shorter than the GPU needs for one. A frame period under the GPU's time per frame
+        // backs the GPU up, and atlas_gl_render then waits for the frame two back (vk wait:gpuFence in the flight recorder):
+        // GPU time, not the CPU cost this check is about. (The far pass takes ~14 ms a frame in this scene on a 3090 and ~30 ms
+        // when another process shares the card: with a fixed 8 ms the "CPU" median was 8 to 29 ms, all of it that wait.)
+        AtlasStats ss{};
+        atlas_get_stats(ctx, &ss);
+        double periodMs = std::max(8.0, ss.lastFrameMs * 1.15);
+        std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(std::max(0.0, periodMs - frameMs.back())));
     }
     stop = true;
     worker.join();
@@ -539,6 +548,8 @@ static Result runSuite(const std::string& data, atlas_test::Profile profile, std
     std::printf("streaming flight: %d clipmap rebuilds during 240 frames; atlas_gl_render CPU median %.2f ms, "
                 "p99 %.2f ms, max %.2f ms\n", rebuilds.load(), sorted[sorted.size() / 2], sorted[sorted.size() * 99 / 100],
                 sorted.back());
+    // ATLAS_RECORDER=1 (ATLAS_RECORDER_DIR): the flight recorder's dump of this flight, where the frame's CPU time went
+    if (std::getenv("ATLAS_RECORDER")) std::printf("flight recorder: %s\n", atlas_fr_dump("streaming flight"));
     // host copies wait for the GPU inside the call, so only zero-copy is held to the 8 ms p99 (software drivers set
     // ATLAS_TEST_SLOW=1: they take seconds per frame)
     const char* slow = std::getenv("ATLAS_TEST_SLOW");
