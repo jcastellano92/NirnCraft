@@ -3,7 +3,6 @@ package com.nirncraft.atlas;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
-import net.minecraft.client.Minecraft;
 import java.io.StringReader;
 
 /**
@@ -57,8 +56,9 @@ public final class AtlasReady {
         var rd = info.has("ready") && info.get("ready").isJsonObject() ? info.getAsJsonObject("ready") : null;
         if (rd == null) return "atlas_info lacks the ready block (an older library)";
         if (rd.get("pipelinesBuilding").getAsInt() != 0) return "pipelines still building off the render thread";
-        var mc = Minecraft.getInstance();
-        if (AtlasLoadingScreen.waiting() || mc.gui.screen() instanceof AtlasLoadingScreen) return "loading phase not over";
+        // (the loading screen itself is not a condition: under the player hold it stays up until the server releases the
+        // player, which happens because this is ready; its work is the generator and grid conditions below)
+        if (AtlasLoadingScreen.waiting()) return "loading phase not over";
         if (AtlasClientGen.ON) {
             var p = AtlasClientGen.progress();
             if (p == null || !p.running()) return "generator not running";
@@ -66,7 +66,10 @@ public final class AtlasReady {
             if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (coarse bake) " + p.far() + " of " + p.farTotal() + " tiles";
         }
         var v = info.has("voxgrid") && info.get("voxgrid").isJsonObject() ? info.getAsJsonObject("voxgrid") : null;
-        if (v == null) return "grid not started";
+        if (v == null) {  // (the level-0 grid exists in the unified / client-generated modes; the plain far field has none to wait for)
+            if (AtlasNearPass.unified() || AtlasClientGen.ON) return "grid not started";
+            return "";
+        }
         if (v.has("settled") && !v.get("settled").getAsBoolean()) return "grid not settled since its last move";
         for (String k : new String[]{"pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections"})
             if (v.has(k) && v.get(k).getAsLong() > 0) return "grid " + k + " " + v.get(k).getAsLong();

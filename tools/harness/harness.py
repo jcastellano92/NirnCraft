@@ -609,6 +609,9 @@ class Runner:
         except Exception as e:  # noqa: BLE001  the client cannot start: skip the group, do not hang on it
             self.disabled[s["group"]] = f"skipped: the client did not start ({str(e)[:160]})"
             raise
+        if s.get("hold_tool"):  # the player hold's live tests (hold_tools.py): they launch and close the client themselves
+            import hold_tools
+            return hold_tools.run(self, s, v, fp)
         if s.get("atlas_tool"):  # the in-game gates for Infinite ATLAS (atlas_tools.py): they drive the client themselves
             import atlas_tools
             return atlas_tools.run(self, s, v, fp)
