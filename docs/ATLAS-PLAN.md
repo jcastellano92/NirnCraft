@@ -90,6 +90,33 @@ roadmap of 12 slices is mostly unbuilt. Not a code source. Four ideas are worth 
 Already ours (Aether copied them from us): footprint level per pixel, `[noinline]` with value structs, step budgets
 against the watchdog, uniform cells taking no slot, the 16³ micro-brick for non-cube blocks.
 
+## 3b. Architecture check: every requirement against the design (2026-10-25)
+
+The renderer direction is decided by this table, not by building everything to find out. **Known** means it's built
+and measured, or standard practice we already rely on. **Risk** means only an experiment answers it. Only the
+experiments in the last column get run, in this order: E1, then E2 to E5 as their stage comes up. Everything else
+follows the design without new tests.
+
+| Requirement | How the design meets it | State | Vital experiment (only if risk) |
+|---|---|---|---|
+| Terrain, near to horizon | NAADF grid per level (clipmap, levels 0-6), footprint picks the level per pixel, baked coarse floor | Built; in game the grid is the far path (~17 km reach) | **E1** grid far cost on 3 views (valley, 10 km horizon, grazing): fits ~6 ms at 1440p? Else hybrid or height pyramid |
+| Vanilla and custom blocks, materials | Level-0 blocks plus 16³ micro-bricks from baked quads; the gallery against vanilla | 113/300 pass; causes now lighting, not shape | No new experiment: the gallery is the measure |
+| Water and fluids | Medium in the trace (in and under), waterlogged bricks | Built; look gap (tint, waves) | None: a look decision, done in the lighting pass |
+| Sky light, sun, moon, night | Physical sky, light by need, tile schedules | Built; night not rechecked since the kernel rework | None: route captures at night |
+| Static light sources, near and far | Emitters in GPU light binning, far lights | Built | None |
+| Dynamic lights (held torches, spells, burning mobs) | One per-frame light list into the same binning | Not built | **E3** binning cost with 1,000 moving lights at 1440p |
+| Shadows | Traced (shadow rays against the grid and the entity BVH) | Terrain yes; entities not yet | Covered by E2 |
+| Entities, players, mobs near to mid | Object-space micro-voxel bricks, posed per frame, GPU two-level BVH traced with the terrain | Not built (vanilla raster with our light now) | **E2** BVH build and trace with 50 / 500 / 5,000 animated entities: frame ms at 1440p |
+| Entities far | Splatted into the coarse levels as transient voxels; impostors with dissolve exist in the old far view | Partly (old view) | Covered by E2 (splat cost) |
+| Smoke, clouds, particles, volumes | GPU particles and density volumes in the same trace (clouds already), lit by ours | Clouds built; particles vanilla | **E4** a smoke volume plus 10k particles: ms near and far |
+| Low-end and high-end scaling | One continuous quality controller (resolution, lod bias, ray and light budgets, entity detail) | Pacer only | **E5** the route on the integrated GPU with the controller holding 30 fps: does the picture stay acceptable? |
+| Fast loading and far changes | GPU-native region files, baked whole-map coarse levels, per-section edits re-downsampled, per-stage fingerprints | Coarse bake built (7-19 MB per level); format and fingerprints designed | None now: measured by the route's relaunch and ready time |
+| Server communicates elements | Coalesced position-based edits plus entity state by interest; bake shared by region hashes (designed) | Edits stored as deltas; sharing not built | None until multiplayer; design in ATLAS-WORLD-STORE §2 |
+| Same world for collisions | The server fed from the GPU generator; level-0 ids against the client level | Built on atlas-server; 0 mismatches over 7,500 blocks | None (server speed is the generator's) |
+
+Rules for tests from here: one experiment per open risk, run when its stage starts; the route, gallery and relaunch are
+the standing gates; no other new tests unless a gate can't answer a question.
+
 ## 4. The stages
 
 One stage at a time. Nothing from a later stage starts early. **Frozen until stage 3 passes:** far settlements and
