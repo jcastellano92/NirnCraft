@@ -938,6 +938,8 @@ public:
                                 if (!st.clkSum[k]) continue;
                                 if (types_[r] == 1 && (k == 7 || k == 8 || (k >= 20 && k < 25)))
                                     std::snprintf(cb, sizeof cb, " [%u] n %llu", k, (unsigned long long)st.clkSum[k]);
+                                else if (types_[r] == 1 && k >= 25 && k < 30)
+                                    std::snprintf(cb, sizeof cb, " [%u] max %u", k, st.clkMax[k]);
                                 else
                                     std::snprintf(cb, sizeof cb, " [%u] %.2f/round max %.2f", k, double(st.clkSum[k]) * 64.0 / 1.8e6 / double(st.n),
                                                   double(st.clkMax[k]) * 64.0 / 1.8e6);

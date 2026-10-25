@@ -1085,7 +1085,11 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     double y1 = double(oy + ry1 - 2);
     int cs = ceilF_N(spreadXY);
     int xStart = ox - cs - maxRadius, yStart = oy - 2 - maxRadius, zStart = oz - cs - maxRadius;
-    int sizeXZ = 2 * (cs + maxRadius), sizeY = 2 * (2 + maxRadius);
+    int sizeXZ = 2 * (cs + maxRadius);
+    // sizeY = 2 * (2 + maxRadius), written another way: as that expression NVIDIA's driver (616.56, this -O0 SPIR-V)
+    // computed 17 for a maxRadius of 5 (the ore's tested-index aliasing then not vanilla's, and no vein took the many
+    // threads: its box looked too tall)
+    int sizeY = (yStart - oy) * -2;
     CLK1(2, c0);
     CLK0(c1);
     bool any = false;
@@ -1114,7 +1118,15 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     // (the vein kernel's capacity: 64 spheres, its index field widths, a thread a position of the box)
     bool boxFits = size <= 64 && sizeXZ <= 31 && sizeY <= 15 && uint(sizeXZ + 1) * uint(sizeY + 1) * uint(sizeXZ + 1) <= 12288u;
     if (!boxFits) CLKN(22);
-    bool toVein = (params.store & 2u) != 0u && boxFits && veinFits(cfg, discard, nt);
+#if FEAT_CLOCK
+    InterlockedAdd(counters[16u + 25u], 1u); InterlockedMax(counters[48u + 25u], uint(sizeXZ));
+    InterlockedAdd(counters[16u + 26u], 1u); InterlockedMax(counters[48u + 26u], uint(sizeY));
+    InterlockedAdd(counters[16u + 27u], 1u); InterlockedMax(counters[48u + 27u], uint(maxRadius));
+    InterlockedAdd(counters[16u + 28u], 1u); InterlockedMax(counters[48u + 28u], uint(cs));
+    InterlockedAdd(counters[16u + 29u], 1u); InterlockedMax(counters[48u + 29u], uint(size));
+#endif
+    // (a small blob stays on the one lane: its loop is short, and a vein ends the origin's round, five passes after it)
+    bool toVein = (params.store & 2u) != 0u && size >= 33 && boxFits && veinFits(cfg, discard, nt);
     CLK1(5, c3);
     if (toVein) CLKN(7); else CLKN(8);
     CLK0(c4);
