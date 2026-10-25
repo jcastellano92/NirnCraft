@@ -15,6 +15,7 @@
 #include <cstring>
 #include <memory>
 #include <mutex>
+#include <condition_variable>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -2021,6 +2022,7 @@ private:
         double units = 0.0;
         bool refine = false;  // (perUnit refined from it: a whole part)
         double est = 0.0;     // its GPU ms as charged when submitted (corrected when it retires)
+        bool unpaced = false;  // (the loading phase's bake, pace class 2: charged no tokens, so the near work after it owes none)
         int part = -1;  // (a store stage's part) its index in partUs_
         int sliceKind = -1;       // (a sliced dispatch: sliceOf's kind) its slice's units, for the next slices' size
         uint32_t sliceUnits = 0;
@@ -2128,7 +2130,7 @@ private:
         // (charged its estimate when submitted; now its own time, but never more than the estimate: a submission the
         // frames held back (the GPU theirs first) took longer without doing more, and charging that rationed the
         // generator to nothing at 1440p. The frames are kept by the duty's control, not by this charge)
-        pace_.tokens += s.est - std::min(gpu, std::max(s.est, 0.05));
+        if (!s.unpaced) pace_.tokens += s.est - std::min(gpu, std::max(s.est, 0.05));
         inFlightMs_ = std::max(0.0, inFlightMs_ - s.est);
         pace_.usedMs += gpu;
         lastSubMs_ = gpu;
@@ -2258,7 +2260,8 @@ private:
         // (the budget pays an estimate now, so work in flight counts against it: a part's from its stage's time a unit,
         // else the recent submissions'; corrected to its own GPU time when it retires)
         s.est = s.perUnit && *s.perUnit > 0.0 && s.units > 0.0 ? *s.perUnit * s.units : subEma_;
-        pace_.tokens -= s.est;
+        s.unpaced = pace_.cls == 2;  // (the loading bake takes no tokens from the near work after it)
+        if (!s.unpaced) pace_.tokens -= s.est;
         inFlightMs_ += s.est;
         s.value = value;
         s.pending = true;
@@ -2597,6 +2600,8 @@ struct AtlasGen {
     AtlasContext* ctx = nullptr;  // atlas_gen_create_for's
     bool ingestSet = false;
     Batch last;                   // the last atlas_gen_run's batch (atlas_gen_ingest)
+    std::thread::id lastBy;       // the thread that made it (awaitIngest)
+    std::condition_variable lastCv;  // (notified when it is ingested)
     // resident pages: chunk -> slot, full (biomes) or heights only, last use
     struct Page {
         uint32_t slot;
@@ -2663,6 +2668,14 @@ struct AtlasGen {
 };
 
 namespace {
+// A batch atlas_gen_run (or _run_store) made on another thread and not ingested yet lives in the engine's outputs, which
+// the far paths reuse: they wait for its atlas_gen_ingest first. (The coarse bake makes far tiles on its own thread beside
+// the near window's; dropping the batch stopped the near generator: "no atlas_gen_run to ingest".) False: still pending
+// after 2 s, the caller answers busy (ATLAS_ERR_TIMEOUT: the bake tries again later).
+bool awaitIngest(AtlasGen* h, std::unique_lock<std::mutex>& l) {
+    if (h->last.chunks.empty() || h->lastBy == std::this_thread::get_id()) return true;
+    return h->lastCv.wait_for(l, std::chrono::seconds(2), [&] { return h->last.chunks.empty(); });
+}
 // the pages chunk (cx, cz) reads: full pages (biomes) over its 3 x 3, heights over x - 4 .. x + 2, z - 2 .. z + 2
 template <class F>
 void neededPages(int32_t cx, int32_t cz, F f) {
@@ -3239,8 +3252,9 @@ ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint3
                                       uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times) {
     if (!h || !lodTxTz || !outSurface || !outWater || count == 0) return ATLAS_ERR_ARG;
     return guarded([&] {
-        std::lock_guard<std::mutex> l(h->mu);
+        std::unique_lock<std::mutex> l(h->mu);
         if (!h->devicePages) return h->fail(ATLAS_ERR_STATE, "no map or a program without the page passes' inputs");
+        if (!awaitIngest(h, l)) return h->fail(ATLAS_ERR_TIMEOUT, "busy: another thread's batch is not ingested yet");
         auto t0 = std::chrono::steady_clock::now();
         AtlasGenTimes t{};
         std::vector<uint32_t> out(size_t(std::min(count, TILE_MAX)) * TILE_PLANES * TILE_COLS), bad(TILE_MAX);
@@ -3277,8 +3291,9 @@ ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txT
                                     uint32_t* outIds, uint32_t capacity, uint32_t* outMixed, uint32_t* outFlags, AtlasGenTimes* times) {
     if (!h || !txTz || !outKinds || !outMixed || count == 0 || count > TILE_MAX || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
-        std::lock_guard<std::mutex> l(h->mu);
+        std::unique_lock<std::mutex> l(h->mu);
         if (!h->devicePages) return h->fail(ATLAS_ERR_STATE, "no map or a program without the page passes' inputs");
+        if (!awaitIngest(h, l)) return h->fail(ATLAS_ERR_TIMEOUT, "busy: another thread's batch is not ingested yet");
         if (outMode == 1u && !h->ingestSet) return h->fail(ATLAS_ERR_STATE, "atlas materials need the ingest table (atlas_gen_set_ingest)");
         auto t0 = std::chrono::steady_clock::now();
         std::vector<int32_t> jobs;
@@ -3306,10 +3321,11 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
                                            AtlasGenTimes* times) {
     if (!h || !txTz || !outKinds || count == 0 || count > TILE_MAX || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
-        std::lock_guard<std::mutex> l(h->mu);
+        std::unique_lock<std::mutex> l(h->mu);
         if (!h->ctx) return h->fail(ATLAS_ERR_STATE, "not made for a context (atlas_gen_create_for)");
         if (!h->devicePages) return h->fail(ATLAS_ERR_STATE, "no map or a program without the page passes' inputs");
         if (!h->ingestSet) return h->fail(ATLAS_ERR_STATE, "no ingest table (atlas_gen_set_ingest)");
+        if (!awaitIngest(h, l)) return h->fail(ATLAS_ERR_TIMEOUT, "busy: another thread's batch is not ingested yet");
         auto t0 = std::chrono::steady_clock::now();
         std::vector<int32_t> jobs;
         for (uint32_t i = 0; i < count; i++) jobs.insert(jobs.end(), {lod, txTz[i * 2], txTz[i * 2 + 1], 0});
@@ -3594,6 +3610,7 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
                         if (!gc->hasChunk(cx, cz)) gc->putChunk(cx, cz, outInfo + size_t(i) * INFO_WORDS);
                     }
                 h->last = b;  // atlas_gen_ingest takes these
+                h->lastBy = std::this_thread::get_id();
             }
         }
         *outCount = m;
@@ -3751,6 +3768,7 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
         AtlasGenTimes t{};
         std::string err;
         h->last = Batch{};
+        h->lastBy = std::this_thread::get_id();
         AtlasStatus s = makeBatch(h, chunkXZ, count, 0u, h->last);
         if (s != ATLAS_OK) return s;
         std::vector<uint32_t> flags(count), info(size_t(count) * INFO_WORDS);
@@ -3806,6 +3824,7 @@ ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* o
         if (!ok)
             for (size_t i = 0; i < h->last.chunks.size() / 2; i++) masks[i] = 0;
         h->last = Batch{};
+        h->lastCv.notify_all();  // (a far path on another thread waits for it: awaitIngest)
         if (outSections) *outSections = sent;
         if (times) {
             *times = AtlasGenTimes{};
