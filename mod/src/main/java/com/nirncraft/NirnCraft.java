@@ -36,16 +36,28 @@ public class NirnCraft {
      */
     private static void harnessFlags() {
         java.nio.file.Path f = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("nirncraft-harness-flags.properties");
-        if (!java.nio.file.Files.isRegularFile(f)) return;
         java.util.Properties props = new java.util.Properties();
-        try (var in = java.nio.file.Files.newBufferedReader(f)) {
-            props.load(in);
-        } catch (java.io.IOException e) {
-            LOGGER.warn("NirnCraft: harness flags not read from {}: {}", f, e.toString());
+        if (java.nio.file.Files.isRegularFile(f)) {
+            try (var in = java.nio.file.Files.newBufferedReader(f)) {
+                props.load(in);
+            } catch (java.io.IOException e) {
+                LOGGER.warn("NirnCraft: harness flags not read from {}: {}", f, e.toString());
+                return;
+            }
+        } else if (System.getProperty("nirncraft.harness") == null) {
             return;
         }
+        // In a harness run the file is the group's word: Prism rewrites JvmArgs from its own stale copy at launch (another
+        // worktree's group, e.g. clientGen / unified), which used to win over the file. The file overrides, and the group
+        // switches it does not name are cleared (2026-10-25: the player hold's tests waited on a client generator they had
+        // switched off).
+        boolean harness = System.getProperty("nirncraft.harness") != null;
+        if (harness)
+            for (String k : System.getProperties().stringPropertyNames())
+                if ((k.startsWith("nirncraft.atlas.") || k.startsWith("nirncraft.hold.") || k.equals("nirncraft.autotest.intro")) && !props.containsKey(k))
+                    System.clearProperty(k);
         for (String k : props.stringPropertyNames())
-            if (System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
+            if (harness || System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
         LOGGER.info("NirnCraft: harness flags {}", props);
     }
 
