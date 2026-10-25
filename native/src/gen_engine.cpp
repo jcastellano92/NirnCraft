@@ -937,6 +937,7 @@ public:
         // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each; the stage sizes its parts
         // from their own GPU times (version 3), at most two of them in flight
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        static const bool farV2 = std::getenv("ATLAS_FAR_V2") && std::getenv("ATLAS_FAR_V2")[0] == '1';
         for (uint32_t ti = 0; ti < n; ti++) {
             bool cleared = false;
             for (size_t si = 0; si < stages_.size(); si++) {
@@ -958,7 +959,7 @@ public:
                         cleared = true;
                     }
                     AtlasGenFarBatch fb{};
-                    fb.version = 3;
+                    fb.version = farV2 ? 2 : 3;  // (ATLAS_FAR_V2=1: the units of the first version, to compare their output with the sized parts)
                     fb.lod = jobs[ti * 4];
                     fb.tx = jobs[ti * 4 + 1];
                     fb.tz = jobs[ti * 4 + 2];
@@ -990,7 +991,7 @@ public:
                     partUs_.push_back(0u);
                     sl.perUnit = &perUnit;
                     sl.units = double(fb.units);
-                    sl.refine = false;
+                    sl.refine = farV2 && r == ATLAS_GEN_STAGE_MORE;
                     if (!submit(err, false)) return fail(err, err + " (far stage)");
                     if (r != ATLAS_GEN_STAGE_MORE) break;
                     if (part > 100000) return fail(err, "far stage never finished");
@@ -2626,11 +2627,11 @@ private:
         return uint32_t(std::clamp(sl, std::min(8.0, double(n)), double(n)));
     }
     void farSliceSeen(uint32_t kind, uint32_t units, double ms) {
-        static const double target = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
+        static const double limit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
         double& sl = farSlice_[kind];
         if (sl <= 0.0 || units == 0) return;
-        if (ms > target * 1.25) sl = std::max(8.0, double(units) * target / ms * 0.9);
-        else if (ms < target * 0.7 && double(units) >= sl * 0.95) sl = std::min(sl * 1.5, 4096.0);
+        if (ms > limit) sl = std::max(8.0, double(units) * limit / ms * 0.85);
+        else if (ms < limit * 0.85 && double(units) >= sl * 0.95) sl = std::min(sl * 1.25, 4096.0);
     }
     // before a submission: wait for the budget; returns the wait
     double paceAcquire() {

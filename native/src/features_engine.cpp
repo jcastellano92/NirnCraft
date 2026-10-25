@@ -815,7 +815,7 @@ public:
         static const bool profile = std::getenv("ATLAS_FAR_PROFILE") != nullptr;
         static const uint32_t maxN = [] {
             const char* e = std::getenv("ATLAS_FAR_SLICE_MAX");
-            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 4096u) & ~63u);
+            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 16384u) & ~63u);
         }();
         static const uint32_t profileN = [] {
             const char* e = std::getenv("ATLAS_FAR_SLICE");
@@ -826,18 +826,18 @@ public:
         FarCost& c = farCost_[lod];
         // The part's own time steers the size. A dispatch of these threads costs a floor (a thread's whole walk, some ms)
         // and little more up to a few thousand chunks: sizing from a time a chunk (time over chunks) shrank the parts to the
-        // floor's 64 chunks, 260 parts a tile. So: a part over 1.25 times the target is cut to the share of the target, one
-        // under 0.7 times it that was a full-size part grows by half. The target is above the floor, under the 8 ms a submission
-        // may take: 1.5 times the budget.
-        const double target = budget * 1.5;
+        // floor's 64 chunks, 260 parts a tile. The floor is 5 to 7 ms and the time hardly moves with the chunks up to a few
+        // hundred, so the part grows by a quarter while it runs under 85 % of the limit (twice the budget, 8 ms: what a
+        // submission may take) and is cut to the share of it when it ran over.
+        const double limit = budget * 1.5;  // (6 ms: under the 8 ms a submission may take, as parts run up to a third over)
         if (c.n <= 0.0) c.n = 256.0;
         for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
             double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
-            if (t > target * 1.25) c.n = std::max(64.0, used * target / t * 0.9);
-            else if (t < target * 0.7 && used >= c.n * 0.95) c.n = std::min(c.n * 1.5, double(maxN));
+            if (t > limit) c.n = std::max(64.0, used * limit / t * 0.85);
+            else if (t < limit * 0.85 && used >= c.n * 0.95) c.n = std::min(c.n * 1.25, double(maxN));
         }
         const uint32_t left = chunks - farOff_;
-        if (part == 0) c.n = std::min(c.n, 1024.0);  // (a new tile: not sized from the last tile's end alone)
+        if (part == 0) c.n = std::min(c.n, 2048.0);  // (a new tile: not sized from the last tile's end alone)
         uint32_t n = profile ? profileN : uint32_t(c.n);
         n = std::min(left, std::max(64u, n & ~63u));
         // (a thread's scratch is a slot of the dispatch: its width times the rows, past the places' list: within the scratch)
@@ -860,6 +860,10 @@ public:
             p.budget = 0;
             dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
         }
+        static const bool trace = std::getenv("ATLAS_FAR_TRACE") != nullptr;
+        if (trace && part < 40)
+            std::fprintf(stderr, "TRACE far lod %u part %u: %u chunks of %u (target n %.0f), %u rows, done %u, last part %.2f ms\n", lod, part, n, chunks,
+                         c.n, farRows_, b->partsDone, b->partsDone ? double(b->partUs[b->partsDone - 1]) / 1000.0 : 0.0);
         if (part < farPlan_.size()) farPlan_.resize(part);
         farPlan_.push_back({n});  // (index = the part: the generator calls once a part, in order)
         char label[48] = {};

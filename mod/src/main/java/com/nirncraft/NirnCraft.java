@@ -44,8 +44,15 @@ public class NirnCraft {
             LOGGER.warn("NirnCraft: harness flags not read from {}: {}", f, e.toString());
             return;
         }
+        // The harness' file is the whole truth when it says so: Prism keeps its own copy of the instance settings, so the -D
+        // flags of an earlier group's launch (a probe's, a loading screen switched off) stayed in JvmArgs and leaked into
+        // the next group's runs. nirncraft.atlas.* flags not in the file are dropped then; the file's own win over any -D.
+        boolean whole = "true".equals(props.getProperty("nirncraft.harness.authoritative"));
+        if (whole)
+            for (String k : System.getProperties().stringPropertyNames())
+                if (k.startsWith("nirncraft.atlas.") && !props.containsKey(k)) System.clearProperty(k);
         for (String k : props.stringPropertyNames())
-            if (System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
+            if (whole || System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
         LOGGER.info("NirnCraft: harness flags {}", props);
     }
 

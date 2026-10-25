@@ -155,9 +155,8 @@ def write_flags_file(jvm, path=None):
     """The group's flags where the mod reads them at startup (NirnCraft.harnessFlags): Prism keeps its own copy of the
     instance settings and wrote it back over the JvmArgs edit at launch, so flags went missing from runs silently."""
     path = Path(path or FLAGS_FILE)
-    if not jvm:
-        path.unlink(missing_ok=True)
-        return
+    jvm = dict(jvm or {})
+    jvm["nirncraft.harness.authoritative"] = "true"  # (NirnCraft.harnessFlags: the file is the whole truth, stale -D flags go)
     lines = [f"{k}={str(v).replace(chr(92), '/')}" for k, v in sorted(jvm.items())]
     lw.atomic(path, ("\n".join(lines) + "\n").encode())
 

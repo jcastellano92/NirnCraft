@@ -202,6 +202,8 @@ int main(int argc, char** argv) {
     spec.centerZ = int32_t(z);
     spec.marginBlocks = std::atoi(arg(argc, argv, "margin", "0").c_str());
 
+    // boost=1 (the default): the generator's submissions unpaced, as the loading screen holds the player (else paced by the frames' cadence)
+    if (arg(argc, argv, "boost", "1") != "0") atlas_gen_pace_boost(g, 1);
     auto phase = [&](int first, int last, const char* name) -> int {
         spec.lodFirst = first;
         spec.lodLast = last;
