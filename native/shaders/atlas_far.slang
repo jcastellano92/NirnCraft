@@ -19,6 +19,13 @@
 #define ATLAS_FAR_SPLIT 0
 #endif
 static const bool FAR_SPLIT = ATLAS_FAR_SPLIT != 0;
+// (the trace's walks and cores: real calls in the general kernels, so a cold driver compile stays at a minute or two;
+// inlined into one function in the split frames' farMain, which is built in the background)
+#if ATLAS_FAR_SPLIT
+#define TRACE_CALL
+#else
+#define TRACE_CALL [noinline]
+#endif
 
 [[vk::binding(0, 0)]] ConstantBuffer<FrameGpu> frame;
 [[vk::binding(1, 0)]] StructuredBuffer<int> regionTable;
@@ -253,6 +260,7 @@ bool voxelStops(uint hitMat, int3 v, int3 wv, int rl, float3 ro, float3 rd, floa
 }
 
 // 1: a hit (gTr), 0: none, 2: it ran out of steps first (its iteration cap or the ray's budget: not a miss)
+TRACE_CALL
 int traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
@@ -679,6 +687,7 @@ void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
 // same in its voxels (u still in blocks along dw), its voxels cubes of their material, as the regions' levels are.
 // stepCap: the ray's steps (gTr.steps) it may reach (then TRACE_CAPPED); seedAxis / seedTo: the voxel index the walk starts
 // at on that axis (vgUnloadedEnd's exit; -1: none); vStop: the voxel (grid-local) it stopped in
+TRACE_CALL
 int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCap, int seedAxis, int seedTo, out float uStop,
                  out int3 vStop) {
     uStop = u0;
@@ -1055,9 +1064,7 @@ void traceInApplyC(TraceIn ti) {
     cTr = ti.tr;
 }
 
-#if !ATLAS_FAR_SPLIT  // (the split's farMain: every trace inlined, one function with its state in registers)
-[noinline]
-#endif
+TRACE_CALL
 TraceOut traceLodCore(TraceIn ti, int lod, float3 p0, float3 d, float len) {
     cGroups = false;
     cGroupPa = 0.001;
@@ -1198,6 +1205,7 @@ int traceLodBody(int lod, float3 p0, float3 d, float len, out float uncExit) {
 // leaves the unloaded region cell (1e30 when it left the LOD's window: that LOD has nothing further along this ray at
 // all); a region or its groups that ran out of steps (their caps, the ray's budget) answer TRACE_UNCOVERED too, not a
 // miss (a hole where the walk gave up).
+TRACE_CALL
 int traceLodRegions(int lod, float3 p0, float3 d, float len, out float uncExit) {
     uncExit = 1e30;
     LodGpu L = frame.lods[lod];
@@ -1749,9 +1757,7 @@ struct SecOut {
     int hitLod;
     uint secCount;
 };
-#if !ATLAS_FAR_SPLIT
-[noinline]
-#endif
+TRACE_CALL
 SecOut traceSecondaryCore(SecIn si, float3 p, float3 dir, float maxT, int lod) {
     sGroups = false;
     sGroupPa = 0.001;
