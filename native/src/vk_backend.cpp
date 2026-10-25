@@ -1768,9 +1768,11 @@ private:
         }();
         if (!dir || !*dir) return;
         // a build in flight (a thread: the driver's pipeline compiles took 30-60 s for the six kernels, the game froze
-        // and looked crashed): swap its pipelines in once it is done, never wait for it
+        // and looked crashed): swap its pipelines in once it is done, never wait for it (ATLAS_SHADER_WAIT=1, offline
+        // measurements: wait, so the frames after the first are timed on the folder's kernels)
+        static const bool waitReload = std::getenv("ATLAS_SHADER_WAIT") && *std::getenv("ATLAS_SHADER_WAIT") == '1';
         if (reloadThread_.joinable()) {
-            if (!reloadDone_.load(std::memory_order_acquire)) return;
+            if (!reloadDone_.load(std::memory_order_acquire) && !waitReload) return;
             reloadThread_.join();
             constexpr int K = RELOAD_KERNELS;
             if (reloadOk_) {
@@ -1799,6 +1801,7 @@ private:
         reloadStamp_ = stamp;
         reloadDone_.store(false);
         reloadThread_ = std::thread([this, base] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
+        if (waitReload) hotReload();  // (the swap, after the build)
     }
 
     static constexpr int RELOAD_KERNELS = 6;
