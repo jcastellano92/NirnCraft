@@ -27,6 +27,10 @@ history and reference: the design (ATLAS-LOD, -STREAMING, -WORLD-STORE), the che
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
    bake per level, cache load, spawn), never a fake bar; background work after entry shows a small indicator.
+   **The player is held until loading is truly complete**, in single player and on servers. Until the client reports
+   ready, the player isn't placed in play: invisible to others, untargetable, invulnerable, frozen, not ticking
+   anything that affects gameplay. Only then does the character select (first join) or the return to the last
+   position happen. Loading is real loading.
 8. **One generator (owner, 2026-10-24).** Far is the real world downsampled, never a second guess. The coarse levels
    are made on the GPU from level-0 chunks of the one exact generator. The coarse "far path" generator is only a
    placeholder: it fills places the level-0 bake hasn't reached, is marked as a stand-in, and fades out (refinement
