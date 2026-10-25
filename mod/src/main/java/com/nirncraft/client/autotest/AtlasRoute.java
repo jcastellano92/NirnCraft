@@ -36,6 +36,18 @@ final class AtlasRoute {
         return t;
     });
     private static final AtomicBoolean SAMPLING = new AtomicBoolean();
+    // CPU per thread (the JVM's view: render thread, server, generator, workers) and the process, per phase: heavy CPU
+    // during a test always has a named cause. The harness adds the OS's view (every native thread, driver compile threads).
+    private static final ExecutorService CPU = Executors.newSingleThreadExecutor(r -> {
+        var t = new Thread(r, "atlas-route-cpu");
+        t.setDaemon(true);
+        return t;
+    });
+    private static final java.lang.management.ThreadMXBean TMX = java.lang.management.ManagementFactory.getThreadMXBean();
+    private static final java.util.Map<Long, Long> cpuPrev = new java.util.HashMap<>();
+    private static long procPrev, cpuAtMs;
+    private static final java.util.LinkedHashMap<String, double[]> phaseCpu = new java.util.LinkedHashMap<>();  // phase -> {wallMs, processMs}
+    private static final java.util.Map<String, java.util.Map<String, Double>> threadCpu = new java.util.LinkedHashMap<>();  // phase -> thread -> ms
     private static final Path OUT = Path.of("build", "autotest-route");
 
     // ---- route state
@@ -74,6 +86,8 @@ final class AtlasRoute {
     private static long settleBegan;
     private static long firstNoHolesMs = -1;
     private static JsonObject settleStart;
+    private static boolean settleRan, settleOk;  // the last settle: the route will not start after one that did not meet its counters
+    private static String settleWhy = "";
 
     static boolean active() { return running || settling; }
 
@@ -119,7 +133,8 @@ final class AtlasRoute {
             JsonObject s = lastSample;
             if (settleStart == null) settleStart = s;
             boolean busy = AtlasProbe.d(s, "pending") > 0 || AtlasProbe.d(s, "waiting") > 0 || AtlasProbe.d(s, "gpuWaiting") > 0
-                    || AtlasProbe.d(s, "coarseWaiting") > 0 || AtlasProbe.d(s, "pendingSections") > 0 || AtlasProbe.d(s, "coarsePending") > 0;
+                    || AtlasProbe.d(s, "coarseWaiting") > 0 || AtlasProbe.d(s, "pendingSections") > 0 || AtlasProbe.d(s, "coarsePending") > 0
+                    || s.has("readyPending") || AtlasProbe.d(s, "pipelinesBuilding") > 0;  // (atlas's own readiness: AtlasReady)
             String sig = (long) AtlasProbe.d(s, "genChunks") + "/" + (long) AtlasProbe.d(s, "farTiles") + "/" + (long) AtlasProbe.d(s, "cachedChunks")
                     + "/" + (long) AtlasProbe.d(s, "built") + "/" + AtlasProbe.sum(s, "holes") + "/" + AtlasProbe.sum(s, "partial")
                     + "/" + AtlasProbe.sum(s, "slotsUsed") + "/" + (long) AtlasProbe.d(s, "coarseIngested") + "/" + (long) AtlasProbe.d(s, "loadedChunks");
@@ -147,6 +162,13 @@ final class AtlasRoute {
             ok = false;
             why = "metric " + String.join(", ", gone) + " absent; " + why;
         }
+        if (s != null && s.has("readyPending")) {
+            ok = false;
+            why = "not ready: " + s.get("readyPending").getAsString() + "; " + why;
+        }
+        settleRan = true;
+        settleOk = ok;
+        settleWhy = why;
         long ms = System.currentTimeMillis() - settleBegan;
         var o = new JsonObject();
         o.addProperty("settled", ok);
@@ -173,6 +195,13 @@ final class AtlasRoute {
 
     // ---------------------------------------------------------------------------------------------------- route
     static void begin(Minecraft mc, String path) {
+        // not ready: nothing is measured on a half-loaded world (pipelines compiling, the loading phase, the coarse bake
+        // not in, the settle not met on atlas's own counters)
+        JsonObject now = AtlasProbe.parse(com.nirncraft.atlas.AtlasClient.debugInfo());
+        var gone = AtlasProbe.missing(now);
+        if (!gone.isEmpty()) throw new IllegalStateException("metric " + String.join(", ", gone) + " absent");
+        if (now.has("readyPending")) throw new IllegalStateException("not ready: " + now.get("readyPending").getAsString());
+        if (settleRan && !settleOk) throw new IllegalStateException("not ready: " + settleWhy);
         try {
             spec = JsonParser.parseString(Files.readString(Path.of(path.trim()))).getAsJsonObject();
         } catch (java.io.IOException e) {
@@ -198,6 +227,10 @@ final class AtlasRoute {
         routeTick = phaseIndex = phaseTick = captureNext = 0;
         samples.clear();
         where.clear();
+        phaseCpu.clear();
+        threadCpu.clear();
+        cpuPrev.clear();
+        CPU.execute(() -> cpuReading("start", true));
         captures = new JsonArray();
         frames.clear();
         cpu.clear();
@@ -320,7 +353,13 @@ final class AtlasRoute {
             w.addProperty("yaw", yaw);
             w.addProperty("groundY", loaded ? ground : -999);
             w.addProperty("loadedAround", loaded);
+            w.addProperty("epochMs", System.currentTimeMillis());
             where.put(sec, w);
+            if (sec > 0) {  // the second that just ended, booked to its phase
+                var before = where.get(sec - 1);
+                String prevPhase = before != null ? before.get("phase").getAsString() : ph.get("name").getAsString();
+                CPU.execute(() -> cpuReading(prevPhase, false));
+            }
             if (SAMPLING.compareAndSet(false, true)) {
                 SAMPLER.execute(() -> {
                     try {
@@ -352,8 +391,61 @@ final class AtlasRoute {
         routeTick++;
     }
 
+    /** (cpu thread) The CPU every thread and the process used since the last reading, booked to `phase`. */
+    private static synchronized void cpuReading(String phase, boolean first) {
+        try {
+            long now = System.currentTimeMillis();
+            long proc = ((com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean()).getProcessCpuTime();
+            long[] ids = TMX.getAllThreadIds();
+            var infos = TMX.getThreadInfo(ids);
+            var book = threadCpu.computeIfAbsent(phase, k -> new java.util.HashMap<>());
+            for (int i = 0; i < ids.length; i++) {
+                if (infos[i] == null) continue;
+                long t = TMX.getThreadCpuTime(ids[i]);
+                if (t < 0) continue;
+                Long before = cpuPrev.put(ids[i], t);
+                if (first || before == null) continue;
+                String name = infos[i].getThreadName().replaceAll("\\d+", "N");
+                book.merge(name, (t - before) / 1e6, Double::sum);
+            }
+            if (!first) {
+                double[] a = phaseCpu.computeIfAbsent(phase, k -> new double[2]);
+                a[0] += now - cpuAtMs;
+                a[1] += (proc - procPrev) / 1e6;
+            }
+            cpuAtMs = now;
+            procPrev = proc;
+        } catch (RuntimeException e) {
+            // (a reading that failed is skipped)
+        }
+    }
+
+    private static JsonObject cpuReport() {
+        var out = new JsonObject();
+        for (var e : phaseCpu.entrySet()) {
+            var row = new JsonObject();
+            row.addProperty("wallMs", e.getValue()[0]);
+            row.addProperty("processMs", e.getValue()[1]);
+            row.addProperty("cores", e.getValue()[0] > 0 ? e.getValue()[1] / e.getValue()[0] : 0);
+            var threads = new java.util.ArrayList<>(threadCpu.getOrDefault(e.getKey(), java.util.Map.of()).entrySet());
+            threads.sort((x, y) -> Double.compare(y.getValue(), x.getValue()));
+            var arr = new JsonArray();
+            for (int i = 0; i < Math.min(15, threads.size()); i++) {
+                var t = new JsonObject();
+                t.addProperty("thread", threads.get(i).getKey());
+                t.addProperty("ms", threads.get(i).getValue());
+                arr.add(t);
+            }
+            row.add("jvmThreads", arr);
+            out.add(e.getKey(), row);
+        }
+        return out;
+    }
+
     private static void finish(Minecraft mc) {
         running = false;
+        String lastPhase = phases.get(phases.size() - 1).get("name").getAsString();
+        CPU.execute(() -> cpuReading(lastPhase, false));
         restoreDisplay(mc);
         try {
             SAMPLER.submit(() -> {}).get(5, java.util.concurrent.TimeUnit.SECONDS);  // (the last reading in)
@@ -411,6 +503,11 @@ final class AtlasRoute {
         }
         out.add("worstFrames", ws);
         out.add("captures", captures);
+        try {
+            CPU.submit(() -> {}).get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception ignored) {
+        }
+        out.add("cpu", cpuReport());
         try {
             Files.createDirectories(OUT);
             Files.writeString(OUT.resolve(tag + ".json"), out.toString());
