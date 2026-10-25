@@ -143,9 +143,19 @@ final class AtlasRoute {
 
     private static void finishSettle(boolean ok, JsonObject s, String why) {
         settling = false;
+        var gone = AtlasProbe.missing(s);
+        if (!gone.isEmpty()) {  // (a counter the reading lacks is never a number: the settle says so and is not "settled")
+            ok = false;
+            why = "metric " + String.join(", ", gone) + " absent; " + why;
+        }
         long ms = System.currentTimeMillis() - settleBegan;
         var o = new JsonObject();
         o.addProperty("settled", ok);
+        if (!gone.isEmpty()) {
+            var a = new JsonArray();
+            gone.forEach(a::add);
+            o.add("missing", a);
+        }
         o.addProperty("ticks", settleTicks);
         o.addProperty("ms", ms);
         o.addProperty("timeToNoHolesMs", firstNoHolesMs);
@@ -390,6 +400,13 @@ final class AtlasRoute {
             secs.add(row);
         }
         out.add("seconds", secs);
+        var absent = new JsonArray();  // the required counters no reading of the whole route had
+        for (String k : AtlasProbe.REQUIRED) {
+            boolean any = false;
+            for (var a : samples.values()) any |= a.has(k);
+            if (!any) absent.add(k);
+        }
+        out.add("absentMetrics", absent);
         var total = new JsonObject();
         stats(total, "frame", all);
         out.add("total", total);

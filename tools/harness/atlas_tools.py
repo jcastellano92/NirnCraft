@@ -20,6 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / ".work/harness/atlas"
 
 # the bar (docs/ATLAS-PLAN.md section 1): smooth and no holes, 1440p on the RTX 3090
+REQUIRED = ["atlasMs", "loadedChunks", "genChunks", "farTiles", "farCached", "budgetFrameMs", "holes", "partial", "farReach",
+            "stageCpuMs", "coldHits", "coldWrites"]  # AtlasProbe.REQUIRED: a gate never reports a counter it did not read
 BAR = {"p99": 20.0, "max": 50.0, "holes": 0, "relaunchGenerated": 0, "fullRadiusMs": 2000}
 START = (-150, 260, 30)          # x, z, blocks above the surface: open ground south of Whiterun (catalog spawn pose)
 HEADING = -90.0                  # Minecraft yaw: -90 looks +x (east)
@@ -179,36 +181,58 @@ def summarize(data):
     secs = data["seconds"]
     tot = data["total"]["frame"]
     atlas = [(r.get("atlas") or {}) for r in secs]
-    holes = [int(sum(a.get("holes") or [])) for a in atlas if a.get("holes") is not None]
-    partial = [int(sum(a.get("partial") or [])) for a in atlas if a.get("partial") is not None]
-    per_level = [max((a["holes"][k] for a in atlas if a.get("holes") and k < len(a["holes"])), default=0) for k in range(7)]
-    last = next((a for a in reversed(atlas) if a), {})
-    first = next((a for a in atlas if a), {})
+    # a counter no reading had is not a number: the route fails on it ("metric X absent"), nothing is reported as -1 or 0
+    absent = [k for k in REQUIRED if not any(k in a for a in atlas)] if any(atlas) else list(REQUIRED)
+    absent = sorted(set(absent) | set(data.get("absentMetrics") or []))
+    holes = [int(sum(a["holes"])) for a in atlas if a.get("holes") is not None]
+    partial = [int(sum(a["partial"])) for a in atlas if a.get("partial") is not None]
+    per_level = [max(a["holes"][k] for a in atlas if a.get("holes") and k < len(a["holes"])) for k in range(7)] if holes else None
+    def series(key):
+        return [a[key] for a in atlas if key in a]
 
-    def span(key):
-        return max(0, (last.get(key) or 0) - (first.get(key) or 0))
+    def last_of(key):
+        v = series(key)
+        return v[-1] if v else None
 
-    gen_near = span("genChunks")
-    far_made = max(0, (last.get("farTiles", 0) - last.get("farCached", 0)) - (first.get("farTiles", 0) - first.get("farCached", 0)))
+    def first_of(key):
+        v = series(key)
+        return v[0] if v else None
+
+    def delta_of(key):
+        return None if key in absent or not series(key) else max(0, last_of(key) - first_of(key))
+
+    def top(key, nd=2):
+        v = series(key)
+        return round(max(v), nd) if v else None
+
+    def num(x, nd=2):
+        return None if x is None else round(x, nd)
+
+    tiles_made = None
+    if "farTiles" not in absent and "farCached" not in absent:
+        tiles_made = int(last_of("farTiles") - last_of("farCached"))
     settle = data.get("settle") or {}
     s0 = settle.get("sample") or {}
     m = {
         "frames": tot.get("n"), "p50": round(tot.get("p50", 0), 2), "p95": round(tot.get("p95", 0), 2),
         "p99": round(tot.get("p99", 0), 2), "max": round(tot.get("max", 0), 2), "over50": tot.get("over50", 0),
-        "holesMax": max(holes, default=-1), "holesAtEnd": holes[-1] if holes else -1,
-        "holesPerLevelMax": per_level, "partialMax": max(partial, default=-1),
-        "farReachMin": min((a["farReach"] for a in atlas if "farReach" in a), default=-1),
-        "genChunksTotal": int(last.get("genChunks", 0)), "farTilesMade": int(far_made),
-        "farTilesMadeTotal": int(last.get("farTiles", 0) - last.get("farCached", 0)),
-        "cachedChunks": int(last.get("cachedChunks", 0)), "farCached": int(last.get("farCached", 0)),
-        "coldHits": int(last.get("coldHits", 0)), "coldWrites": int(last.get("coldWrites", 0)),
-        "genCacheChunkHits": int(last.get("gcChunkHits", 0)), "genCacheSectionWrites": int(last.get("gcSectionWrites", 0)),
-        "genCacheFarWrites": int(last.get("gcFarTileWrites", 0)), "genCacheFarHits": int(last.get("gcFarTileHits", 0)),
-        "stageCpuMaxMs": round(max((a.get("stageCpuMs", 0) for a in atlas), default=0), 2),
-        "stageCpuRunMaxMs": round(last.get("stageCpuMaxMs", 0), 2),
-        "atlasMsMax": round(max((a.get("atlasMs", 0) for a in atlas), default=0), 2),
-        "atlasMsMean": round(sum(a.get("atlasMs", 0) for a in atlas) / max(1, len(atlas)), 2),
-        "infoMsMax": round(max((a.get("infoMs", 0) for a in atlas), default=0), 2),
+        "absentMetrics": absent,
+        "holesMax": max(holes) if holes else None, "holesAtEnd": holes[-1] if holes else None,
+        "holesPerLevelMax": per_level, "partialMax": max(partial) if partial else None,
+        "farReachMin": min(series("farReach")) if series("farReach") else None,
+        "genChunks": delta_of("genChunks"), "genChunksTotal": last_of("genChunks"),
+        "farTilesMadeTotal": tiles_made,
+        "farTilesMade": None if tiles_made is None else max(0, tiles_made - int(first_of("farTiles") - first_of("farCached"))),
+        "cachedChunks": last_of("cachedChunks"), "farCached": last_of("farCached"),
+        "coldHits": last_of("coldHits"), "coldWrites": last_of("coldWrites"),
+        "genCacheAbsent": bool(atlas and all(a.get("gcAbsent") for a in atlas if a)),
+        "genCacheChunkHits": last_of("gcChunkHits"), "genCacheSectionWrites": last_of("gcSectionWrites"),
+        "genCacheFarWrites": last_of("gcFarTileWrites"), "genCacheFarHits": last_of("gcFarTileHits"),
+        "budgetLongestMs": top("budgetLongestMs"), "budgetLatelyMax": top("budgetLatelyMs"),
+        "stageCpuMaxMs": top("stageCpuMs"), "stageCpuRunMaxMs": num(last_of("stageCpuMaxMs")),
+        "atlasMsMax": top("atlasMs"),
+        "atlasMsMean": num(sum(series("atlasMs")) / len(series("atlasMs"))) if series("atlasMs") else None,
+        "infoMsMax": top("infoMs"),
         "settledMs": settle.get("ms"), "settledOk": settle.get("settled"),
         "timeToNoHolesMs": settle.get("timeToNoHolesMs"), "windowUpMs": s0.get("jumpWindowUpMs"),
         "firstUpMs": s0.get("jumpFirstUpMs"),
@@ -240,7 +264,7 @@ def summarize(data):
         "serverJavaDecorationCalls": srv.get("javaDecorationCalls", 0), "serverGpuWaitMs": round(srv.get("gpuWaitMs", 0), 1),
         "serverGpuTimeouts": srv.get("gpuTimeouts", 0),
     })
-    fails = []
+    fails = [f"metric {k} absent" for k in absent]
     if cl:
         if m["collideErrors"] or m["collideChecked"] == 0:
             fails.append(f"collision check did not run: {m['collideErrors'] or 'nothing compared'}")
@@ -251,7 +275,7 @@ def summarize(data):
         fails.append(f"p99 frame {m['p99']} ms > {BAR['p99']:g}")
     if m["max"] > BAR["max"]:
         fails.append(f"worst frame {m['max']} ms > {BAR['max']:g} ({m['over50']} over 50 ms)")
-    if m["holesMax"] > BAR["holes"]:
+    if m["holesMax"] is not None and m["holesMax"] > BAR["holes"]:
         fails.append(f"holes up to {m['holesMax']} (per level max {m['holesPerLevelMax']}), {m['holesAtEnd']} at the end; "
                      f"far reach down to {m['farReachMin']} m")
     return m, fails
@@ -403,6 +427,8 @@ def run_route_scene(runner, s, v, fp):
     metrics = dict(summaries[-1][0])
     if relaunch:
         m2 = summaries[1][0]
+        if m2["genChunksTotal"] is None or m2["farTilesMadeTotal"] is None:
+            raise RuntimeError("relaunch: metric genChunks / farTiles absent in the second run")
         gen2 = m2["genChunksTotal"] + m2["farTilesMadeTotal"]  # since the second launch began (counters restart with the JVM)
         full = m2.get("windowUpMs")
         metrics.update({"run1GenChunks": summaries[0][0]["genChunksTotal"], "run1FarTilesMade": summaries[0][0]["farTilesMadeTotal"],
