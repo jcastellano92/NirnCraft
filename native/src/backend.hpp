@@ -162,6 +162,7 @@ public:
         bool float64 = false;
         float timestampPeriod = 1.0f;
         bool timestamps = false;
+        bool timeline = false;  // timeline semaphores enabled on the device (the generator's submission ring)
     };
     virtual bool sharedDevice(SharedDevice&) { return false; }
     // frames submitted, and the last one known complete (any thread)

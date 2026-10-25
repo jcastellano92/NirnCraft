@@ -1082,8 +1082,17 @@ typedef struct AtlasGenStoreBatch {
     uint32_t part;
     uint32_t units;
     uint32_t lastPartUs; /* the part before's GPU time, microseconds (0 at part 0): a stage may fit its parts to it */
+    /* (version 3) the parts are submitted without waiting (a ring: docs/ATLAS-GPU-LOOP.md step 3): parts 0 ..
+       partsDone - 1 of this call have completed, partUs[i] their GPU times (microseconds). A stage that needs a part's
+       results (its counters, its time) before it can record the next returns ATLAS_GEN_STAGE_WAIT, recording nothing:
+       the generator waits for the parts in flight and calls again with the same part. Before part 0 nothing of the
+       generator's is in flight (a stage may update its descriptor sets there). lastPartUs: the latest completed part's */
+    uint32_t partsDone;
+    uint32_t pad3;
+    const uint32_t* partUs;
 } AtlasGenStoreBatch;
 #define ATLAS_GEN_STAGE_MORE 0x4D4F5245 /* a store stage's return: part recorded, call again */
+#define ATLAS_GEN_STAGE_WAIT 0x57414954 /* a store stage's return: nothing recorded, wait for the parts in flight */
 typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* batch);
 /*
  * A far stage (atlas_gen_add_far_stage): called in the far chunks' passes (atlas_gen_far, atlas_gen_far_ingest) once a
@@ -1113,6 +1122,12 @@ typedef struct AtlasGenFarBatch {
                                       block's biome | flags << 16, 4 the biome above it or the water's; 5, 6 as above */
     uint64_t program;              /* VkBuffer: the generator program's words */
     uint64_t map;                  /* VkBuffer: the map's words (AtlasGenMap) */
+    /* (version 2) in parts, as a store stage's (AtlasGenStoreBatch): `units` of the stage's own units (0: all), return
+       ATLAS_GEN_STAGE_MORE while some are left; the generator submits and calls again with the same tile and part + 1 */
+    uint32_t part;
+    uint32_t units;
+    uint32_t lastPartUs;
+    uint32_t pad2;
 } AtlasGenFarBatch;
 typedef int32_t (*AtlasGenFarStageFn)(void* user, const AtlasGenFarBatch* batch);
 /* Registers a far stage (outId: for atlas_gen_remove_stage). */

@@ -474,11 +474,18 @@ target_sources(atlas_core PRIVATE src/overlays_engine.cpp ${OVL_HEADERS})
 # GPU only (the CPU fallback is a later job of its own).
 set(FEAT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_features.slang")
 set(FEAT_HEADERS)
+# (dev) the kernels' clock probes (atlas_features.slang FEAT_CLOCK; run with ATLAS_FEAT_CLOCK=1 ATLAS_FEAT_PART_TRACE=1)
+option(ATLAS_FEAT_CLOCK "decoration kernels with clock probes (dev)" OFF)
+set(FEAT_DEFS)
+if(ATLAS_FEAT_CLOCK)
+  set(FEAT_DEFS -DFEAT_CLOCK=1)
+endif()
 foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
              "sapply:featStoreApplyMain" "mask:featMaskMain" "farplaces:featFarPlacesMain" "fartrees:featFarTreesMain"
-             "farcanopy:featFarCanopyMain" "vein:featVeinMain")
+             "farcanopy:featFarCanopyMain" "vein:featVeinMain" "lakew:featLakeWideMain"
+             "rockw:featRockWideMain")
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)
@@ -488,7 +495,7 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_feat_${pass}.spv"
-    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise
+    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise ${FEAT_DEFS}
             -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
     ${FEAT_VALIDATE}

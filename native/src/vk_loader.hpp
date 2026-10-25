@@ -13,7 +13,7 @@
 #define ATLAS_VK_GLOBAL_FNS(X) X(vkCreateInstance) X(vkEnumerateInstanceExtensionProperties)
 
 #define ATLAS_VK_INSTANCE_FNS(X)                                                                                      \
-    X(vkDestroyInstance) X(vkEnumeratePhysicalDevices) X(vkGetPhysicalDeviceFeatures) X(vkGetPhysicalDeviceProperties)                                \
+    X(vkDestroyInstance) X(vkEnumeratePhysicalDevices) X(vkGetPhysicalDeviceFeatures) X(vkGetPhysicalDeviceFeatures2) X(vkGetPhysicalDeviceProperties)                                \
     X(vkGetPhysicalDeviceProperties2) X(vkGetPhysicalDeviceQueueFamilyProperties)                                    \
     X(vkGetPhysicalDeviceMemoryProperties) X(vkGetPhysicalDeviceMemoryProperties2) X(vkGetPhysicalDeviceImageFormatProperties2)                        \
     X(vkGetPhysicalDeviceExternalSemaphoreProperties) X(vkEnumerateDeviceExtensionProperties) X(vkCreateDevice)      \
@@ -31,7 +31,7 @@
     X(vkCreateSemaphore) X(vkDestroySemaphore) X(vkCreateQueryPool) X(vkDestroyQueryPool) X(vkGetQueryPoolResults)   \
     X(vkCmdBindPipeline) X(vkCmdBindDescriptorSets) X(vkCmdPushConstants) X(vkCmdDispatch) X(vkCmdPipelineBarrier)   \
     X(vkCmdCopyBuffer) X(vkCmdCopyBufferToImage) X(vkCmdCopyImageToBuffer) X(vkCmdFillBuffer) X(vkCmdUpdateBuffer)                      \
-    X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp) X(vkCmdDispatchBase)
+    X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp) X(vkCmdDispatchBase) X(vkWaitSemaphores) X(vkGetSemaphoreCounterValue)
 
 namespace atlas {
 

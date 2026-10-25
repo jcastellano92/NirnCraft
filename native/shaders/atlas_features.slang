@@ -48,6 +48,29 @@ struct FeatParams {
 
 #include "atlas_feat_math.slang"  // its own copy of the exact math (not atlas_exact.slang: see there)
 
+// (dev: CMake ATLAS_FEAT_CLOCK, slangc -DFEAT_CLOCK=1; the device needs VK_KHR_shader_clock: ATLAS_FEAT_CLOCK=1) the
+// lane's clock around a part of the work: counters[16 + k] the spans' sum, counters[48 + k] the longest, in units of
+// 64 cycles (features_engine.cpp prints them per record with ATLAS_FEAT_PART_TRACE). Off: the macros are empty.
+#ifndef FEAT_CLOCK
+#define FEAT_CLOCK 0
+#endif
+#if FEAT_CLOCK
+[ForceInline]
+void clkAdd(uint k, uint64_t t0) {
+    uint64_t d = (clockARB() - t0) >> 6;
+    uint v = d > 0xFFFFFFFFull ? 0xFFFFFFFFu : uint(d);
+    InterlockedAdd(counters[16u + k], v);
+    InterlockedMax(counters[48u + k], v);
+}
+#define CLK0(v) uint64_t v = clockARB()
+#define CLK1(k, v) clkAdd(k, v)
+#define CLKN(k) InterlockedAdd(counters[16u + (k)], 1u)
+#else
+#define CLK0(v)
+#define CLK1(k, v)
+#define CLKN(k)
+#endif
+
 // the exact functions without their flag argument: a call that passed a thread-private flag word itself made Slang
 // clone the callee for every call site (megabytes of SPIR-V), so the flag goes through a local
 [ForceInline]
@@ -1019,12 +1042,15 @@ bool adjacentAir(int x, int y, int z) {
 static const uint VEIN_PENDING = 0x5645494Eu;  // M_LINE[0]: a vein waits for featVeinMain and its next round's apply
 static const uint VEIN_W = 12288u;             // its tested indices (SCR_TESTED: the first visit's key; SCR_TREE: the fate)
 [noinline]
-bool veinFits(uint cfg, int size, float discard, uint nt, int sizeXZ, int sizeY) {
-    if (!(discard <= 0.0f || discard >= 1.0f) || size > 64 || sizeXZ > 31 || sizeY > 15 || nt > 254u) return false;
-    if (uint(sizeXZ + 1) * uint(sizeY + 1) * uint(sizeXZ + 1) > 12288u) return false;  // (the kernel's threads)
+bool veinFits(uint cfg, float discard, uint nt) {
+    // (the box's size is tested by the caller: passed in here it read wrong on NVIDIA (sizeY 17 where the caller's is
+    // 14), so no vein ever took the many threads)
+    if (!(discard <= 0.0f || discard >= 1.0f)) { CLKN(20); return false; }
+    if (nt > 254u) { CLKN(21); return false; }
     for (uint t = 0; t < nt; t++) {
         uint te = cfg + 3u + t * 4u;
-        if (fprog[te] != RT_SET || inSet(fprog[te + 1], AIR)) return false;
+        if (fprog[te] != RT_SET) { CLKN(23); return false; }
+        if (inSet(fprog[te + 1], AIR)) { CLKN(24); return false; }
         if (discard >= 1.0f) {
             // (the air test reads neighbours: no target may be air of any kind, no replacement either)
             if (bis(fprog[te + 3], B_AIR)) return false;
@@ -1044,6 +1070,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     float discard = pfF(cfg + 1);
     uint nt = fprog[cfg + 2];
     float PIF = asfloat(0x40490FDBu);  // (float) Math.PI
+    CLK0(c0);
     float dir = rngFloat() * PIF;
     float spreadXY = float(size) / 8.0f;  // exact (a power of two)
     int maxRadius = ceilF_N((float(size) / 16.0f * 2.0f + 1.0f) / 2.0f);
@@ -1059,12 +1086,16 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
     int cs = ceilF_N(spreadXY);
     int xStart = ox - cs - maxRadius, yStart = oy - 2 - maxRadius, zStart = oz - cs - maxRadius;
     int sizeXZ = 2 * (cs + maxRadius), sizeY = 2 * (2 + maxRadius);
+    CLK1(2, c0);
+    CLK0(c1);
     bool any = false;
     for (int xp = xStart; xp <= xStart + sizeXZ && !any; xp++)
         for (int zp = zStart; zp <= zStart + sizeXZ; zp++)
             if (yStart <= heightAt(HM_OCEAN_FLOOR_WG, xp, zp)) { any = true; break; }
+    CLK1(3, c1);
     if (!any) return false;
     // doPlace
+    CLK0(c2);
     uint data = sG.base + SCR_MISC + M_ORE;  // size <= 64: 4 doubles each (8 words)
     for (int i = 0; i < size; i++) {
         float step = divF_N(float(i), float(size));
@@ -1078,7 +1109,15 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
         scrSetD(data + uint(i) * 8u + 4u, zz);
         scrSetD(data + uint(i) * 8u + 6u, rr);
     }
-    bool toVein = (params.store & 2u) != 0u && veinFits(cfg, size, discard, nt, sizeXZ, sizeY);
+    CLK1(4, c2);
+    CLK0(c3);
+    // (the vein kernel's capacity: 64 spheres, its index field widths, a thread a position of the box)
+    bool boxFits = size <= 64 && sizeXZ <= 31 && sizeY <= 15 && uint(sizeXZ + 1) * uint(sizeY + 1) * uint(sizeXZ + 1) <= 12288u;
+    if (!boxFits) CLKN(22);
+    bool toVein = (params.store & 2u) != 0u && boxFits && veinFits(cfg, discard, nt);
+    CLK1(5, c3);
+    if (toVein) CLKN(7); else CLKN(8);
+    CLK0(c4);
     for (int i1 = 0; i1 < size - 1 && !toVein; i1++) {  // (the vein kernel's pass 3 instead: featVeinMain)
         if (scrD(data + uint(i1) * 8u + 6u) <= 0.0l) continue;
         for (int i2 = i1 + 1; i2 < size; i2++) {
@@ -1143,6 +1182,7 @@ bool placeOre(uint cfg, int ox, int oy, int oz) {
             }
         }
     }
+    CLK1(6, c4);
     return placed > 0;
 }
 
@@ -1349,8 +1389,179 @@ void rockOne(GBox b, uint cfg, int64_t seed, double cx, double cy, double cz, do
         }
     }
 }
+// (the store, | 16) a rock placement in parts: its state in M_ORE (free outside the ores' records): magic, the
+// phase (0 the shape next, 1 its blocks), the column cursor, then placeRock's own (config, origin, style, size, seed,
+// its stage and the rubble's loop), the rock under way (its rockOne arguments and what rockOne derives from them);
+// the shape's bits (a cell inside the rock's warped ellipsoid) in SCR_TREE (free outside the trees' records)
+static const uint ROCK_PENDING = 0x524F434Bu;  // "ROCK"
+static const uint RK_MAGIC = 0, RK_PHASE = 1, RK_COL = 2, RK_CFG = 3, RK_X = 4, RK_Y = 5, RK_Z = 6, RK_STYLE = 7, RK_SIZE = 8,
+                  RK_SEED = 9, RK_STAGE = 11, RK_I = 12, RK_N = 13, RK_EXT = 14, RK_EY = 15, RK_FCX = 16, RK_FCY = 17,
+                  RK_FCZ = 18, RK_INLINE = 19, RK_RSEED = 20, RK_D = 22;  // RK_D: doubles (2 words each) from here
+static const uint RD_CX = 0, RD_CY = 1, RD_CZ = 2, RD_RX = 3, RD_RY = 4, RD_RZ = 5, RD_TX = 6, RD_TZ = 7, RD_CS = 8, RD_SN = 9,
+                  RD_SRX = 10, RD_SRZ = 11, RD_SRR = 12;  // (RD_SR*: the boulder's own rx, rz, rr for its second rock)
+static const uint ROCK_BITS = 65536u;  // (the shape's capacity: a larger rock tests its cells inline, as the serial code)
+uint rkAt() { return sG.base + SCR_MISC + M_ORE; }
+double rkD(uint i) { return scrD(rkAt() + RK_D + i * 2u); }
+void rkSetD(uint i, double v) { scrSetD(rkAt() + RK_D + i * 2u, v); }
+// rockOne's start: its arguments kept, what it derives from them (no draws), the shape next
+[noinline]
+void rockIssue(int64_t seed, double cx, double cy, double cz, double rx, double ry, double rz, double yaw, double tiltX, double tiltZ) {
+    uint rk = rkAt();
+    double cs = cosS_N(yaw), sn = sinS_N(yaw);
+    int ext = ceilD_N(dmax(rx, rz) + 1.0l);
+    int ey = ceilD_N(ry + 2.0l + double(ext) * (absD(tiltX) + absD(tiltZ)));
+    rkSetD(RD_CX, cx); rkSetD(RD_CY, cy); rkSetD(RD_CZ, cz);
+    rkSetD(RD_RX, rx); rkSetD(RD_RY, ry); rkSetD(RD_RZ, rz);
+    rkSetD(RD_TX, tiltX); rkSetD(RD_TZ, tiltZ); rkSetD(RD_CS, cs); rkSetD(RD_SN, sn);
+    scratch[rk + RK_RSEED] = uint(uint64_t(seed) & 0xFFFFFFFFull); scratch[rk + RK_RSEED + 1u] = uint(uint64_t(seed) >> 32);
+    scratch[rk + RK_EXT] = uint(ext);
+    scratch[rk + RK_EY] = uint(ey);
+    scratch[rk + RK_FCX] = uint(floorD_N(cx)); scratch[rk + RK_FCZ] = uint(floorD_N(cz)); scratch[rk + RK_FCY] = uint(floorD_N(cy));
+    uint cells = ext < 0 || ey < 0 ? 0u : uint(2 * ext + 1) * uint(2 * ext + 1) * uint(2 * ey + 1);
+    scratch[rk + RK_INLINE] = ext < 0 || ey < 0 || cells > ROCK_BITS ? 1u : 0u;
+    scratch[rk + RK_COL] = 0u;
+    scratch[rk + RK_PHASE] = 0u;
+    scratch[rk + RK_MAGIC] = ROCK_PENDING;
+}
+// whether rockOne's cell (bx, by, bz) is inside its rock (the serial loop's test, a pure function of the arguments)
+[noinline]
+bool rockInside(int bx, int by, int bz) {
+    uint rk = rkAt();
+    double cx = rkD(RD_CX), cy = rkD(RD_CY), cz = rkD(RD_CZ), rx = rkD(RD_RX), ry = rkD(RD_RY), rz = rkD(RD_RZ);
+    double tiltX = rkD(RD_TX), tiltZ = rkD(RD_TZ), cs = rkD(RD_CS), sn = rkD(RD_SN);
+    int64_t seed = int64_t((uint64_t(scratch[rk + RK_RSEED + 1u]) << 32) | uint64_t(scratch[rk + RK_RSEED]));
+    double fx = double(bx) + 0.5l - cx, fz = double(bz) + 0.5l - cz;
+    double u = fx * cs + fz * sn, v = -fx * sn + fz * cs;
+    double lift = fx * tiltX + fz * tiltZ;
+    double fy = double(by) + 0.5l - cy - lift;
+    double ur = divD_N(u, rx), fr = divD_N(fy, ry), vr = divD_N(v, rz);
+    double d = ur * ur + fr * fr + vr * vr;
+    double warp = valueNoise_N(double(bx) * 0.45l + double(by) * 0.31l, double(bz) * 0.45l - double(by) * 0.27l, seed) * 0.28l;
+    return !(d > 1.0l + warp);
+}
+// placeRock's control flow after a rock (or at its start): the draws up to the next rock, which it issues; or the end
+[noinline]
+void rockNext() {
+    uint rk = rkAt();
+    uint style = scratch[rk + RK_STYLE], stage = scratch[rk + RK_STAGE];
+    int x = int(scratch[rk + RK_X]), y = int(scratch[rk + RK_Y]), z = int(scratch[rk + RK_Z]), size = int(scratch[rk + RK_SIZE]);
+    int64_t seed = int64_t((uint64_t(scratch[rk + RK_SEED + 1u]) << 32) | uint64_t(scratch[rk + RK_SEED]));
+    GBox b = gbox(x, z);
+    scratch[rk + RK_MAGIC] = 0u;  // (unless a rock is issued below)
+    if (style == 3u) {
+        int n = int(scratch[rk + RK_N]);
+        for (int i = int(scratch[rk + RK_I]); i < n; i++) {
+            double a = rngDouble() * PI_D * 2.0l;
+            double d = 1.0l + rngDouble() * double(2 + size);
+            int sx = x + int(jroundD(cosS_N(a) * d)), sz = z + int(jroundD(sinS_N(a) * d));
+            int sy = floraGround(b, sx, sz, y);
+            if (sy == NONE || iabs(sy - y) > 2) continue;
+            double rr = 0.7l + rngDouble() * 0.8l;
+            double yaw = rngDouble() * 3.0l;
+            scratch[rk + RK_I] = uint(i + 1);
+            rockIssue(seed + int64_t(i), double(sx) + 0.5l, double(sy) - 0.3l, double(sz) + 0.5l, rr, rr * 0.8l, rr, yaw, 0.0l, 0.0l);
+            return;
+        }
+        return;
+    }
+    if (stage != 0u) {
+        // (the boulder's second rock, a third of the time; the other styles: one rock)
+        if (style != 1u && style != 2u && stage == 1u && rngIntB(3) == 0) {
+            double rr = rkD(RD_SRR), rx = rkD(RD_SRX), rz = rkD(RD_SRZ);
+            double a = rngDouble() * PI_D * 2.0l;
+            double ccx = double(x) + 0.5l + cosS_N(a) * rx, ccz = double(z) + 0.5l + sinS_N(a) * rz;
+            double yaw = rngDouble() * 3.0l;
+            scratch[rk + RK_STAGE] = 2u;
+            rockIssue(seed + 99, ccx, double(y) - 0.2l, ccz, rr * 0.5l, rr * 0.45l, rr * 0.5l, yaw, 0.0l, 0.0l);
+        }
+        return;
+    }
+    scratch[rk + RK_STAGE] = 1u;
+    if (style == 1u) {
+        double rr = double(size) + 0.8l;
+        double a1 = rr * (1.1l + rngDouble() * 0.5l);
+        double a2 = 0.55l + rngDouble() * 0.5l;
+        double a3 = rr * (0.7l + rngDouble() * 0.4l);
+        double a4 = rngDouble() * PI_D;
+        double a5 = (rngDouble() - 0.5l) * 0.7l;
+        double a6 = (rngDouble() - 0.5l) * 0.5l;
+        rockIssue(seed, double(x) + 0.5l, double(y) - 0.2l, double(z) + 0.5l, a1, a2, a3, a4, a5, a6);
+    } else if (style == 2u) {
+        double rr = dmax(1.0l, double(size) * 0.6l);
+        double a4 = rngDouble() * PI_D;
+        double a5 = (rngDouble() - 0.5l) * 0.35l;
+        double a6 = (rngDouble() - 0.5l) * 0.35l;
+        rockIssue(seed, double(x) + 0.5l, double(y) + double(size) * 0.9l, double(z) + 0.5l, rr, double(size) * 1.4l + 1.5l, rr * 0.75l, a4, a5, a6);
+    } else {
+        double rr = double(size) + 0.5l;
+        double rx = rr * (0.8l + rngDouble() * 0.5l), ry = rr * (0.55l + rngDouble() * 0.4l);
+        double rz = rr * (0.7l + rngDouble() * 0.4l);
+        double a4 = rngDouble() * PI_D;
+        double a5 = (rngDouble() - 0.5l) * 0.3l;
+        double a6 = (rngDouble() - 0.5l) * 0.3l;
+        rkSetD(RD_SRR, rr); rkSetD(RD_SRX, rx); rkSetD(RD_SRZ, rz);
+        rockIssue(seed, double(x) + 0.5l, double(y) - ry * 0.35l, double(z) + 0.5l, rx, ry, rz, a4, a5, a6);
+    }
+}
+// (featBody) the rock under way: rockOne's walk over its columns within `budget` operations (a cell 1, a cell
+// written 16), its shape from the bits (or inline), then the rest of the placement; true when the placement ended
+[noinline]
+bool rockResume(uint budget) {
+    uint rk = rkAt(), bits = sG.base + SCR_TREE;
+    uint cfg = scratch[rk + RK_CFG];
+    int x = int(scratch[rk + RK_X]), z = int(scratch[rk + RK_Z]);
+    GBox b = gbox(x, z);
+    int ext = int(scratch[rk + RK_EXT]), ey = int(scratch[rk + RK_EY]);
+    int fcx = int(scratch[rk + RK_FCX]), fcy = int(scratch[rk + RK_FCY]), fcz = int(scratch[rk + RK_FCZ]);
+    bool inl = scratch[rk + RK_INLINE] != 0u;
+    uint stone = fprog[cfg], moss = fprog[cfg + 1];
+    float mossChance = pfF(cfg + 2);
+    uint side = ext < 0 ? 0u : uint(2 * ext + 1), tall = ey < 0 ? 0u : uint(2 * ey + 1), ops = 0u;
+    scratch[rk + RK_PHASE] = 1u;
+    for (uint col = scratch[rk + RK_COL]; col < side * side; col++) {
+        if (ops >= budget) {
+            scratch[rk + RK_COL] = col;
+            return false;
+        }
+        int dx = int(col / side) - ext, dz = int(col % side) - ext;
+        int bx = fcx + dx, bz = fcz + dz;
+        int lowest = 2147483647, highest = NONE;
+        for (int dy = -ey; dy <= ey; dy++) {
+            int by = fcy + dy;
+            ops++;
+            uint i = col * tall + uint(dy + ey);
+            bool inside = inl ? rockInside(bx, by, bz) : ((scratch[bits + (i >> 5)] >> (i & 31u)) & 1u) != 0u;
+            if (!inside) continue;
+            uint here = gGet(b, bx, by, bz);
+            if (!bis(here, B_SOFT) && !bis(here, B_SUBSTRATE) && !bis(here, B_SAND)) continue;
+            ops += 15u;
+            gSet(b, bx, by, bz, provider(stone));
+            lowest = imin(lowest, by);
+            highest = imax(highest, by);
+        }
+        if (lowest == 2147483647) continue;
+        for (int fy = lowest - 1, n = 0; n < 4 && bis(gGet(b, bx, fy, bz), B_SOFT); fy--, n++)
+            gSet(b, bx, fy, bz, provider(stone));
+        if (moss != 0u && rngFloat() < mossChance && bis(gGet(b, bx, highest + 1, bz), B_AIR)) {
+            if (rngIntB(3) == 0) gSet(b, bx, highest + 1, bz, fprog[cfg + 8]);  // moss carpet
+            else gSet(b, bx, highest, bz, provider(moss));
+        }
+    }
+    rockNext();
+    return scratch[rk + RK_MAGIC] != ROCK_PENDING;
+}
+
 [noinline]
 bool placeRock(uint cfg, int x, int y, int z) {
+#if FEAT_CLOCK
+    CLK0(r0);
+    bool r = placeRockAt(cfg, x, y, z);
+    CLK1(15, r0);
+    return r;
+}
+[noinline]
+bool placeRockAt(uint cfg, int x, int y, int z) {
+#endif
     GBox b = gbox(x, z);
     if (bis(gGet(b, x, y, z), B_FLUID) || bis(gGet(b, x, y - 1, z), B_FLUID)) return false;
     if (bis(gGet(b, x, y - 1, z), B_AIR) || gReach(b, x, z) < 9) return false;
@@ -1362,6 +1573,22 @@ bool placeRock(uint cfg, int x, int y, int z) {
     }
     int size = intProvider(cfg + 3);
     int64_t seed = int64_t(uint64_t(pfU64(H_SEED)) + uint64_t(int64_t(x)) * uint64_t(341873128712l) + uint64_t(int64_t(z)) * uint64_t(132897987541l));
+    if ((params.store & 16u) != 0u) {
+        // (the store, | 16) each rock's cells' shape on many threads (featRockWideMain, right after the round that
+        // issued it), its blocks and the draws between rocks at the origin's next rounds (rockResume): placeRock's
+        // control flow as a state machine, the same draws and writes in the same order
+        uint rk = rkAt();
+        scratch[rk + RK_CFG] = cfg;
+        scratch[rk + RK_X] = uint(x); scratch[rk + RK_Y] = uint(y); scratch[rk + RK_Z] = uint(z);
+        scratch[rk + RK_STYLE] = style;
+        scratch[rk + RK_SIZE] = uint(size);
+        scratch[rk + RK_SEED] = uint(uint64_t(seed) & 0xFFFFFFFFull); scratch[rk + RK_SEED + 1u] = uint(uint64_t(seed) >> 32);
+        scratch[rk + RK_STAGE] = 0u;
+        scratch[rk + RK_I] = 0u;
+        scratch[rk + RK_N] = style == 3u ? uint(3 + rngIntB(4)) : 0u;
+        rockNext();
+        return true;
+    }
     if (style == 3u) {
         int n = 3 + rngIntB(4);
         for (int i = 0; i < n; i++) {
@@ -1918,6 +2145,10 @@ bool tCommitStep(uint budget) {
     uint ops = 0;
     bool done = false;
     for (int guard = 0; guard < 64 && !done && ops < budget; guard++) {
+#if FEAT_CLOCK
+        uint64_t pc0 = clockARB();
+        uint ph0 = phase;
+#endif
         if (phase == 0u) {
             uint atBase = gGet(box, baseX, baseY, baseZ);
             if ((!bis(atBase, B_SOFT) && !tIsLog(baseX, baseY, baseZ)) || bis(atBase, B_LOGS)) { scratch[h + TC_RES] = 0u; done = true; break; }
@@ -2120,6 +2351,9 @@ bool tCommitStep(uint budget) {
             }
             if (uint(pos) >= c) { scratch[h + TC_RES] = 1u; done = true; break; }
         }
+#if FEAT_CLOCK
+        clkAdd(20u + (ph0 < 11u ? ph0 : 11u), pc0);  // (dev: the commit's phases, 20 + phase)
+#endif
     }
     if (done) {
         scratch[h + TC_MAGIC] = 0u;
@@ -3155,7 +3389,35 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
     int x0 = ox - 8, y0 = oy - 4, z0 = oz - 8;
     uint grid = sG.base + SCR_MISC + M_LAKE;
     for (uint i = 0; i < 64u; i++) scratch[grid + i] = 0u;
+    CLK0(l0);
     int spots = rngIntB(4) + 4;
+    if ((params.store & 8u) != 0u) {
+        // (the store, | 8) the spots' draws here, their cells and the edge tests on many threads (featLakeWideMain,
+        // right after this round), the fill, the barrier and the freeze at the origin's next rounds within their
+        // budget (lakeResume): the same draws in the same order, the same writes in the same order
+        uint lk = lkAt();
+        for (int i = 0; i < spots; i++) {
+            uint sp = lk + LK_SPOTS + uint(i) * 12u;
+            double xr = rngDouble() * 6.0l + 3.0l;
+            double yr = rngDouble() * 4.0l + 2.0l;
+            double zr = rngDouble() * 6.0l + 3.0l;
+            double xp = rngDouble() * (16.0l - xr - 2.0l) + 1.0l + xr / 2.0l;
+            double yp = rngDouble() * (8.0l - yr - 4.0l) + 2.0l + yr / 2.0l;
+            double zp = rngDouble() * (16.0l - zr - 2.0l) + 1.0l + zr / 2.0l;
+            scrSetD(sp, xr); scrSetD(sp + 2u, yr); scrSetD(sp + 4u, zr);
+            scrSetD(sp + 6u, xp); scrSetD(sp + 8u, yp); scrSetD(sp + 10u, zp);
+        }
+        scratch[lk + LK_FLUID] = provider(fprog[cfg]);
+        scratch[lk + LK_CFG] = cfg;
+        scratch[lk + LK_X0] = uint(x0); scratch[lk + LK_Y0] = uint(y0); scratch[lk + LK_Z0] = uint(z0);
+        scratch[lk + LK_NSPOTS] = uint(spots);
+        scratch[lk + LK_FAIL] = 0u;
+        scratch[lk + LK_PHASE] = 0u;
+        scratch[lk + LK_CUR] = 0u;
+        scratch[lk + LK_MAGIC] = LAKE_PENDING;
+        CLK1(9, l0);
+        return true;
+    }
     for (int i = 0; i < spots; i++) {
         double xr = rngDouble() * 6.0l + 3.0l;
         double yr = rngDouble() * 4.0l + 2.0l;
@@ -3175,6 +3437,8 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
                     }
                 }
     }
+    CLK1(9, l0);
+    CLK0(l1);
     uint fluid = provider(fprog[cfg]);
     for (int xx = 0; xx < 16; xx++)
         for (int zz = 0; zz < 16; zz++)
@@ -3185,12 +3449,16 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
                 if (yy < 4 && !bis(st, B_SOLID) && st != fluid) return false;
                 if (!predicate(fprog[cfg + 2], x0 + xx, y0 + yy, z0 + zz)) return false;
             }
+    CLK1(10, l1);
+    CLK0(l2);
     for (int xx = 0; xx < 16; xx++)
         for (int zz = 0; zz < 16; zz++)
             for (int yy = 0; yy < 8; yy++) {
                 if (!lakeBit(grid, (xx * 16 + zz) * 8 + yy)) continue;
                 if (predicate(fprog[cfg + 3], x0 + xx, y0 + yy, z0 + zz)) setBlock(x0 + xx, y0 + yy, z0 + zz, yy >= 4 ? fprog[cfg + 5] : fluid, true);
             }
+    CLK1(11, l2);
+    CLK0(l3);
     uint barrier = provider(fprog[cfg + 1]);
     if (!bis(barrier, B_AIR)) {
         for (int xx = 0; xx < 16; xx++)
@@ -3202,6 +3470,7 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
                     if (bis(st, B_SOLID) && predicate(fprog[cfg + 4], x0 + xx, y0 + yy, z0 + zz)) setBlock(x0 + xx, y0 + yy, z0 + zz, barrier, true);
                 }
     }
+    CLK1(12, l3);
     if (fprog[cfg + 8] != 0u) {
         for (int xx = 0; xx < 16; xx++)
             for (int zz = 0; zz < 16; zz++) {
@@ -3218,9 +3487,108 @@ bool placeLake(uint cfg, int ox, int oy, int oz) {
     return true;
 }
 
+// (the store, | 8) a lake in parts: its state in M_ORE (free outside the ores' records; the cells stay in M_LAKE):
+// magic, the phase (0 the wide passes next, 1 the fill, 2 the barrier, 3 the freeze), the phase's cursor, the box's
+// corner, the config, the fluid, the barrier, the edge tests' verdict, the spots, then each spot's six doubles
+static const uint LAKE_PENDING = 0x4C414B45u;  // "LAKE"
+static const uint LK_MAGIC = 0, LK_PHASE = 1, LK_CUR = 2, LK_X0 = 3, LK_Y0 = 4, LK_Z0 = 5, LK_CFG = 6, LK_FLUID = 7, LK_BARRIER = 8,
+                  LK_FAIL = 9, LK_NSPOTS = 10, LK_SPOTS = 16;  // (16 + 7 spots x 12 words = 100 < M_ORE's 512)
+uint lkAt() { return sG.base + SCR_MISC + M_ORE; }
+// (featBody) the pending lake's rest, as placeLake's serial code goes, within `budget` operations (a cell skipped 1, a
+// cell tested or written 16, a column frozen 16); true when it ended
+[noinline]
+bool lakeResume(uint budget) {
+    uint lk = lkAt(), grid = sG.base + SCR_MISC + M_LAKE;
+    uint cfg = scratch[lk + LK_CFG], fluid = scratch[lk + LK_FLUID];
+    int x0 = int(scratch[lk + LK_X0]), y0 = int(scratch[lk + LK_Y0]), z0 = int(scratch[lk + LK_Z0]);
+    uint phase = scratch[lk + LK_PHASE], cur = scratch[lk + LK_CUR], ops = 0u;
+    if (phase == 0u) {
+        // (the edge tests: any failing one ends the lake, placeLake's false)
+        if (scratch[lk + LK_FAIL] != 0u) {
+            scratch[lk + LK_MAGIC] = 0u;
+            return true;
+        }
+        phase = 1u;
+        cur = 0u;
+    }
+    if (phase == 1u) {
+        CLK0(l2);
+        for (; cur < 2048u && ops < budget; cur++) {
+            int xx = int(cur >> 7), zz = int((cur >> 3) & 15u), yy = int(cur & 7u);
+            ops++;
+            if (!lakeBit(grid, (xx * 16 + zz) * 8 + yy)) continue;
+            ops += 15u;
+            if (predicate(fprog[cfg + 3], x0 + xx, y0 + yy, z0 + zz)) setBlock(x0 + xx, y0 + yy, z0 + zz, yy >= 4 ? fprog[cfg + 5] : fluid, true);
+        }
+        CLK1(11, l2);
+        if (cur < 2048u) {
+            scratch[lk + LK_PHASE] = phase;
+            scratch[lk + LK_CUR] = cur;
+            return false;
+        }
+        uint barrier = provider(fprog[cfg + 1]);
+        scratch[lk + LK_BARRIER] = barrier;
+        phase = bis(barrier, B_AIR) ? 3u : 2u;
+        cur = 0u;
+    }
+    if (phase == 2u) {
+        CLK0(l3);
+        uint barrier = scratch[lk + LK_BARRIER];
+        for (; cur < 2048u && ops < budget; cur++) {
+            int xx = int(cur >> 7), zz = int((cur >> 3) & 15u), yy = int(cur & 7u);
+            ops++;
+            if (!lakeEdge(grid, xx, zz, yy)) continue;
+            ops += 15u;
+            if (!(yy < 4 || rngIntB(2) != 0)) continue;
+            uint st = blockAt(x0 + xx, y0 + yy, z0 + zz);
+            if (bis(st, B_SOLID) && predicate(fprog[cfg + 4], x0 + xx, y0 + yy, z0 + zz)) setBlock(x0 + xx, y0 + yy, z0 + zz, barrier, true);
+        }
+        CLK1(12, l3);
+        if (cur < 2048u) {
+            scratch[lk + LK_PHASE] = phase;
+            scratch[lk + LK_CUR] = cur;
+            return false;
+        }
+        phase = 3u;
+        cur = 0u;
+    }
+    if (fprog[cfg + 8] != 0u) {
+        CLK0(l4);
+        for (; cur < 256u && ops < budget; cur++) {
+            int xx = int(cur >> 4), zz = int(cur & 15u);
+            ops += 16u;
+            int x = x0 + xx, y = y0 + 4, z = z0 + zz;
+            int b = biomeAt(x, y, z);
+            bool freeze = !(biomeTemperature(b, x, y, z) >= 0.15f) && y >= MIN_Y && y <= MAX_Y && fprog[cfg + 7] != 0u;
+            if (freeze) {
+                uint bs = blockAt(x, y, z);
+                freeze = bis(bs, B_WATER) && (bflags2(bs) & F2_LIQUID) != 0u;
+            }
+            if (freeze && predicate(fprog[cfg + 3], x, y, z)) setBlock(x, y, z, fprog[cfg + 6], true);
+        }
+        CLK1(13, l4);
+        if (cur < 256u) {
+            scratch[lk + LK_PHASE] = phase;
+            scratch[lk + LK_CUR] = cur;
+            return false;
+        }
+    }
+    scratch[lk + LK_MAGIC] = 0u;
+    return true;
+}
+
 [noinline]
 bool placeFeature<let T : uint>(uint rec, int x, int y, int z) {
     uint type = T == 0u ? fprog[rec + R_TYPE] : T, cfg = fprog[rec + R_CFG];
+#if FEAT_CLOCK
+    CLK0(p0);
+    bool r = placeFeatureOf<T>(type, cfg, x, y, z);
+    CLK1(1, p0);
+    return r;
+}
+[noinline]
+bool placeFeatureOf<let T : uint>(uint type, uint cfg, int x, int y, int z) {
+#endif
     if (type == FT_ORE) return placeOre(cfg, x, y, z);
     if (type == FT_COVER) return placeCover(cfg, x, y, z);
     if (type == FT_ROCK) return placeRock(cfg, x, y, z);
@@ -3285,6 +3653,8 @@ bool runPlaced<let T : uint>(uint rec, bool first, uint budget) {
             placed++;
             if ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING) break;  // (the vein kernel next)
             if ((params.store & 4u) != 0u && scratch[tcAt() + TC_MAGIC] == TREE_PENDING) break;  // (its commit next rounds)
+            if ((params.store & 8u) != 0u && scratch[lkAt() + LK_MAGIC] == LAKE_PENDING) break;  // (its cells, then its rest)
+            if ((params.store & 16u) != 0u && scratch[rkAt() + RK_MAGIC] == ROCK_PENDING) break;  // (its rocks' shapes)
             continue;
         }
         uint m = mods + uint(mi) * MOD_W;
@@ -3461,10 +3831,43 @@ void featBody<let T : uint>(uint o) {
             scratch[tcAt() + TC_MAGIC] = 0u;
         } else if (scratch[tcAt() + TC_MAGIC] == TREE_PENDING) {
             if (scratch[meta + 10u] != 1u) return;
+            CLK0(t0);
             treeResume(params.budget);
+            CLK1(16, t0);
             scratch[meta + 10u] = 1u;  // (more: the rest of the commit, or the placements after it)
             InterlockedAdd(counters[0], 1u);
             return;
+        }
+    }
+    if ((params.store & 8u) != 0u) {
+        // (a lake under way: its rest within the round's operation budget; once it ends, the placements after it in
+        // the same round. None can be pending at a feature's first round, whatever the ores left in M_ORE)
+        if (first) {
+            scratch[lkAt() + LK_MAGIC] = 0u;
+        } else if (scratch[lkAt() + LK_MAGIC] == LAKE_PENDING) {
+            if (scratch[meta + 10u] != 1u) return;
+            CLK0(t1);
+            bool ended = lakeResume(params.budget);
+            CLK1(17, t1);
+            if (!ended) {
+                InterlockedAdd(counters[0], 1u);  // (meta 10 stays 1: more)
+                return;
+            }
+        }
+    }
+    if ((params.store & 16u) != 0u) {
+        // (a rock placement under way: likewise)
+        if (first) {
+            scratch[rkAt() + RK_MAGIC] = 0u;
+        } else if (scratch[rkAt() + RK_MAGIC] == ROCK_PENDING) {
+            if (scratch[meta + 10u] != 1u) return;
+            CLK0(t2);
+            bool ended = rockResume(params.budget);
+            CLK1(18, t2);
+            if (!ended) {
+                InterlockedAdd(counters[0], 1u);
+                return;
+            }
         }
     }
     if (first) {
@@ -3479,9 +3882,16 @@ void featBody<let T : uint>(uint o) {
     } else {
         if (scratch[meta + 10u] != 1u) return;  // the random is still in meta 6..9
     }
-    bool more = runPlaced<T>(rec, first, (params.store & 4u) != 0u ? 1u : params.budget);  // (| 4: the budget is the commit's)
+    CLK0(b0);
+    // (| 4: a tree a round, the budget the commit's; | 8, 16: the budget is the lake's or the rock's, the placements go on
+    // until one is under way, which ends the round)
+    uint placements = (params.store & 4u) != 0u ? 1u : ((params.store & 24u) != 0u ? 0x40000000u : params.budget);
+    bool more = runPlaced<T>(rec, first, placements);
+    CLK1(0, b0);
     more = more || ((params.store & 2u) != 0u && scratch[sG.base + SCR_MISC + M_LINE] == VEIN_PENDING);  // (its writes next round)
     more = more || ((params.store & 4u) != 0u && scratch[tcAt() + TC_MAGIC] == TREE_PENDING);  // (its commit next rounds)
+    more = more || ((params.store & 8u) != 0u && scratch[lkAt() + LK_MAGIC] == LAKE_PENDING);  // (its rest next rounds)
+    more = more || ((params.store & 16u) != 0u && scratch[rkAt() + RK_MAGIC] == ROCK_PENDING);  // (its rocks next rounds)
     scratch[meta + 10u] = more ? 1u : 2u;
     if (more) InterlockedAdd(counters[0], 1u);
 }
@@ -3545,18 +3955,39 @@ void featOneMain(uint3 id : SV_DispatchThreadID) {
 // 0 clears the indices' words, 1 keeps each tested index's first visit (the smallest key: sphere, then x, y, z as the
 // serial loops go), 2 decides that visit's block into the index's fate (target + 1 << 24 | the position). The origin's
 // next round writes them (veinApply) before anything else.
+// (featVeinMain's pass 3) each live sphere's box as the serial loop bounds it (xMin, yMin, zMin, xMax, yMax, zMax;
+// a dead sphere's xMin above its xMax), after the pair loop: the passes after it test a position against six ints,
+// not six exact floors a sphere
+static const uint VEIN_BOX = SCR_TREE + 12288u;  // (64 spheres x 6 ints, past the fates)
+[noinline]
+void veinBox(uint i) {
+    uint v = sG.base + SCR_MISC + M_LINE, data = sG.base + SCR_MISC + M_ORE, at = sG.base + VEIN_BOX + i * 6u;
+    int xStart = int(scratch[v + 2u]), yStart = int(scratch[v + 3u]), zStart = int(scratch[v + 4u]);
+    double rr = scrD(data + i * 8u + 6u);
+    if (rr < 0.0l) {
+        scratch[at] = 1u;
+        scratch[at + 3u] = 0u;
+        return;
+    }
+    double xx = scrD(data + i * 8u), yy = scrD(data + i * 8u + 2u), zz = scrD(data + i * 8u + 4u);
+    int xMin = imax(floorD_N(xx - rr), xStart), yMin = imax(floorD_N(yy - rr), yStart), zMin = imax(floorD_N(zz - rr), zStart);
+    int xMax = imax(floorD_N(xx + rr), xMin), yMax = imax(floorD_N(yy + rr), yMin), zMax = imax(floorD_N(zz + rr), zMin);
+    scratch[at] = uint(xMin); scratch[at + 1u] = uint(yMin); scratch[at + 2u] = uint(zMin);
+    scratch[at + 3u] = uint(xMax); scratch[at + 4u] = uint(yMax); scratch[at + 5u] = uint(zMax);
+}
 [noinline]
 uint veinKeyOf(int x, int y, int z) {
     uint v = sG.base + SCR_MISC + M_LINE, data = sG.base + SCR_MISC + M_ORE;
     int xStart = int(scratch[v + 2u]), yStart = int(scratch[v + 3u]), zStart = int(scratch[v + 4u]);
     int sizeXZ = int(scratch[v + 5u]), sizeY = int(scratch[v + 6u]), size = int(scratch[v + 7u]);
     for (int i = 0; i < size; i++) {
+        uint at = sG.base + VEIN_BOX + uint(i) * 6u;
+        int xMin = int(scratch[at]), xMax = int(scratch[at + 3u]);
+        if (xMin > xMax || x < xMin || x > xMax) continue;  // (dead, or not in its box: as the serial loops bound it)
+        int yMin = int(scratch[at + 1u]), zMin = int(scratch[at + 2u]), yMax = int(scratch[at + 4u]), zMax = int(scratch[at + 5u]);
+        if (y < yMin || y > yMax || z < zMin || z > zMax) continue;
         double rr = scrD(data + uint(i) * 8u + 6u);
-        if (rr < 0.0l) continue;
         double xx = scrD(data + uint(i) * 8u), yy = scrD(data + uint(i) * 8u + 2u), zz = scrD(data + uint(i) * 8u + 4u);
-        int xMin = imax(floorD_N(xx - rr), xStart), yMin = imax(floorD_N(yy - rr), yStart), zMin = imax(floorD_N(zz - rr), zStart);
-        int xMax = imax(floorD_N(xx + rr), xMin), yMax = imax(floorD_N(yy + rr), yMin), zMax = imax(floorD_N(zz + rr), zMin);
-        if (x < xMin || x > xMax || y < yMin || y > yMax || z < zMin || z > zMax) continue;
         double xd = divD_N(double(x) + 0.5l - xx, rr);
         if (!(xd * xd < 1.0l)) continue;
         double yd = divD_N(double(y) + 0.5l - yy, rr);
@@ -3613,7 +4044,10 @@ void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
             if (t.x == 0u && first < uint(size)) gVeinR[i1] = -1.0l;
         }
         GroupMemoryBarrierWithGroupSync();
-        if (i2 < size) scrSetD(data + uint(i2) * 8u + 6u, gVeinR[i2]);
+        if (i2 < size) {
+            scrSetD(data + uint(i2) * 8u + 6u, gVeinR[i2]);
+            veinBox(uint(i2));  // (its box from its final radius)
+        }
         return;
     }
     if (params.k == 4u) {
@@ -3664,6 +4098,71 @@ void featVeinMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
         return;
     }
 }
+// ---- a lake's cells on many threads (the store, params.store | 8) ----------------------------------------------------
+// placeLake left its spots (lkAt(), phase 0); right after the round, k 0: a thread a (spot, cell) sets the cell's bit
+// when the spot's ellipsoid holds it (bits only ever set: any order gives the serial loop's grid); k 1: a thread a cell
+// of the box, an edge cell's tests (placeLake's first loop returns false at the first failing one: the verdict is
+// whether any fails, the tests only read)
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featLakeWideMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (g.y >= uint(params.origins)) return;
+    sG = orgOf(g.y);
+    uint lk = lkAt(), grid = sG.base + SCR_MISC + M_LAKE;
+    if (scratch[lk + LK_MAGIC] != LAKE_PENDING || scratch[lk + LK_PHASE] != 0u) return;
+    uint id = g.x * 64u + t.x;
+    if (params.k == 0u) {
+        uint spot = id / 1176u, r = id % 1176u;  // (14 x 14 x 6 cells a spot: xx, zz 1..14, yy 1..6)
+        if (spot >= scratch[lk + LK_NSPOTS]) return;
+        int xx = 1 + int(r / 84u), zz = 1 + int((r / 6u) % 14u), yy = 1 + int(r % 6u);
+        uint sp = lk + LK_SPOTS + spot * 12u;
+        double xr = scrD(sp), yr = scrD(sp + 2u), zr = scrD(sp + 4u), xp = scrD(sp + 6u), yp = scrD(sp + 8u), zp = scrD(sp + 10u);
+        double xd = divD_N(double(xx) - xp, xr / 2.0l);
+        double yd = divD_N(double(yy) - yp, yr / 2.0l);
+        double zd = divD_N(double(zz) - zp, zr / 2.0l);
+        if (xd * xd + yd * yd + zd * zd < 1.0l) {
+            int b = (xx * 16 + zz) * 8 + yy;
+            InterlockedOr(scratch[grid + uint(b >> 5)], 1u << uint(b & 31));
+        }
+        return;
+    }
+    if (id >= 2048u) return;
+    int xx = int(id >> 7), zz = int((id >> 3) & 15u), yy = int(id & 7u);
+    if (!lakeEdge(grid, xx, zz, yy)) return;
+    uint cfg = scratch[lk + LK_CFG], fluid = scratch[lk + LK_FLUID];
+    int x0 = int(scratch[lk + LK_X0]), y0 = int(scratch[lk + LK_Y0]), z0 = int(scratch[lk + LK_Z0]);
+    uint st = blockAt(x0 + xx, y0 + yy, z0 + zz);
+    bool bad = (yy >= 4 && (bflags2(st) & F2_LIQUID_PROP) != 0u) || (yy < 4 && !bis(st, B_SOLID) && st != fluid) ||
+               !predicate(fprog[cfg + 2], x0 + xx, y0 + yy, z0 + zz);
+    if (bad) InterlockedOr(scratch[lk + LK_FAIL], 1u);
+}
+
+// ---- a rock's shape on many threads (the store, params.store | 16) ----------------------------------------------------
+// rockIssue left the rock under way (rkAt(), phase 0); right after the round, a thread a word of its shape: the 32 cells
+// rockOne's loop tests there (columns dx then dz, each dy upward), a bit each
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void featRockWideMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
+    if (g.y >= uint(params.origins)) return;
+    sG = orgOf(g.y);
+    uint rk = rkAt();
+    if (scratch[rk + RK_MAGIC] != ROCK_PENDING || scratch[rk + RK_PHASE] != 0u || scratch[rk + RK_INLINE] != 0u) return;
+    int ext = int(scratch[rk + RK_EXT]), ey = int(scratch[rk + RK_EY]);
+    int fcx = int(scratch[rk + RK_FCX]), fcy = int(scratch[rk + RK_FCY]), fcz = int(scratch[rk + RK_FCZ]);
+    uint side = uint(2 * ext + 1), tall = uint(2 * ey + 1), cells = side * side * tall;
+    uint w = g.x * 64u + t.x;
+    if (w * 32u >= cells) return;
+    uint word = 0u;
+    for (uint j = 0u; j < 32u; j++) {
+        uint i = w * 32u + j;
+        if (i >= cells) break;
+        uint col = i / tall;
+        int dy = int(i % tall) - ey, dx = int(col / side) - ext, dz = int(col % side) - ext;
+        if (rockInside(fcx + dx, fcy + dy, fcz + dz)) word |= 1u << j;
+    }
+    scratch[sG.base + SCR_TREE + w] = word;
+}
+
 // htPut from many threads of one origin at once, each with its own key: a slot claimed by compare-exchange, the count
 // by an atomic add (as htPut: a full table flags and drops the write)
 [noinline]
@@ -4399,8 +4898,10 @@ void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
     for (int q = 0; q < 5; q++) b[q] = cs[q] < 0 ? -1 : farBiome(cs[q]);
     int64_t deco = decorationSeed(int64_t(pfU64(H_SEED)), x0, z0);
     uint dl = hdr(H_DISPATCH), nd = hdr(H_NDISPATCH);
-    for (uint r = 0u; r < nd; r++) {
-        uint rec = fprog[dl + r];
+    // params.rec: that tree record only, a dispatch each (the far stage in parts: features_engine.cpp far(); each record
+    // is seeded on its own and writes by atomics, so the split is exact); 0: every tree record
+    for (uint r = params.rec != 0u ? nd - 1u : 0u; r < nd; r++) {
+        uint rec = params.rec != 0u ? params.rec : fprog[dl + r];
         if (fprog[rec + R_TYPE] != FT_TREE) continue;
         bool listed = false;
         for (int q = 0; q < 5 && !listed; q++) listed = b[q] >= 0 && biomeBit(fprog[rec + R_HERE], b[q]);

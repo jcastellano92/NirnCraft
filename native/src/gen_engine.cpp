@@ -100,7 +100,7 @@ constexpr uint32_t FARCHUNK_PIPE = PROBE_PIPE + 6;  // far chunks (atlas_gen_far
 // columns of a tile; its planes (surface, water, top | under, biome, the under biome); tiles of one dispatch
 constexpr uint32_t TILE_COLS = 65536, TILE_PLANES = 7, TILE_MAX = 16;  // (5, 6: the far stages' canopy)
 constexpr uint32_t NB = 15;  // storage buffer bindings
-constexpr uint32_t QUERIES = PASSES + INGEST_PASSES + 4;  // the passes' timestamps, then the page passes' two
+constexpr uint32_t QUERIES = 2 * (PASSES + INGEST_PASSES) + 4;  // each pass's start and end, the readback's end, the pages' two
 constexpr uint32_t PROBE_WORDS = 32;  // atlas_gen.slang probeMain
 constexpr uint32_t QY = 176;
 constexpr uint32_t H_K = 3, H_FIELDS = 13, MAGIC = 0x4E454741u;
@@ -517,6 +517,10 @@ public:
             return;
         }
         if (dev_) {
+            {
+                std::string e;
+                if (!dead_) drain(e);
+            }
             if (shared_) {
                 // our submissions were all waited for; the slots the grid still reads stay (freed with the device)
                 bool leak = !idle(1000);
@@ -532,8 +536,7 @@ public:
                            &tab_, &info_, &map_, &jobs_, &bad_, &far_})
                 release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
-            gt_.destroy();
-            if (subQ_) vkDestroyQueryPool(dev_, subQ_, nullptr);
+            destroyRing();
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
@@ -622,6 +625,16 @@ public:
         dci.queueCreateInfoCount = 1;
         dci.pQueueCreateInfos = &qci;
         dci.pEnabledFeatures = &feats;
+        VkPhysicalDeviceTimelineSemaphoreFeatures timelineF{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
+        {
+            VkPhysicalDeviceTimelineSemaphoreFeatures have{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
+            VkPhysicalDeviceFeatures2 f2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+            f2.pNext = &have;
+            vkGetPhysicalDeviceFeatures2(phys_, &f2);
+            timelineOk_ = have.timelineSemaphore == VK_TRUE;
+            timelineF.timelineSemaphore = have.timelineSemaphore;  // (core 1.2: the submission ring)
+            if (timelineOk_) dci.pNext = &timelineF;
+        }
         if (vkCreateDevice(phys_, &dci, nullptr, &dev_) != VK_SUCCESS) return fail(err, "vkCreateDevice failed");
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
         return build(err);
@@ -639,6 +652,7 @@ public:
         queueMu_ = d.queueMu;
         timestamps_ = d.timestamps;
         timestampPeriod_ = d.timestampPeriod;
+        timelineOk_ = d.timeline;
         grid_ = grid;
         backend_ = backend;
         std::string reason;
@@ -697,6 +711,7 @@ public:
 
     bool probe(uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out, std::string& err) override {
         if (dead_) return fail(err, "the generator's device was lost earlier");
+        if (!drain(err)) return false;
         if (size_t(n) * PROBE_WORDS * 4 > out_.size) return fail(err, "too many probes for one call");
         if (size_t(n) * 8 > pageIdx_.size) {
             if (!waitIdle(err)) return false;
@@ -722,6 +737,7 @@ public:
 
     bool readPage(uint32_t slot, uint32_t* out, std::string& err) override {
         if (dead_) return fail(err, "the generator's device was lost earlier");
+        if (!drain(err)) return false;
         if (!flushPages(err)) return false;
         VkDeviceSize bytes = VkDeviceSize(pageWords_) * 4;
         if (bytes > readback_.size) return fail(err, "a page larger than the readback buffer");
@@ -739,6 +755,7 @@ public:
         uint32_t n = uint32_t(jobs.size() / 4);
         VkDeviceSize bytes = VkDeviceSize(n) * TILE_PLANES * TILE_COLS * 4;
         if (bytes > out_.size || bytes > readback_.size) return fail(err, "too many tiles for one call");
+        if (!drain(err)) return false;  // (the host-visible jobs and flags below)
         if (jobs.size() * 4 > jobs_.size) {
             if (!waitIdle(err)) return false;
             release(jobs_);
@@ -759,19 +776,15 @@ public:
         ms = 0;
         // one submission a pass and tile (the Windows watchdog resets a device whose submission runs ~2 s; on the
         // context's device that takes the renderer down too)
+        double used0 = pace_.usedMs;
         for (uint32_t k = 0; k < passes; k++)
           for (uint32_t ti = 0; ti < n; ti++) {
             begin();
-            if (timestamps_) {
-                vkCmdResetQueryPool(cmd_, queries_, 0, 2);
-                vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
-            }
             p.pad1 = int32_t(ti);
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
             vkCmdDispatch(cmd_, (pipes[k] == TILEBIOME_PIPE ? 3 : 1) * TILE_COLS / GROUP, 1, 1);
-            if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_HOST_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_HOST_BIT);
             if (k + 1 == passes && ti + 1 == n) {
@@ -779,15 +792,10 @@ public:
                 vkCmdCopyBuffer(cmd_, out_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             }
-            auto s0 = std::chrono::steady_clock::now();
-            if (!submitWait(err)) return fail(err, err + " (tile pass " + names[k] + ")");
-            double pass = msSince(s0);
-            uint64_t ts[2] = {};
-            if (timestamps_ && vkGetQueryPoolResults(dev_, queries_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
-                pass = double(ts[1] - ts[0]) * timestampPeriod_ * 1e-6;
-            ms += pass;
-            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen tile pass %s: %.2f ms (tile %u of %u)\n", names[k], pass, ti, n);
+            phase_ = std::string("tile pass ") + names[k] + ", tile " + std::to_string(ti);
+            if (!submit(err, k + 1 == passes && ti + 1 == n)) return fail(err, err + " (tile pass " + names[k] + ")");
         }
+        ms = pace_.usedMs - used0;  // (each submission's GPU time, charged as it retired)
         std::memcpy(out, readback_.map, size_t(bytes));
         std::memcpy(bad, flags, size_t(n) * 4);
         ran_ = 0;  // the output buffer holds tiles now: nothing to ingest
@@ -797,6 +805,7 @@ public:
     bool far(const std::vector<int32_t>& jobs, uint32_t rows, uint32_t mode, uint32_t cap, uint32_t* kinds, uint32_t* ids,
              uint32_t& mixed, uint32_t* bad, double& ms, std::string& err) override {
         if (dead_) return fail(err, "the generator's device was lost earlier");
+        if (!drain(err)) return false;  // (far_ may be replaced below)
         uint32_t n = uint32_t(jobs.size() / 4);
         size_t chunks = size_t(n) * 256 * rows;
         size_t words = 4 + chunks * 2 + size_t(cap) * 2048;
@@ -825,6 +834,7 @@ public:
         VkDeviceSize planes = VkDeviceSize(n) * TILE_PLANES * TILE_COLS * 4;
         if (planes > out_.size) return fail(err, "too many tiles for one call");
         (void)words;
+        if (!drain(err)) return false;  // (the host-visible jobs and flags below)
         if (jobs.size() * 4 > jobs_.size) {
             if (!waitIdle(err)) return false;
             release(jobs_);
@@ -838,15 +848,12 @@ public:
         ms = 0;
         const uint32_t pipes[4] = {TILE_PIPE, TILEBIOME_PIPE, TILESURF_PIPE, FARCHUNK_PIPE};
         const char* names[4] = {"tile", "tileBiome", "tileSurf", "farChunk"};
-        // one submission a pass and tile (the watchdog: see tiles())
+        // one submission a pass and tile (the watchdog: see tiles()), to the ring; the last waited for
+        double used0 = pace_.usedMs;
         for (uint32_t k = 0; k < 4; k++)
           for (uint32_t ti = 0; ti < n; ti++) {
             if (k == 3 && ti == 0 && !runFarStages(jobs, n, err)) return false;  // (their own submissions)
             begin();
-            if (timestamps_) {
-                vkCmdResetQueryPool(cmd_, queries_, 0, 2);
-                vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
-            }
             p.pad1 = int32_t(ti);
             p.pageH = farStaged_ ? 1 : 0;  // (farChunk: draw planes 5, 6)
             if (k == 3 && ti == 0) {
@@ -858,25 +865,40 @@ public:
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
-            vkCmdDispatch(cmd_, k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP, 1, 1);
+            uint32_t groups = k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP;
+            if (k < 3) {
+                // (the tile's columns in slices of groups, a submission each: their columns are independent)
+                uint32_t slice = sliceOf(100u + k, groups);
+                for (uint32_t g0 = 0; g0 < groups; g0 += slice) {
+                    uint32_t m = std::min(slice, groups - g0);
+                    vkCmdDispatchBase(cmd_, g0, 0, 0, m, 1, 1);
+                    ring_[cur_].sliceKind = int(100u + k);
+                    ring_[cur_].sliceUnits = m;
+                    if (g0 + m < groups) {
+                        barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                        phase_ = std::string("far pass ") + names[k] + ", tile " + std::to_string(ti);
+                        if (!submit(err, false)) return fail(err, err + " (far pass " + names[k] + ")");
+                        begin();
+                        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                        vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
+                        vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
+                    }
+                }
+            } else {
+                vkCmdDispatch(cmd_, groups, 1, 1);
+            }
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
-            if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 1);
             if (k == 3 && ti + 1 == n) {
                 VkBufferCopy c{0, 0, VkDeviceSize(4 + chunks * 2) * 4};
                 vkCmdCopyBuffer(cmd_, far_.buf, readback_.buf, 1, &c);
                 barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             }
-            auto s0 = std::chrono::steady_clock::now();
-            if (!submitWait(err)) return fail(err, err + " (far pass " + names[k] + ")");
-            double wall = msSince(s0);
-            uint64_t ts[2] = {};
-            double pass = wall;
-            if (timestamps_ && vkGetQueryPoolResults(dev_, queries_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
-                pass = double(ts[1] - ts[0]) * timestampPeriod_ * 1e-6;
-            ms += pass;
-            if (std::getenv("ATLAS_GEN_TRACE")) std::fprintf(stderr, "TRACE gen far pass %s: %.2f ms (tile %u of %u)\n", names[k], pass, ti, n);
+            phase_ = std::string("far pass ") + names[k] + ", tile " + std::to_string(ti);
+            if (!submit(err, k == 3 && ti + 1 == n)) return fail(err, err + " (far pass " + names[k] + ")");
         }
+        ms = pace_.usedMs - used0;  // (each submission's GPU time, charged as it retired)
         const uint32_t* rb = static_cast<const uint32_t*>(readback_.map);
         mixed = rb[0];
         std::memcpy(kinds, rb + 4, chunks * 2 * 4);
@@ -888,38 +910,63 @@ public:
     // the far stages (atlas_gen_add_far_stage) over each tile of a far call: planes 5, 6 cleared, the stages record, one
     // submission a tile (the watchdog)
     bool farStaged_ = false;
+    std::unordered_map<size_t, double> farUnitMs_;  // (far stages in parts) per stage: ms a unit, measured
     bool runFarStages(const std::vector<int32_t>& jobs, uint32_t n, std::string& err) {
         farStaged_ = false;
         bool any = false;
         for (const Stage& st : stages_) any = any || st.ffn;
         if (!any) return true;
+        // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each
+        static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         for (uint32_t ti = 0; ti < n; ti++) {
-            begin();
-            vkCmdFillBuffer(cmd_, out_.buf, (VkDeviceSize(ti) * TILE_PLANES + 5) * TILE_COLS * 4, VkDeviceSize(2) * TILE_COLS * 4, 0u);
-            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            AtlasGenFarBatch fb{};
-            fb.version = 1;
-            fb.lod = jobs[ti * 4];
-            fb.tx = jobs[ti * 4 + 1];
-            fb.tz = jobs[ti * 4 + 2];
-            fb.tile = ti;
-            fb.tiles = n;
-            fb.vkDevice = dev_;
-            fb.vkCommandBuffer = cmd_;
-            fb.queueFamily = family_;
-            fb.planes = uint64_t(out_.buf);
-            fb.program = uint64_t(prog_.buf);
-            fb.map = uint64_t(map_.buf);
-            for (const Stage& st : stages_) {
+            bool cleared = false;
+            for (size_t si = 0; si < stages_.size(); si++) {
+                const Stage& st = stages_[si];
                 if (!st.ffn) continue;
-                int32_t r = st.ffn(st.user, &fb);
-                if (r != 0) return fail(err, "far stage failed (" + std::to_string(r) + ")");
-                barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                double& perUnit = farUnitMs_[si];
+                if (!drain(err)) return false;  // (part 0 may write its descriptor sets: nothing of ours in flight)
+                for (uint32_t part = 0;; part++) {
+                    poll();
+                    begin();
+                    if (!cleared) {
+                        vkCmdFillBuffer(cmd_, out_.buf, (VkDeviceSize(ti) * TILE_PLANES + 5) * TILE_COLS * 4, VkDeviceSize(2) * TILE_COLS * 4, 0u);
+                        barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                        cleared = true;
+                    }
+                    AtlasGenFarBatch fb{};
+                    fb.version = 2;
+                    fb.lod = jobs[ti * 4];
+                    fb.tx = jobs[ti * 4 + 1];
+                    fb.tz = jobs[ti * 4 + 2];
+                    fb.tile = ti;
+                    fb.tiles = n;
+                    fb.vkDevice = dev_;
+                    fb.vkCommandBuffer = cmd_;
+                    fb.queueFamily = family_;
+                    fb.planes = uint64_t(out_.buf);
+                    fb.program = uint64_t(prog_.buf);
+                    fb.map = uint64_t(map_.buf);
+                    fb.part = part;
+                    fb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
+                    fb.lastPartUs = uint32_t(std::min(lastSubMs_ * 1000.0, 4e9));  // (the latest done, the ring's)
+                    int32_t r = st.ffn(st.user, &fb);
+                    if (r != 0 && r != ATLAS_GEN_STAGE_MORE) {
+                        vkEndCommandBuffer(cmd_);
+                        return fail(err, "far stage failed (" + std::to_string(r) + ")");
+                    }
+                    barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                    phase_ = "far stage, tile " + std::to_string(ti) + ", part " + std::to_string(part);
+                    Slot& sl = ring_[cur_];
+                    sl.perUnit = &perUnit;  // (its estimate; refined from its time when it retires, a whole part)
+                    sl.units = double(fb.units);
+                    sl.refine = r == ATLAS_GEN_STAGE_MORE;
+                    if (!submit(err, false)) return fail(err, err + " (far stage)");
+                    if (r != ATLAS_GEN_STAGE_MORE) break;
+                    if (part > 100000) return fail(err, "far stage never finished");
+                }
             }
-            phase_ = "far stage, tile " + std::to_string(ti);
-            if (!submitWait(err)) return fail(err, err + " (far stage)");
         }
         farStaged_ = true;
         return true;
@@ -950,6 +997,7 @@ public:
         bool any = false;
         for (const Stage& st : stages_) any = any || (!st.store && st.fn);
         if (!any) return true;
+        if (!drain(err)) return false;
         AtlasGenStageBatch sb{};
         sb.version = 1;
         sb.chunkCount = n;
@@ -1015,10 +1063,14 @@ public:
             pick = int(farSlabs_.size() - 1);
         }
         FarSlab& slab = farSlabs_[size_t(pick)];
-        // the passes write the slab (binding 14 while they run), the kinds come back
+        // the passes write the slab (binding 14 while they run), the kinds come back (nothing of ours in flight when
+        // the set is written: a failed pass may leave some)
+        if (!drain(err)) return false;
         std::swap(far_, slab.buf);
         writeSet();
         bool ok = farPasses(jobs, rows, 1u, cap, words, chunks, kinds, mixed, bad, ms, err);
+        std::string e2;
+        if (!ok) drain(e2);
         std::swap(far_, slab.buf);
         writeSet();
         if (!ok) return false;
@@ -1142,6 +1194,7 @@ public:
         if (dead_) return fail(err, "the generator's device was lost earlier");
         if (!storeSlots_) return fail(err, "no store");
         if (count > MAX_CHUNKS || st.radius > STORE_RMAX) return fail(err, "store stage call too large");
+        if (!drain(err)) return false;  // (the lists below, and the stage's own buffers: nothing in flight)
         std::memcpy(stList_.map, list.data(), list.size() * 4);
         std::memcpy(stNb_.map, nb.data(), nb.size() * 4);
         AtlasGenStoreBatch sb{};
@@ -1165,17 +1218,32 @@ public:
         // in parts of about ATLAS_GEN_PART_MS (4) of GPU time, one submission each: the stage's units a part from its
         // measured time a unit (a decoration's passes are a warp an origin, bound by latency: its time hardly grows with
         // the chunks, so a call takes many chunks and its passes go a few at a time)
+        // (version 3) to the ring without waiting for each: the parts done so far and their GPU times given to the
+        // stage; the last part waited for
+        sb.version = 3;
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         double& perUnit = partUnitMs_[st.order];
-        double lastMs = 0.0;
-        for (uint32_t part = 0;; part++) {
+        partUs_.clear();
+        partsDone_ = 0;
+        uint32_t waits = 0;
+        for (uint32_t part = 0;;) {
+            poll();
             sb.part = part;
-            sb.lastPartUs = uint32_t(std::min(lastMs * 1000.0, 4e9));
+            sb.partsDone = partsDone_;
+            sb.partUs = partUs_.data();
+            sb.lastPartUs = partsDone_ ? partUs_[partsDone_ - 1] : 0u;
             sb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
             begin();
             sb.vkCommandBuffer = cmd_;
             phase_ = "store stage " + std::to_string(st.order) + ", " + std::to_string(count) + " chunks, part " + std::to_string(part);
             int32_t r = st.sfn(st.user, &sb);
+            if (r == ATLAS_GEN_STAGE_WAIT) {
+                // (nothing recorded: the oldest part in flight first, then this part again; the command buffer is reused)
+                vkEndCommandBuffer(cmd_);
+                if (!waitOldest(err)) return false;
+                if (++waits > 1000000) return fail(err, "store stage " + std::to_string(st.order) + " never stopped waiting");
+                continue;
+            }
             if (r != 0 && r != ATLAS_GEN_STAGE_MORE) {
                 vkEndCommandBuffer(cmd_);
                 return fail(err, "store stage " + std::to_string(st.order) + " failed (" + std::to_string(r) + ")");
@@ -1184,13 +1252,15 @@ public:
                     VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
-            double used0 = pace_.usedMs;
-            if (!submitWait(err)) return false;
+            Slot& sl = ring_[cur_];
+            sl.part = int(part);
+            partUs_.push_back(0u);
+            sl.perUnit = &perUnit;  // (its estimate; refined from its time when it retires, a whole part)
+            sl.units = double(sb.units);
+            sl.refine = r == ATLAS_GEN_STAGE_MORE;
+            if (!submit(err, r != ATLAS_GEN_STAGE_MORE)) return false;
             if (r != ATLAS_GEN_STAGE_MORE) return true;
-            double ms = pace_.usedMs - used0, per = ms / double(sb.units);
-            lastMs = ms;
-            perUnit = perUnit <= 0.0 ? per : perUnit * 0.7 + per * 0.3;
-            if (part > 100000) return fail(err, "store stage " + std::to_string(st.order) + " never finished");
+            if (++part > 100000) return fail(err, "store stage " + std::to_string(st.order) + " never finished");
         }
     }
     std::unordered_map<uint32_t, double> partUnitMs_;  // (store stages in parts) per stage order: ms a unit, measured
@@ -1220,6 +1290,7 @@ public:
         if (dead_) return fail(err, "the generator's device was lost earlier");
         bool toStore = b.mode == 1, fromStore = b.mode == 2;
         if ((toStore || fromStore) && !storeSlots_) return fail(err, "no store");
+        if (!drain(err)) return false;  // (the host-visible inputs below: nothing in flight reads them)
         if (!flushPages(err)) return false;
         uint32_t n = uint32_t(b.params.chunks);
         bool ingest = o.info != nullptr;
@@ -1270,32 +1341,18 @@ public:
             if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, QUERIES - 1);
         }
         // one submission a pass (the Windows watchdog resets a device whose submission runs ~2 s, the renderer's too
-        // on a shared device; and the frames get the queue between them)
-        // pass: the one just recorded (its time read now, its end timestamp slot reused as the next one's start), or
-        // -1 (the pages: their own slots)
+        // on a shared device; and the frames get the queue between them), to the ring without waiting (the passes'
+        // times from their timestamps once the last is done: pass p from slot p (0 the first's start) to p + 1)
         auto cut = [&](int pass) -> bool {
-            if (!submitWait(err)) return false;
-            if (timestamps_ && pass >= 0) {
-                uint64_t ts2[2] = {};
-                if (vkGetQueryPoolResults(dev_, queries_, uint32_t(pass), 2, sizeof(ts2), ts2, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
-                    // (a sliced pass: the timestamps span the waits between its slices; its submissions' wall times instead)
-                    double ms = slicedMs_ > 0.0 ? slicedMs_ + lastSubMs_ : double(ts2[1] - ts2[0]) * timestampPeriod_ * 1e-6;
-                    if (uint32_t(pass) < PASSES) t.passMs[pass] += ms;
-                    t.kernelMs += ms;
-                }
-                slicedMs_ = 0.0;
-            }
+            if (!submit(err, false)) return false;
             begin();
-            if (timestamps_ && pass >= 0) {
-                vkCmdResetQueryPool(cmd_, queries_, uint32_t(pass) + 1, 1);
-                vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, uint32_t(pass) + 1);
-            }
+            if (timestamps_ && pass >= 0) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 2u * (uint32_t(pass) + 1u));
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
             return true;
         };
         if (nj && !cut(-1)) return false;
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
+        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 2u * pBegin);
         vkCmdFillBuffer(cmd_, out_.buf, VkDeviceSize(n) * OUT_WORDS * 4, VkDeviceSize(n) * 4, 0u);  // the flags
         if (ingest) vkCmdFillBuffer(cmd_, info_.buf, 0, VkDeviceSize(n) * INFO_WORDS * 4, 0xFFFFFFFFu);  // the minima
         barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -1318,17 +1375,17 @@ public:
             // few ms when the frames are over their target (the chunks of a pass are independent: a row of workgroups
             // each); the slice from the pass's measured time a chunk
             uint32_t slice = sliceOf(p, n), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
-            double sliced = 0.0;
             for (uint32_t c0 = 0; c0 < n; c0 += slice) {
                 uint32_t m = std::min(slice, n - c0);
                 vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
                 if (slice >= n) vkCmdDispatch(cmd_, gx, n, 1);
                 else vkCmdDispatchBase(cmd_, 0, c0, 0, gx, m, 1);
+                ring_[cur_].sliceKind = int(p);
+                ring_[cur_].sliceUnits = m;
                 if (c0 + m < n) {
                     barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                    if (!submitWait(err)) return false;
-                    sliced += lastSubMs_;
+                    if (!submit(err, false)) return false;
                     begin();
                     vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
                     vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
@@ -1336,8 +1393,7 @@ public:
             }
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
-            if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, p + 1);
-            slicedMs_ = sliced;
+            if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 2u * p + 1u);
             if (p + 1 < pEnd && !cut(int(p))) return false;
         }
         if (toStore) {
@@ -1361,20 +1417,26 @@ public:
             vkCmdCopyBuffer(cmd_, info_.buf, readback_.buf, 1, &c[1]);
         }
         barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
-        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queries_, passes + 1);
+        if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queries_, 2u * passes);
         if (!submitWait(err)) return false;
         if (timestamps_) {
-            uint64_t ts[QUERIES] = {};
-            if (vkGetQueryPoolResults(dev_, queries_, 0, passes + 2, sizeof(uint64_t) * (passes + 2), ts, 8, VK_QUERY_RESULT_64_BIT) ==
-                VK_SUCCESS) {
-                double k = timestampPeriod_ * 1e-6;
-                for (uint32_t p = passes - 1; p < passes; p++) {  // (the earlier passes: cut())
-                    double ms = double(ts[p + 1] - ts[p]) * k;
-                    if (p < PASSES) t.passMs[p] += ms;
-                    t.kernelMs += ms;
-                }
-                t.readbackMs += double(ts[passes + 1] - ts[passes]) * k;
+            double k = timestampPeriod_ * 1e-6;
+            auto span = [&](uint32_t a, uint32_t z, double& ms) {
+                uint64_t ta = 0, tz = 0;
+                if (vkGetQueryPoolResults(dev_, queries_, a, 1, 8, &ta, 8, VK_QUERY_RESULT_64_BIT) != VK_SUCCESS ||
+                    vkGetQueryPoolResults(dev_, queries_, z, 1, 8, &tz, 8, VK_QUERY_RESULT_64_BIT) != VK_SUCCESS || tz < ta)
+                    return false;
+                ms = double(tz - ta) * k;
+                return true;
+            };
+            for (uint32_t p = pBegin; p < pEnd; p++) {
+                double ms = 0.0;
+                if (!span(2u * p, 2u * p + 1u, ms)) continue;
+                if (p < PASSES) t.passMs[p] += ms;
+                t.kernelMs += ms;
             }
+            double rms = 0.0;
+            if (pEnd > 0 && span(2u * (pEnd - 1u) + 1u, 2u * passes, rms)) t.readbackMs += rms;
             uint64_t tp[2] = {};
             if (nj && vkGetQueryPoolResults(dev_, queries_, QUERIES - 2, 2, sizeof(tp), tp, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
                 o.pageMs = double(tp[1] - tp[0]) * timestampPeriod_ * 1e-6;
@@ -1741,23 +1803,13 @@ private:
         cpi.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         cpi.queueFamilyIndex = family_;
         if (vkCreateCommandPool(dev_, &cpi, nullptr, &pool_) != VK_SUCCESS) return fail(err, "command pool");
-        VkCommandBufferAllocateInfo ca{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
-        ca.commandPool = pool_;
-        ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        ca.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(dev_, &ca, &cmd_) != VK_SUCCESS) return fail(err, "command buffer");
-        VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-        if (vkCreateFence(dev_, &fci, nullptr, &fence_) != VK_SUCCESS) return fail(err, "fence");
         if (timestamps_) {
             VkQueryPoolCreateInfo qp{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
             qp.queryType = VK_QUERY_TYPE_TIMESTAMP;
             qp.queryCount = QUERIES;
             if (vkCreateQueryPool(dev_, &qp, nullptr, &queries_) != VK_SUCCESS) timestamps_ = false;
-            // (each submission's own GPU time: what the budget charges, not its wall time behind the frames)
-            qp.queryCount = 2;
-            if (timestamps_ && vkCreateQueryPool(dev_, &qp, nullptr, &subQ_) != VK_SUCCESS) subQ_ = VK_NULL_HANDLE;
         }
-        if (timestamps_) gt_.create(dev_);  // the flight recorder's timestamps of each submission
+        if (!createRing(err)) return false;  // (the command buffers, their timestamps, the timeline semaphore)
         // the per-batch buffers (fixed: MAX_CHUNKS chunks; K up to 16 interpolated inputs); the readback holds the
         // ids, MAX_CHUNKS flags, then the section infos
         bool ok = ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, MAX_CHUNKS * 8, true, err) &&
@@ -1934,37 +1986,306 @@ private:
         }
         vkUpdateDescriptorSets(dev_, SNB, w, 0, nullptr);
     }
-    // every submission of ours is waited for: nothing of ours runs between calls (the shared device's other queue
-    // users are not ours to wait for)
-    bool waitIdle(std::string&) {
+    // every submission of ours is waited for before a call returns, or drained here: nothing of ours runs between
+    // calls (the shared device's other queue users are not ours to wait for)
+    bool waitIdle(std::string& err) {
+        if (!drain(err)) return false;
         if (!shared_) vkDeviceWaitIdle(dev_);
         return true;
     }
+    // ---- the submission ring (docs/ATLAS-GPU-LOOP.md step 3) ----
+    // Submissions go to the queue without the CPU waiting for each: a ring of command buffers, each submission
+    // signalling the next value of one timeline semaphore. The CPU waits only where it reads a result (a run's readback,
+    // a stage part's counters), before it overwrites what a submission in flight may read (the host-visible inputs, a
+    // stage's descriptor sets: drain()), or when the ring is full (begin(): its oldest). A submission's GPU time (its
+    // own timestamps) is charged to the budget when it retires. ATLAS_GEN_RING=1 (or no timeline semaphore): one
+    // command buffer, each submission waited for, as before.
+    static constexpr uint32_t RING_MAX = 8;
+    struct Slot {
+        VkCommandBuffer cmd = VK_NULL_HANDLE;
+        VkQueryPool q = VK_NULL_HANDLE;  // (its start and end timestamps)
+        fr::GpuTimeline gt;
+        uint64_t value = 0;  // the timeline value its submission signals
+        bool pending = false, timed = false;
+        std::string phase;
+        std::chrono::steady_clock::time_point at;  // (when it was submitted)
+        double* perUnit = nullptr;  // (a stage's part) the stage's ms a unit, refined from this one's time, its units
+        double units = 0.0;
+        bool refine = false;  // (perUnit refined from it: a whole part)
+        double est = 0.0;     // its GPU ms as charged when submitted (corrected when it retires)
+        int part = -1;  // (a store stage's part) its index in partUs_
+        int sliceKind = -1;       // (a sliced dispatch: sliceOf's kind) its slice's units, for the next slices' size
+        uint32_t sliceUnits = 0;
+    };
+    Slot ring_[RING_MAX];
+    uint32_t ringN_ = 1, cur_ = 0;
+    bool timelineOk_ = false, beginBad_ = false;
+    double inFlightMs_ = 0.0, subEma_ = 1.0;  // (the work submitted, not yet retired: its estimated GPU ms; a submission's)
+    VkSemaphore tl_ = VK_NULL_HANDLE;
+    uint64_t submitted_ = 0, retired_ = 0;
+    uint64_t fenceWaits_ = 0, ringWaits_ = 0;  // (the CPU blocked: a result or a drain; the ring full)
+    uint64_t traceFence_ = 0, traceRing_ = 0, traceSubs_ = 0;  // (ATLAS_GEN_PACE_TRACE: the counts at its last line)
+    std::vector<uint32_t> partUs_;  // (storeStage) its parts' GPU times as they retire; partsDone_ of them so far
+    uint32_t partsDone_ = 0;
+    bool createRing(std::string& err) {
+        static const uint32_t want = [] {
+            const char* e = std::getenv("ATLAS_GEN_RING");
+            int v = e ? std::atoi(e) : 3;
+            return uint32_t(std::clamp(v, 1, int(RING_MAX)));
+        }();
+        VkCommandBufferAllocateInfo ca{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+        ca.commandPool = pool_;
+        ca.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        ca.commandBufferCount = 1;
+        // (on the frames' own queue: one at a time, as before; their work queues behind ours there)
+        if (want > 1 && timelineOk_ && !queueMu_) {
+            VkSemaphoreTypeCreateInfo ti{VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO};
+            ti.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+            ti.initialValue = 0;
+            VkSemaphoreCreateInfo si{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+            si.pNext = &ti;
+            if (!vkWaitSemaphores || !vkGetSemaphoreCounterValue || vkCreateSemaphore(dev_, &si, nullptr, &tl_) != VK_SUCCESS)
+                tl_ = VK_NULL_HANDLE;
+        }
+        ringN_ = tl_ ? want : 1u;
+        VkQueryPoolCreateInfo qp{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
+        qp.queryType = VK_QUERY_TYPE_TIMESTAMP;
+        qp.queryCount = 2;
+        for (uint32_t i = 0; i < ringN_; i++) {
+            if (vkAllocateCommandBuffers(dev_, &ca, &ring_[i].cmd) != VK_SUCCESS) return fail(err, "command buffer");
+            // (each submission's own GPU time: what the budget charges, not its wall time behind the frames)
+            if (timestamps_ && vkCreateQueryPool(dev_, &qp, nullptr, &ring_[i].q) != VK_SUCCESS) ring_[i].q = VK_NULL_HANDLE;
+            if (timestamps_) ring_[i].gt.create(dev_);  // the flight recorder's timestamps of each submission
+        }
+        cur_ = 0;
+        cmd_ = ring_[0].cmd;
+        VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+        if (!tl_ && vkCreateFence(dev_, &fci, nullptr, &fence_) != VK_SUCCESS) return fail(err, "fence");
+        return true;
+    }
+    void destroyRing() {
+        for (uint32_t i = 0; i < RING_MAX; i++) {
+            ring_[i].gt.destroy();
+            if (ring_[i].q) vkDestroyQueryPool(dev_, ring_[i].q, nullptr);
+            ring_[i].q = VK_NULL_HANDLE;
+        }
+        if (tl_) vkDestroySemaphore(dev_, tl_, nullptr);
+        tl_ = VK_NULL_HANDLE;
+    }
     void begin() {
+        Slot& s = ring_[cur_];
+        if (s.pending) {
+            // (the ring is full: its oldest first)
+            std::string e;
+            if (!waitValue(s.value, e, true)) {
+                beginBad_ = true;  // (still pending: not reset; submit() refuses)
+                return;
+            }
+        }
+        beginBad_ = false;
+        cmd_ = s.cmd;
         vkResetCommandBuffer(cmd_, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(cmd_, &bi);
-        gt_.begin(cmd_);
-        if (subQ_) {
-            vkCmdResetQueryPool(cmd_, subQ_, 0, 2);
-            vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, subQ_, 0);
-            subTimed_ = true;
+        s.gt.begin(cmd_);
+        s.timed = false;
+        if (s.q) {
+            vkCmdResetQueryPool(cmd_, s.q, 0, 2);
+            vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, s.q, 0);
+            s.timed = true;
+        }
+        s.perUnit = nullptr;
+        s.units = 0.0;
+        s.refine = false;
+        s.part = -1;
+        s.sliceKind = -1;
+        s.sliceUnits = 0;
+    }
+    // a submission done: its GPU time charged (the budget, the longest, the stage's per unit time), the recorder's zones
+    void retire(Slot& s) {
+        if (!s.pending) return;
+        s.pending = false;
+        double wall = msSince(s.at), gpu = wall;
+        if (s.timed) {
+            uint64_t ts[2] = {};
+            if (vkGetQueryPoolResults(dev_, s.q, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS && ts[1] >= ts[0])
+                gpu = double(ts[1] - ts[0]) * timestampPeriod_ * 1e-6;
+        }
+        static const uint32_t genTrack = fr::trackId("GPU gen");
+        s.gt.resolve("gpu gen", genTrack);
+        // the budget pays the submission's GPU time (its timestamps): its wall time also holds the time it queued behind
+        // the frames, and at 1440p that charged the generator for the frames' work until it made nothing (a route at 13
+        // ms frames: no chunk in 160 s)
+        pace_.tokens += s.est - gpu;  // (charged its estimate when submitted: now its own time)
+        inFlightMs_ = std::max(0.0, inFlightMs_ - s.est);
+        pace_.usedMs += gpu;
+        lastSubMs_ = gpu;
+        subEma_ = subEma_ * 0.8 + gpu * 0.2;
+        if (s.refine && s.perUnit && s.units > 0.0) {
+            double per = gpu / s.units;
+            *s.perUnit = *s.perUnit <= 0.0 ? per : *s.perUnit * 0.7 + per * 0.3;
+        }
+        if (s.sliceKind >= 0 && s.sliceUnits > 0) sliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
+        if (s.part >= 0 && size_t(s.part) < partUs_.size()) {
+            partUs_[size_t(s.part)] = uint32_t(std::min(gpu * 1000.0, 4e9));
+            partsDone_ = std::max(partsDone_, uint32_t(s.part) + 1u);
+        }
+        if (gpu > pace_.maxSubMs) {
+            pace_.maxSubMs = gpu;
+            std::snprintf(pace_.maxPhase, sizeof pace_.maxPhase, "%s", s.phase.c_str());
+        }
+        // (the worst of the last 10-20 s, two buckets: what persists, not a first call's pipeline build)
+        auto now = std::chrono::steady_clock::now();
+        if (now - pace_.bucketAt > std::chrono::seconds(10)) {
+            pace_.prevMs = pace_.curMs;
+            std::memcpy(pace_.prevPhase, pace_.curPhase, sizeof pace_.prevPhase);
+            pace_.curMs = 0;
+            pace_.curPhase[0] = 0;
+            pace_.bucketAt = now;
+        }
+        if (gpu > pace_.curMs) {
+            pace_.curMs = gpu;
+            std::snprintf(pace_.curPhase, sizeof pace_.curPhase, "%s", s.phase.c_str());
+        }
+        pace_.subs++;
+        static const double warnMs = envMs("ATLAS_GEN_TRACE_SUBS", 0.0);  // (measurements: submissions over this)
+        if (warnMs > 0.0 && gpu > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", gpu, s.phase.c_str());
+        if (gpu > 500.0)  // (a submission near the watchdog's 2 s: split the work further)
+            std::fprintf(stderr, "TRACE warn gen submission took %.0f ms (%s)\n", gpu, s.phase.c_str());
+        retired_ = std::max(retired_, s.value);
+        completed_.fetch_add(1, std::memory_order_release);
+    }
+    // the slots whose submissions are done, without waiting (they complete in submission order: one queue)
+    void poll() {
+        if (!tl_) return;
+        uint64_t v = 0;
+        if (vkGetSemaphoreCounterValue(dev_, tl_, &v) != VK_SUCCESS) return;
+        for (uint32_t k = 0; k < ringN_; k++) {
+            Slot& s = ring_[(cur_ + k) % ringN_];  // (oldest first: cur_ is the next to be reused)
+            if (s.pending && s.value <= v) retire(s);
         }
     }
-    fr::GpuTimeline gt_;
-    VkQueryPool subQ_ = VK_NULL_HANDLE;
-    bool subTimed_ = false, subTimedDone_ = false;  // (this command buffer began with the submission's start timestamp)
+    // ring: a wait for room (a full ring, the work ahead), not for a result: counted apart
+    bool waitValue(uint64_t value, std::string& err, bool ring = false) {
+        if (!tl_ || value <= retired_) {
+            poll();
+            return true;
+        }
+        uint64_t v = 0;
+        if (vkGetSemaphoreCounterValue(dev_, tl_, &v) == VK_SUCCESS && v >= value) {
+            poll();
+            return true;
+        }
+        ATLAS_ZONE("wait:genFence");
+        (ring ? ringWaits_ : fenceWaits_)++;
+        VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+        wi.semaphoreCount = 1;
+        wi.pSemaphores = &tl_;
+        wi.pValues = &value;
+        VkResult w = vkWaitSemaphores(dev_, &wi, 20'000'000'000ull);
+        if (w != VK_SUCCESS) {
+            dead_ = true;
+            hung_ = w == VK_TIMEOUT;
+            return fail(err, w == VK_TIMEOUT ? "generator batch timed out" : "device lost");
+        }
+        poll();
+        return true;
+    }
+    // everything of ours submitted done
+    bool drain(std::string& err) { return waitValue(submitted_, err); }
+    // the oldest submission in flight done (none: true)
+    bool waitOldest(std::string& err, bool ring = false) {
+        for (uint32_t k = 0; k < ringN_; k++) {
+            Slot& s = ring_[(cur_ + k) % ringN_];
+            if (s.pending) return waitValue(s.value, err, ring);
+        }
+        return true;
+    }
+    bool submitWait(std::string& err) { return submit(err, true); }
+    // the command buffer recorded since begin() to the queue (after the budget's wait); wait: until it is done
+    bool submit(std::string& err, bool wait) {
+        ATLAS_ZONE("gen:submit");
+        {
+            ATLAS_ZONE_MIN("wait:genPace", 100);
+            paceAcquire();
+        }
+        Slot& s = ring_[cur_];
+        if (dead_ || beginBad_) return fail(err, "the generator's device was lost earlier");
+        if (s.gt.active()) s.gt.mark(cmd_, fr::intern(phase_.c_str()));
+        if (s.timed) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.q, 1);
+        vkEndCommandBuffer(cmd_);
+        uint64_t value = submitted_ + 1;
+        VkTimelineSemaphoreSubmitInfo tsi{VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO};
+        tsi.signalSemaphoreValueCount = 1;
+        tsi.pSignalSemaphoreValues = &value;
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmd_;
+        if (tl_) {
+            si.pNext = &tsi;
+            si.signalSemaphoreCount = 1;
+            si.pSignalSemaphores = &tl_;
+        } else {
+            vkResetFences(dev_, 1, &fence_);
+        }
+        VkResult r;
+        {
+            ATLAS_ZONE_MIN("gen:queueSubmit", 100);
+            s.gt.submitted();
+            if (queueMu_) {
+                std::lock_guard<std::mutex> q(*queueMu_);
+                r = vkQueueSubmit(queue_, 1, &si, tl_ ? VK_NULL_HANDLE : fence_);
+            } else {
+                r = vkQueueSubmit(queue_, 1, &si, tl_ ? VK_NULL_HANDLE : fence_);
+            }
+        }
+        if (r != VK_SUCCESS) {
+            dead_ = r == VK_ERROR_DEVICE_LOST;
+            return fail(err, "vkQueueSubmit failed (" + std::to_string(int(r)) + ")");
+        }
+        submitted_ = value;
+        // (the budget pays an estimate now, so work in flight counts against it: a part's from its stage's time a unit,
+        // else the recent submissions'; corrected to its own GPU time when it retires)
+        s.est = s.perUnit && *s.perUnit > 0.0 && s.units > 0.0 ? *s.perUnit * s.units : subEma_;
+        pace_.tokens -= s.est;
+        inFlightMs_ += s.est;
+        s.value = value;
+        s.pending = true;
+        s.phase = phase_;
+        s.at = std::chrono::steady_clock::now();
+        pace_.lastSubAt = s.at;
+        cur_ = (cur_ + 1) % ringN_;
+        if (!tl_) {
+            // (no ring: this one waited for, as before)
+            ATLAS_ZONE("wait:genFence");
+            fenceWaits_++;
+            VkResult w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
+            if (w != VK_SUCCESS) {
+                dead_ = true;
+                hung_ = w == VK_TIMEOUT;
+                return fail(err, w == VK_TIMEOUT ? "generator batch timed out" : "device lost");
+            }
+            retire(s);
+            return true;
+        }
+        poll();
+        return wait ? waitValue(value, err) : true;
+    }
     // ---- the GPU budget ----
-    // The generator shares the card with the frames, and a long kernel in front of a frame is a long frame: the
-    // submissions are paced by a token bucket of GPU milliseconds filled by wall time at a duty that follows the frame
-    // cadence (backend_->framesSubmitted over the last 200 ms): a frame period at its target the generator may take
-    // up to 8 ms of every frame, a period 1.5 x over it 2.5 ms, no frames at all (loading) 80 % of the time. Near work
-    // waits for the bucket to be empty or better, far work for it to be 10 ms full (the leftovers). The wait is
-    // bounded (300 ms a submission: a budget, not a stall); ATLAS_GEN_PACE=0 turns it off, ATLAS_GEN_TARGET_MS sets the
-    // target (20), ATLAS_GEN_FRAME_MS the budget at the target (8).
+    // The generator shares the card with the frames. Its submissions are short (a part of about ATLAS_GEN_PART_MS of GPU
+    // time each), so it may fill whatever the frames leave; the pacer only keeps the frames within their target. A token
+    // bucket of GPU milliseconds fills at a duty, and the duty follows the frames (additive increase, multiplicative
+    // decrease): each 200 ms window the frame period (backend_->framesSubmitted) is held against what the frames may
+    // take: their own period x (1 + ATLAS_GEN_SLACK (0.15)) + 1 ms (ATLAS_GEN_TARGET_MS (20) until that is known).
+    // Their own period is measured in probes: every 4 s (or 25 frames) the generator drains and holds back for a few
+    // frames (paceAcquire waits it out), and whenever it was idle anyway. No frames at all (loading, a paused game): 95 %
+    // of the time. Each submission is charged an estimate when submitted (its own GPU time when it retires), and at
+    // most ATLAS_GEN_AHEAD_MS (6) of them is in flight. Near work waits for the bucket to be empty or better, far work
+    // for it to be 10 ms full. A wait is bounded (300 ms; a probe 1.3 s: a budget, not a stall); ATLAS_GEN_PACE=0 turns
+    // it off; ATLAS_GEN_PACE_TRACE=1 prints the controller every 5 s.
     struct Pacer {
-        double tokens = 20.0, periodMs = 0.0, duty = 0.8;
+        double tokens = 20.0, periodMs = 0.0, duty = 0.5;
         std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
         uint64_t sampleFrames = 0, lastFrames = 0;
         std::chrono::steady_clock::time_point lastFrameAt = last;  // (when the frame counter last moved)
@@ -1976,6 +2297,11 @@ private:
         uint64_t subs = 0;
         int cls = 0;
         bool init = false;
+        // the frames' own period (probes), what they may take, the probe under way
+        double baseMs = 0.0, allowMs = 0.0;
+        bool probing = false, probeMarked = false, probeDrained = false;
+        uint64_t probeFrames = 0, probes = 0;
+        std::chrono::steady_clock::time_point probeAt = last, probeMarkAt = last, lastSubAt = last, traceAt = last;
     } pace_;
     void paceClass(int c) override { pace_.cls = c; }
     PaceStats paceStats() const override {
@@ -1992,9 +2318,12 @@ private:
         return e && std::atof(e) > 0 ? std::atof(e) : def;
     }
     void paceUpdate() {
-        static const double target = envMs("ATLAS_GEN_TARGET_MS", 20.0), atTarget = envMs("ATLAS_GEN_FRAME_MS", 8.0);
+        static const double target = envMs("ATLAS_GEN_TARGET_MS", 20.0), slack = envMs("ATLAS_GEN_SLACK", 0.15);
         auto now = std::chrono::steady_clock::now();
-        double dt = std::chrono::duration<double, std::milli>(now - pace_.last).count();
+        auto msBetween = [](std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
+            return std::chrono::duration<double, std::milli>(b - a).count();
+        };
+        double dt = msBetween(pace_.last, now);
         pace_.last = now;
         uint64_t f = backend_ ? backend_->framesSubmitted() : 0;
         if (!pace_.init) {
@@ -2006,7 +2335,22 @@ private:
             pace_.lastFrames = f;
             pace_.lastFrameAt = now;
         }
-        double win = std::chrono::duration<double, std::milli>(now - pace_.sampleAt).count();
+        auto ease = [](double was, double v) { return was <= 0.0 ? v : was * 0.7 + v * 0.3; };
+        // the probe: from the first frame after the hold began, four frames' period is the frames' own
+        if (pace_.probing && pace_.probeDrained) {
+            if (!pace_.probeMarked && f != pace_.probeFrames) {
+                pace_.probeMarked = true;
+                pace_.probeFrames = f;
+                pace_.probeMarkAt = now;
+            } else if (pace_.probeMarked && f >= pace_.probeFrames + 4) {
+                pace_.baseMs = ease(pace_.baseMs, msBetween(pace_.probeMarkAt, now) / double(f - pace_.probeFrames));
+                pace_.probing = false;
+                pace_.probes++;
+            } else if (msBetween(pace_.probeAt, now) > std::min(1200.0, std::max(400.0, 6.0 * pace_.periodMs))) {
+                pace_.probing = false;  // (frames too slow to time in the hold, or none: the next probe)
+            }
+        }
+        double win = msBetween(pace_.sampleAt, now);
         if (win >= 200.0) {
             double p;
             if (f > pace_.sampleFrames) {
@@ -2015,49 +2359,92 @@ private:
                 // No frame in the window: either none run (loading, a paused game: none for 2 s) or they are stalled
                 // (frames of 200 ms and more: the stall itself is the period, longest wins): the worst case for the
                 // generator, not the best (the first version read both as "no frames" and gave it 80 %)
-                double since = std::chrono::duration<double, std::milli>(now - pace_.lastFrameAt).count();
+                double since = msBetween(pace_.lastFrameAt, now);
                 p = since < 2000.0 && pace_.lastFrames != 0 ? std::max(win, since) : 0.0;
             }
             pace_.periodMs = p == 0.0 ? 0.0 : (pace_.periodMs == 0.0 || p > pace_.periodMs ? p : pace_.periodMs * 0.5 + p * 0.5);
             pace_.sampleFrames = f;
             pace_.sampleAt = now;
-        }
-        double per = pace_.periodMs;
-        if (per <= 0.0) {
-            pace_.duty = 0.8;  // (no frames: loading, a paused game: the card is ours)
-        } else {
-            double over = std::min(1.0, std::max(0.0, (per - target) / (0.5 * target)));
-            double perFrame = atTarget + (2.5 - atTarget) * over;
-            double base = std::min(0.8, std::max(0.08, perFrame / per));
-            // the frames' own GPU time (their timestamps): the rest of the period the card is idle (the CPU's frame,
-            // vsync) and the generator may have a share of it. A long period with a short GPU frame is not the
-            // generator's doing: it had 8 % there and starved (30 ms frames of 10 ms GPU: 2 chunks a second)
-            double g = backend_ ? backend_->frameGpuMs() : 0.0;
-            if (g > 0.0) {
-                double idle = std::max(0.0, 1.0 - g / per);
-                double share = std::min(0.8, std::max(0.08, idle * 0.6));
-                pace_.duty = over > 0.0 ? std::max(base, std::min(share, 0.3)) : std::max(base, share);
+            double per = pace_.periodMs;
+            if (per <= 0.0) {
+                pace_.duty = 0.95;  // (no frames: loading, a paused game: the card is ours)
             } else {
-                pace_.duty = base;
+                // (idle for the whole window: this window's period is the frames' own)
+                if (msBetween(pace_.lastSubAt, now) > win + 50.0) pace_.baseMs = ease(pace_.baseMs, p);
+                // (what the frames may take: their own period and the slack; until it is known, the target)
+                pace_.allowMs = pace_.baseMs > 0.0 ? pace_.baseMs * (1.0 + slack) + 1.0 : target;
+                if (per <= pace_.allowMs) pace_.duty = std::min(0.95, pace_.duty + 0.04);
+                else pace_.duty = std::max(0.03, pace_.duty * (per > pace_.allowMs * 1.5 ? 0.5 : 0.8));
             }
-            pace_.gpuMs = g;
+            pace_.gpuMs = backend_ ? backend_->frameGpuMs() : 0.0;
+            if (!pace_.probing && per > 0.0 && msBetween(pace_.probeAt, now) > std::max(4000.0, 25.0 * per) &&
+                msBetween(pace_.lastSubAt, now) < 200.0) {
+                pace_.probing = true;
+                pace_.probeMarked = false;
+                pace_.probeDrained = false;
+                pace_.probeFrames = f;
+                pace_.probeAt = now;
+            }
+            static const bool trace = std::getenv("ATLAS_GEN_PACE_TRACE") != nullptr;
+            if (trace && msBetween(pace_.traceAt, now) > 5000.0) {
+                // (and the CPU's waits a second since the last line: for a result or a drain, for a full ring or the work
+                // ahead; the submissions a second)
+                double secs = msBetween(pace_.traceAt, now) / 1000.0;
+                pace_.traceAt = now;
+                std::fprintf(stderr,
+                             "TRACE gen pace: period %.1f ms, own %.1f (%llu probes), allowed %.1f, duty %.2f, frame gpu %.1f ms, used %.0f ms, "
+                             "waited %.0f ms; waits/s %.1f result, %.1f ring; submissions/s %.0f (ring %u)\n",
+                             per, pace_.baseMs, (unsigned long long)pace_.probes, pace_.allowMs, pace_.duty, pace_.gpuMs, pace_.usedMs,
+                             pace_.waitedMs, double(fenceWaits_ - traceFence_) / secs, double(ringWaits_ - traceRing_) / secs,
+                             double(pace_.subs - traceSubs_) / secs, ringN_);
+                traceFence_ = fenceWaits_;
+                traceRing_ = ringWaits_;
+                traceSubs_ = pace_.subs;
+                std::string sl;
+                for (auto& [kind, fit] : sliceFit_) {
+                    char b2[96];
+                    std::snprintf(b2, sizeof b2, " %u: %.4f ms a unit, last %u in %.1f ms%s;", kind, fit.msPerUnit, fit.lastUnits, fit.lastMs,
+                                  fit.latency ? " (latency)" : "");
+                    sl += b2;
+                }
+                std::fprintf(stderr, "TRACE gen slices:%s\n", sl.c_str());
+            }
         }
         pace_.tokens = std::min(30.0, pace_.tokens + dt * pace_.duty);
     }
     double lastSubMs_ = 0.0, slicedMs_ = 0.0;
-    // A pass is latency-bound by one workgroup (the surface pass: ~50 ms however few chunks), so slices do not cut its
-    // time in proportion; they cut the workgroups in flight, leaving the card's multiprocessors to the frames. Only
-    // while the frames are over their target: slices of 16 chunks, 8 when they are 1.5 x over.
-    uint32_t sliceOf(uint32_t p, uint32_t n) {
-        (void)p;
+    // (bounded dispatches) a dispatch in slices of its units (a pass's chunks, a far tile pass's groups), a submission
+    // each, sized to about ATLAS_GEN_PART_MS from the time a unit its slices took before. A kind whose time does not
+    // fall with fewer units (bound by one workgroup's latency: a pass's columns walk) is not sliced further: smaller
+    // slices would only multiply it. ATLAS_GEN_PACE=0: never sliced.
+    struct SliceFit {
+        double msPerUnit = 0.0, lastMs = 0.0;
+        uint32_t lastUnits = 0;
+        bool latency = false;
+    };
+    std::unordered_map<uint32_t, SliceFit> sliceFit_;
+    void sliceSeen(uint32_t kind, uint32_t units, double ms) {
+        SliceFit& f = sliceFit_[kind];
+        double per = ms / double(units);
+        f.msPerUnit = f.msPerUnit <= 0.0 ? per : f.msPerUnit * 0.7 + per * 0.3;
+        if (f.lastUnits > 0 && units * 5u <= f.lastUnits * 3u && ms > f.lastMs * 0.75) f.latency = true;
+        if (f.lastUnits == 0 || units != f.lastUnits) {
+            f.lastUnits = units;
+            f.lastMs = ms;
+        } else {
+            f.lastMs = f.lastMs * 0.7 + ms * 0.3;
+        }
+    }
+    uint32_t sliceOf(uint32_t kind, uint32_t n) {
         static const bool on = [] {
             const char* e = std::getenv("ATLAS_GEN_PACE");
             return !e || std::atoi(e) != 0;
         }();
-        if (!on || !shared_ || !backend_) return n;
-        double target = envMs("ATLAS_GEN_TARGET_MS", 20.0);
-        if (pace_.periodMs <= target) return n;
-        return std::min<uint32_t>(n, pace_.periodMs > 1.5 * target ? 8 : 16);
+        static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        if (!on || n <= 1) return std::max(1u, n);
+        auto it = sliceFit_.find(kind);
+        if (it == sliceFit_.end() || it->second.latency || it->second.msPerUnit <= 0.0) return n;
+        return uint32_t(std::clamp(partMs / it->second.msPerUnit, 1.0, double(n)));
     }
     // before a submission: wait for the budget; returns the wait
     double paceAcquire() {
@@ -2069,8 +2456,23 @@ private:
         paceUpdate();
         double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
         auto t0 = std::chrono::steady_clock::now();
-        while (pace_.tokens < need && waited < 300.0) {
-            double ms = std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
+        // (the work in flight ahead of the frames: at most ATLAS_GEN_AHEAD_MS (6) of it, estimated)
+        static const double ahead = envMs("ATLAS_GEN_AHEAD_MS", 6.0);
+        while (inFlightMs_ > ahead && waited < 300.0) {
+            std::string e;
+            if (!waitOldest(e, true)) break;
+            waited = msSince(t0);
+        }
+        while ((pace_.tokens < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
+            if (pace_.probing && !pace_.probeDrained) {
+                // (the probe times the frames alone: ours in flight done first, then from the next frame)
+                std::string e;
+                drain(e);
+                pace_.probeDrained = true;
+                pace_.probeFrames = backend_ ? backend_->framesSubmitted() : 0;
+                pace_.probeAt = std::chrono::steady_clock::now();
+            }
+            double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
             std::this_thread::sleep_for(std::chrono::microseconds(int64_t(ms * 1000.0)));
             waited = msSince(t0);
             paceUpdate();
@@ -2078,95 +2480,6 @@ private:
         pace_.waitedMs += waited;
         if (pace_.cls) pace_.farWaitedMs += waited;
         return waited;
-    }
-    bool submitWait(std::string& err) {
-        ATLAS_ZONE("gen:submitWait");
-        {
-            ATLAS_ZONE_MIN("wait:genPace", 100);
-            paceAcquire();
-        }
-        auto sub0 = std::chrono::steady_clock::now();
-        struct Charge {
-            VulkanEngine* e;
-            std::chrono::steady_clock::time_point t;
-            ~Charge() {
-                double ms = msSince(t);
-                // the budget pays the submission's GPU time (its timestamps) when there is one: its wall time also holds
-                // the time it queued behind the frames, and at 1440p that charged the generator for the frames' work
-                // until it made nothing (a route at 13 ms frames: no chunk in 160 s)
-                double gpu = ms;
-                if (e->subTimedDone_) {
-                    uint64_t ts[2] = {};
-                    if (vkGetQueryPoolResults(e->dev_, e->subQ_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS && ts[1] >= ts[0])
-                        gpu = double(ts[1] - ts[0]) * e->timestampPeriod_ * 1e-6;
-                    e->subTimedDone_ = false;
-                }
-                e->pace_.tokens -= gpu;
-                e->lastSubMs_ = ms;
-                e->pace_.usedMs += gpu;
-                if (ms > e->pace_.maxSubMs) {
-                    e->pace_.maxSubMs = ms;
-                    std::snprintf(e->pace_.maxPhase, sizeof e->pace_.maxPhase, "%s", e->phase_.c_str());
-                }
-                // (the worst of the last 10-20 s, two buckets: what persists, not a first call's pipeline build)
-                auto now = std::chrono::steady_clock::now();
-                if (now - e->pace_.bucketAt > std::chrono::seconds(10)) {
-                    e->pace_.prevMs = e->pace_.curMs;
-                    std::memcpy(e->pace_.prevPhase, e->pace_.curPhase, sizeof e->pace_.prevPhase);
-                    e->pace_.curMs = 0;
-                    e->pace_.curPhase[0] = 0;
-                    e->pace_.bucketAt = now;
-                }
-                if (ms > e->pace_.curMs) {
-                    e->pace_.curMs = ms;
-                    std::snprintf(e->pace_.curPhase, sizeof e->pace_.curPhase, "%s", e->phase_.c_str());
-                }
-                e->pace_.subs++;
-                static const double warnMs = envMs("ATLAS_GEN_TRACE_SUBS", 0.0);  // (measurements: submissions over this)
-                if (warnMs > 0.0 && ms > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", ms, e->phase_.c_str());
-            }
-        } charge{this, sub0};
-        if (gt_.active()) gt_.mark(cmd_, fr::intern(phase_.c_str()));
-        if (subTimed_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, subQ_, 1);
-        subTimedDone_ = subTimed_;
-        subTimed_ = false;
-        vkEndCommandBuffer(cmd_);
-        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
-        si.commandBufferCount = 1;
-        si.pCommandBuffers = &cmd_;
-        vkResetFences(dev_, 1, &fence_);
-        VkResult r;
-        {
-            ATLAS_ZONE_MIN("gen:queueSubmit", 100);
-            gt_.submitted();
-            if (queueMu_) {
-                std::lock_guard<std::mutex> q(*queueMu_);
-                r = vkQueueSubmit(queue_, 1, &si, fence_);
-            } else {
-                r = vkQueueSubmit(queue_, 1, &si, fence_);
-            }
-        }
-        if (r != VK_SUCCESS) {
-            dead_ = r == VK_ERROR_DEVICE_LOST;
-            return fail(err, "vkQueueSubmit failed (" + std::to_string(int(r)) + ")");
-        }
-        auto w0 = std::chrono::steady_clock::now();
-        VkResult w;
-        {
-            ATLAS_ZONE("wait:genFence");
-            w = vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 20'000'000'000ull);
-        }
-        static const uint32_t genTrack = fr::trackId("GPU gen");
-        if (w == VK_SUCCESS) gt_.resolve("gpu gen", genTrack);
-        if (double ws = msSince(w0); ws > 500.0)  // (a submission near the watchdog's 2 s: split the work further)
-            std::fprintf(stderr, "TRACE warn gen submission took %.0f ms (%s)\n", ws, phase_.c_str());
-        if (w != VK_SUCCESS) {
-            dead_ = true;
-            hung_ = w == VK_TIMEOUT;
-            return fail(err, w == VK_TIMEOUT ? "generator batch timed out" : "device lost");
-        }
-        completed_.fetch_add(1, std::memory_order_release);
-        return true;
     }
     void barrier(VkAccessFlags src, VkAccessFlags dst, VkPipelineStageFlags from, VkPipelineStageFlags to) {
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};

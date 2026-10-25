@@ -702,6 +702,7 @@ public:
         }
         d.float64 = float64_;
         d.timestampPeriod = timestampPeriod_;
+        d.timeline = timeline_;
         return true;
     }
     uint64_t framesSubmitted() const override { return frameCounter_.load(); }
@@ -1589,6 +1590,27 @@ private:
         dci.queueCreateInfoCount = nq;
         dci.pQueueCreateInfos = qci;
         dci.pEnabledFeatures = &feats;
+        // (dev: ATLAS_FEAT_CLOCK=1) the decoration kernels' clock probes (a core built with CMake ATLAS_FEAT_CLOCK)
+        VkPhysicalDeviceShaderClockFeaturesKHR clockF{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR};
+        if (std::getenv("ATLAS_FEAT_CLOCK") && std::getenv("ATLAS_FEAT_CLOCK")[0] == '1' && has(VK_KHR_SHADER_CLOCK_EXTENSION_NAME)) {
+            enable.push_back(VK_KHR_SHADER_CLOCK_EXTENSION_NAME);
+            clockF.shaderSubgroupClock = VK_TRUE;
+            dci.pNext = &clockF;
+        }
+        // timeline semaphores (core 1.2, every 1.2 device has them): the client generator's submission ring
+        VkPhysicalDeviceTimelineSemaphoreFeatures timelineF{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
+        {
+            VkPhysicalDeviceTimelineSemaphoreFeatures have12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
+            VkPhysicalDeviceFeatures2 f2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+            f2.pNext = &have12;
+            if (vkGetPhysicalDeviceFeatures2) vkGetPhysicalDeviceFeatures2(phys_, &f2);
+            if (have12.timelineSemaphore) {
+                timelineF.timelineSemaphore = VK_TRUE;
+                timelineF.pNext = const_cast<void*>(dci.pNext);
+                dci.pNext = &timelineF;
+                timeline_ = true;
+            }
+        }
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
         VkResult cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
@@ -3315,6 +3337,7 @@ private:
     uint32_t genFamily_ = UINT32_MAX;
     VkQueue genQueue_ = VK_NULL_HANDLE;
     bool genLowPriority_ = false;  // (the generator's queue at VK_EXT_global_priority's low)
+    bool timeline_ = false;        // (timeline semaphores enabled: the generator's submission ring)
     bool genTimestamps_ = false, float64_ = false;
     std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;

@@ -24,6 +24,8 @@
 #include "atlas_feat_fartrees_spv.h"
 #include "atlas_feat_farcanopy_spv.h"
 #include "atlas_feat_vein_spv.h"
+#include "atlas_feat_lakew_spv.h"
+#include "atlas_feat_rockw_spv.h"
 #include "atlas_feat_init_spv.h"
 #include "atlas_feat_copy_spv.h"
 #include "atlas_feat_apply_spv.h"
@@ -58,6 +60,9 @@ constexpr uint32_t NB = 13, WIDE_W = 44u * 4096u;
 constexpr uint32_t P_HM = 0, P_INIT = 1, P_COPY = 2, P_APPLY = 3, P_PACK = 4, P_FEAT = 5, FT_TYPES = 9, P_AUX = P_FEAT + FT_TYPES - 1,
                    PIPES = P_AUX + 1;
 constexpr uint32_t R_TYPE = 0;
+// the counters buffer: [0] the origins with placements left; (dev, atlas_features.slang FEAT_CLOCK) [16 + k] the clock
+// probes' sums, [48 + k] their longest
+constexpr uint32_t CNT_BYTES = 1024, CLK_N = 32;
 
 double msSince(std::chrono::steady_clock::time_point t0) {
     return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
@@ -414,7 +419,7 @@ private:
         bool ok = ensure(staging_, 32u << 20, true, err) && ensure(prog_, 64, false, err) && ensure(ids_, 64, false, err) &&
                   ensure(aux_, 64, false, err) && ensure(org_, 64, false, err) && ensure(scratch_, 64, false, err) &&
                   ensure(out_, 64, false, err) && ensure(tgt_, 64, false, err) && ensure(wide_, 64, false, err) &&
-                  ensure(cnt_, 64, false, err);
+                  ensure(cnt_, CNT_BYTES, false, err);
         if (ok) writeSet();
         return ok;
     }
@@ -592,7 +597,8 @@ constexpr uint32_t STORE_AUX_W = ATLAS_GEN_STORE_AUX_WORDS, MAX_ORIGINS = 64;
 constexpr uint32_t H_GEN2FEAT = 24, H_FEAT2GEN = 25, H_NGEN = 26;
 // pipelines: hm, init, aux, store apply, one a feature type, then the placement mask
 constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_MASK = S_FEAT + FT_TYPES - 1, S_FARPLACES = S_MASK + 1,
-                   S_FARTREES = S_MASK + 2, S_FARCANOPY = S_MASK + 3, S_VEIN = S_MASK + 4, S_PIPES = S_MASK + 5;
+                   S_FARTREES = S_MASK + 2, S_FARCANOPY = S_MASK + 3, S_VEIN = S_MASK + 4, S_LAKEW = S_MASK + 5, S_ROCKW = S_MASK + 6,
+                   S_PIPES = S_MASK + 7;
 constexpr uint32_t H_PLACES = 29;  // (AtlasFeatureProgram: the settlements' table)
 constexpr uint32_t VEIN_W = 12288;  // (atlas_features.slang featVeinMain: a thread a position of an ore vein's box)
 
@@ -635,13 +641,15 @@ public:
                                          atlas_feat_ore_spv, atlas_feat_cover_spv, atlas_feat_rock_spv, atlas_feat_tree_spv,
                                          atlas_feat_freeze_spv, atlas_feat_disk_spv, atlas_feat_spring_spv, atlas_feat_lake_spv,
                                          atlas_feat_mask_spv, atlas_feat_farplaces_spv, atlas_feat_fartrees_spv,
-                                         atlas_feat_farcanopy_spv, atlas_feat_vein_spv};
+                                         atlas_feat_farcanopy_spv, atlas_feat_vein_spv, atlas_feat_lakew_spv,
+                                         atlas_feat_rockw_spv};
         const size_t size[S_PIPES] = {atlas_feat_hm_spv_size, atlas_feat_init_spv_size, atlas_feat_aux_spv_size,
                                       atlas_feat_sapply_spv_size, atlas_feat_ore_spv_size, atlas_feat_cover_spv_size,
                                       atlas_feat_rock_spv_size, atlas_feat_tree_spv_size, atlas_feat_freeze_spv_size,
                                       atlas_feat_disk_spv_size, atlas_feat_spring_spv_size, atlas_feat_lake_spv_size,
                                       atlas_feat_mask_spv_size, atlas_feat_farplaces_spv_size, atlas_feat_fartrees_spv_size,
-                                      atlas_feat_farcanopy_spv_size, atlas_feat_vein_spv_size};
+                                      atlas_feat_farcanopy_spv_size, atlas_feat_vein_spv_size, atlas_feat_lakew_spv_size,
+                                      atlas_feat_rockw_spv_size};
         for (uint32_t i = 0; i < S_PIPES; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
@@ -684,7 +692,7 @@ public:
         bool ok = ensure(prog_, prog.size() * 4, false, err) && ensure(staging_, prog.size() * 4, true, err) &&
                   ensure(org_, size_t(MAX_ORIGINS) * ORIGIN_W * 4, false, err) &&
                   ensure(scratch_, size_t(MAX_ORIGINS) * SCR_W * 4, false, err) &&
-                  ensure(list_, size_t(MAX_ORIGINS) * 25 * 3 * 4, false, err) && ensure(cnt_, 64, false, err);
+                  ensure(list_, size_t(MAX_ORIGINS) * 25 * 3 * 4, false, err) && ensure(cnt_, CNT_BYTES, false, err);
         if (!ok) return false;
         std::memcpy(staging_.map, prog.data(), prog.size() * 4);
         progBytes_ = prog.size() * 4;
@@ -702,24 +710,30 @@ public:
             vkCmdCopyBuffer(cmd, staging_.buf, prog_.buf, 1, &c);
             progUp_ = true;
         }
-        VkBuffer planes = VkBuffer(b->planes);
-        VkBuffer bufs[NB] = {prog_.buf, prog_.buf, scratch_.buf, prog_.buf, scratch_.buf, scratch_.buf, prog_.buf,
-                             scratch_.buf, scratch_.buf, VkBuffer(b->map), prog_.buf, prog_.buf, planes};
-        VkDescriptorBufferInfo bi[NB];
-        VkWriteDescriptorSet w[NB];
-        for (uint32_t i = 0; i < NB; i++) {
-            bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
-            w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            w[i].dstSet = farSet_;
-            w[i].dstBinding = i;
-            w[i].descriptorCount = 1;
-            w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            w[i].pBufferInfo = &bi[i];
+        // (version 2: in parts) part 0 binds the tile and finds its settlements; then `units` tree records a part, each
+        // a dispatch over the tile's chunks (a record's trees: seeded on their own, written by atomics: any split is
+        // exact); the canopy with the last
+        uint32_t part = b->version >= 2 ? b->part : 0, units = b->version >= 2 ? b->units : 0;
+        if (part == 0) {
+            VkBuffer planes = VkBuffer(b->planes);
+            VkBuffer bufs[NB] = {prog_.buf, prog_.buf, scratch_.buf, prog_.buf, scratch_.buf, scratch_.buf, prog_.buf,
+                                 scratch_.buf, scratch_.buf, VkBuffer(b->map), prog_.buf, prog_.buf, planes};
+            VkDescriptorBufferInfo bi[NB];
+            VkWriteDescriptorSet w[NB];
+            for (uint32_t i = 0; i < NB; i++) {
+                bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
+                w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                w[i].dstSet = farSet_;
+                w[i].dstBinding = i;
+                w[i].descriptorCount = 1;
+                w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                w[i].pBufferInfo = &bi[i];
+            }
+            vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
+            vkCmdFillBuffer(cmd, scratch_.buf, 0, 4, 0u);  // (the places list's count)
+            barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         }
-        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
-        vkCmdFillBuffer(cmd, scratch_.buf, 0, 4, 0u);  // (the places list's count)
-        barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &farSet_, 0, nullptr);
         FeatParams p{b->tx, b->tz, 0, uint32_t(b->lod), int32_t(b->tile), 0u, 0u, 0u};
         auto dispatch = [&](uint32_t pipe, uint32_t gx) {
@@ -730,11 +744,30 @@ public:
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         };
         uint32_t side = b->lod <= 4 ? (16u << uint32_t(b->lod)) : 256u;  // the chunks a tile side the trees run on
-        dispatch(S_FARPLACES, (places_ + GROUP - 1) / GROUP);
-        dispatch(S_FARTREES, (side * side + GROUP - 1) / GROUP);
+        uint32_t groups = (side * side + GROUP - 1) / GROUP;
+        if (part == 0) {
+            dispatch(S_FARPLACES, (places_ + GROUP - 1) / GROUP);
+            if (units == 0) {
+                dispatch(S_FARTREES, groups);  // (all at once: an older generator)
+                dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
+                return 0;
+            }
+            farRecs_.clear();
+            for (uint32_t rec : dispatch_)
+                if (rec < types_.size() && types_[rec] == 4u) farRecs_.push_back(rec);
+            farCursor_ = 0;
+        }
+        for (uint32_t i = 0; i < std::max(1u, units) && farCursor_ < farRecs_.size(); i++) {
+            p.rec = farRecs_[farCursor_++];
+            dispatch(S_FARTREES, groups);
+        }
+        if (farCursor_ < farRecs_.size()) return ATLAS_GEN_STAGE_MORE;
+        p.rec = 0;
         dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
         return 0;
     }
+    std::vector<uint32_t> farRecs_;  // (the far stage in parts) the program's tree records, and the next one
+    size_t farCursor_ = 0;
 
     // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)
     void setOverlays(AtlasOvl* o) { ovl_ = o; }
@@ -742,6 +775,11 @@ public:
     int32_t decorate(const AtlasGenStoreBatch* b) {
         std::string err;
         if (b->radius != 2 || b->count > MAX_ORIGINS) return 1;
+        // (version 3: the parts are not waited for) a round's counter and time are read once its part is done: until
+        // then nothing is recorded (the generator waits for its oldest part in flight, then calls again with this part)
+        uint32_t done = b->version >= 3 ? b->partsDone : (b->version >= 2 ? b->part : 0);
+        bool decide = b->version >= 2 && b->part > 0 && partRoundRec_ != ~0u && !(partVein_ && partPhase_ < 5);
+        if (decide && done <= partRoundPart_) return ATLAS_GEN_STAGE_WAIT;
         if (!aux_.buf || storeSlots_ != b->slots) {
             release(aux_);
             if (!ensure(aux_, size_t(b->slots) * AUX_W * 4, false, err)) return 2;
@@ -808,21 +846,24 @@ public:
             partSteps_.push_back(STEP_APPLY);
         }
         // the bindings: the program, the store's terrain, our aux (per store slot), the origins, the scratch, the store's
-        // blocks, the slot list, the store's aux, the counter, the map, the overlays' boxes (a part binds them again)
-        VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
-                             VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), partTapes_, partRecords_, prog_.buf};
-        VkDescriptorBufferInfo bi[NB];
-        VkWriteDescriptorSet w[NB];
-        for (uint32_t i = 0; i < NB; i++) {
-            bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
-            w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            w[i].dstSet = set_;
-            w[i].dstBinding = i;
-            w[i].descriptorCount = 1;
-            w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            w[i].pBufferInfo = &bi[i];
+        // blocks, the slot list, the store's aux, the counter, the map, the overlays' boxes; written at part 0 (nothing of
+        // the generator's is in flight then), bound each part
+        if (part == 0) {
+            VkBuffer bufs[NB] = {prog_.buf, VkBuffer(b->terrain), aux_.buf, org_.buf, scratch_.buf, VkBuffer(b->blocks), list_.buf,
+                                 VkBuffer(b->aux), cnt_.buf, VkBuffer(b->map), partTapes_, partRecords_, prog_.buf};
+            VkDescriptorBufferInfo bi[NB];
+            VkWriteDescriptorSet w[NB];
+            for (uint32_t i = 0; i < NB; i++) {
+                bi[i] = {bufs[i], 0, VK_WHOLE_SIZE};
+                w[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                w[i].dstSet = set_;
+                w[i].dstBinding = i;
+                w[i].descriptorCount = 1;
+                w[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                w[i].pBufferInfo = &bi[i];
+            }
+            vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);
         }
-        vkUpdateDescriptorSets(dev_, NB, w, 0, nullptr);  // (the part before has finished: the generator waited for it)
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
         uint32_t nslots = partSlots_;
         FeatParams p{int32_t(n), 0, 0, 0, int32_t(nslots), 1u, 1u << 30, 1u};
@@ -842,25 +883,42 @@ public:
         // In parts: a step a part, a placed feature in rounds of `budget` placements an origin (the kernel resumes from
         // the origin's stack: featBody), its budget fitted to about ATLAS_GEN_PART_MS from the last round's time
         // (lastPartUs); the round's count of origins with placements left read back for the next part.
-        if (part > 0 && partRoundRec_ != ~0u) {
+        if (part > 0 && partRoundRec_ != ~0u && partVein_ && partPhase_ < 5) {
+            // the round's vein passes, a dispatch a part (featVeinMain: the spheres' pair loop, a group an origin;
+            // then clear, first visits, fates, and the fates into the origin's table)
+            static const uint32_t order[5] = {3, 0, 1, 2, 4};
+            uint32_t phase = partPhase_;
+            partPhase_ = phase + 1;
+            p.k = order[phase];
+            dispatch(S_VEIN, order[phase] == 3 ? 1u : (VEIN_W + 63) / 64, n);
+            p.k = 0;
+            return ATLAS_GEN_STAGE_MORE;
+        }
+        if (decide) {
             static const double partMs = [] {
                 const char* e = std::getenv("ATLAS_GEN_PART_MS");
                 return e && std::atof(e) > 0 ? std::atof(e) : 4.0;
             }();
-            double ms = double(b->lastPartUs) / 1000.0;
+            // the round's GPU time (version 3: its own part's; before, the generator waited for each part: the last)
+            bool v3 = b->version >= 3 && b->partUs;
+            double ms = double(v3 ? b->partUs[partRoundPart_] : b->lastPartUs) / 1000.0;
             uint32_t& bud = featBudget_[partRoundRec_];
-            uint32_t phase = partPhase_;  // (0 the feature's round; 1..5 its vein's passes, in order 3, 0, 1, 2, 4)
-            // dev: ATLAS_FEAT_PART_TRACE=1: per placed feature its rounds' time and budget, to stderr every 20 s
+            // dev: ATLAS_FEAT_PART_TRACE=1: per placed feature its rounds' time and budget (and its vein passes'), to
+            // stderr every 5 s
             static const bool ptrace = std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
-            if (ptrace) {
-                RecStat& rs = recStats_[partRoundRec_ | phase << 28];
-                rs.max = std::max(rs.max, ms);
-                rs.sum += ms;
+            for (uint32_t ph = 0; ptrace && ph < (partVein_ ? 6u : 1u); ph++) {
+                if (ph > 0 && (!v3 || partRoundPart_ + ph >= done)) break;  // (a vein pass not done yet: not counted)
+                double pms = ph == 0 ? ms : double(b->partUs[partRoundPart_ + ph]) / 1000.0;
+                RecStat& rs = recStats_[partRoundRec_ | ph << 28];
+                rs.max = std::max(rs.max, pms);
+                rs.sum += pms;
                 rs.n++;
-                if (ms > 8.0) rs.over++;
+                if (pms > 8.0) rs.over++;
                 rs.minBud = std::min(rs.minBud, bud);
+            }
+            if (ptrace) {
                 auto now = std::chrono::steady_clock::now();
-                if (now - recStatsAt_ > std::chrono::seconds(20)) {
+                if (now - recStatsAt_ > std::chrono::seconds(5)) {
                     recStatsAt_ = now;
                     std::vector<std::pair<double, uint32_t>> top;
                     for (auto& [r, st] : recStats_) top.push_back({st.max, r});
@@ -871,26 +929,49 @@ public:
                         std::fprintf(stderr, "TRACE feat record %u type %u%s%u: rounds %llu, %.1f ms mean, %.1f max, %llu over 8 ms, budget down to %u\n",
                                      r, types_[r], ph ? " vein pass " : "", ph ? ph - 1 : 0u, (unsigned long long)st.n, st.sum / double(st.n), st.max,
                                      (unsigned long long)st.over, st.minBud);
+                        if (clockOn() && ph == 0) {
+                            // (the probes: per round, the origins' spans summed, and the longest one; 64 cycles a unit,
+                            // in ms at 1.8 GHz; probes 7, 8 count)
+                            std::string line;
+                            char cb[96];
+                            for (uint32_t k = 0; k < CLK_N; k++) {
+                                if (!st.clkSum[k]) continue;
+                                if (types_[r] == 1 && (k == 7 || k == 8 || (k >= 20 && k < 25)))
+                                    std::snprintf(cb, sizeof cb, " [%u] n %llu", k, (unsigned long long)st.clkSum[k]);
+                                else
+                                    std::snprintf(cb, sizeof cb, " [%u] %.2f/round max %.2f", k, double(st.clkSum[k]) * 64.0 / 1.8e6 / double(st.n),
+                                                  double(st.clkMax[k]) * 64.0 / 1.8e6);
+                                line += cb;
+                            }
+                            if (types_[r] == 1 && staging_.map && size_t(r) + 5 < progBytes_ / 4) {
+                                // (an ore's config: size, discard, targets and the first's rule kind)
+                                const uint32_t* pw = static_cast<const uint32_t*>(staging_.map);
+                                uint32_t cfg = pw[r + 5];
+                                if (size_t(cfg) + 3 < progBytes_ / 4) {
+                                    float disc;
+                                    std::memcpy(&disc, &pw[cfg + 1], 4);
+                                    std::snprintf(cb, sizeof cb, " ore size %u discard %.2f targets %u kind %u", pw[cfg], disc, pw[cfg + 2], pw[cfg + 3]);
+                                    line += cb;
+                                }
+                            }
+                            std::fprintf(stderr, "TRACE feat clock record %u:%s\n", r, line.c_str());
+                        }
                     }
                 }
             }
-            if (phase == 0) {
-                if (ms > 0.0) {
-                    double want = double(bud) * partMs / ms;
-                    bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
-                    bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
-                }
-                partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
+            if (ms > 0.0) {
+                double want = double(bud) * partMs / ms;
+                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
+                bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
             }
-            if (partVein_ && phase < 5) {
-                // the round's vein passes, a dispatch a part (featVeinMain: the spheres' pair loop, a group an origin;
-                // then clear, first visits, fates, and the fates into the origin's table)
-                static const uint32_t order[5] = {3, 0, 1, 2, 4};
-                partPhase_ = phase + 1;
-                p.k = order[phase];
-                dispatch(S_VEIN, order[phase] == 3 ? 1u : (VEIN_W + 63) / 64, n);
-                p.k = 0;
-                return ATLAS_GEN_STAGE_MORE;
+            partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
+            if (clockOn() && ptrace && left_.map) {
+                const uint32_t* c = static_cast<const uint32_t*>(left_.map);
+                RecStat& rs = recStats_[partRoundRec_];
+                for (uint32_t k = 0; k < CLK_N; k++) {
+                    rs.clkSum[k] += c[16 + k];
+                    rs.clkMax[k] = std::max(rs.clkMax[k], c[48 + k]);
+                }
             }
             partPhase_ = 0;
             uint32_t left = partLeft_;
@@ -909,15 +990,26 @@ public:
         uint32_t step = partSteps_[partCursor_];
         if (step < STEP_AUX) {
             std::string err;
-            if (!ensure(left_, 64, true, err)) return 3;
+            if (!ensure(left_, CNT_BYTES, true, err)) return 3;
             static const bool treePhasesOn = [] {
                 const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
                 return !(e && e[0] == '0');
             }();
             auto it = featBudget_.find(step);
             // (trees: an operation budget with the commit in phases, else one tree a round as before)
-            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = types_[step] == 4 ? (treePhasesOn ? 512u : 1u) : 64u);
-            vkCmdFillBuffer(cmd, cnt_.buf, 0, 4, 0u);
+            static const bool lakesOn = [] {
+                const char* e = std::getenv("ATLAS_FEAT_LAKES");
+                return !(e && e[0] == '0');
+            }();
+            bool lakeParts = lakesOn && types_[step] == 8;
+            static const bool rocksOn = [] {
+                const char* e = std::getenv("ATLAS_FEAT_ROCKS");
+                return !(e && e[0] == '0');
+            }();
+            bool rockParts = rocksOn && types_[step] == 3;
+            uint32_t bud = it != featBudget_.end() ? it->second
+                                                   : (featBudget_[step] = types_[step] == 4 ? (treePhasesOn ? 512u : 1u) : (lakeParts || rockParts) ? 4096u : 64u);
+            vkCmdFillBuffer(cmd, cnt_.buf, 0, clockOn() ? CNT_BYTES : 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
             // an ore's vein: its block loop on the vein kernel's threads (atlas_features.slang featVeinMain), its three
@@ -935,15 +1027,32 @@ public:
                 return !(e && e[0] == '0');
             }();
             if (treePhases && types_[step] == 4) p.store = 5u;
+            // a lake in parts (store | 8): its spots drawn in the round, their cells and its edge tests on the lake
+            // kernel's threads right after it (featLakeWideMain), its rest within an operation budget in the rounds
+            // after; ATLAS_FEAT_LAKES=0: on the one lane
+            if (lakeParts) p.store = 9u;
+            // a rock placement in parts (store | 16): each rock's shape on the rock kernel's threads right after the
+            // round that issued it (featRockWideMain), its blocks within an operation budget the rounds after;
+            // ATLAS_FEAT_ROCKS=0: on the one lane
+            if (rockParts) p.store = 17u;
             runStep(cmd, p, dispatch, step, partRound_ == 0, bud);
+            if (lakeParts) {
+                p.k = 0;
+                dispatch(S_LAKEW, (7u * 1176u + 63u) / 64u, n);
+                p.k = 1;
+                dispatch(S_LAKEW, 2048u / 64u, n);
+                p.k = 0;
+            }
+            if (rockParts) dispatch(S_ROCKW, 65536u / 32u / 64u, n);  // (atlas_features.slang ROCK_BITS: a word a thread)
             p.store = 1u;
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                     VK_PIPELINE_STAGE_TRANSFER_BIT);
-            VkBufferCopy c{0, 0, 4};
+            VkBufferCopy c{0, 0, clockOn() ? CNT_BYTES : 4};
             vkCmdCopyBuffer(cmd, cnt_.buf, left_.buf, 1, &c);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_HOST_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT);
             partRoundRec_ = step;
-            return ATLAS_GEN_STAGE_MORE;  // (its count read at the next part: another round, or the next step)
+            partRoundPart_ = part;
+            return ATLAS_GEN_STAGE_MORE;  // (its count read once it is done: another round, or the next step)
         }
         runStep(cmd, p, dispatch, step, true, 1u << 30);
         partCursor_++;
@@ -999,7 +1108,7 @@ public:
     std::vector<uint32_t> partSteps_;
     std::vector<int32_t> partSlotXZ_;
     uint32_t partCursor_ = 0, partSlots_ = 0;
-    uint32_t partRound_ = 0, partRoundRec_ = ~0u;
+    uint32_t partRound_ = 0, partRoundRec_ = ~0u, partRoundPart_ = 0;
     uint32_t partPhase_ = 0, partLeft_ = 0;  // (an ore's round: its vein pass next, and the round's count of origins left)
     bool partVein_ = false;  // (the feature in rounds: its round, the record the last part ran)
     std::unordered_map<uint32_t, uint32_t> featBudget_;  // per record: placements an origin a round (fitted to the part)
@@ -1008,7 +1117,13 @@ public:
         double max = 0, sum = 0;
         uint64_t n = 0, over = 0;
         uint32_t minBud = ~0u;
+        uint64_t clkSum[CLK_N] = {};
+        uint32_t clkMax[CLK_N] = {};
     };
+    static bool clockOn() {
+        static const bool on = std::getenv("ATLAS_FEAT_CLOCK") && std::getenv("ATLAS_FEAT_CLOCK")[0] == '1';
+        return on;
+    }
     std::unordered_map<uint32_t, RecStat> recStats_;  // (ATLAS_FEAT_PART_TRACE)
     std::chrono::steady_clock::time_point recStatsAt_ = std::chrono::steady_clock::now();
     bool partBoxes_ = false;
