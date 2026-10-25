@@ -438,6 +438,25 @@ def apply_curves(rgb, labels, curves):
     return out
 
 
+def split_pits(dark, shape):
+    """A pit is a dark spot in a picture that otherwise matches: its component's ring (3 px around it) shows the block as
+    vanilla does (the shape difference there under 6). Dark where its surroundings differ too is a silhouette or a lighting
+    difference (a missing part, a shadow), not a hole. Returns (pit mask, silhouette mask)."""
+    from scipy import ndimage
+    lab_, n = ndimage.label(dark)
+    pit = np.zeros_like(dark)
+    if n == 0:
+        return pit, dark.copy()
+    for i, sl in enumerate(ndimage.find_objects(lab_), start=1):
+        y0, y1, x0, x1 = max(0, sl[0].start - 4), sl[0].stop + 4, max(0, sl[1].start - 4), sl[1].stop + 4
+        comp = lab_[y0:y1, x0:x1] == i
+        ring = ndimage.binary_dilation(comp, iterations=3) & ~comp
+        ring &= ~dark[y0:y1, x0:x1]
+        if ring.sum() >= 8 and float(shape[y0:y1, x0:x1][ring].mean()) < 6.0 and comp.sum() < 0.25 * dark.size:
+            pit[y0:y1, x0:x1] |= comp
+    return pit, dark & ~pit
+
+
 def pair_metrics(v_png, a_png, curves=None, labels=None):
     """The pair's numbers. With `curves` (fit_curves) vanilla's pixels are first put through the look's tone curves: what is
     left is the block's own difference, not the pipeline's (a physical sun and a tone map against vanilla's lightmap)."""
@@ -453,10 +472,11 @@ def pair_metrics(v_png, a_png, curves=None, labels=None):
     off = np.median(d.reshape(-1, 3), axis=0)
     shape = np.sqrt(((d - off) ** 2).sum(-1))
     ca = la[..., 0] - off[0]
-    pit = ca < minfilter3(lv[..., 0]) - PIT_L           # darker than every vanilla pixel around it
+    dark = ca < minfilter3(lv[..., 0]) - PIT_L          # darker than every vanilla pixel around it
+    pit, sil = split_pits(dark, shape)
     bright = ca > -minfilter3(-lv[..., 0]) + PIT_L      # brighter than every vanilla pixel around it
     return {"dE": float(de.mean()), "dEp95": float(np.percentile(de, 95)), "dEshape": float(shape.mean()),
-            "offsetL": float(off[0]), "pit": float(pit.mean()), "bright": float(bright.mean()),
+            "offsetL": float(off[0]), "pit": float(pit.mean()), "silhouette": float(sil.mean()), "bright": float(bright.mean()),
             "lumaVanilla": float(lv[..., 0].mean()), "lumaAtlas": float(la[..., 0].mean()), "px": int(de.size),
             # what is in the picture at all: the share of pixels near black in atlas and not in vanilla (a hole: nothing
             # drawn, nothing loaded), and the spread of luminance in each (an atlas picture as flat as the stage's floor
