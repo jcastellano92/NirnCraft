@@ -114,6 +114,16 @@ follows the design without new tests.
 | Server communicates elements | Coalesced position-based edits plus entity state by interest; bake shared by region hashes (designed) | Edits stored as deltas; sharing not built | None until multiplayer; design in ATLAS-WORLD-STORE §2 |
 | Same world for collisions | The server fed from the GPU generator; level-0 ids against the client level | Built on atlas-server; 0 mismatches over 7,500 blocks | None (server speed is the generator's) |
 
+**Two candidate techniques to test when their stage comes (from an outside review, 2026-10-25):**
+- **(C) Directional coarse voxels:** six-direction colour and opacity per coarse voxel, so distant forests and meadows
+  don't average to mud and read right from the side. Test with the far-look work, on the gallery sweep (grass
+  coverage at 1 km, tree shimmer).
+- **(E) Cone tracing through the coarse levels** for bounce and AO. Test in the lighting pass against the dark side
+  faces and corners.
+
+Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
+(§0.1-0.2).
+
 **Supported, not built (owner, 2026-10-25).** E2-E5 aren't features to build now. They're checks that the core leaves
 room for them, so none forces a redesign later. Each is a design check against the core's interfaces:
 - the trace loop has a slot for a second structure (the entity BVH) and for density volumes;
