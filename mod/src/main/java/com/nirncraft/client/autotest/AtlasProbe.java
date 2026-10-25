@@ -40,11 +40,13 @@ final class AtlasProbe {
     private static final Pattern CACHE = Pattern.compile(
             "genCache\\{(on|OFF) fp ([0-9a-f]+) on disk (\\d+) chunks (\\d+) sections ([\\d.,]+) MB; queued writes (\\d+); written (\\d+) chunks (\\d+) sections (\\d+) far tiles; "
                     + "chunk hits (\\d+) misses (\\d+) \\((\\d+) incomplete\\), section reads (\\d+), far tile hits (\\d+), hash errors (\\d+)\\}");
+    // AtlasReady.line: "ready{ok}" or "ready{pending: what}"
+    private static final Pattern READY = Pattern.compile("ready\\{(ok|pending: ([^}]*))\\}");
     private static final Pattern JUMP = Pattern.compile("jump\\{firstUp=(-?[\\d.,]+) windowUp=(-?[\\d.,]+) features=(-?[\\d.,]+)");
 
     /** The counters a gate cannot do without. */
     static final String[] REQUIRED = {"atlasMs", "loadedChunks", "genChunks", "farTiles", "farCached", "budgetFrameMs", "holes", "partial",
-            "farReach", "stageCpuMs", "coldHits", "coldWrites"};
+            "farReach", "stageCpuMs", "coldHits", "coldWrites", "ready"};
 
     /** The required counters this reading lacks. */
     static java.util.List<String> missing(JsonObject s) {
@@ -88,6 +90,11 @@ final class AtlasProbe {
         } else {
             o.addProperty("gcAbsent", true);  // (no cache peek in this library: the tiers' numbers stand)
         }
+        Matcher rm = READY.matcher(info);
+        if (rm.find()) {
+            o.addProperty("ready", rm.group(1).equals("ok"));
+            if (rm.group(2) != null) o.addProperty("readyPending", rm.group(2));
+        }
         num(o, JUMP, info, "jumpFirstUpMs", "jumpWindowUpMs", "jumpFeaturesMs");
         int at = info.indexOf(" core=");
         if (at >= 0) {
@@ -120,6 +127,8 @@ final class AtlasProbe {
         if (v == null) return;
         copy(o, v, "pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections", "built", "batches", "lastGpuMs",
                 "stageCpuMs", "stageCpuMaxMs", "framesSinceMove", "resident", "uniform", "nearestMissing", "reach");
+        JsonObject rd = obj(core, "ready");
+        if (rd != null) put(o, "pipelinesBuilding", rd, "pipelinesBuilding");
         if (v.has("settled")) o.addProperty("gridSettled", v.get("settled").getAsBoolean());
         JsonObject cov = obj(v, "coverage");
         if (cov != null) {

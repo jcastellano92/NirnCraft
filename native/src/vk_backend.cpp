@@ -1928,6 +1928,7 @@ private:
                 farReloaded_ = true;  // (the split frames draw with it too)
             }
             for (int i = 0; i < K; i++) reloadPipe_[i] = VK_NULL_HANDLE, reloadMod_[i] = VK_NULL_HANDLE;
+            reloadBusy_.store(false, std::memory_order_release);
             return;
         }
         auto now = std::chrono::steady_clock::now();
@@ -1939,6 +1940,7 @@ private:
         if (ec || stamp == reloadStamp_) return;
         reloadStamp_ = stamp;
         reloadDone_.store(false);
+        reloadBusy_.store(true, std::memory_order_release);
         reloadThread_ = std::thread([this, base] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
         if (waitReload) hotReload();  // (the swap, after the build)
     }
@@ -1946,6 +1948,7 @@ private:
     static constexpr int RELOAD_KERNELS = 6;
     std::thread reloadThread_;
     std::atomic<bool> reloadDone_{false};
+    std::atomic<bool> reloadBusy_{false};  // a kernel reload is building or waiting to be swapped in (atlas_info ready.pipelinesBuilding)
     bool reloadOk_ = false;
     VkShaderModule reloadMod_[RELOAD_KERNELS] = {};
     VkPipeline reloadPipe_[RELOAD_KERNELS] = {};
@@ -2280,6 +2283,7 @@ private:
     // ---- the level-0 grid (voxgrid.hpp, atlas_voxgrid.slang) ----------------------------------------------------
 
     GlTimes glTimes() const override { return glTimes_; }
+    int pipelinesBuilding() const override { return reloadBusy_.load(std::memory_order_acquire) ? 1 : 0; }
 
     VoxGridTimes voxgridTimes() const override {
         VoxGridTimes t;

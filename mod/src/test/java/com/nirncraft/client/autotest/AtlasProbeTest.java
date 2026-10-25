@@ -44,6 +44,16 @@ class AtlasProbeTest {
     }
 
     @Test
+    void readinessIsReadFromTheProfilerBlock() throws IOException {
+        var ok = AtlasProbe.parse(line());
+        assertTrue(ok.get("ready").getAsBoolean());
+        assertFalse(ok.has("readyPending"));
+        var half = AtlasProbe.parse(line().replace("ready{ok}", "ready{pending: horizon (coarse bake) 12 of 76 tiles}"));
+        assertFalse(half.get("ready").getAsBoolean());
+        assertEquals("horizon (coarse bake) 12 of 76 tiles", half.get("readyPending").getAsString());
+    }
+
+    @Test
     void anAbsentCounterIsNamedNeverANumber() {
         var s = AtlasProbe.parse("frame{atlasMs=1.0 glRenderWallMs=0.1 frameWallMs=2.0 fps=60 unified=true loadedChunks=5 t=1} no context");
         assertTrue(AtlasProbe.missing(s).contains("holes"));

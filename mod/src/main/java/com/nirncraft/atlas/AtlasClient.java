@@ -869,6 +869,12 @@ public final class AtlasClient {
         return ctx != null;
     }
 
+    /** atlas_info's JSON (AtlasReady), or null without a context. */
+    static String coreInfoJson() {
+        var c = ctx;
+        return c == null ? null : c.info();
+    }
+
     static boolean failedForSession() {
         return failed;
     }
@@ -1158,7 +1164,7 @@ public final class AtlasClient {
         sz = AtlasRecorder.begin();
         String gen = AtlasClientGen.state();
         AtlasRecorder.end(Z_STATE_GEN, sz, 1_000_000);
-        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " core=" + core + " " + AtlasRecorder.state();
+        return frame + "inside{" + AtlasNearPass.insideWhat + "} " + sections + " " + (materials != null ? materials.state() + " " : "") + edits + " " + gen + " " + AtlasReady.line(core) + " core=" + core + " " + AtlasRecorder.state();
     }
 
     private static int ablateSet = 0;

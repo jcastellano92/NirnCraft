@@ -40,6 +40,11 @@ final class AtlasLoadingScreen extends Screen {
         armed = ON && AtlasClientGen.ON;
     }
 
+    /** The screen is due to open (armed) and has not yet. */
+    static boolean waiting() {
+        return armed;
+    }
+
     static void disarm() {
         armed = false;
     }

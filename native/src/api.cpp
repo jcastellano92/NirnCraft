@@ -490,6 +490,9 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ctx->glInputsMs, g.waitMs, g.prepareMs, g.recordMs, ctx->inSnapMs, ctx->inSkyMs, ctx->inLightsMs,
                           ctx->inGridMs, ctx->inTexMs);
             ctx->info.insert(ctx->info.size() - 1, b);
+            // readiness (the harness gates wait on it): pipelines still being built off the render thread
+            std::snprintf(b, sizeof b, ",\"ready\":{\"pipelinesBuilding\":%d}", ctx->backend->pipelinesBuilding());
+            ctx->info.insert(ctx->info.size() - 1, b);
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
             // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
