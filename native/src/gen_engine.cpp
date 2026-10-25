@@ -2285,8 +2285,8 @@ private:
     // was idle all through it (the last 10 s), else the shortest window period of the last 10 s (or, ATLAS_GEN_PROBES=1,
     // probes: every 4 s it drains and holds back for a few frames). No frames at all (loading, a paused game): 95 %
     // of the time. Each submission is charged an estimate when submitted (its own GPU time when it retires), and at
-    // most ATLAS_GEN_AHEAD_MS (4) of them is in flight, and none is submitted while a frame is on the GPU (a frame period
-    // at most: ATLAS_GEN_GAPS=0 off). Near work waits for the bucket to be empty or better, far work
+    // most ATLAS_GEN_AHEAD_MS (4) of them is in flight, and where the frames leave the GPU idle a quarter of the time or
+    // more none is submitted while a frame is on the GPU (20 ms at most: ATLAS_GEN_GAPS=0 off). Near work waits for the bucket to be empty or better, far work
     // for it to be 10 ms full. A wait is bounded (300 ms; a probe 1.3 s: a budget, not a stall); ATLAS_GEN_PACE=0 turns
     // it off; ATLAS_GEN_PACE_TRACE=1 prints the controller every 5 s.
     struct Pacer {
@@ -2487,8 +2487,11 @@ private:
         // (the gaps between frames: not while a frame is on the GPU, a frame period at most, then one part anyway: a
         // GPU the frames keep busy still gets its share; ATLAS_GEN_GAPS=0 off)
         static const bool gaps = !(std::getenv("ATLAS_GEN_GAPS") && std::getenv("ATLAS_GEN_GAPS")[0] == '0');
-        if (gaps && pace_.periodMs > 0.0) {
-            double cap = std::min(100.0, std::max(8.0, pace_.periodMs)), g0 = waited;
+        // (only where the frames leave gaps: frames that keep the GPU busy end to end (an empty world's long far rays) would
+        // otherwise hold the generator to a submission a frame, and the world it would fill stays empty)
+        double idleMs = pace_.periodMs - pace_.gpuMs;
+        if (gaps && pace_.periodMs > 0.0 && pace_.gpuMs > 0.0 && pace_.gpuMs < 0.75 * pace_.periodMs) {
+            double cap = std::min(20.0, std::max(2.0, idleMs)), g0 = waited;
             while (backend_->frameOnGpu() && waited - g0 < cap) {
                 std::this_thread::sleep_for(std::chrono::microseconds(500));
                 waited = msSince(t0);
