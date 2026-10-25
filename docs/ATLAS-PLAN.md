@@ -79,10 +79,11 @@ A stage is done when its bar passes in the real game, not offline.
 
 ### Merge gate (2026-10-25)
 
-A step merges when it's proven, not in big batches. The gate before a renderer step merges:
-- route frame times: no worse than atlas-render's;
-- a gallery class sample: its pass count may not drop, so speed never quietly costs looks;
-- the step's moving capture: no new ghosting or shimmer.
+A step merges when it's proven by the numbers its own fast loop already measures, promptly, not in big batches.
+
+**Later, once it works here (owner, 2026-10-25):** cross-vendor exactness, scaling to lower resolutions and 8 GB cards,
+a moving-capture check per temporal change, a gallery no-drop rule on merges, and the cache lifecycle for players
+(in-save storage, a budget, estimates, warnings). These are parked, not dropped: they'd slow the iteration now.
 
 ### Frame budget (2026-10-25)
 
