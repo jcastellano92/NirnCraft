@@ -155,6 +155,8 @@ public final class AtlasNative {
     private final MethodHandle setCache, setPipelineCache, pipelineProgress;
     // abi 0.18, the micro-voxel bricks (null with an older library)
     private final MethodHandle setBricks, setOffsets;
+    // tests: level 0's block ids as the GPU holds them (atlas_debug_read_blocks; null with an older library)
+    private final MethodHandle readBlocks;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -252,6 +254,7 @@ public final class AtlasNative {
         setCache = bindOptional(l, lib, "atlas_set_cache",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
         setOffsets = bindOptional(l, lib, "atlas_set_material_offsets", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        readBlocks = bindOptional(l, lib, "atlas_debug_read_blocks", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         setBricks = bindOptional(l, lib, "atlas_set_material_bricks", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
                 ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS));
     }
@@ -1130,6 +1133,22 @@ public final class AtlasNative {
             try {
                 check((int) debugAblate.invokeExact(ptr, bits), "atlas_debug_ablate");
                 return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (tests) Level 0's block ids as the GPU holds them at xyz (x, y, z per position): the 16-bit id, 0xFFFE where level 0
+         * holds nothing there. Null with an older library. Waits for the GPU: a handful of positions a call.
+         */
+        public int[] readBlocks(int[] xyz) {
+            if (readBlocks == null) return null;
+            int n = xyz.length / 3;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(JAVA_INT, n);
+                check((int) readBlocks.invokeExact(ptr, a.allocateFrom(JAVA_INT, xyz), n, out), "atlas_debug_read_blocks");
+                return out.toArray(JAVA_INT);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

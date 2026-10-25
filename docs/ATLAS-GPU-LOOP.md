@@ -198,6 +198,35 @@ The server's world is then the GPU's world. The only readback is the simulation-
 **Collisions (stage 5):** with server = GPU world, the client's vanilla chunks in the simulation radius hold exactly the
 drawn blocks. Gate: a scripted walk comparing level-0 ids against `ClientLevel` gives 0 mismatches.
 
+### 4.1 Status (2026-10-25, branch atlas-server)
+
+**Built.** `com.nirncraft.atlas.server`: `AtlasServerCap` (the integrated server's chunk maps use the simulation distance, at most 8:
+`ServerChunkCache.setViewDistance` per level plus the chunk-cache radius packet. `PlayerList.setViewDistance` is undone on the next tick,
+the integrated server sets it back to the render distance), `AtlasServerStats` (server ticks, worker CPU, chunks, in the route report),
+`AtlasChunkGenerator` (`nirncraft:atlas`, a `NoiseBasedChunkGenerator` subclass; the world presets use it; 26.3 has `buildTerrain` for
+fillFromNoise + surface + carvers), `AtlasServerFeed` / `AtlasServerGen` (the seam to the client generator), `AtlasServerAgreement`.
+Existing worlds keep `minecraft:noise` in their saved dimensions; a datapack `data/minecraft/dimension/overworld.json` would replace it
+(`WorldDimensions.bake` prefers the datapack's stems), the preset only gives it to new worlds. Native: `atlas_gen_store_prioritize`
+(the server's chunks and their neighbourhoods first in the store), `atlas_debug_read_blocks` (test readback of level 0).
+
+**How a chunk goes.** `buildTerrain` asks the feed; the generator's worker puts the chunk through the store ahead of the camera's window,
+the decorated ids come back with `atlas_gen_run_store` and fill the proto chunk (heightmaps primed, block entities and mobs replayed from
+the structures' side files, `AtlasSideOps`). Java makes the chunk instead (counted) when: no GPU yet, a structure the overlays do not carry
+reaches it, its settlement or dungeon is not recorded yet, more than 24 requests are outstanding, the kernels flagged it, or 6 s passed.
+
+**Measured** (route, fresh world and cache each, RTX 3090 shared with the client). Step 1, cap off vs on, Java generation both:
+server worker CPU 1430 -> 1200 ms/s, new server chunks 2225 -> 1789, `buildTerrain` calls 2942 -> 2479, tick p99 20.1 -> 17.6 ms, view 12 -> 8.
+Step 2 (GPU chunks, before the store priority): worker CPU 150 ms/s, tick p99 8.2 ms; 211 chunks from the GPU, 312 in Java, 156 timeouts.
+**Gate not met**: Java `buildTerrain` calls are not 0. The store makes about 7 decorated chunks/s while the camera's window is also
+filling (trees: stage 1 of the table above), so bursts (the first ring, flight) are Java and the walk is the GPU's. The share of GPU-made
+server chunks matching the GPU world (all 8 neighbours GPU-made too): 71 of 77; the misses were deliveries with all-air ids, now refused
+(`ids` against the store's own kinds). A Java neighbour's decoration writes into a GPU chunk (ore blobs: the 0.2 % parity gap), so the
+hash gate is only exact once every chunk is GPU-made. Step 3: the collision walk (walk + sprint, 7,500 level-0 blocks read back from the
+GPU against the client level) has 0 mismatches (`harness.py run atlas-collide`).
+
+**Next:** after the trees' stage-1 work the burst fits; then raise `AtlasServerGen.MAX_OUTSTANDING`, drop the timeout, and make the
+structure chunks the overlays do not carry (the site lists' sets) part of the tapes or an allow-list.
+
 ## 5. Order of work
 
 First, measure: recorder `rt:` counters (fence waits, readbacks, host map reads per second by site), a per-tree ms
