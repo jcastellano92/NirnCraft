@@ -708,7 +708,8 @@ void World::setPackOnGpu(bool on) {
 }
 
 void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
-    fr::LockZone lock(mu_, "wait:world.mu(takePackQueue#1)", "hold:world.mu(takePackQueue#1)");
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);  // (the render thread: it takes what is queued next frame instead)
+    if (!lock.owns_lock()) return;
     if (burst > max) max = std::max(max, std::min(burst, packQueue_.size() / 8));
     size_t i = 0;
     for (; i < packQueue_.size() && out.size() < max; i++) {
@@ -721,8 +722,7 @@ void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
     packQueue_.erase(packQueue_.begin(), packQueue_.begin() + ptrdiff_t(i));
 }
 
-void World::packedDone(const std::vector<PackDone>& done, Made* made) {
-    fr::LockZone lock(mu_, "wait:world.mu(packedDone#1)", "hold:world.mu(packedDone#1)");
+void World::packedApply(const std::vector<PackDone>& done, Made* made) {
     for (const PackDone& d : done) {
         if (d.gen & BAKE) {
             if (d.words) {
@@ -747,6 +747,40 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
         rawMeta_.erase(m);
         packedCount_++;
     }
+}
+
+void World::drainInbox() {
+    if (!inboxFull_.load(std::memory_order_acquire)) return;
+    std::vector<PackDone> take;
+    {
+        std::lock_guard<std::mutex> g(inboxMu_);
+        take.swap(inbox_);
+        inboxFull_.store(false, std::memory_order_release);
+    }
+    packedApply(take, nullptr);
+}
+
+void World::packedDone(const std::vector<PackDone>& done, Made* made) {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) {
+        // busy (an update's commit, a spill slice): the render thread does not wait. What needs no `made` (the bakes and the
+        // packed sections) is applied by the next holder of the lock; a base fetch's sections go back at once, so wait
+        bool needsMade = false;
+        for (const PackDone& d : done) needsMade |= (d.gen & BASE_FETCH) != 0;
+        if (!needsMade) {
+            std::lock_guard<std::mutex> g(inboxMu_);
+            inbox_.insert(inbox_.end(), done.begin(), done.end());
+            inboxFull_.store(true, std::memory_order_release);
+            return;
+        }
+        ATLAS_ZONE_MIN("wait:world.mu(packedDone, base fetch)", 200);
+        lock.lock();
+    }
+    uint64_t t1 = fr::nowNs();
+    drainInbox();
+    packedApply(done, made);
+    uint64_t t2 = fr::nowNs();
+    if (t2 - t1 >= 1000000) fr::record("hold:world.mu(packedDone)", t1, t2);
 }
 
 void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
@@ -2116,6 +2150,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         };
         lastGroupsBuilt_ = uint32_t(treesBuilt.load());
         lastGroupsMs_ = double(treeUs.load()) / 1000.0;
+        drainInbox();
         uint32_t now = nowMs();
         for (size_t i = 0; i < results.size(); i++) {
             auto& [k, r] = results[i];
@@ -2315,6 +2350,7 @@ void World::spiller() {
         spillCv_.wait(lock, [&] { return spillStop_ || store_->spillPending(); });
         if (spillStop_) return;
         uint64_t t1 = fr::nowNs();
+        drainInbox();
         store_->drainSpills(0.5);
         uint64_t t2 = fr::nowNs();
         if (t2 - t1 >= 1000000) fr::record("hold:world.mu(spill slice)", t1, t2);
