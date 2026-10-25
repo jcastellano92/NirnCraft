@@ -295,6 +295,23 @@ final class AtlasGallery {
                 }
                 idx++;
             }
+            case "probe" -> {  // each listed block as the client, the feed and the core have it, to <name>.probe.txt
+                var out = new StringBuilder();
+                for (JsonElement e : current.getAsJsonArray("blocks")) {
+                    var a = e.getAsJsonArray();
+                    try {
+                        out.append(com.nirncraft.atlas.AtlasClient.probeBlock(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt())).append(System.lineSeparator());
+                    } catch (RuntimeException ex) {
+                        out.append("probe failed ").append(ex).append(System.lineSeparator());
+                    }
+                }
+                try {
+                    Files.writeString(outDir.resolve(current.get("name").getAsString() + ".probe.txt"), out.toString());
+                } catch (java.io.IOException ex) {
+                    NirnCraft.LOGGER.warn("gallery probe failed", ex);
+                }
+                idx++;
+            }
             case "mode" -> {
                 boolean atlas = current.get("name").getAsString().equals("atlas");
                 // vanilla's raster alone: atlas neither owns the terrain nor draws a far field; atlas: the unified field

@@ -307,6 +307,14 @@ final class AtlasMaterials {
         return (short) best[1];
     }
 
+    /** Which block state an exact (or palette) material id was handed out for (debugging: the id as the core holds it). */
+    synchronized String whoIs(int id) {
+        for (var e : exact.entrySet())
+            if ((e.getValue() & 0xFFFF) == id) return net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(Block.stateById((int) (e.getKey() >> 32))) + " tint=" + Integer.toHexString((int) (long) e.getKey());
+        for (var e : ids.entrySet()) if ((e.getValue() & 0xFFFF) == id) return "palette " + e.getKey();
+        return id == 0 ? "air" : "?";
+    }
+
     /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
     synchronized String state() {
         return "exactIds{used=" + (nextExact - EXACT_FIRST) + " bricks=" + exactBricks + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()

@@ -1007,6 +1007,25 @@ public final class AtlasClient {
         return b.toString();
     }
 
+    /**
+     * One block as the three layers have it (the gallery's "probe" op): the client's state, the near id the feed would
+     * give it, and the material the core holds there now.
+     */
+    public static String probeBlock(int x, int y, int z) {
+        var mc = Minecraft.getInstance();
+        var s = mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z));
+        StringBuilder b = new StringBuilder(x + " " + y + " " + z + " client=" + net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(s));
+        b.append(" nearId=").append(AtlasClientSections.nearIdOf(s));
+        var c = ctx;
+        if (c != null) {
+            short[] ids = c.debugSection(x >> 4, y >> 4, z >> 4);
+            int m = ids == null ? -1 : ids[(x & 15) + 16 * ((z & 15) + 16 * (y & 15))] & 0xFFFF;
+            b.append(" core=").append(m).append(' ').append(materials != null && m > 0 ? materials.whoIs(m) : "");
+        }
+        b.append(" chunk=").append(AtlasClientSections.chunkFlags(x >> 4, z >> 4));
+        return b.toString();
+    }
+
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
         var c = ctx;

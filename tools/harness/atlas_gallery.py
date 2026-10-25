@@ -17,6 +17,7 @@ import fnmatch
 import hashlib
 import json
 import math
+import re
 import shutil
 import time
 from pathlib import Path
@@ -295,6 +296,7 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
             if mode == "atlas":  # (what was placed is up in atlas: nothing pending, the grid's counters still)
                 steps.append({"op": "settle", "max": 900, "min": 40})
                 steps.append({"op": "info", "name": f"b{b:03d}-atlas"})
+                steps.append({"op": "probe", "name": f"b{b:03d}-atlas", "blocks": [list(cell(i)) for i in range(len(batch))]})
             steps += shots_for(cells, mode, settle)
         steps.append({"op": "mode", "name": "atlas", "wait": 1})
         receipt = run_script(g, f"batch{b}", steps, out, timeout=2400)
@@ -310,8 +312,19 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
                 steps += [{"op": "mode", "name": mode, "wait": 120}] + shots_for(again, mode, settle + 2)
             steps.append({"op": "mode", "name": "atlas", "wait": 1})
             run_script(g, f"batch{b}-again{attempt}", steps, out, timeout=1800)
+        probes = []
+        try:
+            probes = (out / f"b{b:03d}-atlas.probe.txt").read_text(encoding="utf-8").splitlines()
+        except OSError:
+            pass
         for i, gr in enumerate(batch):
             row = measure_pair(out, gr)
+            if i < len(probes):
+                row["probe"] = probes[i]
+                m = re.search(r" core=(\d+) ", probes[i])
+                if m and int(m.group(1)) == 0 and " client=minecraft:air" not in probes[i]:
+                    row["notInCore"] = True
+                    judge(row)
             row["dir"] = str(out)
             row["class"] = gr.get("class", "")
             row["cell"] = list(cell(i))
@@ -557,6 +570,8 @@ def judge(row):
             causes.append("pits")
         if m["dEshape"] > (LIMITS["shape"] if d == "2 m" else LIMITS["shape16"]):
             causes.append("shape")
+    if row.get("notInCore"):
+        causes.append("not in core")  # (atlas's core holds air where the client has a block: the feed lost it)
     if tone > 1 and not causes:
         causes.append("tone")
     row["causes"] = sorted(set(causes))
@@ -684,7 +699,7 @@ def finish_near(g, s, v, fp, rows, folder, groups, counts):
                 if src.exists():
                     shutil.copy2(src, fail_dir / f"{r['id']}__{m}__{tag}.png")
     infos = folder / "info"
-    for f in list(work.glob("b*/*.info.txt")) + list(work.glob("b*/*.describe.txt")):  # (atlas's own report at each batch's shots: kept, small)
+    for f in list(work.glob("b*/*.info.txt")) + list(work.glob("b*/*.describe.txt")) + list(work.glob("b*/*.probe.txt")):  # (atlas's own report at each batch's shots: kept, small)
         infos.mkdir(exist_ok=True)
         shutil.copy2(f, infos / f"{f.parent.name}-{f.name}")
     shutil.rmtree(work, ignore_errors=True)
