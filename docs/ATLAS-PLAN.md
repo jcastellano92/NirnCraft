@@ -121,6 +121,10 @@ follows the design without new tests.
 - **(E) Cone tracing through the coarse levels** for bounce and AO. Test in the lighting pass against the dark side
   faces and corners.
 
+- **(F) Coarse-voxel appearance:** directional opacity, a self-occlusion factor and a tight sub-box per coarse voxel,
+  so thin things (fences, grass) neither vanish nor swell far off, and forests don't brighten when they coarsen. Test
+  together with (C), offline, on the gallery sweep (from an outside review, 2026-10-25).
+
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
 

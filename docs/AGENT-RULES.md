@@ -222,3 +222,15 @@ Read these first:
 * **The same for `<game>/atlas-shaders` (2026-10-25).** The core draws with any `*.spv` there in place of its own
   kernels (shader_watch `--game`). A folder left from 10-20 made every gallery run measure that day's far kernel (no
   bricks). The harness moves it aside before each live run (`game.clear_dev_shaders`); never leave one there.
+
+* **Three loops, fastest first (owner, 2026-10-25).** Most iterations must not launch the game.
+  * **Inner (seconds):** check a change offline on a saved real scene: atlas_render with `watch=1` shader reload, a scene
+    exported from the game (harness `atlaslab-export` / twins) or made by gen_bake_tool. Kernels, look, coarse levels
+    and materials are iterated here.
+  * **Middle (~1 min):** one small live probe (`harness.py probe` or a single `--class` gallery batch) on a warm cache,
+    only for what offline can't show.
+  * **Outer (milestones only):** the route, the full gallery sample and the relaunch test, once per finished step that is
+    ready to merge.
+
+  A live run in the inner loop, or a route per change, is a process bug: say why if you need one.
+
