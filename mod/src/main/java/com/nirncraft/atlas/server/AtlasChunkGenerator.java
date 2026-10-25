@@ -106,6 +106,7 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
             if (gpu != null && err == null) {
                 try {
                     fill(chunk, gpu);
+                    AtlasServerAgreement.path(pos.x(), pos.z(), true);
                     markFilled(pos);
                     AtlasServerStats.GPU_CHUNKS.incrementAndGet();
                     return CompletableFuture.completedFuture(chunk);
@@ -116,8 +117,10 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
                 }
             } else if (err != null) {
                 if (err instanceof java.util.concurrent.TimeoutException || err.getCause() instanceof java.util.concurrent.TimeoutException) {
-                    AtlasServerStats.GPU_TIMEOUTS.incrementAndGet();
+                    long n = AtlasServerStats.GPU_TIMEOUTS.incrementAndGet();
                     feed.cancel(pos.x(), pos.z());
+                    if (n <= 5 || n % 25 == 0) NirnCraft.LOGGER.warn("atlas server: chunk {} waited {} ms for the GPU store ({} timeouts so far): {}", pos,
+                            TIMEOUT_MS, n, feed.describe());
                 }
             }
             return java(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);
@@ -133,6 +136,7 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
 
     private CompletableFuture<ChunkAccess> java(ChunkAccess chunk, Blender blender, RandomState randomState, StructureManager structureManager,
                                                 BiomeManager biomeManager, @Nullable WorldGenRegion carverBiomeRegion, Set<Holder<Biome>> possibleBiomes) {
+        AtlasServerAgreement.path(chunk.getPos().x(), chunk.getPos().z(), false);
         AtlasServerStats.JAVA_TERRAIN_CALLS.incrementAndGet();
         AtlasServerStats.JAVA_CHUNKS.incrementAndGet();
         return super.buildTerrain(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);

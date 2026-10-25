@@ -52,6 +52,11 @@ public final class AtlasServerAgreement {
     public static synchronized void client(int cx, int cz, int minSec, int[][] sections) {
         long key = net.minecraft.world.level.ChunkPos.pack(cx, cz);
         if (COMPARED.containsKey(key)) return;
+        if (PATH.get(key) == 2) {  // (made in Java, whatever the GPU said of it before)
+            chunksJavaMade++;
+            COMPARED.put(key, -1);
+            return;
+        }
         long[] g = GPU.get(key);
         if (g == null) {
             chunksNoGpu++;
@@ -95,10 +100,19 @@ public final class AtlasServerAgreement {
         }
     }
 
+    private static final Long2IntOpenHashMap PATH = new Long2IntOpenHashMap();  // chunk -> 1 filled from the GPU, 2 made by Java
+    private static long chunksJavaMade;
+
+    /** The server filled the chunk from the GPU ids (placed: the blocks it set), or made it in Java. */
+    public static synchronized void path(int cx, int cz, boolean gpu) {
+        if (PATH.size() > 8 * KEEP) PATH.clear();
+        PATH.put(net.minecraft.world.level.ChunkPos.pack(cx, cz), gpu ? 1 : 2);
+    }
+
     /** Zeroes the tally (the route's start); the GPU records stay. */
     public static synchronized void reset() {
         COMPARED.clear();
-        sameSections = diffSections = chunksNoGpu = chunksSame = chunksDiff = 0;
+        sameSections = diffSections = chunksNoGpu = chunksSame = chunksDiff = chunksJavaMade = 0;
         SAMPLES.clear();
     }
 
@@ -108,6 +122,7 @@ public final class AtlasServerAgreement {
         o.addProperty("chunksSame", chunksSame);
         o.addProperty("chunksDiffer", chunksDiff);
         o.addProperty("chunksWithoutGpuRecord", chunksNoGpu);
+        o.addProperty("chunksMadeInJava", chunksJavaMade);
         o.addProperty("sectionsSame", sameSections);
         o.addProperty("sectionsDiffer", diffSections);
         JsonArray a = new JsonArray();

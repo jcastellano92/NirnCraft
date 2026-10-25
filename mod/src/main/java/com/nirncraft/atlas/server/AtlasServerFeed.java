@@ -38,6 +38,8 @@ public final class AtlasServerFeed {
         boolean ready();
 
         /** Whether the GPU world has this structure's pieces (the recorded settlements and dungeons); else Java places them. */
+        String describe();
+
         boolean covers(net.minecraft.world.level.levelgen.structure.Structure structure);
     }
 

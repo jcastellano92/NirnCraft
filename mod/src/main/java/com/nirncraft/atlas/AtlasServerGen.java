@@ -111,8 +111,10 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         int n = 0;
         for (Req r : reqs.values()) {
             if (r.submitted) continue;
-            if (!AtlasOverlayLive.finalAt(r.cx, r.cz)) {
+            if (!AtlasOverlayLive.finalAt(r.cx, r.cz)) {  // (a settlement or start found since the request: Java makes it)
                 waitedForTapes++;
+                reqs.remove(ChunkPos.pack(r.cx, r.cz));
+                r.f.complete(null);
                 continue;
             }
             r.submitted = true;
@@ -164,6 +166,11 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
             served++;
             r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette, AtlasSideOps.at(xz[i * 2], xz[i * 2 + 1])));
         }
+    }
+
+    @Override
+    public String describe() {
+        return state() + " " + owner.storeLine();
     }
 
     /** "server feed: asked / served / flagged / waiting for tapes" (atlas-info). */

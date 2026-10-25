@@ -502,6 +502,16 @@ final class AtlasClientGen implements AutoCloseable {
         return c != null && c.ctx != null && c.uploader.isAlive();
     }
 
+    /** (diagnostics) the store's held / waiting / ready chunks. */
+    String storeLine() {
+        try {
+            int[] s = gen.storeStats();
+            return "store{held=" + s[0] + " waiting=" + s[1] + " ready=" + s[2] + "}";
+        } catch (RuntimeException e) {
+            return "store{?}";
+        }
+    }
+
     void wake() {
         LockSupport.unpark(worker);
         LockSupport.unpark(uploader);
