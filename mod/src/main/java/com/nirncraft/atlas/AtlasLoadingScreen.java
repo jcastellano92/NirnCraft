@@ -79,10 +79,11 @@ final class AtlasLoadingScreen extends Screen {
 
     @Override
     public void tick() {
-        // (the kernels' compile has its own true progress, minutes on a cold cache: the give-up clock starts once they are built)
-        if (rendererNs == 0 && !AtlasClient.buildingContext()) rendererNs = System.nanoTime();
-        double s = rendererNs == 0 ? 0 : (System.nanoTime() - rendererNs) / 1e9;
+        // (the kernels' compiles have their own true progress, minutes on a cold cache: the give-up clock starts once the
+        // renderer's and the generator's are built, the generator running)
         AtlasClientGen.Progress p = AtlasClientGen.progress();
+        if (rendererNs == 0 && AtlasClient.started() && p != null && p.running()) rendererNs = System.nanoTime();
+        double s = rendererNs == 0 ? 0 : (System.nanoTime() - rendererNs) / 1e9;
         boolean failed = AtlasClient.failedForSession();
         if (p != null && p.nearDone() && nearDoneNs == 0) nearDoneNs = System.nanoTime();
         // the horizon: the whole-map coarse bake's levels 3-6 made or loaded, and the tiles of the windows in the grid

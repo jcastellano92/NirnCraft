@@ -565,6 +565,11 @@ public:
     bool init(std::string& err) {
         pipeprog::done.store(0);
         pipeprog::total.store(pipeprog::INIT_KERNELS);
+        pipeprog::split.store(0);
+        {
+            std::lock_guard<std::mutex> l(pipeprog::mu);
+            std::snprintf(pipeprog::name, sizeof pipeprog::name, "%s", "the device");  // (before its first kernel)
+        }
         if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) return false;
         probeInterop();
         // far kernel: binding 0 uniform, the rest storage buffers
@@ -2283,7 +2288,10 @@ private:
     // ---- the level-0 grid (voxgrid.hpp, atlas_voxgrid.slang) ----------------------------------------------------
 
     GlTimes glTimes() const override { return glTimes_; }
-    int pipelinesBuilding() const override { return reloadBusy_.load(std::memory_order_acquire) ? 1 : 0; }
+    // (a reload building, and the split frames' far kernel still compiling on its thread)
+    int pipelinesBuilding() const override {
+        return (reloadBusy_.load(std::memory_order_acquire) ? 1 : 0) + (pipeprog::split.load() == 1 ? 1 : 0);
+    }
 
     VoxGridTimes voxgridTimes() const override {
         VoxGridTimes t;

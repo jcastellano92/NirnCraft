@@ -64,7 +64,10 @@ public final class AtlasClient {
     private static AtlasNative.Context ctx;
     private static volatile AtlasMaterials materials;  // (atlas-info: the exact ids' use)
     private static Path libPath;  // the loaded core (the client generator binds its own calls there)
-    private static AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
+    private static volatile AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
+    private static final Object CLIENT_GEN_LOCK = new Object();
+    private static volatile Thread clientGenStart;  // (its start's thread: stop() releases the context after it)
+    private static volatile int clientGenEpoch;  // (stop: a generator still starting on its thread is closed when it arrives)
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
     // (start) the context being made on its thread: [context, on the CPU]; when it began
     private static volatile java.util.concurrent.CompletableFuture<Object[]> ctxBuild;
@@ -168,14 +171,21 @@ public final class AtlasClient {
         NeoForge.EVENT_BUS.addListener(AtlasCacheWipe::onCommands);  // (/nirncraft-atlas-wipecache)
         // the loading phase (AtlasLoadingScreen): armed on joining, opened once vanilla's terrain screen closed
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn e) -> AtlasLoadingScreen.arm());
+        // (a quit while the kernels compile: the player's own render distance back before the options are saved)
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.GameShuttingDownEvent e) -> reduceVanilla(Minecraft.getInstance(), false));
         // in the world while kernels still compile (the context's, or the split frames' far kernel in the background):
         // one small line, the real counts (atlas_pipeline_progress), never a timed bar
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RenderGuiEvent.Post e) ->
                 AtlasGuard.run("atlas compile line", Z_LOADING, () -> compileLine(e.getGuiGraphics())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas loading phase", Z_LOADING, () -> AtlasLoadingScreen.tick(Minecraft.getInstance())));
+        // (vanilla's distance back once no build runs, whatever path the frames took: a session turned off, no pack)
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> {
+            if (reducedFrom >= 0 && !buildingContext()) reduceVanilla(Minecraft.getInstance(), false);
+        });
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             AtlasLoadingScreen.disarm();
+            reduceVanilla(Minecraft.getInstance(), false);
             serverWorldId = 0;
             farActors = null;
             farSites = null;
@@ -550,6 +560,31 @@ public final class AtlasClient {
                 0xA0C8C0B0, true);
     }
 
+    // (ATLAS-PLAN 0.9) while atlas's kernels compile, vanilla draws reduced so the machine goes to the compile: a short
+    // render distance, the player's own restored the moment the context is made (or failed, or the world is left)
+    private static int reducedFrom = -1;
+    private static final int REDUCED_DISTANCE = 2;
+
+    private static void reduceVanilla(Minecraft mc, boolean on) {
+        if (mc == null || mc.options == null || "false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.reduceWhileLoading"))) return;
+        if (on && reducedFrom < 0) {
+            int d = mc.options.renderDistance().get();
+            if (d <= REDUCED_DISTANCE) return;
+            reducedFrom = d;
+            mc.options.renderDistance().set(REDUCED_DISTANCE);
+            mc.options.broadcastOptions();  // (the integrated server's view distance follows: its chunks are the work too)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: vanilla's render distance {} -> {} while atlas's kernels compile", d, REDUCED_DISTANCE);
+        } else if (!on && reducedFrom >= 0) {
+            // (only if it is still ours: a change made meanwhile, the player's or a test's, stays)
+            if (mc.options.renderDistance().get() == REDUCED_DISTANCE) {
+                mc.options.renderDistance().set(reducedFrom);
+                mc.options.broadcastOptions();
+            }
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: vanilla's render distance back to {}", reducedFrom);
+            reducedFrom = -1;
+        }
+    }
+
     /** The context's kernels as they are built (the loading screen), or null: none being made, an older library. */
     static AtlasNative.PipelineProgress building() {
         AtlasNative l = lib;
@@ -632,6 +667,7 @@ public final class AtlasClient {
                 t.setDaemon(true);
                 ctxBuild = build;
                 ctxBuildStartNs = System.nanoTime();
+                reduceVanilla(mc, true);
                 t.start();
             }
             if (!ctxBuild.isDone()) return false;  // (vanilla draws this frame)
@@ -640,9 +676,11 @@ public final class AtlasClient {
                 made = ctxBuild.join();
             } catch (java.util.concurrent.CompletionException e) {
                 ctxBuild = null;
+                reduceVanilla(mc, false);
                 throw e.getCause() != null ? e.getCause() : e;
             }
             ctxBuild = null;
+            reduceVanilla(mc, false);
             ctx = (AtlasNative.Context) made[0];
             cpuBackend = (Boolean) made[1];
             com.nirncraft.NirnCraft.LOGGER.info("atlas: context made in {} s (its kernels built off the render thread)",
@@ -675,13 +713,17 @@ public final class AtlasClient {
                 source = new AtlasServerSource(serverWorldId, mc.gameDirectory.toPath(), AtlasFarField::previewRaster);
             // exact heights on the GPU where this machine has a device that keeps them bit-exact and it is faster
             // (verified against the CPU path tile by tile; -Dnirncraft.atlas.gpuHeight=false keeps the CPU)
-            if (source instanceof AtlasExactSource e && !"false".equals(System.getProperty("nirncraft.atlas.gpuHeight"))) {
+            // (the client generator's far terrain replaces this source below: none of its GPU set-up, a device and a kernel
+            // compiled on this thread, is made for nothing)
+            boolean genFar = AtlasClientGen.ON && AtlasClientGen.far() && mc.hasSingleplayerServer()
+                    && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"));
+            if (!genFar && source instanceof AtlasExactSource e && !"false".equals(System.getProperty("nirncraft.atlas.gpuHeight"))) {
                 String why = e.enableGpu(lib);
                 if (why != null) com.nirncraft.NirnCraft.LOGGER.info("atlas exact heights on the CPU: {}", why);
             }
             // whole far tiles in the generator's kernels (map, height, water on the device; checked per LOD against the
             // CPU path); -Dnirncraft.atlas.gpuTiles=false keeps the path above
-            if (source instanceof AtlasExactSource e && libPath != null && !"false".equals(System.getProperty("nirncraft.atlas.gpuTiles"))) {
+            if (!genFar && source instanceof AtlasExactSource e && libPath != null && !"false".equals(System.getProperty("nirncraft.atlas.gpuTiles"))) {
                 // (off the render thread: the program and the map take a while; tiles until then take the path above)
                 net.minecraft.server.MinecraftServer sp = mc.getSingleplayerServer();
                 Path lp = libPath;
@@ -698,8 +740,7 @@ public final class AtlasClient {
             // coarse cell was not given yet, stale against the generator and never replaced); the lights and the
             // server's sections still go up. -Dnirncraft.atlas.farTiles=true brings the tiles back (the settlements'
             // far stand-ins ride on them)
-            if (AtlasClientGen.ON && AtlasClientGen.far() && mc.hasSingleplayerServer()
-                    && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"))) {
+            if (genFar) {
                 if (source instanceof AtlasExactSource e) e.close();
                 source = AtlasFarField.noTerrainSource();
                 com.nirncraft.NirnCraft.LOGGER.info("atlas far terrain: the client generator's coarse levels only (no terrain tiles)");
@@ -731,7 +772,29 @@ public final class AtlasClient {
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
             // the structures from the plans as stages of the client generator's batches (before its program compiles)
             if (AtlasClientGen.ON && mc.hasSingleplayerServer()) AtlasOverlayLive.register(libPath, mc.getSingleplayerServer());
-            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) clientGen = AtlasClientGen.start(mc.getSingleplayerServer(), libPath, ctx, mats);
+            if (AtlasClientGen.ON && mc.hasSingleplayerServer()) {
+                // on its own thread: its device's pipelines and the decoration's kernels are driver compiles too, and the
+                // feature program a Java compile (the render thread never waits for them)
+                net.minecraft.server.MinecraftServer sp = mc.getSingleplayerServer();
+                Path lp = libPath;
+                AtlasNative.Context c = ctx;
+                int epoch = ++clientGenEpoch;
+                Thread t = new Thread(() -> {
+                    try {
+                        AtlasClientGen g = AtlasClientGen.start(sp, lp, c, mats);
+                        if (g == null) return;
+                        synchronized (CLIENT_GEN_LOCK) {
+                            if (epoch != clientGenEpoch) g.close();  // (stopped meanwhile)
+                            else clientGen = g;
+                        }
+                    } catch (Throwable e) {
+                        com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation did not start", e);
+                    }
+                }, "atlas client generator start");
+                t.setDaemon(true);
+                clientGenStart = t;
+                t.start();
+            }
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;
@@ -1276,12 +1339,27 @@ public final class AtlasClient {
         AtlasNative.Context c = ctx;
         // the context goes only once the far-field worker is out of it (it may still be mid-pass after close()'s
         // join: destroyed under it, its next atlas_update crashed the game); the GL side goes now, on this thread
-        Runnable destroy = () -> {
+        Runnable destroyNow = () -> {
             try {
                 if (c != null) c.close();
             } catch (Throwable ignored) {
                 // best effort
             }
+        };
+        // (a client generator still starting on its thread builds on this context: it closes itself when it arrives, the
+        // epoch below; the context goes only after that, on a thread of its own, never waiting on the render thread)
+        Thread starting = clientGenStart;
+        Runnable destroy = starting == null || !starting.isAlive() ? destroyNow : () -> {
+            Thread w = new Thread(() -> {
+                try {
+                    starting.join();
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+                destroyNow.run();
+            }, "atlas context release");
+            w.setDaemon(true);
+            w.start();
         };
         try {
             if (farField != null) farField.stopWorker();
@@ -1299,9 +1377,12 @@ public final class AtlasClient {
             // best effort
         }
         try {
-            if (clientGen != null) {
-                clientGen.close();
-                clientGen = null;
+            synchronized (CLIENT_GEN_LOCK) {
+                clientGenEpoch++;  // (one still starting closes itself when it arrives)
+                if (clientGen != null) {
+                    clientGen.close();
+                    clientGen = null;
+                }
             }
             if (farField != null) farField.close(destroy);  // now, or when the worker leaves
             else destroy.run();

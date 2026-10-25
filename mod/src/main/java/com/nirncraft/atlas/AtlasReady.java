@@ -39,6 +39,11 @@ public final class AtlasReady {
     /** As {@link #pending()}, on atlas_info's JSON already read (null: not read). */
     static String pending(String core) {
         if (AtlasClient.failedForSession()) return "atlas is off for the session";
+        if (AtlasClient.buildingContext()) {  // (the context's kernels compiling on its thread: no atlas_info yet)
+            AtlasNative.PipelineProgress pp = AtlasClient.building();
+            return pp == null ? "pipelines still building off the render thread"
+                    : "pipelines still building off the render thread (" + pp.done() + " / " + pp.total() + ", " + pp.name() + ")";
+        }
         if (!AtlasClient.started()) return "renderer not started";
         JsonObject info = null;
         if (core != null) {
