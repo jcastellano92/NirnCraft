@@ -531,6 +531,7 @@ public:
                            &tab_, &info_, &map_, &jobs_, &bad_, &far_})
                 release(*b);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
+            if (subQ_) vkDestroyQueryPool(dev_, subQ_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (descPool_) vkDestroyDescriptorPool(dev_, descPool_, nullptr);
@@ -1750,6 +1751,9 @@ private:
             qp.queryType = VK_QUERY_TYPE_TIMESTAMP;
             qp.queryCount = QUERIES;
             if (vkCreateQueryPool(dev_, &qp, nullptr, &queries_) != VK_SUCCESS) timestamps_ = false;
+            // (each submission's own GPU time: what the budget charges, not its wall time behind the frames)
+            qp.queryCount = 2;
+            if (timestamps_ && vkCreateQueryPool(dev_, &qp, nullptr, &subQ_) != VK_SUCCESS) subQ_ = VK_NULL_HANDLE;
         }
         // the per-batch buffers (fixed: MAX_CHUNKS chunks; K up to 16 interpolated inputs); the readback holds the
         // ids, MAX_CHUNKS flags, then the section infos
@@ -1938,7 +1942,14 @@ private:
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(cmd_, &bi);
+        if (subQ_) {
+            vkCmdResetQueryPool(cmd_, subQ_, 0, 2);
+            vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, subQ_, 0);
+            subTimed_ = true;
+        }
     }
+    VkQueryPool subQ_ = VK_NULL_HANDLE;
+    bool subTimed_ = false, subTimedDone_ = false;  // (this command buffer began with the submission's start timestamp)
     // ---- the GPU budget ----
     // The generator shares the card with the frames, and a long kernel in front of a frame is a long frame: the
     // submissions are paced by a token bucket of GPU milliseconds filled by wall time at a duty that follows the frame
@@ -2071,9 +2082,19 @@ private:
             std::chrono::steady_clock::time_point t;
             ~Charge() {
                 double ms = msSince(t);
-                e->pace_.tokens -= ms;
+                // the budget pays the submission's GPU time (its timestamps) when there is one: its wall time also holds
+                // the time it queued behind the frames, and at 1440p that charged the generator for the frames' work
+                // until it made nothing (a route at 13 ms frames: no chunk in 160 s)
+                double gpu = ms;
+                if (e->subTimedDone_) {
+                    uint64_t ts[2] = {};
+                    if (vkGetQueryPoolResults(e->dev_, e->subQ_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS && ts[1] >= ts[0])
+                        gpu = double(ts[1] - ts[0]) * e->timestampPeriod_ * 1e-6;
+                    e->subTimedDone_ = false;
+                }
+                e->pace_.tokens -= gpu;
                 e->lastSubMs_ = ms;
-                e->pace_.usedMs += ms;
+                e->pace_.usedMs += gpu;
                 if (ms > e->pace_.maxSubMs) {
                     e->pace_.maxSubMs = ms;
                     std::snprintf(e->pace_.maxPhase, sizeof e->pace_.maxPhase, "%s", e->phase_.c_str());
@@ -2096,6 +2117,9 @@ private:
                 if (warnMs > 0.0 && ms > warnMs) std::fprintf(stderr, "TRACE gen submission %.1f ms (%s)\n", ms, e->phase_.c_str());
             }
         } charge{this, sub0};
+        if (subTimed_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, subQ_, 1);
+        subTimedDone_ = subTimed_;
+        subTimed_ = false;
         vkEndCommandBuffer(cmd_);
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.commandBufferCount = 1;
