@@ -59,6 +59,19 @@ server (the hold protects the player, and the same code runs in multiplayer).
 * A modified client that skips the hold screen can still send `Ready` at once: the client is the authority on its own
   loading, the server on what a held player may do.
 
+## Findings from the live runs (2026-10-25)
+
+* With the client generator on (`nirncraft.atlas.clientGen=true`) the spawn area is 1793 chunks and loaded about 2 chunks
+  a second on a shared machine, so a real hold waits for minutes (the old screen gave up silently after 180 s and hid
+  this). It is the true cost of "loading is complete"; the hold's own tests run with the generator off (group `hold`).
+* `AtlasReady` waited on "grid not started" for ever in the plain far-field mode (no level-0 grid): the grid is now required
+  only in the unified / client-generated modes. It also counted its own loading screen as "loading phase not over",
+  which deadlocks a screen that closes on ready: removed.
+* The harness's flags file did not win over Prism's stale JvmArgs copy of another worktree's group (clientGen, unified,
+  keepWorld): in a harness run it now overrides, and clears the group switches it does not name (NirnCraft.harnessFlags).
+* The pin runs every other tick, so a client that falls for a moment (the no-gravity flag not yet received) could be 3 blocks
+  off at release; the release now snaps the player back to where the hold began.
+
 ## Tests
 
 * `nirncraft-hold selftest` (headless, stand-in players; in tools/qa/qa.ps1's server run): hidden from a viewer, mob cannot

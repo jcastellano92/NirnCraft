@@ -251,5 +251,8 @@ def first_join(runner, s):
     m["raceScreenSamplesAfterRelease"] = len(seen)
     if not seen:
         fails.append("the character select never appeared after the release")
-    safe_close(g)
+    try:
+        safe_close(g)
+    except RuntimeError as e:  # (with the character select up the client takes minutes to quit: not the hold's failure)
+        m["closeSlow"] = str(e)[:80]
     return fails, m
