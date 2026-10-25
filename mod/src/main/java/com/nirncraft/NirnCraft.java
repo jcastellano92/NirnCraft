@@ -45,7 +45,7 @@ public class NirnCraft {
             return;
         }
         for (String k : props.stringPropertyNames())
-            if (System.getProperty(k) == null) System.setProperty(k, props.getProperty(k));
+            System.setProperty(k, props.getProperty(k));  // (the harness writes this file per launch: it wins over a stale -D that Prism kept in the instance)
         LOGGER.info("NirnCraft: harness flags {}", props);
     }
 

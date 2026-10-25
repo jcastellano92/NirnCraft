@@ -84,10 +84,12 @@ public final class AtlasServerStats {
         begun.addProperty("gpuWaitMs", GPU_WAIT_NS.get() / 1e6);
         begun.addProperty("gpuTimeouts", GPU_TIMEOUTS.get());
         AtlasServerAgreement.reset();
+        tickStart = 0;
         recording = true;
     }
 
     private static synchronized void tick(MinecraftServer server) {
+        if (tickStart == 0) return;  // (the recording began inside this tick)
         double ms = (System.nanoTime() - tickStart) / 1e6;
         if (tickCount == ticks.length) ticks = Arrays.copyOf(ticks, tickCount * 2);
         ticks[tickCount++] = (float) ms;
