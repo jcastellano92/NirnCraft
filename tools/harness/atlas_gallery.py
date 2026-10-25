@@ -463,21 +463,28 @@ def pair_metrics(v_png, a_png, curves=None, labels=None):
     left is the block's own difference, not the pipeline's (a physical sun and a tone map against vanilla's lightmap)."""
     v = load_rgb(v_png)
     a = load_rgb(a_png, (v.shape[1], v.shape[0]))
+    if labels is None or labels.shape != v.shape[:2]:
+        labels = None
     if curves:
-        if labels is None or labels.shape != v.shape[:2]:
-            labels = np.zeros(v.shape[:2], dtype=np.uint8)
-        v = apply_curves(v, labels, curves)
+        v = apply_curves(v, labels if labels is not None else np.zeros(v.shape[:2], dtype=np.uint8), curves)
     lv, la = lab_arr(v), lab_arr(a)
     d = la - lv
     de = np.sqrt((d ** 2).sum(-1))
     off = np.median(d.reshape(-1, 3), axis=0)
-    shape = np.sqrt(((d - off) ** 2).sum(-1))
-    ca = la[..., 0] - off[0]
+    # the level of each face apart (atlas lights the top by the sun, the front by the sky: no one offset is both's)
+    offmap = np.broadcast_to(off, d.shape).copy()
+    if labels is not None and labels.shape == d.shape[:2]:
+        for k in (0, 1):
+            m = labels == k if k == 1 else labels != 1
+            if m.mean() >= 0.05:
+                offmap[m] = np.median(d[m], axis=0)
+    shape = np.sqrt(((d - offmap) ** 2).sum(-1))
+    ca = la[..., 0] - offmap[..., 0]
     dark = ca < minfilter3(lv[..., 0]) - PIT_L          # darker than every vanilla pixel around it
     pit, sil = split_pits(dark, shape)
     bright = ca > -minfilter3(-lv[..., 0]) + PIT_L      # brighter than every vanilla pixel around it
     return {"dE": float(de.mean()), "dEp95": float(np.percentile(de, 95)), "dEshape": float(shape.mean()),
-            "offsetL": float(off[0]), "pit": float(pit.mean()), "silhouette": float(sil.mean()), "bright": float(bright.mean()),
+            "offsetL": float(off[0]), "offsetFront": float(offmap[labels == 1, 0].mean()) if labels is not None and (labels == 1).any() else None, "pit": float(pit.mean()), "silhouette": float(sil.mean()), "bright": float(bright.mean()),
             "lumaVanilla": float(lv[..., 0].mean()), "lumaAtlas": float(la[..., 0].mean()), "px": int(de.size),
             # what is in the picture at all: the share of pixels near black in atlas and not in vanilla (a hole: nothing
             # drawn, nothing loaded), and the spread of luminance in each (an atlas picture as flat as the stage's floor
@@ -622,7 +629,7 @@ def apply_look(rows, work_dirs):
         r.setdefault("raw16", r["m16"])
         r.setdefault("rawFails", list(r["fails"]))
     curves = tone_curves(rows, work_dirs)
-    if curves:
+    if True:
         for r in rows:
             od = work_dirs[r["id"]]
             for tag, key, raw in (("a2", "m2", "raw2"), ("b16", "m16", "raw16")):
