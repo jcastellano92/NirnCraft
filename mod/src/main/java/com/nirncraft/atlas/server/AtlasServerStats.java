@@ -28,7 +28,7 @@ public final class AtlasServerStats {
 
     /** Chunks the AtlasChunkGenerator took from the GPU, made in Java (the fallback), and Java's fillFromNoise calls. */
     public static final AtomicLong GPU_CHUNKS = new AtomicLong(), JAVA_CHUNKS = new AtomicLong(), JAVA_TERRAIN_CALLS = new AtomicLong(),
-            JAVA_DECORATION_CALLS = new AtomicLong(), GPU_WAIT_NS = new AtomicLong(), GPU_TIMEOUTS = new AtomicLong();
+            JAVA_DECORATION_CALLS = new AtomicLong(), STRUCTURE_CHUNKS = new AtomicLong(), GPU_WAIT_NS = new AtomicLong(), GPU_TIMEOUTS = new AtomicLong();
     private static final AtomicLong NEW_CHUNKS = new AtomicLong();
 
     private static final ThreadMXBean TMX = ManagementFactory.getThreadMXBean();
@@ -80,8 +80,10 @@ public final class AtlasServerStats {
         begun.addProperty("javaChunks", JAVA_CHUNKS.get());
         begun.addProperty("javaTerrainCalls", JAVA_TERRAIN_CALLS.get());
         begun.addProperty("javaDecorationCalls", JAVA_DECORATION_CALLS.get());
+        begun.addProperty("structureChunks", STRUCTURE_CHUNKS.get());
         begun.addProperty("gpuWaitMs", GPU_WAIT_NS.get() / 1e6);
         begun.addProperty("gpuTimeouts", GPU_TIMEOUTS.get());
+        AtlasServerAgreement.reset();
         recording = true;
     }
 
@@ -165,6 +167,7 @@ public final class AtlasServerStats {
             t.addProperty("over50", over50);
         }
         o.add("tick", t);
+        o.add("agreement", AtlasServerAgreement.report());
         o.add("seconds", ROWS.deepCopy());
         double worker = 0, serverCpu = 0, proc = 0;
         for (var e : ROWS) {
@@ -183,6 +186,7 @@ public final class AtlasServerStats {
         o.addProperty("javaChunks", JAVA_CHUNKS.get() - begun.get("javaChunks").getAsLong());
         o.addProperty("javaTerrainCalls", JAVA_TERRAIN_CALLS.get() - begun.get("javaTerrainCalls").getAsLong());
         o.addProperty("javaDecorationCalls", JAVA_DECORATION_CALLS.get() - begun.get("javaDecorationCalls").getAsLong());
+        o.addProperty("structureChunks", STRUCTURE_CHUNKS.get() - begun.get("structureChunks").getAsLong());
         o.addProperty("gpuWaitMs", GPU_WAIT_NS.get() / 1e6 - begun.get("gpuWaitMs").getAsDouble());
         o.addProperty("gpuTimeouts", GPU_TIMEOUTS.get() - begun.get("gpuTimeouts").getAsLong());
         if (server != null) {

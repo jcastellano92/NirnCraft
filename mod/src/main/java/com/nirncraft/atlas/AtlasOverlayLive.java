@@ -131,6 +131,28 @@ final class AtlasOverlayLive {
         l.close();
     }
 
+    /** Whether the overlays have looked for the seeded starts near the camera (a chunk is final only after, finalAt). */
+    static boolean scanned() {
+        Live l = live;
+        return l == null || l.scanned;
+    }
+
+    /**
+     * Whether chunk (cx, cz) comes out of the store with every stage's data: no settlement or seeded start whose tapes
+     * are still being recorded reaches it (the self-baking cache's no-bake boxes), and the starts near the camera have been
+     * found. The integrated server keeps what it is given for good, so it waits for this.
+     */
+    static boolean finalAt(int cx, int cz) {
+        Live l = live;
+        if (l == null) return true;  // (the overlays are off: no tapes to wait for)
+        if (!l.scanned) return false;
+        int[] b = l.noBakeSent;
+        if (b != null)
+            for (int i = 0; i + 3 < b.length; i += 4)
+                if (cx >= b[i] && cz >= b[i + 1] && cx <= b[i + 2] && cz <= b[i + 3]) return false;
+        return true;
+    }
+
     /** The overlays' handle on this generator (the decoration's mask reads their piece boxes), or null. */
     static java.lang.foreign.MemorySegment handleFor(AtlasGenNative.Gen gen) {
         Live l = live;
@@ -215,7 +237,8 @@ final class AtlasOverlayLive {
             gen.setNoBake(boxes);
         }
 
-        int[] noBakeSent;
+        volatile int[] noBakeSent;
+        volatile boolean scanned;
 
         String state() {
             return String.format("overlays: %d settlements and seeded starts (%d recorded in %.1f s, %d from the cache), %d chunks stamped, %d states missing%s",
@@ -266,6 +289,7 @@ final class AtlasOverlayLive {
                         }
                     }
                     noBake(plan);  // (the seeded starts found near the camera)
+                    scanned = true;
                     if (best < 0 && seeded == null) {
                         LockSupport.parkNanos(500_000_000L);
                         continue;

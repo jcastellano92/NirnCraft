@@ -238,6 +238,7 @@ final class AtlasClientSections {
             secs[s] = nearIds(sec);
         }
         int cx = c.getPos().x(), cz = c.getPos().z();
+        com.nirncraft.atlas.server.AtlasServerAgreement.client(cx, cz, minSec, secs);  // (the server's chunk against the GPU's)
         int[][] tints = columnTints(level, c, high);
         return new AtlasSections.Decoded(cx, cz, minSec, secs, tints[0][136], tints[1][136], tints[0], tints[1]);
     }

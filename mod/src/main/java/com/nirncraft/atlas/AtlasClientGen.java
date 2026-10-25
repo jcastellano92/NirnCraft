@@ -190,6 +190,8 @@ final class AtlasClientGen implements AutoCloseable {
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
     // (direct) the chunk store with the decoration's stages: chunks come out of it decorated (atlas_gen_run_store)
     private volatile boolean storeOn;
+    /** The integrated server's chunks, from the store (docs/ATLAS-GPU-LOOP.md section 4): null unless the store is on. */
+    private volatile AtlasServerGen serverGen;
     private volatile java.lang.foreign.MemorySegment featStages;
     private volatile long storeFinished;
     // stats (atlas-info)
@@ -392,6 +394,13 @@ final class AtlasClientGen implements AutoCloseable {
             c.cacheArm = cacheArm;
             c.storeOn = stages != null;
             c.featStages = stages;
+            if (c.storeOn && direct && com.nirncraft.atlas.server.AtlasServerMode.gpuChunks()) {
+                // the server's AtlasChunkGenerator takes its chunks from the store, on this generator's worker
+                c.serverGen = new AtlasServerGen(c, prog.blocks, c.farIds);
+                com.nirncraft.atlas.server.AtlasServerFeed.bind(g, c.serverGen);
+                com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the integrated server's chunks come from the GPU store ({})",
+                        g instanceof com.nirncraft.atlas.server.AtlasChunkGenerator ? "AtlasChunkGenerator" : "this world's generator is not the atlas one: unused");
+            }
             // the far chunks carry the decoration's trees (its far stage, unless ATLAS_FEAT_FAR=0): no stand-in canopy
             AtlasTileUpload.noDressingCanopy = stages != null && far() && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
@@ -493,7 +502,7 @@ final class AtlasClientGen implements AutoCloseable {
         return c != null && c.ctx != null && c.uploader.isAlive();
     }
 
-    private void wake() {
+    void wake() {
         LockSupport.unpark(worker);
         LockSupport.unpark(uploader);
         for (Thread t : featureWorkers) LockSupport.unpark(t);
@@ -702,6 +711,7 @@ final class AtlasClientGen implements AutoCloseable {
         // the self-baking cache's fingerprint, now that the generator is whole (program, stages, ingest, map): the
         // generator's completed by the far identity (world generation and painting code)
         if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.identity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
+        if (serverGen != null) serverGen.up();
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -710,6 +720,8 @@ final class AtlasClientGen implements AutoCloseable {
         while (running) {
             try {
                 refreshStats();
+                // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
+                if (serverGen != null && direct && storeOn && serveServer(ids, flags, info)) continue;
                 int waiting;
                 synchronized (ready) {
                     waiting = ready.size();
@@ -880,10 +892,23 @@ final class AtlasClientGen implements AutoCloseable {
      * of its misses (seconds a call).
      */
     private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer) {
+        directBatch(batch, ids, flags, info, first, defer, false);
+    }
+
+    /** The server's requests that are ready go into the store ahead of the window's chunks: its answer comes from the next calls. */
+    private boolean serveServer(int[] ids, int[] flags, int[] info) {
+        int[] b = serverGen.take(16);
+        if (b.length == 0) return false;
+        for (int i = 0; i < b.length; i += 2) done.add(ChunkPos.pack(b[i], b[i + 1]));  // (claimed: the window does not plan them too)
+        directBatch(b, ids, flags, info, false, false, true);
+        return true;
+    }
+
+    private void directBatch(int[] batch, int[] ids, int[] flags, int[] info, boolean first, boolean defer, boolean server) {
         if (batch.length > 0) nearWorkNs = System.nanoTime();
         // (the self-baking cache) the chunks it knows go into the grid from disk, not generated; the features' chunks
         // (their ids wanted here) are generated as before
-        if (gen.cacheSupported()) {
+        if (gen.cacheSupported() && !server) {  // (the server's chunks skip the cache: it holds sections, the server needs the ids)
             // (the chunk store) only the misses go into it: it makes the neighbourhood their stages read by itself
             // (atlas_gen_run_store), so a cached chunk is never made again nor packed again (the churn: every chunk
             // through the store, its neighbours sent back to the start by each new one)
@@ -909,7 +934,10 @@ final class AtlasClientGen implements AutoCloseable {
             AtlasGenNative.Times[] tt = new AtlasGenNative.Times[1];
             long gz = AtlasRecorder.begin();
             generatedChunks += n;  // (these chunks the cache did not have: through the store's stages)
-            int m = gen.runStore(batch, outXZ, null, flags, info, tt);
+            AtlasServerGen sg = serverGen;
+            boolean idsForServer = sg != null && sg.pending();
+            int m = gen.runStore(batch, outXZ, idsForServer ? ids : null, flags, info, tt);
+            if (idsForServer && m > 0) sg.delivered(outXZ, m, ids, flags);
             AtlasRecorder.end(Z_RUN_STORE, gz, 0, batch.length / 2);
             gt = tt[0];
             storeFinished += m;
@@ -1648,6 +1676,11 @@ final class AtlasClientGen implements AutoCloseable {
     public void close() {
         running = false;
         if (active == this) active = null;
+        AtlasServerGen sg = serverGen;
+        if (sg != null) {
+            com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
+            sg.close();
+        }
         List<Thread> all = new ArrayList<>(featureWorkers);
         all.add(worker);
         all.add(uploader);
