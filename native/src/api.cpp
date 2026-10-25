@@ -1028,6 +1028,16 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
         fprintf(stderr, "[atlas] steps: mean %.1f p50 %u p90 %u p99 %u p999 %u max %u warp-max mean %.1f\n",
                 double(steps) / double(v.size()), v[v.size() / 2], v[v.size() * 9 / 10], v[v.size() * 99 / 100],
                 v[v.size() * 999 / 1000], v.back(), warpMax / double(std::max<size_t>(warps, 1)));
+        // (and by eighths of the image, top to bottom: the sky's rows against the ground's)
+        char band[256];
+        int at = 0;
+        for (uint32_t b = 0; b < 8; b++) {
+            double s = 0;
+            for (uint32_t y = H * b / 8; y < H * (b + 1) / 8; y++)
+                for (uint32_t x = 0; x < W; x++) s += ctx->targets.counters[size_t(y) * W + x];
+            at += snprintf(band + at, sizeof(band) - at, " %.0f", s / (double(W) * (H * (b + 1) / 8 - H * b / 8)));
+        }
+        fprintf(stderr, "[atlas] steps by eighth, top to bottom:%s\n", band);
     }
     ctx->stats.lastFrameMs = ms;
     return ATLAS_OK;
