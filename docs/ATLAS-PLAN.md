@@ -77,6 +77,23 @@ distance. As numbers:
 
 A stage is done when its bar passes in the real game, not offline.
 
+### Frame budget (2026-10-25)
+
+At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
+the reserved slices stay free for what comes later:
+
+| Part | Budget |
+|---|---|
+| Terrain, near to horizon | 6-8 ms |
+| Lighting (sun, sky, bounce, lights) | ~3 ms |
+| Entities and effects (far movers as points, emitters in the light list) | 1-2 ms |
+| **Reserved:** clouds and weather (volumetric, amortised, same trace) | ~2 ms |
+| Post-processing | ~1 ms |
+
+Far edits re-ingest only the changed sections and their coarse levels (microseconds to a ms each). Far fires and
+lightning go in the light layer; far battles are points or silhouettes. In game the renderer was 25-29 ms on
+2026-10-25: the far-view work (sky exit, amortised far field) is what frees the reserve.
+
 ## 2. Why we keep not getting there
 
 1. **Too many fronts at once.** Generation on the GPU, features, settlements, content, water and residency all moved
