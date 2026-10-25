@@ -85,6 +85,8 @@ public:
     // `force` (returns true and fills out)
     bool pack(uint64_t have, bool force, const std::vector<uint32_t>& lights, std::vector<uint32_t>& out, uint64_t& revision) const;
     size_t bricks() const;
+    // how many materials hold a voxel brick, how many sheets, and the table's length (atlas_info brickMats)
+    void stats(uint32_t& voxels, uint32_t& sheets, uint32_t& table) const;
 
 private:
     mutable std::mutex mu_;

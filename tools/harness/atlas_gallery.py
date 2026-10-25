@@ -297,7 +297,8 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
                 steps.append({"op": "await", "max": 1200, "blocks": [list(cell(i)) for i in range(len(batch))]})
                 steps.append({"op": "settle", "max": 900, "min": 40})
                 steps.append({"op": "info", "name": f"b{b:03d}-atlas"})
-                steps.append({"op": "probe", "name": f"b{b:03d}-atlas", "blocks": [list(cell(i)) for i in range(len(batch))]})
+                steps.append({"op": "probe", "name": f"b{b:03d}-atlas",
+                              "blocks": [list(cell(i)) for i in range(len(batch))] + [[cell(i)[0], cell(i)[1] - 1, cell(i)[2]] for i in range(len(batch))]})
             steps += shots_for(cells, mode, settle)
         steps.append({"op": "mode", "name": "atlas", "wait": 1})
         receipt = run_script(g, f"batch{b}", steps, out, timeout=2400)
@@ -322,6 +323,8 @@ def near_rows(g, groups, work, a, say=print, yield_check=None, first=0):
             row = measure_pair(out, gr)
             if i < len(probes):
                 row["probe"] = probes[i]
+                if len(probes) >= 2 * len(batch):
+                    row["probeFloor"] = probes[len(batch) + i]
                 m = re.search(r" core=(\d+) ", probes[i])
                 if m and int(m.group(1)) == 0 and " client=minecraft:air" not in probes[i]:
                     row["notInCore"] = True

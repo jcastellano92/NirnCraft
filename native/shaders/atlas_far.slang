@@ -714,7 +714,9 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     uint wcls = uint(palette[mat].emisClass.y);
                     bool seeWater = ((frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && wcls == 2u) || primaryPassesWater(wcls, t);
                     // a block with a micro-voxel brick (a door, a rail, a torch: atlas_bricks.slang): its 1/16 voxels
-                    uint br = gPrimary && !seeWater ? brickOf(mat) : 0u;
+                    // (a waterlogged fence, bars or candle is a water-class material with a brick: the brick is seen through
+                    // the water; plain water has none)
+                    uint br = gPrimary && (!seeWater || wcls == 2u) ? brickOf(mat) : 0u;
                     if (br != 0u) {
                         // (its walk is up to 48 micro-voxels: counted against the ray's budget as a few steps)
                         gTr.steps += 4u;

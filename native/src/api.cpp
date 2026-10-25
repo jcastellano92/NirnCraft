@@ -447,6 +447,14 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         ctx->info = ctx->backend->info();
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
+        if (!ctx->info.empty() && ctx->info.back() == '}') {
+            // (abi 0.18) the bricks the context holds: materials with a voxel brick, with sheets, the table's length
+            uint32_t withBrick = 0, withCross = 0, table = 0;
+            ctx->bricks.stats(withBrick, withCross, table);
+            char bb[160];
+            std::snprintf(bb, sizeof bb, ",\"brickMats\":{\"voxels\":%u,\"sheets\":%u,\"table\":%u}", withBrick, withCross, table);
+            ctx->info.insert(ctx->info.size() - 1, bb);
+        }
         if (ctx->world.groupsWanted.load() && !ctx->info.empty() && ctx->info.back() == '}') {
             // (abi 0.14) the content-shaped groups: regions with a tree, their memory, the last update's builds
             World::GroupStats g = ctx->world.groupStats();
