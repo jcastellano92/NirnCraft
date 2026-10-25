@@ -24,6 +24,6 @@ public final class AtlasServerMode {
      * before/after measures); the AtlasChunkGenerator checks the GPU is really there before each chunk.
      */
     public static boolean gpuChunks() {
-        return gpuWorld() && !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.serverGen"));
+        return gpuWorld() && Boolean.getBoolean("nirncraft.atlas.serverGen");  // off by default until the generator keeps up (owner, 2026-10-25): -Dnirncraft.atlas.serverGen=true
     }
 }
