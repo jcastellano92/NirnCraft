@@ -46,6 +46,10 @@ gate, and a new one replaces a slower one. The process itself keeps improving, a
     - Open item: each level's data window, and the generator's near radius, should be sized from the footprint (the
       distance where that level's voxel is about 1 px), not a fixed chunk count. It's a focused core change after the
       current far-view steps.
+    - Residency by touch: the GPU knows which cells the rays touched in the last frames, and only those need to stay in
+      VRAM. Untouched cells (rock under the feet while on the surface, the far side of a mountain) drop to compressed
+      host or disk tiers until a ray needs them. A memory and loading win, not render time: drawing already touches
+      only what rays reach.
 9. **Never freeze, and say truly what is loading (owner, 2026-10-25).** No pipeline compile or bake work on the render
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
