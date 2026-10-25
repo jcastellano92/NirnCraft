@@ -49,7 +49,9 @@ gate, and a new one replaces a slower one. The process itself keeps improving, a
     - Residency by touch: the GPU knows which cells the rays touched in the last frames, and only those need to stay in
       VRAM. Untouched cells (rock under the feet while on the surface, the far side of a mountain) drop to compressed
       host or disk tiers until a ray needs them. A memory and loading win, not render time: drawing already touches
-      only what rays reach.
+      only what rays reach. Viewport and occlusion drive it, but "touched" includes the secondary rays (shadows, bounce,
+      water reflections reach behind and above the camera), plus a look-ahead margin from the camera's motion and turn
+      rate, so a fast turn, a shadow or a reflection never meets a hole.
 9. **Never freeze, and say truly what is loading (owner, 2026-10-25).** No pipeline compile or bake work on the render
    thread. While atlas isn't ready, vanilla keeps drawing, reduced (short distance, no costly passes) so the work gets
    the machine. The loading screen shows each real phase with true progress from real counters (kernel compiles,
