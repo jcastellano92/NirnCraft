@@ -225,6 +225,12 @@ final class AtlasMaterials {
         long key = (long) sid << 32 | (q & 0xFFFFFFFFL);
         Short have = exact.get(key);
         if (have != null) return have;
+        // a state that draws nothing in vanilla (no model quads, no fluid: a wall with no post and no arms) is air: with
+        // neither shape, textures nor brick its material was a solid cube in its colour where vanilla shows the floor
+        if (s.getFluidState().isEmpty() && AtlasShapes.quads(s).isEmpty()) {
+            exact.put(key, (short) 0);
+            return 0;
+        }
         if (nextExact > EXACT_LAST) {
             // full: the same state in its nearest tint (its shape, textures and brick), else the far state's; a plain
             // block id last (a per-block material wears the first state's shape: a fence's post, one half of a plant)
