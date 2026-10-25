@@ -947,7 +947,7 @@ final class AtlasClientGen implements AutoCloseable {
             AtlasServerGen sg = serverGen;
             boolean idsForServer = sg != null && sg.pending();
             int m = gen.runStore(batch, outXZ, idsForServer ? ids : null, flags, info, tt);
-            if (idsForServer && m > 0) sg.delivered(outXZ, m, ids, flags);
+            if (idsForServer && m > 0) sg.delivered(outXZ, m, ids, flags, info);
             AtlasRecorder.end(Z_RUN_STORE, gz, 0, batch.length / 2);
             gt = tt[0];
             storeFinished += m;

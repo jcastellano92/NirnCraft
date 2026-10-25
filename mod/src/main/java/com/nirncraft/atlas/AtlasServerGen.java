@@ -35,7 +35,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     private final AtlasClientGen owner;
     private final ConcurrentHashMap<Long, Req> reqs = new ConcurrentHashMap<>();
     private volatile boolean up, closed;
-    private volatile long served, flagged, waitedForTapes, notFinal, overflow;
+    private volatile long served, flagged, waitedForTapes, notFinal, overflow, badReadbacks;
     /** Requests the store holds at once; the rest are made in Java (-Dnirncraft.atlas.serverGen.outstanding). */
     static final int MAX_OUTSTANDING = Integer.getInteger("nirncraft.atlas.serverGen.outstanding", 24);
 
@@ -138,7 +138,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
      * Worker thread: the store gave m chunks (their pairs in xz, ids and flags as atlas_gen_run_store gave them): those
      * the server asked for go to it. A chunk the kernels could not prove exact goes as null (Java makes it).
      */
-    void delivered(int[] xz, int m, int[] ids, int[] flags) {
+    void delivered(int[] xz, int m, int[] ids, int[] flags, int[] info) {
         for (int i = 0; i < m; i++) {
             long k = ChunkPos.pack(xz[i * 2], xz[i * 2 + 1]);
             Req r = reqs.remove(k);
@@ -171,6 +171,22 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
                     nearSecs[s] = near.clone();
                 }
             }
+            // the ids against the store's own report of the chunk (kinds: air, blocks, deep rock): a section the report says
+            // has blocks and the ids say is air is a bad readback or a slot that is not this chunk's: Java makes the chunk
+            int nonAir = 0, disagree = 0;
+            for (int s = 0; s < 40; s++) {
+                int kind = info[i * AtlasGenNative.INFO_WORDS + 4 + s * 4 + 2];
+                if (secs[s] != null) nonAir++;
+                if ((kind == AtlasGenNative.SEC_AIR) != (secs[s] == null)) disagree++;
+            }
+            if (nonAir == 0 || disagree > 0) {
+                badReadbacks++;
+                if (badReadbacks <= 5)
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas server feed: chunk {},{} ids disagree with the store's report ({} sections non-air, {} disagree): Java makes it",
+                            xz[i * 2], xz[i * 2 + 1], nonAir, disagree);
+                r.f.complete(null);
+                continue;
+            }
             AtlasServerAgreement.gpu(xz[i * 2], xz[i * 2 + 1], hashes, nearSecs);
             served++;
             r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette, AtlasSideOps.at(xz[i * 2], xz[i * 2 + 1])));
@@ -185,6 +201,6 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
     /** "server feed: asked / served / flagged / waiting for tapes" (atlas-info). */
     String state() {
         return "serverFeed{up=" + up + " waiting=" + reqs.size() + " served=" + served + " flagged=" + flagged
-                + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + " javaOverflow=" + overflow + "}";
+                + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + " javaOverflow=" + overflow + " badReadbacks=" + badReadbacks + "}";
     }
 }
