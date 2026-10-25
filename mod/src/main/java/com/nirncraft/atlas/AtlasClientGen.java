@@ -972,6 +972,17 @@ final class AtlasClientGen implements AutoCloseable {
      */
     private long reconcileNs;
 
+    /**
+     * A chunk of the spawn window that atlas does not upload itself counts as in: one not proven exact (the server's blocks
+     * supply it) or one whose loaded blocks are up already. The window was never "up" while a couple of them stood in it.
+     */
+    private void markCovered(int cx, int cz) {
+        if (jumpNs != 0 && inWindow(cx, cz, jumpCx, jumpCz, RADIUS)) {
+            upSinceJump.add(ChunkPos.pack(cx, cz));
+            if (windowUpNs == 0 && upSinceJump.size() >= windowChunks()) windowUpNs = System.nanoTime();
+        }
+    }
+
     private void reconcileWindow() {
         long now = System.nanoTime();
         if (windowUpNs != 0 || jumpNs == 0 || now - reconcileNs < 4_000_000_000L || now - nearWorkNs < 3_000_000_000L || !deferred.isEmpty()) return;
@@ -1129,6 +1140,7 @@ final class AtlasClientGen implements AutoCloseable {
             int cx = batch[i * 2], cz = batch[i * 2 + 1];
             if (flags[i] != 0) {
                 flagged++;  // not proven exact here: the server's blocks
+                markCovered(cx, cz);
                 continue;
             }
             if (!inWindow(cx, cz, ccx, ccz, RADIUS + 1)) {
@@ -1136,7 +1148,10 @@ final class AtlasClientGen implements AutoCloseable {
                 continue;
             }
             if (wantIds && near(cx, cz, ccx, ccz, FEATURE_RADIUS + 2)) store.put(ChunkPos.pack(cx, cz), compact(ids, i));
-            if (AtlasClientSections.isReal(cx, cz)) continue;  // the loaded chunk's own blocks are up: they stay
+            if (AtlasClientSections.isReal(cx, cz)) {  // the loaded chunk's own blocks are up: they stay
+                markCovered(cx, cz);
+                continue;
+            }
             int o = i * AtlasGenNative.INFO_WORDS + 4;
             int highest = -1;
             for (int sec = 0; sec < 40; sec++) {
@@ -1230,7 +1245,10 @@ final class AtlasClientGen implements AutoCloseable {
         AtlasClientGen c = active;
         if (c == null) return null;
         int farTotal = c.farOn ? 6 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1) : 0;
-        return new Progress(camSet, c.upSinceJump.size(), windowChunks(), c.windowUpNs != 0, Math.min(c.farDone.size(), farTotal), farTotal,
+        // the spawn area the loading gate waits for: the chunks within SPAWN_RADIUS of where the player joined (nearest first
+        // the generator makes them); the rest of the window goes on while the player plays
+        int spawnTotal = windowChunks(SPAWN_RADIUS), spawnUp = c.jumpNs == 0 ? 0 : c.countUp(SPAWN_RADIUS);
+        return new Progress(camSet, spawnUp, spawnTotal, c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal), Math.min(c.farDone.size(), farTotal), farTotal,
                 c.cachedChunks, c.farCached, c.chunks);
     }
 
@@ -1307,6 +1325,28 @@ final class AtlasClientGen implements AutoCloseable {
             if (AtlasEditsClient.claim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz), h)) m |= 1L << sec;
         }
         return m;
+    }
+
+    /**
+     * The radius, in chunks, of the spawn area the loading phase waits for (the generator's window is RADIUS, 24, 1793 chunks;
+     * the decoration of a chunk is 70 ms of GPU time, so the whole window is minutes cold). The window's nearest ring is made
+     * first; the rest follows while the player plays, the coarse levels under it. -Dnirncraft.atlas.spawnRadius=24: all of it.
+     */
+    static final int SPAWN_RADIUS = Math.min(RADIUS, Integer.getInteger("nirncraft.atlas.spawnRadius", 12));
+
+    private int countUp(int radius) {
+        int n = 0;
+        for (int dz = -radius; dz <= radius; dz++)
+            for (int dx = -radius; dx <= radius; dx++)
+                if (dx * dx + dz * dz <= radius * radius && upSinceJump.contains(ChunkPos.pack(jumpCx + dx, jumpCz + dz))) n++;
+        return n;
+    }
+
+    private static int windowChunks(int r) {
+        int w = 0;
+        for (int dz = -r; dz <= r; dz++)
+            for (int dx = -r; dx <= r; dx++) if (dx * dx + dz * dz <= r * r) w++;
+        return w;
     }
 
     private static int windowChunks() {
