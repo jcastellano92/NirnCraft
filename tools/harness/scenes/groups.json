@@ -57,7 +57,8 @@
   "hold": {
     "description": "The player hold's live tests (hold_tools.py): the kept test world, the client generator off so the hold waits on the renderer alone (with it on, the spawn area is 1800 chunks and takes minutes: see docs/PLAYER-HOLD.md)",
     "jvm": {
-      "nirncraft.atlas.clientGen": "false"
+      "nirncraft.atlas.clientGen": "false",
+      "nirncraft.hold.arrival": "true"
     },
     "keptWorld": true,
     "server": false

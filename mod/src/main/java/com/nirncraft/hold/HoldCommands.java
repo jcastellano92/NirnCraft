@@ -44,6 +44,17 @@ public final class HoldCommands {
                             c.getSource().sendSuccess(() -> Component.literal("holding " + p.getGameProfile().name() + " until their client reports ready"), true);
                             return 1;
                         })))
+                .then(Commands.literal("respawn")  // (the test helper: the dead player's "Respawn" click, from the server)
+                        .then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                            ServerPlayer p = EntityArgument.getPlayer(c, "player");
+                            if (!p.isDeadOrDying()) {
+                                c.getSource().sendFailure(Component.literal(p.getGameProfile().name() + " is not dead"));
+                                return 0;
+                            }
+                            p.connection.handleClientCommand(new net.minecraft.network.protocol.game.ServerboundClientCommandPacket(
+                                    net.minecraft.network.protocol.game.ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+                            return 1;
+                        })))
                 .then(Commands.literal("selftest").executes(c -> selftest(c.getSource()))));
     }
 
