@@ -74,6 +74,13 @@ std::vector<BakeTile> planBake(const AtlasGenBakeSpec& spec) {
             int32_t span = 256 << lod;
             int32_t tx0 = floorDiv(spec.minX - spec.marginBlocks, span), tx1 = floorDiv(spec.maxX - 1 + spec.marginBlocks, span);
             int32_t tz0 = floorDiv(spec.minZ - spec.marginBlocks, span), tz1 = floorDiv(spec.maxZ - 1 + spec.marginBlocks, span);
+            if (lod >= 5) {
+                // (the two coarsest levels' windows reach 16 and 32 km from the spawn, past the map's edge on a side: the sea
+                // there is part of the floor, a few tiles whose tiles cost next to nothing; finer levels stay in the bounds)
+                int32_t half = 512 << lod;
+                tx0 = std::min(tx0, floorDiv(spec.centerX - half, span)), tx1 = std::max(tx1, floorDiv(spec.centerX + half - 1, span));
+                tz0 = std::min(tz0, floorDiv(spec.centerZ - half, span)), tz1 = std::max(tz1, floorDiv(spec.centerZ + half - 1, span));
+            }
             std::vector<std::pair<double, BakeTile>> level;
             for (int32_t tz = tz0; tz <= tz1; tz++)
                 for (int32_t tx = tx0; tx <= tx1; tx++) {
