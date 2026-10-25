@@ -1178,13 +1178,16 @@ class AtlasGenParityTest {
                 List<Float> frameMs = new ArrayList<>();  // (each frame's update + render, ms: the render thread's)
                 Thread renderer = new Thread(() -> {
                     AtlasNative.Frame f = new AtlasNative.Frame();
-                    f.width = 320;
-                    f.height = 180;
+                    // NIRNCRAFT_RELAUNCH_SIZE "w,h": the frames' size (default 320 x 180; 2560,1440 loads the card as the game's)
+                    String[] wh = System.getenv().getOrDefault("NIRNCRAFT_RELAUNCH_SIZE", "320,180").split(",");
+                    final int fw = Integer.parseInt(wh[0].trim()), fh = Integer.parseInt(wh[1].trim());
+                    f.width = fw;
+                    f.height = fh;
                     f.maxDistance = 2000;
-                    new org.joml.Matrix4f().perspective((float) Math.toRadians(70), 320f / 180, 0.05f, 4000f)
+                    new org.joml.Matrix4f().perspective((float) Math.toRadians(70), (float) fw / fh, 0.05f, 4000f)
                             .lookAt(0, 0, 0, 0, -0.5f, 1, 0, 1, 0).invert().get(f.invViewProj);
-                    int[] color = new int[320 * 180];
-                    float[] depth = new float[320 * 180];
+                    int[] color = new int[fw * fh];
+                    float[] depth = new float[fw * fh];
                     long nextFrame = System.nanoTime();
                     while (rendering.get()) {
                         f.x = cam[0];

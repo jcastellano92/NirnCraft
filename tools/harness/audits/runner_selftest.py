@@ -404,5 +404,17 @@ with _tf.TemporaryDirectory() as _td:
     _game.write_flags_file({}, _f)
     expect(not _f.exists(), "no flags: no file (a run without flags gets none from the last one)")
 
+# --- dev shaders in the instance shadow the core's kernels: moved aside before a live run (2026-10-25) --------------
+with _tf.TemporaryDirectory() as _td:
+    _g = Path(_td)
+    expect(_game.clear_dev_shaders(_g) is None, "no atlas-shaders folder: nothing moved")
+    (_g / "atlas-shaders").mkdir()
+    expect(_game.clear_dev_shaders(_g) is None and (_g / "atlas-shaders").is_dir(), "an empty atlas-shaders folder stays")
+    (_g / "atlas-shaders/atlas_far.spv").write_bytes(b"\x03\x02\x23\x07")
+    _closed = []
+    _to = _game.clear_dev_shaders(_g, running=lambda: True, close=lambda: _closed.append(1))
+    expect(_to is not None and not (_g / "atlas-shaders").exists() and (_to / "atlas_far.spv").exists() and _closed,
+           "atlas-shaders with kernels is moved aside, the client closed first")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
