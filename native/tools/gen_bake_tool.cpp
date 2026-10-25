@@ -136,12 +136,13 @@ int main(int argc, char** argv) {
     f.cameraPos[1] = std::atof(arg(argc, argv, "y", "360").c_str());
     f.cameraPos[2] = z;
     atlas::cameraMatrix(0, -35, 70, 16.0 / 9.0, f.invViewProj);
-    f.width = 320;
-    f.height = 180;
+    const int FW = std::atoi(arg(argc, argv, "w", "320").c_str()), FH = std::atoi(arg(argc, argv, "h", "180").c_str());  // (w=2560 h=1440: the game's frames)
+    f.width = FW;
+    f.height = FH;
     f.maxDistance = 4000;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    std::vector<uint32_t> color(320 * 180);
+    std::vector<uint32_t> color(size_t(FW) * FH);
     AtlasFrameOutput out{color.data(), nullptr, nullptr};
     double centre[3] = {x, f.cameraPos[1], z};
     // bg=1: a thread renders the frames from the first bake step on (the game's cadence, bgcap ms a frame), their wall times
@@ -160,7 +161,7 @@ int main(int argc, char** argv) {
         bgOn = true;
         bgMs.clear();
         bgThread = std::thread([&] {
-            std::vector<uint32_t> img(320 * 180);
+            std::vector<uint32_t> img(size_t(FW) * FH);
             AtlasFrameOutput o2{img.data(), nullptr, nullptr};
             while (!bgStop) {
                 auto a = std::chrono::steady_clock::now();
@@ -371,6 +372,7 @@ int main(int argc, char** argv) {
         std::printf("{\"setupMs\":%.0f,\"placedMs\":%.0f}\n", tReady - t0, tPlaced - tReady);
         if (first >= last) rc = phase(first, last, "levels");
         if (rc == 0 && arg(argc, argv, "lod2", "0") != "0") {
+            atlas_gen_pace_boost(g, 0);  // (after control the bake is paced by the frames)
             startBg();
             rc = phase(2, 2, "level2");
         }
