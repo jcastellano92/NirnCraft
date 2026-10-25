@@ -85,7 +85,9 @@ def run(runner, s, v, fp):
     first = len(list(work.glob("b*")))
     g.ensure_visible()
     setup = ["ui close", "perspective first", "hud off", "try time set 6000", "try nirncraft-weather fronts clear", "weather-off on",
-             "try nirncraft-weather set-all clear 120"]
+             "try nirncraft-weather set-all clear 120",
+             # (no random ticks: a crop grew or a sapling, cocoa or wheat on the stone floor was gone from one shot to the next)
+             "try gamerule random_tick_speed 0", "try gamerule randomTickSpeed 0"]
     ox, oy, oz = ORIGIN
     half = (COLS // 2) * SPACING + 8
     try:
