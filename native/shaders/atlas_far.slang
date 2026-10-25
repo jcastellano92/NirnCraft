@@ -679,6 +679,155 @@ void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
     cTr.hasAlbedo = 1u;
 }
 
+// ---- coarse voxels as smooth surfaces (ATLAS-PLAN 0.2: detail as the eye resolves it) ----
+// A coarse level's voxel wider than the pixel's footprint (the footprint's own level not resident: a streaming gap, a
+// window's edge) is not drawn as the cube it is stored as: its level's occupancy is a density (each voxel's centre 1 when
+// solid, 0 when air), interpolated trilinearly, the surface where it reaches one half; the colour the solid corners'
+// albedo by their weights; the normal the density's gradient. A mountain at a coarse level reads as a smooth slope in
+// blended colour, never stair-stepped boxes in mottled per-voxel colours. (ATLAS_ABLATE 32: the cubes, as before)
+static const float SMOOTH_COARSE_PX = 1.5;  // a voxel this many footprints wide, or more, is drawn smooth
+
+// the material of grid-local voxel v of level grid g: 0 air, 0xFFFFFFFF no data (outside the window, an unloaded chunk)
+uint vgMatG(VgGrid g, int3 v) {
+    if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= g.X * 16 || v.y >= g.Y * 16 || v.z >= g.Z * 16) return 0xFFFFFFFFu;
+    uint cw = vgChunks[vgCellG(g, v >> 4)];
+    uint st = cw & 3u;
+    if (st == VG_UNLOADED) return 0xFFFFFFFFu;
+    if (st == VG_EMPTY) return 0u;
+    if (st == VG_UNIFORM) return (cw >> 2) & 0xFFFFu;
+    int3 l = v & 15;
+    uint i = uint(l.x + 16 * (l.z + 16 * l.y));
+    return (vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+}
+
+// a voxel's share of the density: 1 what this ray stops at, 0 air and water a ray passes (skipWater: the trace on
+// under a water surface, or water seen through); no data (an unloaded neighbour, the window's edge) counts as the hit
+// voxel's own, solid, so the surface keeps no lip where the level's data ends
+float smoothOcc(uint m, bool skipWater) {
+    if (m == 0u) return 0.0;
+    if (m == 0xFFFFFFFFu) return 1.0;
+    return skipWater && uint(palette[m].emisClass.y) == 2u ? 0.0 : 1.0;
+}
+
+// the level's density at q (grid-local voxel units): its eight voxel centres around q, trilinear
+float vgDensityG(VgGrid g, float3 q, bool skipWater) {
+    q -= 0.5;
+    int3 b = int3(floor(q));
+    float3 w = q - float3(b);
+    float o[8];
+    [unroll]
+    for (int k = 0; k < 8; k++) o[k] = smoothOcc(vgMatG(g, b + int3(k & 1, (k >> 1) & 1, (k >> 2) & 1)), skipWater);
+    return lerp(lerp(lerp(o[0], o[1], w.x), lerp(o[2], o[3], w.x), w.y), lerp(lerp(o[4], o[5], w.x), lerp(o[6], o[7], w.x), w.y), w.z);
+}
+
+struct SmoothHit {
+    bool hit;
+    float t;        // the surface along the walk's parameter
+    float3 n;       // its normal (unit, grid axes: the world's)
+    float3 albedo;  // the solid corners' albedo by their weights (linear)
+};
+
+// The density's crossing along ro + d u (grid-local voxel units, u the walk's parameter) for u in [u0, u1), from the
+// cell of eight voxel centres around each sample (the last cell's corners kept: a march stays in two or three cells).
+// ([noinline]: one copy wherever traceVoxGrid is inlined; it reads no thread-private static, its inputs are arguments)
+[noinline]
+SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, bool skipWater) {
+    SmoothHit sh;
+    sh.hit = false;
+    sh.t = u1;
+    sh.n = float3(0, 1, 0);
+    sh.albedo = float3(0, 0, 0);
+    int3 cellAt = int3(-0x7FFFFFFF, 0, 0);
+    uint mats[8];
+    float occ[8];
+    [unroll]
+    for (int k = 0; k < 8; k++) { mats[k] = 0u; occ[k] = 0.0; }
+    float fPrev = -1.0, uPrev = u0;
+    const int N = 10;
+    float du = (u1 - u0) / float(N);
+    float u = u0;
+    float3 w3 = float3(0, 0, 0);
+    for (int it = 0; it < N + 5; it++) {
+        // (N even samples, then bisection between the last one outside and the first one inside)
+        float3 q = ro + d * u - 0.5;  // (voxel centres at integer + 0.5: the cell's lower corner floor(q))
+        int3 b = int3(floor(q));
+        if (any(b != cellAt)) {
+            cellAt = b;
+            [unroll]
+            for (int k = 0; k < 8; k++) {
+                uint m = vgMatG(g, b + int3(k & 1, (k >> 1) & 1, (k >> 2) & 1));
+                mats[k] = m;
+                occ[k] = smoothOcc(m, skipWater);
+            }
+        }
+        w3 = q - float3(b);
+        float x0 = lerp(occ[0], occ[1], w3.x), x1 = lerp(occ[2], occ[3], w3.x);
+        float x2 = lerp(occ[4], occ[5], w3.x), x3 = lerp(occ[6], occ[7], w3.x);
+        float f = lerp(lerp(x0, x1, w3.y), lerp(x2, x3, w3.y), w3.z);
+        if (it < N) {
+            if (f >= 0.5) {
+                if (it == 0) {  // (inside at once: the surface at the march's start)
+                    sh.hit = true;
+                    u1 = u;
+                    break;
+                }
+                sh.hit = true;
+                // bisection on [uPrev, u]
+                u1 = u;
+                u0 = uPrev;
+                u = 0.5 * (u0 + u1);
+                it = N - 1;  // (the next iterations bisect)
+                continue;
+            }
+            uPrev = u;
+            fPrev = f;
+            u += du;
+            if (it == N - 1) return sh;  // (no crossing: the ray passes this voxel's corner)
+            continue;
+        }
+        // bisection
+        if (f >= 0.5) u1 = u; else u0 = u;
+        u = 0.5 * (u0 + u1);
+    }
+    if (!sh.hit) return sh;
+    sh.t = u1;
+    // the normal: minus the density's gradient over a voxel either side of the crossing (central differences: a terrace's
+    // one-voxel ramp and its flat top share their light across the step, a slope reads as a slope)
+    float3 qh = ro + d * sh.t;
+    float3 gr = float3(vgDensityG(g, qh + float3(1, 0, 0), skipWater) - vgDensityG(g, qh - float3(1, 0, 0), skipWater),
+                       vgDensityG(g, qh + float3(0, 1, 0), skipWater) - vgDensityG(g, qh - float3(0, 1, 0), skipWater),
+                       vgDensityG(g, qh + float3(0, 0, 1), skipWater) - vgDensityG(g, qh - float3(0, 0, 1), skipWater));
+    if (dot(gr, gr) < 1e-8) {  // (flat over the stencil: the crossing's own cell)
+        gr.x = lerp(lerp(occ[1] - occ[0], occ[3] - occ[2], w3.y), lerp(occ[5] - occ[4], occ[7] - occ[6], w3.y), w3.z);
+        gr.y = lerp(lerp(occ[2] - occ[0], occ[3] - occ[1], w3.x), lerp(occ[6] - occ[4], occ[7] - occ[5], w3.x), w3.z);
+        gr.z = lerp(lerp(occ[4] - occ[0], occ[5] - occ[1], w3.x), lerp(occ[6] - occ[2], occ[7] - occ[3], w3.x), w3.y);
+    }
+    float gl = length(gr);
+    sh.n = gl > 1e-5 ? -gr / gl : -normalize(d);
+    // the colour: the solid corners' albedo by their trilinear weights
+    float3 acc = float3(0, 0, 0);
+    float wsum = 0.0;
+    [unroll]
+    for (int k = 0; k < 8; k++) {
+        if (occ[k] <= 0.0 || mats[k] == 0xFFFFFFFFu) continue;  // (no data: no colour of its own)
+        float wk = ((k & 1) != 0 ? w3.x : 1.0 - w3.x) * (((k >> 1) & 1) != 0 ? w3.y : 1.0 - w3.y) * (((k >> 2) & 1) != 0 ? w3.z : 1.0 - w3.z);
+        acc += palette[mats[k]].albedoRough.rgb * wk;
+        wsum += wk;
+    }
+    sh.albedo = wsum > 1e-6 ? acc / wsum : float3(0.5, 0.5, 0.5);
+    return sh;
+}
+
+// (TraceResult.hasAlbedo) bit 0 its albedo is the hit's own, bit 1 a smooth normal in bits 16-31 (octahedral, 8 bits each)
+static const uint HIT_SMOOTH_N = 2u;
+uint packSmoothN(float3 n) {
+    float2 e = octEncode(n);
+    return 1u | HIT_SMOOTH_N | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+}
+float3 hitSmoothN(uint hasAlbedo) {
+    return octDecode(float2(float((hasAlbedo >> 16) & 255u), float((hasAlbedo >> 24) & 255u)) / 255.0);
+}
+
 // The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
 // [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
 // window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
@@ -771,8 +920,30 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
                     uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                     if (g.k > 0) {
-                        // a coarse level's voxel: a cube of its material (the regions' levels' rule)
-                        if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
+                        // a coarse level's voxel: a cube of its material (the regions' levels' rule), unless it is wider
+                        // than the primary ray's footprint: then the level's smooth surface (coarseSmoothHit)
+                        float foot = (cChordT + t) * frame.params.w * frame.params.z;
+                        bool smooth = cPrimary && vs >= SMOOTH_COARSE_PX * foot && (cAblate & 32u) == 0u;
+                        bool stops = voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t);
+                        if (stops && smooth) {
+                            // (from a voxel before the cube's entry: a concave corner's surface stands in front of it;
+                            // to a voxel and a half past it, within this walk: a convex edge's lies inside)
+                            float span = length(d) > 1e-12 ? 1.0 / length(d) : 1.0;  // (the parameter across one voxel)
+                            bool skipW = cSkipWater || (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
+                            SmoothHit shit = coarseSmoothHit(g, ro, d, max(u0, t - span), min(t + 1.5 * span, u1), skipW);
+                            if (shit.hit) {
+                                float3 an = abs(shit.n);
+                                cTr.t = shit.t;
+                                cTr.mat = mat;
+                                cTr.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
+                                cTr.lod = g.k;
+                                cTr.albedo = shit.albedo;
+                                cTr.hasAlbedo = packSmoothN(shit.n);
+                                cTr.steps = steps;
+                                return TRACE_HIT;
+                            }
+                            // (no crossing near it: the ray passes this voxel's corner, the walk goes on)
+                        } else if (stops) {
                             cTr.t = t;
                             cTr.mat = mat;
                             cTr.axis = entryAxis(v, ro, d, inv, stepPos);
@@ -2806,6 +2977,13 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
                 break;
             so.y = floor(so.y + ci.y) + 1.02 - ci.y;
         }
+        // (the unified field: a coarse level's hit, a smooth surface inside its level's cube: out of that solid along the
+        // normal, else its rays start inside the cube and the surface is black)
+        int hitLod = (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u ? int(255u - ((info >> 8) & 255u)) : 0;
+        if (hitLod > 0 && hitLod <= 6) {
+            float hs = float(1 << hitLod);
+            for (int i = 0; i < 3 && occupiedAt(hitLod, so); i++) so += N * (0.5 * hs);
+        }
     }
     // The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"): a pixel cannot show the light's detail finer
     // than its footprint there (the blocks one pixel covers: distance x the pixel's angle x lightCtl.x), so its secondary
@@ -3638,9 +3816,12 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         int ax = res.axis < 0 ? 1 : res.axis;
         float3 n = float3(0, 0, 0);
         n[ax] = dir[ax] > 0.0 ? -1.0 : 1.0;  // the face entered (blocks, near: no smoothing)
+        if ((res.hasAlbedo & HIT_SMOOTH_N) != 0u) n = hitSmoothN(res.hasAlbedo);  // (a coarse level's smooth surface)
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
         float2 e = octEncode(n);
-        uint info = (255u << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+        // (byte 8-15, the host's sky light where the host writes the info: in the unified field atlas's own, 255 - the hit's
+        // level, nearLightAt's origin out of that level's solid)
+        uint info = ((255u - uint(clamp(res.lod, 0, 7))) << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
         // (what the host's depth test sees: the bed, so what swims over it shows, the water's medium on it from the
         // surface's distance, waterAdd.a; under water, where the ray left the water)
         float tDepth = watered && eyeWater ? min(tHit, max(airFrom, 0.05)) : tHit;
@@ -3753,6 +3934,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if (ax == 0) n.x = slope.x > 0 ? -1.0 : 1.0;
         else if (ax == 1) n.y = slope.y > 0 ? -1.0 : 1.0;
         else n.z = slope.z > 0 ? -1.0 : 1.0;
+        if ((res.hasAlbedo & HIT_SMOOTH_N) != 0u) n = hitSmoothN(res.hasAlbedo);  // (a coarse level's smooth surface)
         float3 p = worldAt(o, dir, k, tHit);
         airAtPoint(p);  // the key light at the hit (a peak keeps the sun longer; an eclipse's shadow where it falls)
         float s = float(1 << res.lod);
