@@ -166,11 +166,18 @@ void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     for (auto& e : std::filesystem::directory_iterator(root, ec))
         if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != sub + 1)
             old.push_back(e.path());
-    if (!old.empty())
-        std::thread([old] {
-            std::error_code e2;
-            for (auto& p : old) std::filesystem::remove_all(p, e2);
-        }).detach();
+    oldSets_ = std::move(old);  // (deleted once this set has written something: a set opened for a moment, while the
+                                // generator was being put together or taken apart, must not delete the real one)
+}
+
+void GenCache::dropOldSets() {
+    if (oldSets_.empty()) return;
+    std::vector<std::filesystem::path> old;
+    old.swap(oldSets_);
+    std::thread([old] {
+        std::error_code e2;
+        for (auto& p : old) std::filesystem::remove_all(p, e2);
+    }).detach();
 }
 
 GenCache::Region& GenCache::region(uint64_t rk) {
@@ -190,6 +197,10 @@ GenCache::Region& GenCache::region(uint64_t rk) {
             r.secs[Key3{0, int32_t(h[2]), int32_t(h[3]), int32_t(h[4])}] = loc;
         } else if (type == 2) {
             r.tiles[tileKey(int32_t(h[2]), int32_t(h[4]))] = {loc, h[1] >> 8};
+        } else if (type == 4) {
+            int32_t cx = int32_t(h[2]), cz = int32_t(h[4]);
+            r.chunks.erase(chunkKey(cx, cz));
+            for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
         } else if (type == 3) {
             Key3 k{int32_t(h[3] >> 16), int32_t(h[2]), int32_t(h[3] & 0xFFFFu), int32_t(h[4])};
             if (r.coarse.emplace(k, loc).second) r.baked[tileKey(tdiv(k.x), tdiv(k.z))]++;
@@ -212,6 +223,7 @@ void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
     j.info.assign(info, info + INFO_WORDS);
     {
         std::lock_guard<std::mutex> l(mu_);
+        fresh_.insert(chunkKey(cx, cz));
         queue_.push_back(std::move(j));
         st_.queued = queue_.size();
     }
@@ -250,7 +262,9 @@ void GenCache::writerLoop() {
         // (the compression outside the lock)
         std::vector<uint8_t> payload;
         auto t0 = std::chrono::steady_clock::now();
-        if (j.type == 2) {
+        if (j.type == 4) {
+            // (a tombstone: no payload)
+        } else if (j.type == 2) {
             encodeKinds(j.info, payload);
         } else if (j.isChunk) {
             encodeHeader(j.info.data(), payload);
@@ -265,7 +279,18 @@ void GenCache::writerLoop() {
         double ms = msSince(t0);
         l.lock();
         st_.encodeMs += ms;
-        if (on && dir == dir_ && on_ && j.type >= 2) {
+        if (on && dir == dir_ && on_ && j.type == 4) {
+            uint64_t rk = regionOf(j.k.x, j.k.z);
+            Region& r = region(rk);
+            uint32_t h[HEAD] = {MAGIC, 4u, uint32_t(j.k.x), 0u, uint32_t(j.k.z), 0u};
+            FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
+            bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD;
+            if (f) std::fclose(f);
+            if (ok) {
+                r.fileBytes += uint64_t(HEAD) * 4;
+                st_.fileBytes += uint64_t(HEAD) * 4;
+            }
+        } else if (on && dir == dir_ && on_ && j.type >= 2) {
             // (the far terrain's: a tile's kinds, a coarse chunk)
             int tx = j.type == 2 ? j.k.x : tdiv(j.k.x), tz = j.type == 2 ? j.k.z : tdiv(j.k.z);
             uint64_t rk = farRegionOf(j.k.lod, tx, tz);
@@ -285,6 +310,7 @@ void GenCache::writerLoop() {
                           std::fwrite(zero, 1, padN, f) == padN;
                 if (f) std::fclose(f);
                 if (ok) {
+                    dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
                     if (j.type == 2) r.tiles[tileKey(tx, tz)] = {loc, mixed};
                     else if (r.coarse.emplace(j.k, loc).second) r.baked[tileKey(tx, tz)]++;
@@ -313,6 +339,7 @@ void GenCache::writerLoop() {
                           std::fwrite(zero, 1, padN, f) == padN;
                 if (f) std::fclose(f);
                 if (ok) {
+                    dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
                     if (j.isChunk) r.chunks[chunkKey(cx, cz)] = {loc, mask}, st_.chunks++, st_.chunkWrites++;
                     else r.secs[j.k] = loc, st_.sections++, st_.sectionWrites++;
@@ -382,12 +409,22 @@ bool GenCache::hasChunk(int cx, int cz) {
     return region(regionOf(cx, cz)).chunks.count(chunkKey(cx, cz)) != 0;
 }
 
-void GenCache::forget(int cx, int cz) {
-    if (!on()) return;
-    std::lock_guard<std::mutex> l(mu_);
-    Region& r = region(regionOf(cx, cz));
-    r.chunks.erase(chunkKey(cx, cz));
-    for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
+bool GenCache::forget(int cx, int cz) {
+    if (!on()) return false;
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        if (!fresh_.erase(chunkKey(cx, cz))) return false;  // (from disk, or never: kept)
+        Region& r = region(regionOf(cx, cz));
+        r.chunks.erase(chunkKey(cx, cz));
+        for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
+        Job j;
+        j.type = 4;
+        j.k = Key3{0, cx, 0, cz};
+        queue_.push_back(std::move(j));
+        st_.queued = queue_.size();
+    }
+    cv_.notify_one();
+    return true;
 }
 
 bool GenCache::complete(int cx, int cz) {
@@ -422,6 +459,7 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
     for (int s = 0; s < 40; s++)
         if (info[4 + s * 4 + 2] == KIND_BLOCKS && !r.secs.count(Key3{0, cx, s - 4, cz})) {
             st_.chunkMisses++;
+            st_.chunkIncomplete++;
             return false;  // (its sections not all baked yet)
         }
     st_.chunkHits++;

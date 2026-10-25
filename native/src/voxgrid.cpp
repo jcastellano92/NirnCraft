@@ -178,6 +178,29 @@ VoxGrid::Coverage VoxGrid::coverage() const {
             if (!seen) best = d;
         }
     c.reach = best;
+    {
+        constexpr int FC = 32, FR = 1500, FN = 2 * FR / FC;
+        for (int j = 0; j < FN; j++)
+            for (int i = 0; i < FN; i++) {
+                float dx = float((i - FN / 2) * FC + FC / 2), dz = float((j - FN / 2) * FC + FC / 2);
+                float d = std::sqrt(dx * dx + dz * dz);
+                if (d > float(FR)) continue;
+                int wx = camB_[0] + int(dx), wz = camB_[2] + int(dz);
+                bool seen = false;
+                int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
+                if (inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) seen = true;
+                for (int k = 1; k <= activeCoarse_ && !seen; k++) {
+                    const Level& L = lv_[k];
+                    if (!L.centred) continue;
+                    int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
+                    if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) seen = true;
+                }
+                if (!seen) {
+                    c.nearHoles++;
+                    c.nearReach = std::min(c.nearReach, d);
+                }
+            }
+    }
     return c;
 }
 
@@ -189,7 +212,8 @@ std::string VoxGrid::coverageJson() const {
         covAt_ = now;
     }
     const Coverage& c = covCache_;
-    std::string o = "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"holes\":[";
+    std::string o = "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"nearHoles\":" + std::to_string(c.nearHoles) +
+                    ",\"nearReach\":" + std::to_string(int(c.nearReach)) + ",\"holes\":[";
     for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.holes[k]);
     o += "],\"partial\":[";
     for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.partial[k]);
@@ -927,19 +951,35 @@ std::vector<Key3> VoxGrid::takeReleased() {
 
 VgBatch VoxGrid::take(int maxSections) {
     VgBatch b;
+    auto p0 = std::chrono::steady_clock::now();
     std::lock_guard<std::mutex> lock(mu_);
+    auto p1 = std::chrono::steady_clock::now();
     if (!enabled) return b;
     if (centred_) {
         if (gpuRank) take0Gpu(b, maxSections);
         else take0(b, maxSections);
     }
     b.level0Jobs = b.jobs.size();
+    auto p2 = std::chrono::steady_clock::now();
     if (activeCoarse_) takeCoarse(b);
+    auto p3 = std::chrono::steady_clock::now();
+    struct PhaseNote {
+        VoxGrid* g;
+        std::chrono::steady_clock::time_point t[4];
+        ~PhaseNote() {
+            auto t4 = std::chrono::steady_clock::now();
+            double ms[4] = {std::chrono::duration<double, std::milli>(t[1] - t[0]).count(),
+                            std::chrono::duration<double, std::milli>(t[2] - t[1]).count(),
+                            std::chrono::duration<double, std::milli>(t[3] - t[2]).count(),
+                            std::chrono::duration<double, std::milli>(t4 - t[3]).count()};
+            g->notePhases(ms, t4);
+        }
+    } note{this, {p0, p1, p2, p3}};
     // the host's warm tier: uploads packed on the GPU (staged with the batch's raw sections, read back next time)
     if (world_ && world_->packOnGpu.load(std::memory_order_relaxed) && packBudget > 0) {
         std::vector<World::PackReq> reqs;
         // (a backlog: more a batch, up to an eighth of it, 4096 at most: raw sections wait in host RAM until packed)
-        world_->takePackQueue(size_t(packBudget), reqs, 4096);
+        world_->takePackQueue(size_t(scaled(packBudget)), reqs, size_t(scaled(4096)));
         std::unordered_map<const void*, uint32_t> staged;
         for (size_t i = 0; i < b.secs.size(); i++) staged[b.secs[i].get()] = uint32_t(i);
         for (World::PackReq& r : reqs) {
@@ -954,7 +994,7 @@ VgBatch VoxGrid::take(int maxSections) {
     }
     // (the self-baking cache) generated sections packed for the world's gen cache, read back with the batch
     if (world_ && !bake_.empty()) {
-        for (int i = 0; i < bakeBudget && !bake_.empty(); i++) {
+        for (int i = 0, nb = scaled(bakeBudget); i < nb && !bake_.empty(); i++) {
             auto [k, ref] = bake_.front();
             bake_.pop_front();
             uint32_t at = VG_GPU_SRC | uint32_t(b.gsecs.size());
@@ -1878,7 +1918,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         // (nearest first, a coarseBudget a batch)
         std::vector<std::pair<float, uint32_t>> order;
         for (auto& [c, g] : cgiven_[k]) order.push_back({chunkPriority(k, g.cx, g.cy, g.cz), c});
-        size_t share = std::min(order.size(), size_t(coarseBudget));
+        size_t share = std::min(order.size(), size_t(scaled(coarseBudget)));
         if (share < order.size()) {
             std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end());
             order.resize(share);
@@ -1943,7 +1983,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     }
     auto byDist = [](const auto& a, const auto& c) { return a.first < c.first; };
     // (a backlog: more a batch, up to an eighth of it, 4096 at most: what waits pins its sections' ids in host RAM)
-    size_t share = std::min(order.size(), std::max(size_t(coarseBudget), std::min(order.size() / 8, size_t(4096))));
+    size_t share = std::min(order.size(), std::max(size_t(scaled(coarseBudget)), std::min(order.size() / 8, size_t(scaled(4096)))));
     if (share < order.size()) {
         std::nth_element(order.begin(), order.begin() + ptrdiff_t(share), order.end(), byDist);
         order.resize(share);

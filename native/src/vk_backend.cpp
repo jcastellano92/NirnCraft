@@ -525,7 +525,7 @@ public:
         }
         o += ",\"vkExport\":" + b(interopCapable_);
         if (!interopCapable_) o += ",\"vkExportReason\":" + q(vkInteropWhy_);
-        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) +
+        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) + ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
              ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
         if (glLoaded_) {
             o += ",\"gl\":{\"renderer\":" + q(glRenderer_) + ",\"version\":" + q(glVersion_) + ",\"vendor\":" + q(glVendor_) +
@@ -705,6 +705,8 @@ public:
         return true;
     }
     uint64_t framesSubmitted() const override { return frameCounter_.load(); }
+    double frameGpuMs() const override { return frameGpuEma_.load(); }
+    std::atomic<double> frameGpuEma_{0.0};
     uint64_t framesCompleted() const override { return completedFrame_.load(); }
 
     bool memoryInfo(MemoryInfo& m, std::string&) override {
@@ -1561,11 +1563,21 @@ private:
         qci[0].queueFamilyIndex = family_;
         qci[0].queueCount = genFamily_ == family_ ? 2 : 1;
         qci[0].pQueuePriorities = prio;
+        // (VK_EXT_global_priority, where offered: the generator's compute-only family at the system's low priority, so
+        // the frames' work goes before it across queues too; ATLAS_GEN_LOW_PRIORITY=0 off)
+        VkDeviceQueueGlobalPriorityCreateInfoEXT low{VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT};
+        low.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT;
+        bool lowWanted = !(std::getenv("ATLAS_GEN_LOW_PRIORITY") && std::getenv("ATLAS_GEN_LOW_PRIORITY")[0] == '0');
         if (genFamily_ != UINT32_MAX && genFamily_ != family_) {
             qci[1].queueFamilyIndex = genFamily_;
             qci[1].queueCount = 1;
             qci[1].pQueuePriorities = prio + 1;
             nq = 2;
+            if (lowWanted && has("VK_EXT_global_priority")) {
+                enable.push_back("VK_EXT_global_priority");
+                qci[1].pNext = &low;
+                genLowPriority_ = true;
+            }
         }
         VkPhysicalDeviceFeatures have{};
         vkGetPhysicalDeviceFeatures(phys_, &have);
@@ -1580,6 +1592,17 @@ private:
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
         VkResult cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        if (cr != VK_SUCCESS && genLowPriority_) {
+            // (a driver that refuses the priority: as before, without it)
+            qci[1].pNext = nullptr;
+            enable.erase(std::remove_if(enable.begin(), enable.end(), [](const char* e) { return std::strcmp(e, "VK_EXT_global_priority") == 0; }),
+                         enable.end());
+            genLowPriority_ = false;
+            dci.enabledExtensionCount = uint32_t(enable.size());
+            dci.ppEnabledExtensionNames = enable.data();
+            dev_ = VK_NULL_HANDLE;
+            cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        }
         if (cr != VK_SUCCESS && budgetExt_) {
             // a driver that lists the budget extension yet refuses it: try again without
             enable.erase(std::remove_if(enable.begin(), enable.end(),
@@ -2097,6 +2120,9 @@ private:
         t.lastStates = vgLastStates_;
         t.stageCpuMs = vgStageMs_;
         t.stageCpuMaxMs = vgStageMaxMs_;
+        t.stageCpuRecentMs = std::max(vgStagePrev_, vgStageCur_);
+        t.takeMs = vgTakeMs_;
+        t.takeMaxMs = vgTakeMaxMs_;
         return t;
     }
 
@@ -2137,8 +2163,27 @@ private:
         ATLAS_ZONE("vk:stageVoxGrid");
         auto c0 = std::chrono::steady_clock::now();
         bool ok = stageVoxGridTimed(s, in, err);
-        vgStageMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+        auto c1 = std::chrono::steady_clock::now();
+        vgStageMs_ = std::chrono::duration<double, std::milli>(c1 - c0).count();
         vgStageMaxMs_ = std::max(vgStageMaxMs_, vgStageMs_);
+        // the worst over the last 2-4 s (two buckets): whether it persists
+        if (c1 - vgStageBucket_ > std::chrono::seconds(2)) {
+            vgStagePrev_ = vgStageCur_;
+            vgStageCur_ = 0;
+            vgStageBucket_ = c1;
+        }
+        vgStageCur_ = std::max(vgStageCur_, vgStageMs_);
+        // the staging's budget (ATLAS_STAGE_MS, 2 ms of the render thread a frame): over it, this frame's batch budgets
+        // shrink in proportion; well under it, they grow back (a tenth a frame) to their maxima
+        if (in.voxgrid) {
+            static const double target = [] {
+                const char* e = std::getenv("ATLAS_STAGE_MS");
+                return e && std::atof(e) > 0 ? std::atof(e) : 2.0;
+            }();
+            float& q = in.voxgrid->budgetScale;
+            if (vgStageMs_ > target) q = std::max(0.25f, q * float(std::clamp(0.8 * target / vgStageMs_, 0.5, 0.9)));
+            else if (vgStageMs_ < 0.5 * target) q = std::min(1.0f, q * 1.1f);
+        }
         return ok;
     }
     bool stageVoxGridTimed(Slot& s, const FrameInputs& in, std::string& err) {
@@ -2204,7 +2249,10 @@ private:
                 return e ? std::max(1, std::atoi(e)) : 256;  // (8 KiB each: a 2 MiB copy a frame at most, ~0.2 ms)
             }();
             ATLAS_ZONE_MIN("grid:take", 100);
-            b = g->take(budget);
+            auto k0 = std::chrono::steady_clock::now();
+            b = g->take(g->scaled(budget));
+            vgTakeMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - k0).count();
+            vgTakeMaxMs_ = std::max(vgTakeMaxMs_, vgTakeMs_);
         }
         bool work = b.clear || !b.jobs.empty() || b.coarse();
         bool fresh = false;
@@ -2665,6 +2713,8 @@ private:
             uint32_t nq = s.vgTimed ? 4u : 2u;
             vkGetQueryPoolResults(dev_, s.query, 0, nq, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
             *gpuMs = double(ts[1] - ts[0]) * timestampPeriod_ / 1e6;
+            double was = frameGpuEma_.load();
+            frameGpuEma_.store(was <= 0.0 ? *gpuMs : was * 0.8 + *gpuMs * 0.2);
             if (s.vgTimed) {
                 vgLastMs_ = double(ts[3] - ts[2]) * timestampPeriod_ / 1e6;
                 vgLastSections_ = s.vgSections;
@@ -3029,7 +3079,9 @@ private:
         VkDeviceSize limit = uniform ? props_.limits.maxUniformBufferRange : maxStorageRange_;
         if (bound && size > limit) return fail(err, "a frame or scene buffer exceeds this device's descriptor range limit");
         release(b);
-        VkDeviceSize alloc = size + size / 4;  // headroom against regrowth every frame
+        // headroom against regrowth every frame: doubling up to 32 MiB (a batch that grows a little each frame made a
+        // device allocation each time: the render thread's worst staging), a quarter beyond
+        VkDeviceSize alloc = size < (32u << 20) ? size * 2 : size + size / 4;
         if (bound) alloc = std::max(size, std::min(alloc, limit));
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bc.size = alloc;
@@ -3221,7 +3273,8 @@ private:
     uint64_t texRevision_ = ~0ull, texGeneration_ = 0;
     size_t texUploadedWords_ = 0;  // the texture buffer holds this many words of the host's set (texturepack.hpp)
     uint64_t brickRevision_ = ~0ull;
-    double vgStageMs_ = 0, vgStageMaxMs_ = 0;
+    double vgStageMs_ = 0, vgStageMaxMs_ = 0, vgTakeMs_ = 0, vgTakeMaxMs_ = 0, vgStagePrev_ = 0, vgStageCur_ = 0;
+    std::chrono::steady_clock::time_point vgStageBucket_ = std::chrono::steady_clock::now();
     double vgLastMs_ = 0, vgMsTotal_ = 0;
     GlTimes glTimes_;
     uint32_t vgLastSections_ = 0, vgLastJobs_ = 0;
@@ -3261,6 +3314,7 @@ private:
     // the client generator's queue (sharedDevice; VK_NULL_HANDLE: it shares queue_ under queueMu_)
     uint32_t genFamily_ = UINT32_MAX;
     VkQueue genQueue_ = VK_NULL_HANDLE;
+    bool genLowPriority_ = false;  // (the generator's queue at VK_EXT_global_priority's low)
     bool genTimestamps_ = false, float64_ = false;
     std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;

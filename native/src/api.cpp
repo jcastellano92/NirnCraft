@@ -491,11 +491,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
                           "\"batches\":%llu,\"pending\":%zu,\"lastGpuMs\":%.3f,\"lastSections\":%u,\"lastJobs\":%u,"
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
-                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"baking\":%zu,%s",
+                          "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"stageCpuRecentMs\":%.3f,\"takeMs\":%.3f,\"takeMaxMs\":%.3f,\"stageScale\":%.2f,\"baking\":%zu,%s%s",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, v.bakeQueued(), v.refineInfo().c_str());
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), v.bakeQueued(), v.phaseInfo().c_str(), v.refineInfo().c_str());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)

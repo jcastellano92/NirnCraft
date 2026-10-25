@@ -478,7 +478,7 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
              "sapply:featStoreApplyMain" "mask:featMaskMain" "farplaces:featFarPlacesMain" "fartrees:featFarTreesMain"
-             "farcanopy:featFarCanopyMain")
+             "farcanopy:featFarCanopyMain" "vein:featVeinMain")
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)

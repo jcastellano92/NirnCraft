@@ -180,10 +180,42 @@ final class AtlasOverlayLive {
             String key = Long.toHexString(ow.getSeed()) + "-" + Integer.toHexString(java.util.Arrays.hashCode(prog.words)) + "-"
                     + Integer.toHexString(plan.settlements() * 31 + plan.nodes() * 17 + plan.edges()) + "-v" + TAPE_VERSION;
             cache = server.getServerDirectory().resolve("nirncraft-cache").resolve("overlays").resolve(key);
+            noBake(plan);  // (before the generator's first batch: no settlement is ready yet)
             thread = new Thread(this::run, "nirncraft-atlas-overlays");
             thread.setDaemon(true);
             thread.setPriority(Thread.MIN_PRIORITY);
         }
+
+        /**
+         * The self-baking cache keeps nothing of a place whose tapes are not ready (the plan's settlements, the seeded
+         * starts found so far): a chunk made there before them is made again (regenerate) and only that one is kept.
+         * Else the copy made without them was baked, and every relaunch served it, then made the settlement again.
+         */
+        void noBake(StreetPlan plan) {
+            List<Integer> b = new ArrayList<>();
+            for (int s = 0; s < plan.settlements(); s++) {
+                if (ready.contains(plan.sId[s])) continue;
+                int r = plan.sReach[s] + 32;  // (the decoration's reach past the settlement's: two chunks)
+                b.add(Math.floorDiv(plan.sX[s] - r, 16));
+                b.add(Math.floorDiv(plan.sZ[s] - r, 16));
+                b.add(Math.floorDiv(plan.sX[s] + r, 16));
+                b.add(Math.floorDiv(plan.sZ[s] + r, 16));
+            }
+            for (AtlasOverlayStarts.Start st : near) {
+                if (ready.contains(st.key())) continue;
+                BoundingBox x = st.box();
+                b.add(Math.floorDiv(x.minX() - 32, 16));
+                b.add(Math.floorDiv(x.minZ() - 32, 16));
+                b.add(Math.floorDiv(x.maxX() + 32, 16));
+                b.add(Math.floorDiv(x.maxZ() + 32, 16));
+            }
+            int[] boxes = b.stream().mapToInt(Integer::intValue).toArray();
+            if (java.util.Arrays.equals(boxes, noBakeSent)) return;
+            noBakeSent = boxes;
+            gen.setNoBake(boxes);
+        }
+
+        int[] noBakeSent;
 
         String state() {
             return String.format("overlays: %d settlements and seeded starts (%d recorded in %.1f s, %d from the cache), %d chunks stamped, %d states missing%s",
@@ -233,6 +265,7 @@ final class AtlasOverlayLive {
                             seeded = st;
                         }
                     }
+                    noBake(plan);  // (the seeded starts found near the camera)
                     if (best < 0 && seeded == null) {
                         LockSupport.parkNanos(500_000_000L);
                         continue;
@@ -246,6 +279,7 @@ final class AtlasOverlayLive {
                     ready.add(id);
                     Map<Long, Integer> offsets = new HashMap<>();
                     ovl.set(AtlasOvlNative.SET_TAPES, tapes.tapeWords(offsets));
+                    noBake(plan);  // (its chunks made from now on are kept)
                     // chunks made before their tapes were up: again
                     AtlasClientGen.regenerate(keys);
                     doing = "";
