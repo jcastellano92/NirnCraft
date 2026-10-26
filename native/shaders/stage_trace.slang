@@ -3,9 +3,9 @@
 // the GPU grid (level 0 blocks, coarse levels 1..6 voxels of 2^k blocks) and the hit stored in the hit buffer (farHit,
 // the record atlas_far.slang farHitStore writes: the shade side, farMain's ATLAS_FAR_PASS 2, reads it).
 // Step 6.1-6.5: every level's voxels plain cubes, material and entry axis only, except a coarse level's cube wider than the
-// pixel: its level's smooth surface, found after the walk; a grazing hit's second look at a coarser level (no bricks,
-// shapes or water medium: farMain's ATLAS_ABLATE 805306368 is the same picture; with 32, the cubes; with 2147483648, no
-// grazing look); 6.7 the amortised far field's taken hits (FRAME_FAR_AMORT). farMain's choices otherwise:
+// pixel: its level's smooth surface, found after the walk; a grazing hit's second look at a coarser level; the water
+// medium; level 0's bricks, shapes, cut-outs and leaf gaps (its refine pass; plain cubes' texels are not drawn yet:
+// albedo only). ATLAS_ABLATE: 32 the cubes, 2147483648 no grazing look, 268435456 no shapes, 536870912 no cut-outs; 6.7 the amortised far field's taken hits (FRAME_FAR_AMORT). farMain's choices otherwise:
 // the level a chord takes (the footprint's and the residency's at the pixel's threshold, never finer along the ray, the
 // chord ending where the pick changes), a coarser level where one does not hold the point, a finer one where no
 // coarser does, past a hole where none does; the walk's exits by index (a nudge past a face is below float precision at
@@ -18,7 +18,9 @@
 #ifndef ATLAS_LEAN_CLOCK
 #define ATLAS_LEAN_CLOCK 0
 #endif
-// ATLAS_LEAN_PASS 0: the primary walk (a water surface met from above: its pixel listed in leanList); 1: the water pass
+// ATLAS_LEAN_PASS 0: the primary walk (a water surface met from above, or a level-0 voxel with a brick or shape, foliage
+// at levels 0-1: its pixel listed in leanList); 2: the refine pass over its list, the ray traced again with farMain's
+// micro-voxel tests (bricks, shapes, cut-outs, leaf gaps); 1: the water pass
 // over that compacted list, the trace on behind each surface (the blueprint's work lists: each pass its own small
 // state; the water trace inside the primary walk spilled its registers to shared memory, 1280 -> 6912 B a group)
 #ifndef ATLAS_LEAN_PASS
@@ -35,8 +37,13 @@
 [[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;  // (the last frame's surface distance per pixel)
 [[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
 [[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
-// the water pass's work list: [0] the pixels listed, [1..3] its indirect dispatch (groups of 64, 1, 1), [4..] the pixels
+// the passes' work lists: [0] the water pass's pixels, [1..3] its indirect dispatch (groups of 64, 1, 1), [4..7] the
+// refine pass's; [8..] the water pass's pixels, [8 + w h ..] the refine pass's
 [[vk::binding(43, 0)]] RWStructuredBuffer<uint> leanList;
+// (the refine pass's and the primary walk's material tables: atlas_far.slang's)
+[[vk::binding(25, 0)]] StructuredBuffer<uint4> groupData;  // (groups.hpp: groupData[0] the shapes' head)
+[[vk::binding(33, 0)]] StructuredBuffer<uint> texData;     // (the materials' 16 x 16 face textures)
+[[vk::binding(40, 0)]] StructuredBuffer<uint> brickData;   // (bricks.hpp: the micro-voxel bricks)
 
 static const uint ST_EMPTY = 0u, ST_UNLOADED = 2u, ST_UNIFORM = 3u;  // (voxgrid.hpp VG_*; 1 mixed)
 static const uint RAY_STEPS = 24576u;  // a ray's steps at most (farMain's)
@@ -135,13 +142,192 @@ float unloadedExit(int j, float3 p, float3 d) {
     return max(min(t.x, min(t.y, t.z)), 0.0);
 }
 
+// ---- the materials' micro detail (atlas_bricks.slang, atlas_groups.slang, atlas_far.slang's, ported without structs) ----
+uint gWordL(uint w) {
+    uint4 q = groupData[w >> 2];
+    uint k = w & 3u;
+    return k == 0u ? q.x : (k == 1u ? q.y : (k == 2u ? q.z : q.w));
+}
+// material mat's shape (its first word in groupData, x 4), 0 none (atlas_groups.slang shapeOfIn with groupData[0])
+uint shapeOfL(uint mat) {
+    uint4 h = groupData[0];
+    if (mat >= h.z) return 0u;
+    uint s = gWordL(h.x + mat);
+    return s == 0u ? 0u : (h.y + (s - 1u) * 32u) * 4u;
+}
+// material mat's brick (its first word in brickData), 0 none; an animated one's frame (atlas_bricks.slang brickOf)
+uint brickOfL(uint mat) {
+    uint n = brickData[0];
+    uint b = mat < n ? brickData[1u + mat] : 0u;
+    if ((b & 0x40000000u) != 0u) return b;
+    if ((b & 0x80000000u) != 0u) {
+        b &= 0x7FFFFFFFu;
+        uint hd = brickData[b];
+        uint frames = max(hd & 0xFFFFu, 1u), ticks = max(hd >> 16, 1u);
+        uint tk = asuint(frame.weatherParams.z);
+        uint f = (tk != 0u ? (tk - 1u) / ticks : uint(max(frame.sunDir.w, 0.0) * 20.0 / float(ticks))) % frames;
+        b = brickData[b + 1u + f];
+    }
+    return b;
+}
+float3 srgbLinL(uint c) {
+    float3 v = float3(float((c >> 16) & 255u), float((c >> 8) & 255u), float(c & 255u)) / 255.0;
+    return pow(v, float3(2.2, 2.2, 2.2));
+}
+#if ATLAS_LEAN_PASS >= 1
+uint hashUL(uint x) { return hashU(x); }
+uint cutHashL(int3 p) {
+    uint h3 = hashUL(uint(p.z) * 83492791u ^ 0x5EEDu);
+    uint h2 = hashUL(uint(p.y) * 19349663u ^ h3);
+    return hashUL(uint(p.x) * 73856093u ^ h2);
+}
+// the face a ray going + along axis a enters (west, down, north), and - (east, up, south)
+int faceLow(int a) { return a == 0 ? 4 : (a == 1 ? 0 : 2); }
+int faceHigh(int a) { return a == 0 ? 5 : (a == 1 ? 1 : 3); }
+int gTexelL(int f, int x, int y, int z) { return f <= 1 ? x + 4 * z : (f <= 3 ? x + 4 * (3 - y) : z + 4 * (3 - y)); }
+// a shaped material's face-tile colour at micro-voxel q (atlas_groups.slang cellAlbedo)
+float3 cellAlbedoL(uint mat, uint sh, int f, int3 q) {
+    int3 mq = q & 3;
+    uint c = gWordL(sh + 4u + uint(f * 16 + gTexelL(f, mq.x, mq.y, mq.z)));
+    if ((c >> 24) == 0u) c = gWordL(sh + 3u);
+    return srgbLinL(c);
+}
+// a material's texture: its first word in texData, or 0 (atlas_far.slang vgTexture)
+uint texOfL(uint mat) {
+    if (mat >= texData[0]) return 0u;
+    uint s2 = texData[1u + mat];
+    return s2 == 0u ? 0u : 1u + texData[0] + (s2 - 1u) * 6u * 341u;
+}
+// face f of texture at, (u, v) over a footprint of fp blocks: linear rgb, a coverage (atlas_far.slang texSample)
+float4 texSampleL(uint at, int f, float u, float v, float fp) {
+    float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
+    int l0 = int(lv), l1 = min(4, l0 + 1);
+    int n0 = 16 >> l0, n1 = 16 >> l1;
+    uint m0 = l0 == 0 ? 0u : (l0 == 1 ? 256u : (l0 == 2 ? 320u : (l0 == 3 ? 336u : 340u)));
+    uint m1 = l1 == 0 ? 0u : (l1 == 1 ? 256u : (l1 == 2 ? 320u : (l1 == 3 ? 336u : 340u)));
+    uint b = at + uint(f) * 341u;
+    uint c0 = texData[b + m0 + uint(min(int(u * float(n0)), n0 - 1) + n0 * min(int(v * float(n0)), n0 - 1))];
+    uint c1 = texData[b + m1 + uint(min(int(u * float(n1)), n1 - 1) + n1 * min(int(v * float(n1)), n1 - 1))];
+    float kk = lv - float(l0);
+    return float4(lerp(srgbLinL(c0), srgbLinL(c1), kk), lerp(float(c0 >> 24), float(c1 >> 24), kk) / 255.0);
+}
+// material mat's random offset at world block wb (atlas_bricks.slang brickOffset)
+float3 brickOffsetL(uint mat, int3 wb) {
+    uint n = brickData[0];
+    uint w = mat < n ? brickData[1u + 2u * n + mat] : 0u;
+    if ((w & 3u) == 0u) return float3(0, 0, 0);
+    int64_t sx = int64_t(int(uint(wb.x) * 3129871u)), sz = int64_t(wb.z) * int64_t(116129781);
+    int64_t seed = sx ^ sz;
+    seed = seed * seed * int64_t(42317861) + seed * int64_t(11);
+    seed = seed >> 16;
+    float maxH = float((w >> 8) & 255u) / 255.0, maxV = float((w >> 16) & 255u) / 255.0;
+    float ox = clamp((float(int(seed & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oz = clamp((float(int((seed >> 8) & int64_t(15))) / 15.0 - 0.5) * 0.5, -maxH, maxH);
+    float oy = (w & 3u) == 2u ? (float(int((seed >> 4) & int64_t(15))) / 15.0 - 1.0) * maxV : 0.0;
+    return float3(ox, oy, oz);
+}
+// the ray l + d t (l voxel-local 0..1, entered through axis) through brick record b's 16^3 micro-voxels: the first
+// filled one (t from l, its face's axis, its colour), or false (atlas_bricks.slang brickWalk)
+bool brickWalkL(uint b, float3 l, float3 d, int axis, out float tOut, out int axOut, out float3 albOut) {
+    tOut = 0.0;
+    axOut = axis;
+    albOut = float3(0, 0, 0);
+    uint gLo = brickData[b], gHi = brickData[b + 1u];
+    float3 o = clamp(l, float3(0, 0, 0), float3(1, 1, 1)) * 16.0;
+    float3 dq = d * 16.0;
+    int3 m = clamp(int3(floor(o)), int3(0, 0, 0), int3(15, 15, 15));
+    int3 st = int3(dq.x > 0.0 ? 1 : -1, dq.y > 0.0 ? 1 : -1, dq.z > 0.0 ? 1 : -1);
+    float3 iv = float3(abs(dq.x) > 1e-12 ? 1.0 / dq.x : 1e30, abs(dq.y) > 1e-12 ? 1.0 / dq.y : 1e30, abs(dq.z) > 1e-12 ? 1.0 / dq.z : 1e30);
+    float3 nx = (float3(m) + float3(dq.x > 0.0 ? 1.0 : 0.0, dq.y > 0.0 ? 1.0 : 0.0, dq.z > 0.0 ? 1.0 : 0.0) - o) * iv;
+    nx = float3(abs(dq.x) > 1e-12 ? nx.x : 1e30, abs(dq.y) > 1e-12 ? nx.y : 1e30, abs(dq.z) > 1e-12 ? nx.z : 1e30);
+    float3 dl = abs(iv);
+    float tc = 0.0;
+    int ax = axis;
+    [loop]
+    for (int kk = 0; kk < 48; kk++) {
+        uint g = uint((m.x >> 2) + 4 * ((m.z >> 2) + 4 * (m.y >> 2)));
+        bool on = g < 32u ? ((gLo >> g) & 1u) != 0u : ((gHi >> (g - 32u)) & 1u) != 0u;
+        if (on) {
+            uint gr = g < 32u ? countbits(gLo & ((1u << g) - 1u)) : countbits(gLo) + countbits(gHi & ((1u << (g - 32u)) - 1u));
+            uint at = b + 4u + 3u * gr;
+            uint lo = brickData[at], hi = brickData[at + 1u];
+            uint i = uint((m.x & 3) + 4 * ((m.z & 3) + 4 * (m.y & 3)));
+            if ((i < 32u ? ((lo >> i) & 1u) : ((hi >> (i - 32u)) & 1u)) != 0u) {
+                uint rank = brickData[at + 2u] + (i < 32u ? countbits(lo & ((1u << i) - 1u)) : countbits(lo) + countbits(hi & ((1u << (i - 32u)) - 1u)));
+                uint ng = brickData[b + 2u] & 0xFFFFu;
+                uint w = brickData[b + 4u + 3u * ng + (rank >> 2)];
+                uint pi = (w >> ((rank & 3u) * 8u)) & 255u;
+                uint c = brickData[b + brickData[b + 3u] + pi];
+                tOut = tc;
+                axOut = ax;
+                albOut = srgbLinL(c);
+                return true;
+            }
+        }
+        int a = nx.x <= nx.y && nx.x <= nx.z ? 0 : (nx.y <= nx.z ? 1 : 2);
+        tc = nx[a];
+        m[a] += st[a];
+        if (m[a] < 0 || m[a] > 15) return false;
+        nx[a] += dl[a];
+        ax = a;
+    }
+    return false;
+}
+// a sheets record (up to 4 planes of 16 x 16 cells, and an axis-aligned rest as voxels: atlas_bricks.slang sheetsHit)
+bool sheetsL(uint c, float3 l, float3 d, int axis, out float tOut, out int axOut, out float3 albOut) {
+    bool hit = false;
+    tOut = 1e30;
+    axOut = axis;
+    albOut = float3(0, 0, 0);
+    uint head = brickData[c];
+    uint np = min(head & 255u, 4u);
+    [loop]
+    for (uint kk = 0u; kk < np; kk++) {
+        uint base = c + 2u + kk * 269u;
+        float3 n = float3(asfloat(brickData[base]), asfloat(brickData[base + 1u]), asfloat(brickData[base + 2u]));
+        float dp = asfloat(brickData[base + 3u]);
+        float den = dot(n, d);
+        if (abs(den) < 1e-6) continue;
+        float t = (dp - dot(n, l)) / den;
+        if (t < 0.0 || t >= tOut) continue;
+        float3 pp = l + d * t;
+        if (any(pp < float3(-1e-4, -1e-4, -1e-4)) || any(pp > float3(1.0001, 1.0001, 1.0001))) continue;
+        float3 O = float3(asfloat(brickData[base + 4u]), asfloat(brickData[base + 5u]), asfloat(brickData[base + 6u]));
+        float3 U = float3(asfloat(brickData[base + 7u]), asfloat(brickData[base + 8u]), asfloat(brickData[base + 9u]));
+        float3 V = float3(asfloat(brickData[base + 10u]), asfloat(brickData[base + 11u]), asfloat(brickData[base + 12u]));
+        float s1 = dot(pp - O, U) / max(dot(U, U), 1e-8), s2 = dot(pp - O, V) / max(dot(V, V), 1e-8);
+        if (s1 < 0.0 || s1 > 1.0 || s2 < 0.0 || s2 > 1.0) continue;
+        uint cc = brickData[base + 13u + uint(clamp(int(s1 * 16.0), 0, 15) + 16 * clamp(int(s2 * 16.0), 0, 15))];
+        if ((cc >> 24) < 128u) continue;
+        hit = true;
+        tOut = t;
+        float3 an = abs(n);
+        axOut = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
+        albOut = srgbLinL(cc);
+    }
+    if ((head & 256u) != 0u) {
+        float vt;
+        int va;
+        float3 vc;
+        if (brickWalkL(c + brickData[c + 1u], l, d, axis, vt, va, vc) && (!hit || vt < tOut)) {
+            hit = true;
+            tOut = vt;
+            axOut = va;
+            albOut = vc;
+        }
+    }
+    if (!hit) tOut = 0.0;
+    return hit;
+}
+#endif
+
 [shader("compute")]
-#if ATLAS_LEAN_PASS == 1
+#if ATLAS_LEAN_PASS != 0
 [numthreads(64, 1, 1)]
 void traceMain(uint3 gid : SV_DispatchThreadID) {
     uint w = frame.dims.x, h = frame.dims.y;
-    if (gid.x >= leanList[0]) return;
-    uint pix = leanList[4u + gid.x];
+    if (gid.x >= leanList[ATLAS_LEAN_PASS == 1 ? 0u : 4u]) return;
+    uint pix = leanList[8u + (ATLAS_LEAN_PASS == 1 ? 0u : w * h) + gid.x];
     uint3 id = uint3(pix % w, pix / w, 0u);
 #else
 [numthreads(8, 8, 1)]
@@ -162,7 +348,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     bool nearRaster = (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) == FRAME_PRIMARY_NEAR;
     bool seeThrough = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
     float eyeDepth = -1.0;  // (farMain's eyeWaterDepth: the water above the eye, blocks; -1 not in water)
-    if (ATLAS_LEAN_PASS == 0 && unified && levelOn(0)) {
+    if (ATLAS_LEAN_PASS != 1 && unified && levelOn(0)) {
         int3 g0 = frame.vgOrigin.xyz * 16;
         int3 ve = int3(floor(frame.camFrac.xyz + float3(frame.camInt.xyz - g0)));
         int X0 = int(frame.vgDims.x), Y0 = int(frame.vgDims.y), Z0 = int(frame.vgDims.z);
@@ -245,6 +431,19 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     int wK = 0;
     float tStart = primaryNear ? 0.0 : frame.params.x, hitFrom = 0.0;  // (the walk's start; the start of the chord that hit)
     float tStart0 = tStart;
+    // (the refine pass starts its trace just before the voxel the primary walk stopped at, at the chord's level it had
+    // there: its record's distance, its level in the albedo flags' place; not the whole ray again)
+    int lodC0 = 0;
+#if ATLAS_LEAN_PASS == 2
+    {
+        uint4 r0 = farHit[pix * 2u];
+        float tr0 = asfloat(r0.x);
+        if (tr0 >= 0.0) {
+            tStart = max(tStart, tr0 - 0.05);
+            lodC0 = int(r0.w & 15u);
+        }
+    }
+#endif
 #if ATLAS_LEAN_PASS == 1
     // (the water pass: the surface the primary walk met, from its record: the trace on from it, water passed)
     uint4 wa0 = farHit[pix * 2u], wb0 = farHit[pix * 2u + 1u];
@@ -272,8 +471,11 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     // passes and the looks run it again, never a second copy. The
     // ray's set-up and the walk's state live inside a pass: set up outside, they were live across the smooth search, and
     // the driver's 72 registers and 4352 bytes of shared memory a group were 64 and 768)
+    bool refineListed = false;  // (the primary walk: this pixel's micro-voxel detail is the refine pass's)
+    int refineLodC = 0;         // (and the chord's level it had there, for the refine pass's start)
+    float alphaXi = frac(pixelDither(id.xy, 13u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
     [loop]
-    for (int ph = ATLAS_LEAN_PASS; ph < 2; ph++) {
+    for (int ph = ATLAS_LEAN_PASS == 1 ? 1 : 0; ph < 2; ph++) {
         // (ph 0 the view ray, ph 1 on behind a water surface: each a full trace, its passes and grazing looks)
         pass = 0;
         grazing = false;
@@ -304,7 +506,8 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             // voxel walk's parameter u along the chord (blocks); the face the walk left by, as a voxel index (exitAxis, exitTo)
             float t0 = tStart, len = 0.0, u = 0.0;
             float3 a = o, d = dir, ro = float3(0, 0, 0), dv = float3(0, 0, 1), inv = float3(1e30, 1e30, 1e30);
-            int lodC = 0, gx = 0, gz = 0, X = 1, Y = 1, Z = 1, exitAxis = -1, exitTo = 0;
+            int lodC = lodC0, gx = 0, gz = 0, X = 1, Y = 1, Z = 1, exitAxis = -1, exitTo = 0;
+            lodC0 = 0;  // (a walk on past a corner or behind water starts afresh, as farMain's)
             uint base = 0u;
             int3 gOrigin = int3(0, 0, 0);
             bool chord = true, level = false, finer = false;
@@ -579,17 +782,144 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                             uint m = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                             // (water a ray passes: farMain's voxelStops: seen through, the trace on behind a surface or under
                             // it, the near field's own when the host rasters it)
-                            bool through = (seeThrough || skipWater || (nearRaster && t0 + u < frame.params.x)) && uint(palette[m].emisClass.y) == 2u;
-                            if (!through) {
+                            uint mcls = uint(palette[m].emisClass.y);
+                            bool through = (seeThrough || skipWater || (nearRaster && t0 + u < frame.params.x)) && mcls == 2u;
+                            // the face entered: the axis whose slab the ray entered last (farMain's entryAxis)
+                            float3 sp = float3(dv.x > 0.0 ? 1.0 : 0.0, dv.y > 0.0 ? 1.0 : 0.0, dv.z > 0.0 ? 1.0 : 0.0);
+                            float3 tNear = (float3(v) + (1.0 - sp) - ro) * inv;
+                            if (abs(dv.x) <= 1e-12) tNear.x = -1e30;
+                            if (abs(dv.y) <= 1e-12) tNear.y = -1e30;
+                            if (abs(dv.z) <= 1e-12) tNear.z = -1e30;
+                            int eAx = tNear.x >= tNear.y && tNear.x >= tNear.z ? 0 : (tNear.y >= tNear.z ? 1 : 2);
+                            bool stop = !through;
+                            float tr = 0.0;  // (the refined hit past the voxel's entry)
+#if ATLAS_LEAN_PASS == 0
+                            // (the primary walk: a voxel where farMain's result is not the plain cube is the refine pass's:
+                            // a level-0 brick (a waterlogged one met while passing its water), a level-0 shape, foliage at
+                            // levels 0-1 (its leaf gaps))
+                            {
+                                uint nb = brickData[0];
+                                bool brick = k == 0 && m < nb && brickData[1u + m] != 0u && (mcls == 2u ? through : !through);
+                                bool shape = k == 0 && !through && mcls != 2u && (asuint(frame.jitter.w) & 268435456u) == 0u && shapeOfL(m) != 0u;
+                                if (brick || shape || (!through && k <= 1 && mcls == 1u)) {
+                                    refineListed = true;
+                                    refineLodC = lodC;
+                                    stop = true;
+                                }
+                            }
+#else
+                            // (farMain's level-0 voxel tests, traceVoxGrid: a brick's micro-voxels (a waterlogged one's
+                            // inside its water, seen through it), else a shape's (a cut-out cube by its texture's
+                            // coverage), else the cube; foliage at levels 0-1 with its hashed gaps (voxelStops))
+                            bool own = false;
+                            float3 oAlb = float3(0, 0, 0);
+                            if (k == 0) {
+                                uint br0 = brickOfL(m);
+                                bool logged = mcls == 2u && br0 != 0u;
+                                uint br = (logged ? through : !through) ? br0 : 0u;
+                                if (br != 0u) {
+                                    steps += 4u;
+                                    float3 lp = ro + dv * u - float3(v) - brickOffsetL(m, v + gOrigin);
+                                    float bt;
+                                    int bax;
+                                    float3 bal;
+                                    bool bh;
+                                    if ((br & 0x40000000u) != 0u) bh = sheetsL(br & 0x3FFFFFFFu, lp, dv, eAx, bt, bax, bal);
+                                    else bh = brickWalkL(br, lp, dv, eAx, bt, bax, bal);
+                                    stop = bh;
+                                    own = bh;
+                                    tr = bh ? bt : 0.0;
+                                    eAx = bh ? bax : eAx;
+                                    oAlb = bal;
+                                } else if (!through && !logged && (asuint(frame.jitter.w) & 268435456u) == 0u) {
+                                    uint sh = shapeOfL(m);
+                                    if (sh != 0u) {
+                                        uint4 head = groupData[sh >> 2];
+                                        uint tex = (head.z & 1u) != 0u && (head.x & head.y) == 0xFFFFFFFFu && (asuint(frame.jitter.w) & 536870912u) == 0u
+                                                 ? texOfL(m) : 0u;
+                                        int f = dv[eAx] > 0.0 ? faceLow(eAx) : faceHigh(eAx);
+                                        if (tex != 0u) {
+                                            // (a whole cube of cut-out texels: its entered face's texel coverage against
+                                            // the pixel's threshold)
+                                            float3 lq = clamp(ro + dv * u - float3(v), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+                                            float2 uv = f <= 1 ? lq.xz : (f <= 3 ? float2(lq.x, 1.0 - lq.y) : float2(lq.z, 1.0 - lq.y));
+                                            float fp = (t0 + u) * pa / max(abs(dv[eAx]), 0.2);
+                                            float4 cq = texSampleL(tex, f, uv.x, uv.y, fp);
+                                            stop = cq.a > alphaXi;
+                                            own = stop;
+                                            oAlb = cq.rgb;
+                                        } else {
+                                            // its 4 x 4 x 4 micro-voxels (the shape's mask, a cut-out shape's alpha hashed
+                                            // per world micro-voxel), walked to where the ray leaves the voxel
+                                            uint alphaAt = (head.z & 1u) != 0u && (asuint(frame.jitter.w) & 536870912u) == 0u ? sh + 100u : 0u;
+                                            float3 oq = (ro - float3(v)) * 4.0, dq = dv * 4.0;
+                                            int3 cq = clamp(int3(floor(oq + dq * u)), int3(0, 0, 0), int3(3, 3, 3));
+                                            int3 sq = int3(dq.x > 0.0 ? 1 : -1, dq.y > 0.0 ? 1 : -1, dq.z > 0.0 ? 1 : -1);
+                                            float3 iq = float3(abs(dq.x) > 1e-12 ? 1.0 / dq.x : 1e30, abs(dq.y) > 1e-12 ? 1.0 / dq.y : 1e30,
+                                                               abs(dq.z) > 1e-12 ? 1.0 / dq.z : 1e30);
+                                            float3 nq = (float3(cq) + float3(dq.x > 0.0 ? 1.0 : 0.0, dq.y > 0.0 ? 1.0 : 0.0, dq.z > 0.0 ? 1.0 : 0.0) - oq) * iq;
+                                            nq = float3(abs(dq.x) < 1e-12 ? 1e30 : nq.x, abs(dq.y) < 1e-12 ? 1e30 : nq.y, abs(dq.z) < 1e-12 ? 1e30 : nq.z);
+                                            float3 dlq = abs(iq);
+                                            float tcq = u;
+                                            int3 wvq = (v + gOrigin) * 4;
+                                            stop = false;
+                                            [loop]
+                                            for (int kq = 0; kq < 12; kq++) {
+                                                uint bit = uint(cq.x + 4 * (cq.z + 4 * cq.y));
+                                                bool filled = (((bit < 32u ? head.x >> bit : head.y >> (bit - 32u))) & 1u) != 0u;
+                                                if (filled && alphaAt != 0u) {
+                                                    uint al = (gWordL(alphaAt + (bit >> 2)) >> ((bit & 3u) * 8u)) & 255u;
+                                                    filled = al == 255u || (cutHashL(wvq + cq) >> 24) < al;
+                                                }
+                                                if (filled) {
+                                                    stop = true;
+                                                    own = true;
+                                                    tr = tcq - u;
+                                                    oAlb = cellAlbedoL(m, sh, dv[eAx] > 0.0 ? faceLow(eAx) : faceHigh(eAx), wvq + cq);
+                                                    // (and its texel where the material has a texture and it covers:
+                                                    // atlas_far.slang vgTexel after a shape's hit)
+                                                    uint tx = texOfL(m);
+                                                    if (tx != 0u) {
+                                                        int fx = dv[eAx] > 0.0 ? faceLow(eAx) : faceHigh(eAx);
+                                                        float3 lx = clamp(ro + dv * tcq - float3(v), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+                                                        float2 ux = clamp(fx <= 1 ? lx.xz : (fx <= 3 ? float2(lx.x, 1.0 - lx.y) : float2(lx.z, 1.0 - lx.y)),
+                                                                          float2(0, 0), float2(0.9999, 0.9999));
+                                                        float4 cx = texSampleL(tx, fx, ux.x, ux.y, (t0 + tcq) * pa / max(abs(dv[eAx]), 0.2));
+                                                        if (cx.a >= 0.5) oAlb = cx.rgb;
+                                                    }
+                                                    break;
+                                                }
+                                                int aq = nq.x <= nq.y && nq.x <= nq.z ? 0 : (nq.y <= nq.z ? 1 : 2);
+                                                tcq = nq[aq];
+                                                cq[aq] += sq[aq];
+                                                if (cq[aq] < 0 || cq[aq] > 3) break;
+                                                nq[aq] += dlq[aq];
+                                                eAx = aq;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (stop && !own && k <= 1 && mcls == 1u) {
+                                // (a primary ray sees gaps between leaves: a hashed share of foliage voxels lets it
+                                // through, moving with the TAA phase; voxelStops's cLeafGap 0.3 at levels 0 and 1)
+                                int3 wv = v + (gOrigin >> k);
+                                uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
+                                uint hh = (uint(wv.x) * 73856093u) ^ (uint(wv.y) * 19349663u) ^ (uint(wv.z) * 83492791u) ^ (uint(k) * 2654435761u) ^
+                                          (phase * 374761393u);
+                                hh = (hh ^ (hh >> 13)) * 1274126177u;
+                                stop = !(float(hh & 0xFFFFu) / 65535.0 < 0.3);
+                            }
+                            if (stop) {
+                                // (this hit's own colour, or none: never an earlier hit's of this ray)
+                                hasAlbedo = own ? 1u : 0u;
+                                if (own) alb = oAlb;
+                            }
+#endif
+                            if (stop) {
                                 mat = m;
-                                tHit = t0 + u;
-                                // the face entered: the axis whose slab the ray entered last (farMain's entryAxis)
-                                float3 sp = float3(dv.x > 0.0 ? 1.0 : 0.0, dv.y > 0.0 ? 1.0 : 0.0, dv.z > 0.0 ? 1.0 : 0.0);
-                                float3 tNear = (float3(v) + (1.0 - sp) - ro) * inv;
-                                if (abs(dv.x) <= 1e-12) tNear.x = -1e30;
-                                if (abs(dv.y) <= 1e-12) tNear.y = -1e30;
-                                if (abs(dv.z) <= 1e-12) tNear.z = -1e30;
-                                axis = tNear.x >= tNear.y && tNear.x >= tNear.z ? 0 : (tNear.y >= tNear.z ? 1 : 2);
+                                tHit = t0 + u + tr;
+                                axis = eAx;
                                 break;
                             }
                             lo = v;
@@ -611,6 +941,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 exitAxis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
                 exitTo = exitAxis == 0 ? (dv.x > 0.0 ? hi.x : lo.x - 1) : exitAxis == 1 ? (dv.y > 0.0 ? hi.y : lo.y - 1) : (dv.z > 0.0 ? hi.z : lo.z - 1);
             }
+            if (refineListed) break;  // (the primary walk: the rest is the refine pass's)
             if (grazing) {
                 // (the grazing look done: its hit, else the finer hit as it was)
                 grazing = false;
@@ -769,6 +1100,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 break;
             }
         }
+        if (refineListed) break;  // (its water, if any, the refine pass's to list)
         if (ph == 1) {
             // (in the unified field: what lies past WATER_SEE blocks of water is not seen, deep water)
             if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
@@ -778,14 +1110,14 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
         wK = k;
         if (!(primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[mat].emisClass.y) == 2u)) break;
         tW = unified ? tHit : -1.0;
-#if ATLAS_LEAN_PASS == 0
+#if ATLAS_LEAN_PASS != 1
         // (a water surface: the trace behind it is the water pass's, its pixel listed; the record holds the surface,
         // tW, for it: in the unified field its own hit, else the near raster's: the water pass starts where this did)
         {
             uint at;
             InterlockedAdd(leanList[0], 1u, at);
             if ((at & 63u) == 0u) InterlockedAdd(leanList[1], 1u);
-            leanList[4u + at] = pix;
+            leanList[8u + at] = pix;
         }
         break;
 #else
@@ -794,10 +1126,18 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
         skipWater = true;
 #endif
     }
+#if ATLAS_LEAN_PASS == 0
+    if (refineListed) {
+        uint at;
+        InterlockedAdd(leanList[4], 1u, at);
+        if ((at & 63u) == 0u) InterlockedAdd(leanList[5], 1u);
+        leanList[8u + w * h + at] = pix;
+    }
+#endif
     // the hit record (atlas_far.slang farHitStore's layout: tHit, tW, material, albedo flags; axis, level, water's level,
     // steps; the water's material; the albedo as halves, the frame it was traced: the amortisation's age)
     uint i2 = pix * 2u;
-    farHit[i2] = uint4(asuint(tHit), asuint(tW), mat, hasAlbedo);
+    farHit[i2] = uint4(asuint(tHit), asuint(tW), mat, refineListed ? uint(refineLodC) : hasAlbedo);
     farHit[i2 + 1u] = uint4(uint(axis + 1) | (uint(k) << 2) | (uint(clamp(wK, 0, 15)) << 6) | (min(steps, 0x3FFFFFu) << 10), wMat,
                             f32tof16(alb.x) | (f32tof16(alb.y) << 16), f32tof16(alb.z) | (((frame.temporal.x - (eyeWater ? FAR_AMORT_N : 0u)) & 0xFFFFu) << 16));
 #if ATLAS_LEAN_CLOCK
