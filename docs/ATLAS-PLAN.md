@@ -420,6 +420,7 @@ branch is merged only when its stage comes and a quick re-check shows it still a
 | Simulation level of detail, thin NeoForge fork, companion process | the plan's "Owning the loader" section | simulation phase | Round-1 estimates first |
 | Candidate techniques C, E, F, G, H | §3b | their stage | Ceiling test first |
 | Cache lifecycle, cross-vendor exactness, low-end scaling, merge quality gates | §4 "Later, once it works here" | after it works here | — |
+| Component tooling gaps: GPU-vs-Java checks per component, seconds-long visuals for terrain, rivers and settlement placement | docs/COMPONENTS.md | when each component is worked on | — |
 | Bridge vanilla Profiler zones (worker threads) into the flight recorder | idea (spikes) | when CPU matters | — |
 
 ## 5. How the work runs (cost)

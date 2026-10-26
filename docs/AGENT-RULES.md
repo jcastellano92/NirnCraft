@@ -306,4 +306,5 @@ Read these first:
     phases do, so it can't become one long placement. Write the template when the next new type is needed.
   - **The build runs the pipeline-stats guard (fails) and the shader lint (warns, with a fix hint each).**
   - **`harness.py run --changed`** runs exactness, dispatch timing and the gallery for what changed (impact.json).
+  - **docs/COMPONENTS.md** lists, per generator or world component, the fast check, the visual tool and the one command. Run only those for what you touched. Fill a gap there only when you work on that component.
 
