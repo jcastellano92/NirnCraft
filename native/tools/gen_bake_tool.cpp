@@ -139,6 +139,16 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         double t0 = nowMs();
         // every coarse level's tiles around the camera, by the far path (coarsest first)
         size_t made = 0, busy = 0, cachedTiles = 0, cachedChunks = 0;
+        size_t tilesAll = 0;
+        for (int k = 1; k <= 6; k++) tilesAll += size_t(2 * tileR[k] + 1) * (2 * tileR[k] + 1);
+        double lastSaid = nowMs();
+        // (progress for the queue's watchers: every half minute)
+        auto say = [&](const char* what, size_t done, size_t all) {
+            if (nowMs() - lastSaid < 30000.0) return;
+            lastSaid = nowMs();
+            std::fprintf(stderr, "TRACE progress view %d %s %zu / %zu
+", vi, what, done, all);
+        };
         for (int k = 6; k >= 1; k--) {
             int span = 256 << k;
             int tx0 = int(std::floor(vx / span)), tz0 = int(std::floor(vz / span));
@@ -147,6 +157,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             for (int dz = -tileR[k]; dz <= tileR[k]; dz++)
                 for (int dx = -tileR[k]; dx <= tileR[k]; dx++) {
                     int32_t t[2] = {tx0 + dx, tz0 + dz};
+                    say("tiles", made + cachedTiles, tilesAll);
                     // (a saved scene: the tile from the cache, the inner loop's seconds, when the cache knows it)
                     uint8_t served = 0;
                     uint32_t ch = 0, tk = 0;
@@ -191,6 +202,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             return m;
         };
         for (size_t at = 0; at < todo.size();) {
+            say("chunks", at, todo.size());
             std::vector<int32_t> batch;
             while (at < todo.size() && batch.size() < 128) batch.push_back(todo[at].first), batch.push_back(todo[at].second), at++;
             uint32_t n0 = uint32_t(batch.size() / 2);
@@ -228,6 +240,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         for (; settle < 3000; settle++) {
             std::string inf = atlas_info(ctx);
             if (settle > 4 && infoInt(inf, "\"pending\":") == 0 && infoInt(inf, "\"coarseWaiting\":") <= 0) break;
+            say("settle frames (pending)", size_t(settle), size_t(infoInt(inf, "\"pending\":")));
             atlas_render(ctx, &f, &out);
         }
         double tSettled = nowMs();
