@@ -1010,9 +1010,10 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
     for (uint32_t c : ctx->targets.counters) steps += c;
     ctx->stats.raySteps = steps;
     // (dev: ATLAS_STEP_STATS=1, the per-pixel steps' spread: a warp (8 x 4 pixels of an 8 x 8 group) runs as long as its
-    // slowest pixel, so the mean of the warps' maxima is what the pass costs, not the mean)
+    // slowest pixel, so the mean of the warps' maxima is what the pass costs, not the mean. Not in timed frames,
+    // ATLAS_TIMING_DEVICE_OUTPUTS: its sort of every pixel's count held the GPU idle between frames, and its clocks fell)
     static const bool stepStats = [] { const char* e = std::getenv("ATLAS_STEP_STATS"); return e && *e == '1'; }();
-    if (stepStats && ctx->targets.counters.size() >= size_t(f->width) * f->height) {
+    if (stepStats && !std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") && ctx->targets.counters.size() >= size_t(f->width) * f->height) {
         const uint32_t W = f->width, H = f->height;
         std::vector<uint32_t> v(ctx->targets.counters.begin(), ctx->targets.counters.begin() + size_t(W) * H);
         double warpMax = 0;

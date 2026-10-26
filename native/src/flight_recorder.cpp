@@ -396,6 +396,12 @@ void GpuTimeline::submitted() {
     }
 }
 
+// the last resolved GPU time of each pass (ms): atlas_fr_pass_ms, a bench's settle and its timed frames' medians
+namespace {
+std::mutex gPassMx;
+std::unordered_map<std::string, double> gPassMs;
+}  // namespace
+
 void GpuTimeline::resolve(const char* parent, uint32_t track) {
     bool was = open_ && submitted_ && n_ >= 2;
     open_ = false;
@@ -416,9 +422,11 @@ void GpuTimeline::resolve(const char* parent, uint32_t track) {
     // the parent's arg: microseconds between the host's submit and the GPU starting the buffer (queue wait; 0 when anchored)
     int64_t lat = cal ? (int64_t(first) - int64_t(submitNs_)) / 1000 : 0;
     record(parent, first, last, int32_t(std::max<int64_t>(0, std::min<int64_t>(lat, 2'000'000'000))), track);
+    std::lock_guard<std::mutex> lk(gPassMx);
     for (uint32_t i = 1; i < n_; i++) {
         if (ts[i] < ts[i - 1]) continue;
         record(names_[i], host(ts[i - 1]), host(ts[i]), 0, track);
+        gPassMs[names_[i]] = double(host(ts[i]) - host(ts[i - 1])) / 1e6;
     }
 }
 
@@ -993,6 +1001,13 @@ ATLAS_API const char* atlas_fr_dump(const char* reason) {
 }
 
 ATLAS_API uint64_t atlas_fr_dump_count(void) { return st().dumps.load(); }
+
+// The last resolved GPU time of a pass (its mark's name), ms; -1 none yet (the recorder off, or no such pass)
+ATLAS_API double atlas_fr_pass_ms(const char* name) {
+    std::lock_guard<std::mutex> lk(gPassMx);
+    auto it = name ? gPassMs.find(name) : gPassMs.end();
+    return it == gPassMs.end() ? -1.0 : it->second;
+}
 
 ATLAS_API const char* atlas_fr_last_dump(void) {
     static thread_local std::string out;
