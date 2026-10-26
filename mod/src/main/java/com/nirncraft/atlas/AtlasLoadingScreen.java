@@ -40,6 +40,9 @@ final class AtlasLoadingScreen extends Screen {
     private String problem;             // a failure or a timeout: what is wrong (the hold stays)
     private String pending = "", lastPending = "-";
     private long lastPendingLogNs;
+    private String stallKey = "";       // (the watchdog: what was pending and how far it was, when it last moved)
+    private long stallSinceNs = System.nanoTime(), stallLogNs;
+    static final long STALL_LOG_NS = 30_000_000_000L;
     private boolean isReady, failed, vanillaIn;
     private Button retry, enter;
 
@@ -166,6 +169,26 @@ final class AtlasLoadingScreen extends Screen {
         return true;
     }
 
+    /**
+     * The watchdog: when neither what is pending nor the loading's progress moved for 30 s, the log says why (the far gate's
+     * count and what its tiles wait for, the deferred chunks and what they wait for, the bake's state), every 30 s.
+     */
+    private void watchdog(double s) {
+        if (isReady || pending.isEmpty()) return;
+        long now = System.nanoTime();
+        String key = pending + AtlasReady.loadingProgress();
+        if (!key.equals(stallKey)) {
+            stallKey = key;
+            stallSinceNs = now;
+            return;
+        }
+        if (now - stallSinceNs < STALL_LOG_NS || now - stallLogNs < STALL_LOG_NS) return;
+        stallLogNs = now;
+        String gen = AtlasClientGen.stallReport(), bake = AtlasCoarseBake.line();
+        com.nirncraft.NirnCraft.LOGGER.warn("atlas loading phase: {} s, no progress for {} s on \"{}\": {}{}", String.format("%.1f", s),
+                (now - stallSinceNs) / 1_000_000_000L, pending, gen == null ? "no generator" : gen, bake == null ? "" : "; " + bake);
+    }
+
     /** Re-reads the readiness (atlas_info is read: a few times a second at most). */
     private void check() {
         long now = System.nanoTime();
@@ -199,6 +222,7 @@ final class AtlasLoadingScreen extends Screen {
             lastPendingLogNs = System.nanoTime();
             com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: {} s, {}", String.format("%.1f", s), pending.isEmpty() ? "ready" : "waiting for: " + pending);
         }
+        watchdog(s);
         boolean held = HoldClient.held();
         if (!held && (isReady || sentReady)) {  // released by the server (or never held and ready): the world is the player's
             com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: ready after {} s ({})", String.format("%.1f", s),
