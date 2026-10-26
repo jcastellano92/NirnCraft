@@ -584,7 +584,11 @@ def dispatch(args):
             raise RuntimeError("Another disposable native client is running; close it cleanly first")
         atomic(GAME / "nirncraft-live.txt", b"# New preview session; idle\n")
         launcher = Path(os.environ["LOCALAPPDATA"]) / "Programs/PrismLauncher/prismlauncher.exe"
-        subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME], creationflags=subprocess.CREATE_NO_WINDOW)
+        # (tools/dev/owner_play.py: NIRNCRAFT_LAUNCH_WORLD joins that saved world at launch, no autotest needed. The game
+        # inherits this process's environment only when Prism is not already running: a running Prism forwards the launch)
+        world = os.environ.get("NIRNCRAFT_LAUNCH_WORLD")
+        subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME, *(["--world", world] if world else [])],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
         print("Preview launch requested; status will report when the world heartbeat is ready")
     elif args.action == "close":
         if not processes():
