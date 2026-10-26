@@ -18,6 +18,16 @@ hardware.
 - **Supported, built when their stage comes:** distant storms and 3D cloud weather, far entities changing, fast AI
   pathing, water.
 
+**Later phase: own the simulation (owner, 2026-10-25).** Modernise the game's simulation the way the renderer was.
+- Simulation level of detail: full rate near players, coarse or statistical far, paused when nobody is near.
+- Regions ticked in parallel; data-oriented entities.
+- GPU simulation for fluids, fire, crowds, pathing and weather on the same world data.
+- Cosmetic simulation on clients; interest-managed sync.
+
+Scope: everything NirnCraft adds (NPCs, creatures, battles, fluids, weather) can be ours within the no-mixins rule.
+Replacing vanilla's own tick needs that rule relaxed or our own server, which is the owner's decision. It starts after
+the renderer milestone, with a read-only design study first.
+
 **How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
 experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
 gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
