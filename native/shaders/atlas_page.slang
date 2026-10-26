@@ -677,7 +677,7 @@ void regionPalette(int x, int z, inout BCol c) {
         c.pal = palAt(mw(pw(1) + uint(idx) * 2u));
         c.cave = mw(pw(1) + uint(idx) * 2u + 1u);
     } else {
-        if (idx < 0) g_bad = g_bad | 16u;  // a generated region: the endless lands are off
+        if (idx < 0) markBad(16u);  // a generated region: the endless lands are off
         c.pal = palAt(pw(2));
         c.cave = pw(3);
     }
@@ -821,7 +821,7 @@ void pageColsMain(uint3 id : SV_DispatchThreadID) {
     int x = (cx << 4) + int(i & 15u), z = (cz << 4) + int(i >> 4);
     uint base = uint(slot) * pageWords();
     uint nf = hdr(H_FIELDS);
-    g_bad = 0u;
+    BAD_TO(1u, uint(slot));
     MapS s = tamrielSample(x, z);
     for (uint f = 0u; f < nf; f++) {
         uint kind = prog[hdr(S_FKINDS) + f];
@@ -829,7 +829,7 @@ void pageColsMain(uint3 id : SV_DispatchThreadID) {
         if (kind == FK_HEIGHT) v = tamrielHeight(x, z, s);
         else if (kind - 1u <= CHN_OVERHANG) v = channelValue(kind - 1u, x, z, s);
         else {
-            g_bad = g_bad | 32u;
+            markBad(32u);
             v = 0.0l;
         }
         pages[base + f * 256u + i] = asuint(float(v));
@@ -843,7 +843,6 @@ void pageColsMain(uint3 id : SV_DispatchThreadID) {
     }
     pages[base + nf * 256u + i] = word;
     for (uint k = i; k < pageBiomeWords(); k += 256u) pages[base + nf * 256u + 256u + k] = 0u;
-    if (g_bad != 0u) pageBad[uint(slot)] = 1u;
 }
 
 [shader("compute")]
@@ -855,7 +854,7 @@ void pageBiomesMain(uint3 id : SV_DispatchThreadID) {
     if (pageJobs[j * 4u + 3u] == 0) return;
     int cx = pageJobs[j * 4u], cz = pageJobs[j * 4u + 1u], slot = pageJobs[j * 4u + 2u];
     int lqx = int((t & 15u) >> 2), lqz = int(t & 3u);
-    g_bad = 0u;
+    BAD_TO(1u, uint(slot));
     BCol c = biomeColumn((cx << 2) + lqx, (cz << 2) + lqz);
     // the climate at the column's first quart (createBiomes asks bottom up: qy -16, block y -64)
     int bx = c.qx << 2, bz = c.qz << 2, by = MIN_Y;
@@ -870,10 +869,9 @@ void pageBiomesMain(uint3 id : SV_DispatchThreadID) {
     uint i0 = uint(lqx * 4 + lqz) * uint(QY);
     for (int qy = 0; qy < QY; qy += 2) {
         uint b0 = noiseBiome(c, qy - 16), b1 = noiseBiome(c, qy - 15);
-        if (b0 == BIOME_NONE || b1 == BIOME_NONE) g_bad = g_bad | 64u;
+        if (b0 == BIOME_NONE || b1 == BIOME_NONE) markBad(64u);
         pages[base + ((i0 + uint(qy)) >> 1)] = (b0 & 0xFFFFu) | (b1 << 16);
     }
-    if (g_bad != 0u) pageBad[uint(slot)] = 1u;
 }
 
 // ---- far tiles (atlas_gen_tiles): AtlasExactSource.fill's columns on the device ------------------------------------
@@ -892,7 +890,7 @@ void tileMain(uint3 id : SV_DispatchThreadID) {
     int s = 1 << uint(lod);
     int bx = tx * (int(TILE_SIDE) << uint(lod)) + (s >> 1), bz = tz * (int(TILE_SIDE) << uint(lod)) + (s >> 1);
     int x = bx + int(c & 255u) * s, z = bz + int(c >> 8) * s;
-    g_bad = 0u;
+    BAD_TO(1u, t);
     MapS m = tamrielSample(x, z);
     double h = tamrielHeight(x, z, m);
     // waterTop: rivers and lakes at or above sea level, filled to ceil(level)
@@ -903,7 +901,6 @@ void tileMain(uint3 id : SV_DispatchThreadID) {
     float water = double(w) > h ? w : F_NAN;
     outIds[t * TILE_COLS * TILE_PLANES + c] = asuint(float(h));
     outIds[t * TILE_COLS * TILE_PLANES + TILE_COLS + c] = asuint(water);
-    if (g_bad != 0u) pageBad[t] = 1u;
 }
 
 // ---- the far columns' surface (atlas_gen_tiles with blocks): AtlasSurface.column on the device --------------------
@@ -934,7 +931,7 @@ void ownColumnFields(BCol c) {
         double v = kind == FK_HEIGHT ? tamrielHeight(x, z, c.s) : channelValue(kind - 1u, x, z, c.s);
         g_colVals[f] = float(v);
     }
-    if (nf > 16u) g_bad = g_bad | 32u;
+    if (nf > 16u) markBad(32u);
     g_colOwn = true;
 }
 [noinline]
@@ -1164,7 +1161,7 @@ int farCulture(int x, int z) {
     if (rasterCovers(double(x), double(z)) && !nearForeign(x, z)) idx = regionIndexRaster(x, z);
     else idx = tamrielSample(x, z).region;
     if (idx >= 0 && idx < int(fw(15))) return mi(fw(16) + uint(idx));
-    g_bad = g_bad | 16u;  // a generated region: the endless lands are off
+    markBad(16u);  // a generated region: the endless lands are off
     return 0;
 }
 // FarRoads.surface: the road block over the far column centred at (x, z), span blocks wide, or FAR_NONE
@@ -1231,7 +1228,7 @@ void tileBiomeMain(uint3 id : SV_DispatchThreadID) {
     int s = 1 << uint(lod), n = int(TILE_SIDE);
     int i = int(c & 255u), j = int(c >> 8);
     int x = tx * (n << uint(lod)) + i * s + (s >> 1), z = tz * (n << uint(lod)) + j * s + (s >> 1);
-    g_bad = 0u;
+    BAD_TO(1u, t);
     float surface = tileSurface(t, i, j);
     float water = asfloat(outIds[t * TILE_COLS * TILE_PLANES + TILE_COLS + c]);
     int top = -floorD(-double(surface)) - 1;
@@ -1241,7 +1238,6 @@ void tileBiomeMain(uint3 id : SV_DispatchThreadID) {
     uint b = quartBiomeFar(q.x, q.y, q.z);
     uint plane = k == 0u ? 2u : (k == 1u ? 4u : 3u);
     outIds[t * TILE_COLS * TILE_PLANES + TILE_COLS * plane + c] = b;
-    if (g_bad != 0u) pageBad[t] = 1u;
 }
 
 // outIds per tile: surface, water (tileMain), then top | under << 16 (generator ids) and the biome at the column's top
@@ -1255,7 +1251,7 @@ void tileSurfMain(uint3 id : SV_DispatchThreadID) {
     int s = 1 << uint(lod), n = int(TILE_SIDE);
     int i = int(c & 255u), j = int(c >> 8);
     int x = tx * (n << uint(lod)) + i * s + (s >> 1), z = tz * (n << uint(lod)) + j * s + (s >> 1);
-    g_bad = 0u;
+    BAD_TO(1u, t);
     float surface = tileSurface(t, i, j);
     float water = asfloat(outIds[t * TILE_COLS * TILE_PLANES + TILE_COLS + c]);
     int gx, gz;
@@ -1311,7 +1307,7 @@ void tileSurfMain(uint3 id : SV_DispatchThreadID) {
     uint above = outIds[P + TILE_COLS * 3u + c] & 0xFFFFu;  // the biome at top + 1, or at the water's top
     uint flags = 0u;
     if (mh(MH_FAR) != 0u) {
-        if (above >= fw(4)) g_bad = g_bad | 32u;  // (no biome there: not proven)
+        if (above >= fw(4)) markBad(32u);  // (no biome there: not proven)
         else if (isNaNF(water) || water <= surface) {
             if (!isSea && farSnowGround(tb) && coldEnoughToSnow(above, x, top + 1, z)) {
                 double bare = jmaxD(1.0e-6l, snowBare(above, x, z));
@@ -1335,7 +1331,6 @@ void tileSurfMain(uint3 id : SV_DispatchThreadID) {
     outIds[P + TILE_COLS * 2u + c] = (tb & 0xFFFFu) | (ub << 16);
     outIds[P + TILE_COLS * 3u + c] = (biomes & 0xFFFFu) | (flags << 16);
     outIds[P + TILE_COLS * 4u + c] = above;
-    if (g_bad != 0u) pageBad[t] = 1u;
 }
 
 // ---- far chunks (atlas_gen_far): a lod-k tile's 16 x 16 level-k chunk columns, from its planes ----------------------

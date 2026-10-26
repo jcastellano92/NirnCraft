@@ -21,6 +21,8 @@
 // float contract of atlas_gen.slang (-fp-mode precise, spv_exact: RTE, no contraction), the one division correctly
 // rounded (divF), Math.round(float) and Math.max / min (signed zeros) as Java defines them, Math.hypot as StrictMath's.
 
+// (the overlays read no exactness flag)
+void markBad(uint bits) {}
 #include "atlas_exact.slang"
 
 struct OvlParams {
