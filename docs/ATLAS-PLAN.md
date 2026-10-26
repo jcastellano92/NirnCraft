@@ -49,7 +49,8 @@ conversion layer would make it a win-win.
   - thin-fork cost: patch size and rebase effort of one added hook;
   - companion-process throughput: chunks/s over shared memory.
 
-**How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
+**How we get there:** be agile. When we're not sure, shift focus to whatever reduces the uncertainty most, with a
+quick estimate or ceiling test; park the rest, and come back when the numbers say so. Start with what we have; take targeted, focused steps with one agent each; iterate fast and
 experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
 gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
 
