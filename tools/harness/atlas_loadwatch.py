@@ -5,6 +5,7 @@
 The client restarts at the route's fixed spawn (atlas_tools.ensure_spawn); --cold wipes atlas's cache first. The profile line
 is read every few seconds (the near window's chunks up of the window, the bake's tiles) and printed as TRACE progress; the
 client is closed when atlas-load.json says ready (or gave up), or at --limit seconds. Prints the receipt's numbers.
+--both: cold then warm in one job (the gate wants them together).
 Run through the lock:  heavy.py --exclusive --loop middle --why "..." "<you>: perf loadwatch" -- py -3 tools/harness/atlas_loadwatch.py
 """
 import argparse
@@ -25,8 +26,20 @@ import game  # noqa: E402
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cold", action="store_true")
+    ap.add_argument("--both", action="store_true", help="a cold launch, then a warm one on its cache: one gated job")
     ap.add_argument("--limit", type=int, default=300)
     a = ap.parse_args()
+    if a.both:
+        import subprocess
+        rc = 0
+        for label, extra in (("cold", ["--cold"]), ("warm", [])):
+            print(f"TRACE begin loadwatch {label} launch", flush=True)
+            r = subprocess.call([sys.executable, "-u", str(Path(__file__).resolve()), "--limit", str(a.limit)] + extra)
+            print(f"TRACE done loadwatch {label} launch rc={r}", flush=True)
+            rc = rc or r
+            if r:
+                break
+        return rc
     groups = json.loads((HERE / "scenes/groups.json").read_text(encoding="utf-8"))
 
     class Runner:
