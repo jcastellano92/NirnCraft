@@ -405,6 +405,10 @@ float3 regionOriginRel(RegionGpu r) {
 
 #include "atlas_groups.slang"
 #include "atlas_bricks.slang"  // (the micro-voxel bricks: non-cube blocks at 1/16 block)
+// (FRAME_FAR_AMORT) each pixel's primary hit, this frame's and the last's (farHitStore), two words a pixel. (The last
+// globals: gpu_layout.hpp FarGlobals lists them in declaration order for the C++ build, which never reads them)
+[[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
+[[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
 
 // What a secondary ray loses per block of path through a voxel of material `mat` (-1: it stops there, solid): a
 // cut-out shape (leaves, plants: the game classes plants as terrain, and a solid cube of grass tuft blocked every
@@ -679,6 +683,171 @@ void vgTexel(uint mat, float3 lp, float3 d, int ax, float tView) {
     cTr.hasAlbedo = 1u;
 }
 
+// ---- coarse voxels as smooth surfaces (ATLAS-PLAN 0.2: detail as the eye resolves it) ----
+// A coarse level's voxel wider than the pixel's footprint (the footprint's own level not resident: a streaming gap, a
+// window's edge) is not drawn as the cube it is stored as: its level's occupancy is a density (each voxel's centre 1 when
+// solid, 0 when air), interpolated trilinearly, the surface where it reaches one half; the colour the solid corners'
+// albedo by their weights; the normal the density's gradient. A mountain at a coarse level reads as a smooth slope in
+// blended colour, never stair-stepped boxes in mottled per-voxel colours. (ATLAS_ABLATE 32: the cubes, as before)
+static const float SMOOTH_COARSE_PX = 1.5;  // a voxel this many footprints wide, or more, is drawn smooth
+
+// the material of grid-local voxel v of level grid g: 0 air, 0xFFFFFFFF no data (outside the window, an unloaded chunk)
+uint vgMatG(VgGrid g, int3 v) {
+    if (v.x < 0 || v.y < 0 || v.z < 0 || v.x >= g.X * 16 || v.y >= g.Y * 16 || v.z >= g.Z * 16) return 0xFFFFFFFFu;
+    uint cw = vgChunks[vgCellG(g, v >> 4)];
+    uint st = cw & 3u;
+    if (st == VG_UNLOADED) return 0xFFFFFFFFu;
+    if (st == VG_EMPTY) return 0u;
+    if (st == VG_UNIFORM) return (cw >> 2) & 0xFFFFu;
+    int3 l = v & 15;
+    uint i = uint(l.x + 16 * (l.z + 16 * l.y));
+    return (vgPool[(cw >> 2) * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
+}
+
+// a voxel's share of the density: 1 what this ray stops at, 0 air and water a ray passes (skipWater: the trace on
+// under a water surface, or water seen through); no data (an unloaded neighbour, the window's edge) counts as the hit
+// voxel's own, solid, so the surface keeps no lip where the level's data ends
+float smoothOcc(uint m, bool skipWater) {
+    if (m == 0u) return 0.0;
+    if (m == 0xFFFFFFFFu) return 1.0;
+    return skipWater && uint(palette[m].emisClass.y) == 2u ? 0.0 : 1.0;
+}
+
+// the density (trilinear over the eight voxel centres around a point) as central differences over a voxel either side of q
+// from the 32 voxel centres they share, not 48: the 2 x 2 x 2 around q and a 4-voxel arm each side of it on each axis
+float3 vgDensityGrad(VgGrid g, float3 q, bool skipWater) {
+    q -= 0.5;
+    int3 b = int3(floor(q));
+    float3 w = q - float3(b);
+    float c[8];  // (x + 2 y + 4 z, as vgDensityG's)
+    [unroll]
+    for (int n = 0; n < 8; n++) c[n] = smoothOcc(vgMatG(g, b + int3(n & 1, (n >> 1) & 1, (n >> 2) & 1)), skipWater);
+    float3 gr = float3(0, 0, 0);
+    [unroll]
+    for (int n = 0; n < 4; n++) {
+        int a = n & 1, e = (n >> 1) & 1;
+        float xl = smoothOcc(vgMatG(g, b + int3(-1, a, e)), skipWater), xh = smoothOcc(vgMatG(g, b + int3(2, a, e)), skipWater);
+        float yl = smoothOcc(vgMatG(g, b + int3(a, -1, e)), skipWater), yh = smoothOcc(vgMatG(g, b + int3(a, 2, e)), skipWater);
+        float zl = smoothOcc(vgMatG(g, b + int3(a, e, -1)), skipWater), zh = smoothOcc(vgMatG(g, b + int3(a, e, 2)), skipWater);
+        // (x: the pair (y, z) = (a, e); y: (x, z) = (a, e); z: (x, y) = (a, e))
+        float wx = (a != 0 ? w.y : 1.0 - w.y) * (e != 0 ? w.z : 1.0 - w.z);
+        float wy = (a != 0 ? w.x : 1.0 - w.x) * (e != 0 ? w.z : 1.0 - w.z);
+        float wz = (a != 0 ? w.x : 1.0 - w.x) * (e != 0 ? w.y : 1.0 - w.y);
+        gr.x += wx * (lerp(c[1 + 2 * a + 4 * e], xh, w.x) - lerp(xl, c[2 * a + 4 * e], w.x));
+        gr.y += wy * (lerp(c[a + 2 + 4 * e], yh, w.y) - lerp(yl, c[a + 4 * e], w.y));
+        gr.z += wz * (lerp(c[a + 2 * e + 4], zh, w.z) - lerp(zl, c[a + 2 * e], w.z));
+    }
+    return gr;
+}
+
+struct SmoothHit {
+    bool hit;
+    float t;        // the surface along the walk's parameter
+    float3 n;       // its normal (unit, grid axes: the world's)
+    float3 albedo;  // the solid corners' albedo by their weights (linear)
+};
+
+// The density's crossing along ro + d u (grid-local voxel units, u the walk's parameter) for u in [u0, u1), from the
+// cell of eight voxel centres around each sample (the last cell's corners kept: a march stays in two or three cells).
+// ([noinline]: one copy for traceView's inlined copies; it reads no thread-private static, its inputs are arguments)
+[noinline]
+SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, bool skipWater) {
+    SmoothHit sh;
+    sh.hit = false;
+    sh.t = u1;
+    sh.n = float3(0, 1, 0);
+    sh.albedo = float3(0, 0, 0);
+    int3 cellAt = int3(-0x7FFFFFFF, 0, 0);
+    uint mats[8];
+    float occ[8];
+    [unroll]
+    for (int k = 0; k < 8; k++) { mats[k] = 0u; occ[k] = 0.0; }
+    float fPrev = -1.0, uPrev = u0;
+    const int N = 10;
+    float du = (u1 - u0) / float(N);
+    float u = u0;
+    float3 w3 = float3(0, 0, 0);
+    for (int it = 0; it < N + 5; it++) {
+        // (N even samples, then bisection between the last one outside and the first one inside)
+        float3 q = ro + d * u - 0.5;  // (voxel centres at integer + 0.5: the cell's lower corner floor(q))
+        int3 b = int3(floor(q));
+        if (any(b != cellAt)) {
+            cellAt = b;
+            [unroll]
+            for (int k = 0; k < 8; k++) {
+                uint m = vgMatG(g, b + int3(k & 1, (k >> 1) & 1, (k >> 2) & 1));
+                mats[k] = m;
+                occ[k] = smoothOcc(m, skipWater);
+            }
+        }
+        w3 = q - float3(b);
+        float x0 = lerp(occ[0], occ[1], w3.x), x1 = lerp(occ[2], occ[3], w3.x);
+        float x2 = lerp(occ[4], occ[5], w3.x), x3 = lerp(occ[6], occ[7], w3.x);
+        float f = lerp(lerp(x0, x1, w3.y), lerp(x2, x3, w3.y), w3.z);
+        if (it < N) {
+            if (f >= 0.5) {
+                if (it == 0) {  // (inside at once: the surface at the march's start)
+                    sh.hit = true;
+                    u1 = u;
+                    break;
+                }
+                sh.hit = true;
+                // bisection on [uPrev, u]
+                u1 = u;
+                u0 = uPrev;
+                u = 0.5 * (u0 + u1);
+                it = N - 1;  // (the next iterations bisect)
+                continue;
+            }
+            uPrev = u;
+            fPrev = f;
+            u += du;
+            if (it == N - 1) return sh;  // (no crossing: the ray passes this voxel's corner)
+            continue;
+        }
+        // bisection
+        if (f >= 0.5) u1 = u; else u0 = u;
+        u = 0.5 * (u0 + u1);
+    }
+    if (!sh.hit) return sh;
+    sh.t = u1;
+    // the normal: minus the density's gradient over a voxel either side of the crossing (central differences: a terrace's
+    // one-voxel ramp and its flat top share their light across the step, a slope reads as a slope)
+    float3 qh = ro + d * sh.t;
+    float3 gr = vgDensityGrad(g, qh, skipWater);
+    if (dot(gr, gr) < 1e-8) {  // (flat over the stencil: the crossing's own cell)
+        gr.x = lerp(lerp(occ[1] - occ[0], occ[3] - occ[2], w3.y), lerp(occ[5] - occ[4], occ[7] - occ[6], w3.y), w3.z);
+        gr.y = lerp(lerp(occ[2] - occ[0], occ[3] - occ[1], w3.x), lerp(occ[6] - occ[4], occ[7] - occ[5], w3.x), w3.z);
+        gr.z = lerp(lerp(occ[4] - occ[0], occ[5] - occ[1], w3.x), lerp(occ[6] - occ[2], occ[7] - occ[3], w3.x), w3.y);
+    }
+    float gl = length(gr);
+    sh.n = gl > 1e-5 ? -gr / gl : -normalize(d);
+    // the colour: the solid corners' albedo by their trilinear weights
+    float3 acc = float3(0, 0, 0);
+    float wsum = 0.0;
+    [unroll]
+    for (int k = 0; k < 8; k++) {
+        if (occ[k] <= 0.0 || mats[k] == 0xFFFFFFFFu) continue;  // (no data: no colour of its own)
+        float wk = ((k & 1) != 0 ? w3.x : 1.0 - w3.x) * (((k >> 1) & 1) != 0 ? w3.y : 1.0 - w3.y) * (((k >> 2) & 1) != 0 ? w3.z : 1.0 - w3.z);
+        acc += palette[mats[k]].albedoRough.rgb * wk;
+        wsum += wk;
+    }
+    sh.albedo = wsum > 1e-6 ? acc / wsum : float3(0.5, 0.5, 0.5);
+    return sh;
+}
+
+// (TraceResult.hasAlbedo) bit 0 its albedo is the hit's own, bit 1 a smooth normal in bits 16-31 (octahedral, 8 bits each),
+// bit 2 alone: a coarse level's cube that wants its smooth surface (traceView's smoothPrimaryHit clears it)
+static const uint HIT_SMOOTH_N = 2u;
+static const uint HIT_SMOOTH_WANT = 4u;
+uint packSmoothN(float3 n) {
+    float2 e = octEncode(n);
+    return 1u | HIT_SMOOTH_N | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+}
+float3 hitSmoothN(uint hasAlbedo) {
+    return octDecode(float2(float((hasAlbedo >> 16) & 255u), float((hasAlbedo >> 24) & 255u)) / 255.0);
+}
+
 // The chord p0 + d u (camera-relative), u in [u0, u1), through the grid: TRACE_HIT (res filled), TRACE_MISS (it crossed
 // [u0, u1) through chunks with data), else TRACE_UNCOVERED and uStop where it met a chunk without data or left the
 // window (the SVDAG regions answer from there). A step reads the chunk word; inside a chunk with blocks the block word;
@@ -771,12 +940,18 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                     uint i = uint(l.x + 16 * (l.z + 16 * l.y));
                     uint mat = uni ? (cw >> 2) & 0xFFFFu : (vgPool[slot * 2048u + (i >> 1)] >> (16u * (i & 1u))) & 0xFFFFu;
                     if (g.k > 0) {
-                        // a coarse level's voxel: a cube of its material (the regions' levels' rule)
+                        // a coarse level's voxel: a cube of its material (the regions' levels' rule), unless it is wider
+                        // than the primary ray's footprint: then the level's smooth surface (coarseSmoothHit)
+                        // (the smooth surface itself is found once the view ray is done, traceView's smoothPrimaryHit: in
+                        // the walk, a call inside the divergent step loop, it cost the horizon view's far pass 0.7 s)
+                        float foot = (cChordT + t) * frame.params.w * frame.params.z;
+                        bool smooth = cPrimary && vs >= SMOOTH_COARSE_PX * foot && (cAblate & 32u) == 0u;
                         if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
                             cTr.t = t;
                             cTr.mat = mat;
                             cTr.axis = entryAxis(v, ro, d, inv, stepPos);
                             cTr.lod = g.k;
+                            if (smooth) cTr.hasAlbedo = HIT_SMOOTH_WANT;
                             return TRACE_HIT;
                         }
                         lo = v;
@@ -889,14 +1064,33 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
 // p0), TRACE_MISS, TRACE_UNCOVERED with uncExit (from p0) as the regions report it, or TRACE_CAPPED: its steps spent
 // (COARSE_RUN_STEPS over all its runs and levels: a grid starved of level-0 chunks made this 24 x 6 walks of 4096 steps a
 // ray, a 5 s GPU timeout).
+// whether level grid g holds camera-relative p: its chunk there in the window and not UNLOADED (one word)
+bool vgHoldsAt(VgGrid g, float3 p) {
+    int3 v = (int3(floor(p)) + frame.camInt.xyz - g.origin) >> g.k;
+    if (any(v < int3(0, 0, 0)) || v.x >= g.X * 16 || v.y >= g.Y * 16 || v.z >= g.Z * 16) return false;
+    return (vgChunks[vgCellG(g, v >> 4)] & 3u) != VG_UNLOADED;
+}
+
 int vgCoarseRun(float3 p0, float3 d, float u0, float u1, out float uncExit) {
     uncExit = 1e30;
     float u = u0;
     uint cap = min(RAY_STEPS, cTr.steps + COARSE_RUN_STEPS);
     for (int it = 0; it < 24 && u < u1; it++) {
+        // the finest coarse level holding the point (one chunk word a level) is where the walk starts: a gap costs a jump
+        // to the level that answers, not a walk and an unloaded run's scan on every finer level that does not (one walk
+        // call site below: the split build inlines it)
+        int kFrom = 1;
+        {
+            float3 pu = p0 + d * u;
+            for (int k = 1; k <= 6; k++)
+                if (vgLevelOn(k) && ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) != 0 && vgHoldsAt(vgGrid(k), pu)) {
+                    kFrom = k;
+                    break;
+                }
+        }
         bool on = false;
         float next = u1;  // (where some level holds data again)
-        for (int k = 1; k <= 6; k++) {
+        for (int k = kFrom; k <= 6; k++) {
             if (!vgLevelOn(k) || ((frame.vgLevel[clamp(k, 1, 6) - 1].w >> 17) & 1) == 0) continue;
             VgGrid gk = vgGrid(k);
             float uk;
@@ -1484,6 +1678,9 @@ float lodResidentDist(float level) {
 
 // the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
 static float gHitLod = 0.0;
+// where the stretch that hit starts along the view ray (smoothPrimaryHit searches no further back: a finer level, or this
+// level's walk, found air before it)
+static float gHitFrom = 0.0;
 
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
 // Each stretch of the ray takes the level of its continuous level (lodFromFootprint at its distance, lodResident at its
@@ -1513,7 +1710,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
     float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this stretch
     // (a grazing hit's second look: the coarser level over [t, grazeEnd), the finer hit kept for when it has none)
     bool graze = false;
-    float grazeEnd = 0.0, fineT = 0.0;
+    float grazeEnd = 0.0, fineT = 0.0, fineFrom = 0.0;
     TraceResult fine = gTr;
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
@@ -1548,8 +1745,12 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
         int r = traceLod(lod, a, d, len, uncExit);
         if (graze) {
             // the coarser level's surface near the grazing hit, else the finer hit as it was
-            if (r == TRACE_HIT) return t + gTr.t;
+            if (r == TRACE_HIT) {
+                gHitFrom = t;
+                return t + gTr.t;
+            }
             gTr = fine;
+            gHitFrom = fineFrom;
             return fineT;
         }
         if (r == TRACE_HIT) {
@@ -1559,12 +1760,15 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
             float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
             gHitLod = rings ? float(lod) : max(lh, float(lod));
             int k2 = lodPick(lh, xi, lodCount);
-            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer) {
+            // (a coarse cube that wants its smooth surface, HIT_SMOOTH_WANT, has no second look: its cube face's cos is
+            // the staircase's, not the surface's; the smooth surface is what the footprint asks for there)
+            if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer && gTr.hasAlbedo != HIT_SMOOTH_WANT) {
                 // seen at a grazing angle, its footprint wants a coarser level: that level's surface around the hit,
                 // from a little in front of it (the next stretch)
                 float s2 = float(1 << k2);
                 fine = gTr;
                 fineT = th;
+                fineFrom = t;
                 graze = true;
                 lod = k2;
                 grazeEnd = min(th + 3.0 * s2, t1);
@@ -1573,6 +1777,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
                 gTr.hasAlbedo = 0u;  // (the coarser level's own surface: not the finer hit's texel)
                 continue;
             }
+            gHitFrom = t;
             return th;
         }
         if (r == TRACE_UNCOVERED) {
@@ -1612,12 +1817,57 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
     return -1.0;
 }
 
+// A coarse level's cube hit by a primary ray where its voxel is wider than the pixel (traceVoxGrid's HIT_SMOOTH_WANT): its
+// level's smooth surface (coarseSmoothHit) along the ray's tangent there (its parameter the view ray's), from a voxel
+// before the cube's entry (a concave corner's surface stands in front of it; never before the hitting stretch's start,
+// gHitFrom) to a voxel and a half past it (a convex edge's lies inside; never past t1). Once a ray, after its walk: one
+// call where the warp's rays are done, not one inside the walk's divergent loop. Returns the hit, or -1: no crossing (the
+// ray passes the voxel's corner: traceView walks on past it).
+float smoothPrimaryHit(float3 o, float3 dir, float t1, float tHit) {
+    gTr.hasAlbedo = 0u;
+    int k = clamp(gTr.lod, 1, 6);
+    VgGrid g = vgGrid(k);
+    float vs = float(1 << k);
+    float R = frame.camFrac.w;
+    float kc = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
+    float3 tg = dir + float3(0, 2.0 * kc * tHit, 0);
+    float3 ro = (worldAt(o, dir, kc, tHit) - float3(g.origin - frame.camInt.xyz)) / vs;
+    bool skipW = gSkipWater || (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
+    SmoothHit sh = coarseSmoothHit(g, ro, tg / vs, -min(vs, max(tHit - gHitFrom, 0.0)), min(1.5 * vs, max(t1 - tHit, 0.0)), skipW);
+    if (!sh.hit) return -1.0;
+    float3 an = abs(sh.n);
+    gTr.t += sh.t;
+    gTr.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
+    gTr.albedo = sh.albedo;
+    gTr.hasAlbedo = packSmoothN(sh.n);
+    return tHit + sh.t;
+}
+
 // The view's ray (traceViewBody): a primary ray (gPrimary) from its own start (gSecT 0: the distance of a chord's
 // start along the view ray is gChordT + gSecT)
 float traceView(float3 o, float3 dir, float t0, float t1, float lodDither) {
     gPrimary = true;
     gSecT = 0.0;
-    float r = traceViewBody(o, dir, t0, t1, lodDither);
+    float r = -1.0;
+    // (one walk call site: a smooth search that finds no crossing walks on once from a voxel and a half past the cube,
+    // its second miss keeps the cube)
+    for (int pass = 0; pass < 2; pass++) {
+        r = traceViewBody(o, dir, t0, t1, lodDither);
+        if (r < 0.0 || gTr.hasAlbedo != HIT_SMOOTH_WANT) break;
+        float vs = float(1 << clamp(gTr.lod, 1, 6));
+        float rs = smoothPrimaryHit(o, dir, t1, r);
+        if (rs >= 0.0) {
+            r = rs;
+            break;
+        }
+        if (pass == 1) break;  // (the cube)
+        t0 = r + 1.5 * vs;
+        if (t0 >= t1) {
+            r = -1.0;
+            break;
+        }
+        gTr.axis = -1;
+    }
     gPrimary = false;
     return r;
 }
@@ -2806,6 +3056,13 @@ float4 nearLightAt(uint2 px, float3 o, float3 dir, float nd, uint info, float3 s
                 break;
             so.y = floor(so.y + ci.y) + 1.02 - ci.y;
         }
+        // (the unified field: a coarse level's hit, a smooth surface inside its level's cube: out of that solid along the
+        // normal, else its rays start inside the cube and the surface is black)
+        int hitLod = (frame.dims.z & FRAME_PRIMARY_NEAR_LIT) != 0u ? int(255u - ((info >> 8) & 255u)) : 0;
+        if (hitLod > 0 && hitLod <= 6) {
+            float hs = float(1 << hitLod);
+            for (int i = 0; i < 3 && occupiedAt(hitLod, so); i++) so += N * (0.5 * hs);
+        }
     }
     // The light by need (docs/ATLAS-RENDERER-PLAN.md "The light by need"): a pixel cannot show the light's detail finer
     // than its footprint there (the blocks one pixel covers: distance x the pixel's angle x lightCtl.x), so its secondary
@@ -3450,6 +3707,74 @@ float eyeWaterDepth(out uint mat) {
     return 48.0;
 }
 
+// ---- the far range's primary rays across frames (FRAME_FAR_AMORT) ---------------------------------------------------
+// A primary ray's hit where a block covers no more than a pixel (the footprint: distance x pixel angle >= 1 block, or the
+// sky) is what the last frame's ray there met, reprojected (the camera moves a little against such distances): the pass
+// keeps each pixel's hit (farHitStore: farHit, this frame's; prevFarHit, the last frame's) and a pixel takes the last
+// frame's at its reprojected point while that point agrees about the surface (the same distance from the last camera)
+// and the hit is younger than FAR_AMORT_N frames. Every 8 x 8 tile is traced whole one frame in FAR_AMORT_N, staggered
+// by a hash of the tile (a warp's rays are traced together or not at all: one traced lane in a warp costs the warp's
+// whole walk). Pixels drive it, never a distance: the footprint and the reprojection decide. What moves or shines is
+// not in the hit: the movers (traceActors) and the light (nearLightMain, its lights) are this frame's, every frame.
+static const uint FAR_AMORT_N = 4u;
+// (the store: tHit, tW, the hit's material and albedo flags; its axis, level and the water's level, the water's
+// material, the albedo as halves, the frame it was traced: frame.temporal.x's low 16 bits)
+// (inlined: as a [noinline] call its two TraceResults went through memory, and the split kernel's shared memory grew
+// from 7936 to 16640 bytes a group, the L1 the walk lives on with it: its far pass 40 % slower with this off)
+void farHitStore(uint pix, float tHit, float tW, TraceResult res, TraceResult wRes, uint stamp) {
+    uint i = pix * 2u;
+    farHit[i] = uint4(asuint(tHit), asuint(tW), res.mat, res.hasAlbedo);
+    uint packed = uint(res.axis + 1) | (uint(clamp(res.lod, 0, 15)) << 2) | (uint(clamp(wRes.lod, 0, 15)) << 6);
+    farHit[i + 1u] = uint4(packed, wRes.mat, f32tof16(res.albedo.x) | (f32tof16(res.albedo.y) << 16),
+                           f32tof16(res.albedo.z) | ((stamp & 0xFFFFu) << 16));
+}
+// the last frame's hit pixel px (its ray dir) takes, at its reprojected point: its index in prevFarHit (0xFFFFFFFF: none,
+// the pixel traces its own) and d, this ray's distance to that hit's first surface (the water's where it met water)
+// (scalars only across the call: a [noinline] call passing TraceResults went through memory, the kernel's shared memory
+// grew from 7936 to 16640 bytes a group and the far pass was 40 % slower)
+[noinline]  // (out of farMain's inlined body: it reads no thread-private static, its inputs are arguments)
+uint farHitSource(uint2 px, float3 dir, out float d) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    d = -1.0;
+    // (the tile's own frame: traced whole)
+    uint2 tile = px / 8u;
+    if (((hashU(tile.x * 73856093u ^ (tile.y * 19349663u)) + frame.temporal.x) % FAR_AMORT_N) == 0u) return 0xFFFFFFFFu;
+    uint n = w * h, count, stride;
+    prevFarHit.GetDimensions(count, stride);
+    if (count < 2u * n) return 0xFFFFFFFFu;  // (no last frame of this size)
+    prevSurface.GetDimensions(count, stride);
+    if (count < n) return 0xFFFFFFFFu;
+    float pa = frame.params.w * frame.params.z;
+    // the point the last frame's surface along this ray stood at (its distance here at the same pixel: the camera
+    // moves little against a far one), reprojected into the last frame
+    float ds = prevSurface[px.y * w + px.x];
+    bool sky = !(ds < 1e29);
+    if (!sky && ds * pa < 1.0) return 0xFFFFFFFFu;  // (near: its own ray)
+    float R = frame.camFrac.w;
+    float k = R > 0 && !sky ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;  // (the sky: a direction)
+    float3 X = worldAt(frame.camFrac.xyz, dir, k, sky ? 1e7 : ds) - frame.prevCam.xyz;
+    float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
+    if (clip.w <= 1e-4) return 0xFFFFFFFFu;
+    float2 pn = clip.xy / clip.w - frame.farLight.zw;  // (the last frame's jitter taken off, as nearHistoryAt)
+    int2 q = int2(floor(float2((pn.x * 0.5 + 0.5) * float(w), (0.5 - pn.y * 0.5) * float(h))));
+    if (any(q < int2(0, 0)) || q.x >= int(w) || q.y >= int(h)) return 0xFFFFFFFFu;
+    uint i = (uint(q.y) * w + uint(q.x)) * 2u;
+    uint4 a = prevFarHit[i], b = prevFarHit[i + 1u];
+    if (((frame.temporal.x - (b.w >> 16)) & 0xFFFFu) >= FAR_AMORT_N) return 0xFFFFFFFFu;  // (traced FAR_AMORT_N frames ago or more)
+    float tq = asfloat(a.x), wq = asfloat(a.y);
+    float tf = tq >= 0.0 ? tq : wq;  // (what prevSurface holds: the bed under water, the water's surface over deep water)
+    if (sky) {
+        if (tf >= 0.0) return 0xFFFFFFFFu;  // (the sky here, a surface there: a silhouette moved)
+        return i;
+    }
+    // the same surface: the last camera's distance to the point agrees with what its ray there met
+    if (!(tf >= 0.0) || tf * pa < 1.0) return 0xFFFFFFFFu;
+    float lx = length(X);
+    if (abs(lx - tf) > 0.02 * tf + 1.0) return 0xFFFFFFFFu;
+    d = ds + (tf - lx);  // (first order: the point the hit was, along this ray)
+    return i;
+}
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
@@ -3558,36 +3883,67 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     uint eyeMat = 0u;
     float eyeDepth = unified ? eyeWaterDepth(eyeMat) : -1.0;
     bool eyeWater = eyeDepth >= 0.0;
-    gSkipWater = eyeWater;
-    gTr = res;
-    // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
-    float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
-    float tHit = traceView(o, dir, tStart, tEye, lodDither);
-    res = gTr;
-    gSkipWater = false;
-    // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
-    // what is under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped);
-    // (_LIT) atlas draws it at any distance, and what lies behind it is traced on from it, WATER_SEE blocks at most
-    // (one call site for both: NVIDIA merges a [noinline] call with the same arguments, and each traceView is one more
-    // inlined copy of the walk)
+    float tHit = -1.0;
     float tW = -1.0;
     TraceResult wRes = res;
-    if (primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[res.mat].emisClass.y) == 2u) {
-        tW = unified ? tHit : -1.0;
-        // a fresh result: only the pixel's dither carries over (the water hit's texel albedo tinted the bed)
-        TraceResult r2;
-        r2.t = 0; r2.mat = 0; r2.axis = -1; r2.lod = 0; r2.steps = res.steps; r2.dither = res.dither;
-        r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
-        gSkipWater = true;
-        gTr = r2;
-        tHit = traceView(o, dir, unified ? tHit : tStart, unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y,
-                         lodDither);
+    // (FRAME_FAR_AMORT) the last frame's hit where this pixel may take it
+    bool amort = (frame.dims.z & FRAME_FAR_AMORT) != 0u && !eyeWater;
+    uint hitStamp = frame.temporal.x;
+    float hitD = -1.0;
+    uint hitSrc = amort ? farHitSource(id.xy, dir, hitD) : 0xFFFFFFFFu;
+    bool taken = hitSrc != 0xFFFFFFFFu;
+    if (taken) {
+        // (the record, farHitStore's: res keeps this pixel's own dither)
+        uint4 ha = prevFarHit[hitSrc], hb = prevFarHit[hitSrc + 1u];
+        float tq = asfloat(ha.x), wq = asfloat(ha.y);
+        float tf = tq >= 0.0 ? tq : wq;
+        tHit = tq < 0.0 || hitD < 0.0 ? -1.0 : hitD + (tq - tf);
+        tW = wq < 0.0 || hitD < 0.0 ? -1.0 : hitD + (wq - tf);
+        res.mat = ha.z;
+        res.hasAlbedo = ha.w;
+        res.axis = int(hb.x & 3u) - 1;
+        res.lod = int((hb.x >> 2) & 15u);
+        res.albedo = float3(f16tof32(hb.z & 0xFFFFu), f16tof32(hb.z >> 16), f16tof32(hb.w & 0xFFFFu));
+        res.steps = 0u;
+        res.t = 0.0;
+        wRes = res;
+        wRes.mat = hb.y;
+        wRes.lod = int((hb.x >> 6) & 15u);
+        hitStamp = hb.w >> 16;
+    }
+    if (!taken) {
+        hitStamp = frame.temporal.x;
+        gSkipWater = eyeWater;
+        gTr = res;
+        // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
+        float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
+        tHit = traceView(o, dir, tStart, tEye, lodDither);
         res = gTr;
         gSkipWater = false;
-        // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on to
-        // what the ray met: a pool's wall it leaves by is rare)
-        if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+        // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
+        // what is under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped);
+        // (_LIT) atlas draws it at any distance, and what lies behind it is traced on from it, WATER_SEE blocks at most
+        // (one call site for both: NVIDIA merges a [noinline] call with the same arguments, and each traceView is one more
+        // inlined copy of the walk)
+        wRes = res;
+        if (primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[res.mat].emisClass.y) == 2u) {
+            tW = unified ? tHit : -1.0;
+            // a fresh result: only the pixel's dither carries over (the water hit's texel albedo tinted the bed)
+            TraceResult r2;
+            r2.t = 0; r2.mat = 0; r2.axis = -1; r2.lod = 0; r2.steps = res.steps; r2.dither = res.dither;
+            r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
+            gSkipWater = true;
+            gTr = r2;
+            tHit = traceView(o, dir, unified ? tHit : tStart, unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y,
+                             lodDither);
+            res = gTr;
+            gSkipWater = false;
+            // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on to
+            // what the ray met: a pool's wall it leaves by is rare)
+            if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+        }
     }
+    if (amort) farHitStore(pix, tHit, tW, res, wRes, hitStamp);
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
     gSecAblate = gAblate;
     gSecMode = (gAblate >> 23) & 7u;
@@ -3638,9 +3994,12 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         int ax = res.axis < 0 ? 1 : res.axis;
         float3 n = float3(0, 0, 0);
         n[ax] = dir[ax] > 0.0 ? -1.0 : 1.0;  // the face entered (blocks, near: no smoothing)
+        if ((res.hasAlbedo & HIT_SMOOTH_N) != 0u) n = hitSmoothN(res.hasAlbedo);  // (a coarse level's smooth surface)
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
         float2 e = octEncode(n);
-        uint info = (255u << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
+        // (byte 8-15, the host's sky light where the host writes the info: in the unified field atlas's own, 255 - the hit's
+        // level, nearLightAt's origin out of that level's solid)
+        uint info = ((255u - uint(clamp(res.lod, 0, 7))) << 8) | (uint(saturate(e.x) * 255.0 + 0.5) << 16) | (uint(saturate(e.y) * 255.0 + 0.5) << 24);
         // (what the host's depth test sees: the bed, so what swims over it shows, the water's medium on it from the
         // surface's distance, waterAdd.a; under water, where the ray left the water)
         float tDepth = watered && eyeWater ? min(tHit, max(airFrom, 0.05)) : tHit;
@@ -3753,6 +4112,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if (ax == 0) n.x = slope.x > 0 ? -1.0 : 1.0;
         else if (ax == 1) n.y = slope.y > 0 ? -1.0 : 1.0;
         else n.z = slope.z > 0 ? -1.0 : 1.0;
+        if ((res.hasAlbedo & HIT_SMOOTH_N) != 0u) n = hitSmoothN(res.hasAlbedo);  // (a coarse level's smooth surface)
         float3 p = worldAt(o, dir, k, tHit);
         airAtPoint(p);  // the key light at the hit (a peak keeps the sun longer; an eclipse's shadow where it falls)
         float s = float(1 << res.lod);

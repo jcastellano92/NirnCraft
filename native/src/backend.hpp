@@ -32,6 +32,9 @@ struct GlFrameIO {
 // FRAME_NEAR_LIGHT (atlas.h ATLAS_FRAME_NEAR_LIGHT; the kernels' atlas_shared.slang)
 constexpr uint32_t FRAME_NEAR_LIGHT_BIT = 0x20000u;
 constexpr uint32_t FRAME_NEAR_SPLIT_BIT = 0x40000u;
+// (internal, the Vulkan backend's split frames of the unified field) the far range's primary rays reused across frames
+// where a block covers no more than a pixel (atlas_far.slang farHit; ATLAS_FAR_AMORT=0: every pixel traced each frame)
+constexpr uint32_t FRAME_FAR_AMORT_BIT = 0x40000000u;
 // (internal) the far lights culled, ranked and binned on the device (atlas_far.slang lightCullMain): backends that can
 constexpr uint32_t FRAME_GPU_LIGHTS_BIT = 0x80000000u;
 // (abi 0.17) ATLAS_FRAME_PRIMARY_NEAR / _LIT: atlas's primary rays draw the near field; the near light is then an output

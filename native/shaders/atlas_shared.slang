@@ -25,6 +25,8 @@ static const uint FRAME_PRIMARY_NEAR = 0x80000u;      // (abi 0.17) the near fie
 static const uint FRAME_PRIMARY_NEAR_LIT = 0x100000u; // (abi 0.17) ... composited (atlas.h)
 static const uint FRAME_GPU_LIGHTS = 0x80000000u;  // (internal: the Vulkan backend) the far lights culled, ranked and
                                                     // binned on the GPU (lightCullMain), not by lights.cpp
+static const uint FRAME_FAR_AMORT = 0x40000000u;  // (internal: the Vulkan backend, split frames of the unified field) the
+                                                   // far range's primary rays reused across frames (atlas_far.slang farHit)
 static const uint FRAME_NEAR_SPLIT = 0x40000u; // (internal: the Vulkan backend) the near light traced at half resolution
                                                // (nearLightMain) and upsampled (nearUpsampleMain), not in farMain
 // the shader pack's ambient floor (deferred.fsh: albedo x (sky + floor)), under every far land surface as under the near

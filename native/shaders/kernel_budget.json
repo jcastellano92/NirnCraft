@@ -1,0 +1,1448 @@
+{
+ "about": [
+  "The kernels' budget, a ratchet: any increase fails (the build: spv_budget over every module's SPIR-V; a run with",
+  "ATLAS_PIPE_BUDGET=1 or strict: the driver's pipeline statistics). Lower a number when a change frees it; raise one",
+  "only in a deliberate commit that says why. spv_budget <this file> native/build/gen --write prints today's spv part.",
+  "spv: instructions, private (thread-private statics), workgroup (groupshared), fnArrays (function-scope arrays),",
+  "structCalls (calls passing a struct or pointer, beyond structCallsOk). pipe: per vendor and pipeline name, registers,",
+  "shared, local (bytes a thread, the statistic's low 32 bits), stack, binary (bytes). docs/AGENT-RULES.md has the why."
+ ],
+ "spv": {
+  "atlas_cloud": {
+   "instructions": 7663,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": [
+    "cumulusDensity"
+   ]
+  },
+  "atlas_far": {
+   "instructions": 77781,
+   "private": 28,
+   "workgroup": 0,
+   "fnArrays": 59,
+   "structCalls": 0,
+   "structCallsOk": [
+    "coarseSmoothHit",
+    "cumulusDensity",
+    "farHitSource",
+    "traceGroups",
+    "traceLodCore",
+    "traceLodRegions",
+    "traceRegion",
+    "traceSecondaryCore",
+    "traceVoxGrid"
+   ]
+  },
+  "atlas_farsplit": {
+   "instructions": 149575,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 242,
+   "structCalls": 0,
+   "structCallsOk": [
+    "coarseSmoothHit",
+    "cumulusDensity",
+    "farHitSource"
+   ]
+  },
+  "atlas_feat_apply": {
+   "instructions": 233,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_aux": {
+   "instructions": 1238,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 2,
+   "structCalls": 0,
+   "structCallsOk": [
+    "floorD"
+   ]
+  },
+  "atlas_feat_copy": {
+   "instructions": 167,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_cover": {
+   "instructions": 22041,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 10,
+   "structCalls": 0,
+   "structCallsOk": [
+    "alchemy",
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "expS",
+    "fbm",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "nearWaterAt",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_disk": {
+   "instructions": 19711,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_farcanopy": {
+   "instructions": 640,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": [
+    "floorD"
+   ]
+  },
+  "atlas_feat_farplaces": {
+   "instructions": 212,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_fartrees": {
+   "instructions": 12718,
+   "private": 2,
+   "workgroup": 0,
+   "fnArrays": 15,
+   "structCalls": 0,
+   "structCallsOk": [
+    "ceilF",
+    "divD",
+    "divF",
+    "expS",
+    "farScatterNext",
+    "fbm",
+    "fieldSample",
+    "floorD",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sqrtD",
+    "twoProd"
+   ]
+  },
+  "atlas_feat_freeze": {
+   "instructions": 19709,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_hm": {
+   "instructions": 445,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_init": {
+   "instructions": 736,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 1,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_lake": {
+   "instructions": 20614,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_lakew": {
+   "instructions": 2160,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 1,
+   "structCalls": 0,
+   "structCallsOk": [
+    "divD",
+    "twoProd"
+   ]
+  },
+  "atlas_feat_mask": {
+   "instructions": 2797,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": [
+    "divF",
+    "floorD",
+    "sqrtD",
+    "twoProd"
+   ]
+  },
+  "atlas_feat_ore": {
+   "instructions": 21088,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_pack": {
+   "instructions": 119,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_rock": {
+   "instructions": 21143,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gReach",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "rockOne",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_rockw": {
+   "instructions": 1251,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": [
+    "divD",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_sapply": {
+   "instructions": 256,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_feat_spring": {
+   "instructions": 19669,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 9,
+   "structCalls": 0,
+   "structCallsOk": [
+    "arraySize",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "out1",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "sinS",
+    "treeB",
+    "twoProd",
+    "valueNoise"
+   ]
+  },
+  "atlas_feat_tree": {
+   "instructions": 41798,
+   "private": 3,
+   "workgroup": 0,
+   "fnArrays": 24,
+   "structCalls": 0,
+   "structCallsOk": [
+    "LX",
+    "LZ",
+    "arraySize",
+    "atan2S",
+    "ceilD",
+    "ceilF",
+    "cosS",
+    "divD",
+    "divF",
+    "expS",
+    "fbm",
+    "fieldSample",
+    "floorD",
+    "floraGround",
+    "fmFind",
+    "fmGet",
+    "fmHas",
+    "fmInit",
+    "fmKey",
+    "fmN",
+    "fmPut",
+    "fmRehash",
+    "fmRemove",
+    "fmSetSlot",
+    "fmSetVal",
+    "fmShiftKeys",
+    "fmSize",
+    "fmVal",
+    "gContains",
+    "gGet",
+    "gSet",
+    "hypotS",
+    "leafFor",
+    "lying",
+    "out1",
+    "powD",
+    "qPop",
+    "qPush",
+    "rngDoubleP",
+    "rngIntBP",
+    "rngNextP",
+    "roots",
+    "setL",
+    "shAcacia",
+    "shAspen",
+    "shBaldCypress",
+    "shBamboo",
+    "shBaobab",
+    "shBroadleaf",
+    "shColumnar",
+    "shConifer",
+    "shCrystal",
+    "shDead",
+    "shFallenLog",
+    "shJungle",
+    "shMangrove",
+    "shPalm",
+    "shShrub",
+    "shStump",
+    "shTwisted",
+    "shWillow",
+    "sinS",
+    "sqrtD",
+    "tier",
+    "treeB",
+    "trunkDraw",
+    "trunkLine",
+    "twoProd",
+    "valueNoise",
+    "wrapDegrees"
+   ]
+  },
+  "atlas_feat_vein": {
+   "instructions": 2448,
+   "private": 1,
+   "workgroup": 2,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": [
+    "divD",
+    "floorD",
+    "twoProd"
+   ]
+  },
+  "atlas_gen_aquifer": {
+   "instructions": 9073,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 56,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_cols": {
+   "instructions": 234,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_corner": {
+   "instructions": 2591,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 29,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_farChunk": {
+   "instructions": 2475,
+   "private": 0,
+   "workgroup": 2,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_fill": {
+   "instructions": 13060,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 54,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_math": {
+   "instructions": 4195,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 17,
+   "structCalls": 0,
+   "structCallsOk": [
+    "remPio2"
+   ]
+  },
+  "atlas_gen_mats": {
+   "instructions": 213,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_pack": {
+   "instructions": 184,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_pageBiomes": {
+   "instructions": 16494,
+   "private": 4,
+   "workgroup": 0,
+   "fnArrays": 46,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "mergeForeign",
+    "noiseBiome",
+    "pickMicro",
+    "rasterSample",
+    "regionPalette",
+    "surfaceBiome",
+    "vmRunRange"
+   ]
+  },
+  "atlas_gen_pageCols": {
+   "instructions": 20212,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 48,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "channelValue",
+    "mergeForeign",
+    "planBed",
+    "planPad",
+    "rasterSample",
+    "remPio2",
+    "streetPad",
+    "tamrielHeight"
+   ]
+  },
+  "atlas_gen_probe": {
+   "instructions": 20264,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 48,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "channelValue",
+    "mergeForeign",
+    "planBed",
+    "planPad",
+    "rasterSample",
+    "remPio2",
+    "streetPad",
+    "tamrielHeight"
+   ]
+  },
+  "atlas_gen_secs": {
+   "instructions": 865,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gen_surface": {
+   "instructions": 8703,
+   "private": 4,
+   "workgroup": 0,
+   "fnArrays": 44,
+   "structCalls": 0,
+   "structCallsOk": [
+    "runRules"
+   ]
+  },
+  "atlas_gen_tile": {
+   "instructions": 17789,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 45,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "mergeForeign",
+    "planBed",
+    "planPad",
+    "rasterSample",
+    "remPio2",
+    "streetPad",
+    "tamrielHeight"
+   ]
+  },
+  "atlas_gen_tileBiome": {
+   "instructions": 25532,
+   "private": 5,
+   "workgroup": 0,
+   "fnArrays": 53,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "biomeClimate0",
+    "channelValue",
+    "mergeForeign",
+    "noiseBiome",
+    "ownColumnFields",
+    "pickMicro",
+    "planBed",
+    "planPad",
+    "rasterSample",
+    "regionPalette",
+    "remPio2",
+    "streetPad",
+    "surfaceBiome",
+    "tamrielHeight",
+    "vmRunRange"
+   ]
+  },
+  "atlas_gen_tileSurf": {
+   "instructions": 21640,
+   "private": 4,
+   "workgroup": 0,
+   "fnArrays": 69,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "mergeForeign",
+    "rasterSample",
+    "runRules"
+   ]
+  },
+  "atlas_gen_top": {
+   "instructions": 192,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_gridlight": {
+   "instructions": 1004,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 1,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_height": {
+   "instructions": 36837,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 240,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ingest": {
+   "instructions": 172,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lightadmit": {
+   "instructions": 202,
+   "private": 0,
+   "workgroup": 2,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lightbin": {
+   "instructions": 629,
+   "private": 0,
+   "workgroup": 7,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lightcull": {
+   "instructions": 864,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_boxes": {
+   "instructions": 1926,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 7,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbAdvance": {
+   "instructions": 212,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbDescUp": {
+   "instructions": 150,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbErrCount": {
+   "instructions": 202,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbErrMax": {
+   "instructions": 187,
+   "private": 0,
+   "workgroup": 1,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbErrReduce": {
+   "instructions": 306,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbErrTask": {
+   "instructions": 573,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctErr": {
+   "instructions": 199,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctLeaf": {
+   "instructions": 626,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctList": {
+   "instructions": 163,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctPack": {
+   "instructions": 618,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctPos": {
+   "instructions": 213,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctRoot": {
+   "instructions": 136,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbOctUp": {
+   "instructions": 278,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbPack": {
+   "instructions": 193,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbPosDown": {
+   "instructions": 154,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRefitBox": {
+   "instructions": 346,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRefitPack": {
+   "instructions": 227,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRegionCount": {
+   "instructions": 144,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRegionInit": {
+   "instructions": 207,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRegionTight": {
+   "instructions": 206,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRootBases": {
+   "instructions": 138,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbRuns": {
+   "instructions": 252,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbScanAdd": {
+   "instructions": 107,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbScanBlocks": {
+   "instructions": 209,
+   "private": 0,
+   "workgroup": 1,
+   "fnArrays": 1,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbScanTop": {
+   "instructions": 479,
+   "private": 0,
+   "workgroup": 1,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbSliceReduce": {
+   "instructions": 344,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbSliceTask": {
+   "instructions": 841,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 3,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbSweep": {
+   "instructions": 831,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_build_lbSweepWide": {
+   "instructions": 1260,
+   "private": 0,
+   "workgroup": 4,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_lod_groups": {
+   "instructions": 1820,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 7,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_nearlight": {
+   "instructions": 26113,
+   "private": 28,
+   "workgroup": 1,
+   "fnArrays": 32,
+   "structCalls": 0,
+   "structCallsOk": [
+    "cumulusDensity",
+    "traceGroups",
+    "traceLodCore",
+    "traceLodRegions",
+    "traceRegion",
+    "traceSecondaryCore",
+    "traceVoxGrid"
+   ]
+  },
+  "atlas_neartemporal": {
+   "instructions": 29382,
+   "private": 28,
+   "workgroup": 0,
+   "fnArrays": 32,
+   "structCalls": 0,
+   "structCallsOk": [
+    "cumulusDensity",
+    "traceGroups",
+    "traceLodCore",
+    "traceLodRegions",
+    "traceRegion",
+    "traceSecondaryCore",
+    "traceVoxGrid"
+   ]
+  },
+  "atlas_nearup": {
+   "instructions": 17816,
+   "private": 28,
+   "workgroup": 0,
+   "fnArrays": 32,
+   "structCalls": 0,
+   "structCallsOk": [
+    "traceGroups",
+    "traceLodCore",
+    "traceLodRegions",
+    "traceRegion",
+    "traceSecondaryCore",
+    "traceVoxGrid"
+   ]
+  },
+  "atlas_ovl_access": {
+   "instructions": 10836,
+   "private": 0,
+   "workgroup": 2,
+   "fnArrays": 4,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_connect": {
+   "instructions": 2328,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_done": {
+   "instructions": 112,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_mark": {
+   "instructions": 129,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_mbnl": {
+   "instructions": 332,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_pieces": {
+   "instructions": 2851,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_roads": {
+   "instructions": 38588,
+   "private": 1,
+   "workgroup": 4,
+   "fnArrays": 16,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "mergeForeign",
+    "rasterSample"
+   ]
+  },
+  "atlas_ovl_sanity": {
+   "instructions": 14412,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_ovl_streets": {
+   "instructions": 7510,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_publish": {
+   "instructions": 244,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_store_storeIn": {
+   "instructions": 8997,
+   "private": 1,
+   "workgroup": 0,
+   "fnArrays": 18,
+   "structCalls": 0,
+   "structCallsOk": [
+    "beyondSample",
+    "mergeForeign",
+    "msClear",
+    "rasterSample",
+    "twoProd"
+   ]
+  },
+  "atlas_store_storeOut": {
+   "instructions": 140,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_sunmap": {
+   "instructions": 19140,
+   "private": 28,
+   "workgroup": 0,
+   "fnArrays": 31,
+   "structCalls": 0,
+   "structCallsOk": [
+    "cumulusDensity",
+    "traceGroups",
+    "traceLodCore",
+    "traceLodRegions",
+    "traceRegion",
+    "traceVoxGrid"
+   ]
+  },
+  "atlas_vg_cand": {
+   "instructions": 90,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_down": {
+   "instructions": 778,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 7,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_fill": {
+   "instructions": 241,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_grow": {
+   "instructions": 373,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 2,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_ingest": {
+   "instructions": 2393,
+   "private": 0,
+   "workgroup": 5,
+   "fnArrays": 20,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_pack": {
+   "instructions": 675,
+   "private": 0,
+   "workgroup": 5,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_rank": {
+   "instructions": 275,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_rankcut": {
+   "instructions": 317,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_ranklist": {
+   "instructions": 346,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_satx": {
+   "instructions": 126,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_saty": {
+   "instructions": 101,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_satz": {
+   "instructions": 101,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_section": {
+   "instructions": 728,
+   "private": 0,
+   "workgroup": 3,
+   "fnArrays": 2,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "atlas_vg_unpack": {
+   "instructions": 217,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  }
+ },
+ "pipe": {
+  "nvidia": {
+   "farMain": {
+    "registers": 128,
+    "shared": 12544,
+    "local": 12848,
+    "stack": 0,
+    "binary": 2126720
+   },
+   "farMain (split frames)": {
+    "registers": 168,
+    "shared": 7936,
+    "local": 3536,
+    "stack": 0,
+    "binary": 2786432
+   },
+   "cloudMain": {
+    "registers": 72,
+    "shared": 6912,
+    "local": 128,
+    "stack": 0,
+    "binary": 162560
+   },
+   "sunMapMain": {
+    "registers": 128,
+    "shared": 12544,
+    "local": 2432,
+    "stack": 0,
+    "binary": 403072
+   },
+   "nearLightMain": {
+    "registers": 128,
+    "shared": 12560,
+    "local": 5328,
+    "stack": 0,
+    "binary": 573312
+   },
+   "nearUpsampleMain": {
+    "registers": 128,
+    "shared": 12544,
+    "local": 2480,
+    "stack": 0,
+    "binary": 372480
+   },
+   "nearTemporalMain": {
+    "registers": 128,
+    "shared": 12544,
+    "local": 5504,
+    "stack": 0,
+    "binary": 659968
+   },
+   "lightKernel": {
+    "registers": 41,
+    "shared": 1552,
+    "local": 0,
+    "stack": 0,
+    "binary": 33920
+   },
+   "publishMain": {
+    "registers": 22,
+    "shared": 0,
+    "local": 0,
+    "stack": 0,
+    "binary": 1280
+   },
+   "ingestMain": {
+    "registers": 16,
+    "shared": 0,
+    "local": 0,
+    "stack": 0,
+    "binary": 896
+   },
+   "vgSectionMain": {
+    "registers": 60,
+    "shared": 12,
+    "local": 0,
+    "stack": 0,
+    "binary": 16640
+   },
+   "voxgridKernel": {
+    "registers": 54,
+    "shared": 10544,
+    "local": 0,
+    "stack": 0,
+    "binary": 74880
+   }
+  }
+ }
+}

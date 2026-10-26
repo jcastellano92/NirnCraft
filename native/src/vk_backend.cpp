@@ -211,7 +211,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 41;
+constexpr uint32_t BINDINGS = 43;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -228,7 +228,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    // (the split under PRIMARY_NEAR_LIT) the water over each pixel's surface (farMain), for nearTemporalMain
                    B_WATER_ADD = 39,
                    // (abi 0.18) the micro-voxel bricks (bricks.hpp BrickStore::pack; atlas_bricks.slang)
-                   B_BRICKS = 40;
+                   B_BRICKS = 40,
+                   // (FRAME_FAR_AMORT_BIT) each pixel's primary hit, this frame's and the last's (atlas_far.slang farHit)
+                   B_FAR_HIT = 41, B_PREV_FAR_HIT = 42;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // gridLightMain (atlas_bricks.slang): its threads (GRID_LIGHT_THREADS: 4 x 4 x 4 blocks each of 192 x 96 x 192) and the
@@ -260,7 +262,8 @@ bool unifiedSplit(const FrameGpu& frame) {
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD ||
+           b == B_FAR_HIT;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -351,6 +354,8 @@ struct SceneCopy {
 
 struct Slot {
     uint64_t frameNumber = 0;  // of its last submission
+    VkBuffer boundPrevHit = VK_NULL_HANDLE;   // and its primary hits (FRAME_FAR_AMORT_BIT)
+    bool hitFresh = false;                    // B_FAR_HIT newly allocated: filled with no hit in record
     int boundCopy = -1;        // scene copy its far descriptor set points at
     VkBuffer boundPrev = VK_NULL_HANDLE;  // the previous frame's surface buffer its cloud pass reads
     VkBuffer boundPrevNear = VK_NULL_HANDLE;  // and its near light (nearTemporalMain)
@@ -822,6 +827,7 @@ public:
             if (nearLight && primaryNear && (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) && !nearFull) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
             else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         }
+        farAmortBit(frame, s);
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
@@ -953,6 +959,7 @@ public:
         const bool lit = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0;
         if (nearLight && !nearFull && (!primaryNear || lit)) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
         else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
+        farAmortBit(frame, s);
         hostNearInputs_ = host && nearLight && !primaryNear;
         const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         if (!prepare(s, in, frame, false, err)) return false;
@@ -1678,7 +1685,11 @@ private:
         // (dev: ATLAS_PIPE_STATS=1) each pipeline's executable statistics (registers, local memory...) on stderr
         VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR statsF{
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR};
-        if (std::getenv("ATLAS_PIPE_STATS") && std::getenv("ATLAS_PIPE_STATS")[0] == '1' &&
+        // (ATLAS_PIPE_BUDGET=1 or strict: and each against shaders/kernel_budget.json's "pipe" part, pipeBudget)
+        const char* budgetEnv = std::getenv("ATLAS_PIPE_BUDGET");
+        pipeBudget_ = budgetEnv && *budgetEnv && *budgetEnv != '0';
+        pipeBudgetStrict_ = budgetEnv && std::string(budgetEnv) == "strict";
+        if (((std::getenv("ATLAS_PIPE_STATS") && std::getenv("ATLAS_PIPE_STATS")[0] == '1') || pipeBudget_) &&
             has(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME)) {
             enable.push_back(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME);
             statsF.pipelineExecutableInfo = VK_TRUE;
@@ -1757,6 +1768,71 @@ private:
     // when ATLAS_PIPELINE_CACHE names a file (read once, written back after each pipeline that took long)
     // (ATLAS_PIPE_STATS=1) the driver's statistics of a pipeline's executables, one line each
     bool pipeStats_ = false;
+    // (ATLAS_PIPE_BUDGET) a pipeline's driver statistics against its budget in shaders/kernel_budget.json ("pipe", then
+    // the vendor, then the pipeline's name: registers, shared, local, stack, binary in bytes; local memory is the
+    // statistic's low 32 bits, bit 36 a flag): TRACE FAIL pipebudget for each over it, the process ends (exit 3) when
+    // strict. A ratchet: the budget changes only in a deliberate commit.
+    bool pipeBudget_ = false, pipeBudgetStrict_ = false;
+    void pipeBudget(const char* name, const std::vector<VkPipelineExecutableStatisticKHR>& st) {
+        static const std::string text = [] {
+            std::string t;
+#ifdef ATLAS_KERNEL_BUDGET
+            const char* path = std::getenv("ATLAS_PIPE_BUDGET_FILE") ? std::getenv("ATLAS_PIPE_BUDGET_FILE") : ATLAS_KERNEL_BUDGET;
+#else
+            const char* path = std::getenv("ATLAS_PIPE_BUDGET_FILE");
+#endif
+            if (std::FILE* f = path ? std::fopen(path, "rb") : nullptr) {
+                char buf[4096];
+                size_t k;
+                while ((k = std::fread(buf, 1, sizeof buf, f)) > 0) t.append(buf, k);
+                std::fclose(f);
+            }
+            return t;
+        }();
+        const char* vendor = props_.vendorID == 0x10DE ? "nvidia" : props_.vendorID == 0x1002 ? "amd" : props_.vendorID == 0x8086 ? "intel" : "other";
+        const std::string qt = "\"";
+        size_t at = text.find(qt + "pipe" + qt);
+        if (at != std::string::npos) at = text.find(qt + vendor + qt, at);
+        if (at != std::string::npos) at = text.find(qt + name + qt, at);
+        if (at == std::string::npos) {
+            std::fprintf(stderr, "TRACE pipebudget %s: no budget for %s (shaders/kernel_budget.json, pipe)\n", name, vendor);
+            return;
+        }
+        size_t end = text.find('}', at);
+        std::string obj = text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+        auto limit = [&](const char* key, double& v) {
+            size_t k = obj.find(qt + key + qt);
+            if (k == std::string::npos) return false;
+            k = obj.find(':', k);
+            if (k == std::string::npos) return false;
+            v = std::atof(obj.c_str() + k + 1);
+            return true;
+        };
+        auto statOf = [&](const char* statName) -> uint64_t {
+            for (const auto& x : st)
+                if (std::strcmp(x.name, statName) == 0 && x.format == VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_UINT64_KHR) return x.value.u64;
+            return 0;
+        };
+        const struct { const char* key; const char* stat; uint64_t mask; } rows[] = {
+            {"registers", "Register Count", ~0ull}, {"shared", "Shared Memory Size", ~0ull},
+            {"local", "Local Memory Size", 0xFFFFFFFFull}, {"stack", "Stack Size", ~0ull}, {"binary", "Binary Size", ~0ull}};
+        bool fail = false;
+        for (const auto& r : rows) {
+            double lim;
+            if (!limit(r.key, lim)) continue;
+            uint64_t have = statOf(r.stat) & r.mask;
+            if (double(have) > lim) {
+                std::fprintf(stderr, "TRACE FAIL pipebudget %s %s %llu > budget %.0f (shaders/kernel_budget.json: the far walk lives on L1, "
+                                     "shared memory and spills cost every pixel)\n",
+                             name, r.key, (unsigned long long)have, lim);
+                fail = true;
+            }
+        }
+        if (fail && pipeBudgetStrict_) {
+            std::fflush(stderr);
+            std::exit(3);
+        }
+    }
     void pipelineStats(VkPipeline p, const char* name) {
         auto props = reinterpret_cast<PFN_vkGetPipelineExecutablePropertiesKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutablePropertiesKHR"));
         auto stats = reinterpret_cast<PFN_vkGetPipelineExecutableStatisticsKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutableStatisticsKHR"));
@@ -1787,6 +1863,7 @@ private:
                 line += b;
             }
             std::fprintf(stderr, "TRACE pipestats %s[%u]:%s\n", name, e, line.c_str());
+            if (pipeBudget_ && e == 0) pipeBudget(name, st);
             // (ATLAS_PIPE_IR=<dir>: the driver's internal representations of it, one file each)
             const char* irDir = std::getenv("ATLAS_PIPE_IR");
             auto irs = reinterpret_cast<PFN_vkGetPipelineExecutableInternalRepresentationsKHR>(
@@ -2155,10 +2232,13 @@ private:
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
             VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
+            VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
             ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
-                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err);
+                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err) &&
+                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) ? px * 32 : 32, false, Mem::DeviceOnly, err);
             // filled with "no surface" and "no samples" in record
             if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
+            if (ok && s.bufs[B_FAR_HIT].buf != hitBefore) s.hitFresh = true;
         }
         return ok;
     }
@@ -2169,10 +2249,12 @@ private:
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
         VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
         VkBuffer prevNear = slots_[prev].bufs[B_NEAR_LIGHT].buf;  // (not: it grows when the near light turns on)
+        VkBuffer prevHit = slots_[prev].bufs[B_FAR_HIT].buf;  // (nor: it grows when the far range is amortised)
         if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf ||
-            s.boundPrevNear != prevNear) {
+            s.boundPrevNear != prevNear || s.boundPrevHit != prevHit) {
             s.boundPrev = prevBuf;
             s.boundPrevNear = prevNear;
+            s.boundPrevHit = prevHit;
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
             VkDescriptorImageInfo noiseInfo{noiseSampler_, noiseView_, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
@@ -2192,6 +2274,7 @@ private:
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : i == B_PREV_NEAR_LIGHT ? (ps.bufs[B_NEAR_LIGHT].buf ? ps.bufs[B_NEAR_LIGHT] : s.bufs[B_NEAR_LIGHT])
                              : i == B_PREV_NEAR_AGE ? (ps.bufs[B_NEAR_AGE].buf ? ps.bufs[B_NEAR_AGE] : s.bufs[B_NEAR_AGE])
+                             : i == B_PREV_FAR_HIT ? (ps.bufs[B_FAR_HIT].buf ? ps.bufs[B_FAR_HIT] : s.bufs[B_FAR_HIT])
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
@@ -2769,6 +2852,17 @@ private:
                                  nullptr, 0, nullptr);
             sunFresh_ = false;
         }
+        if (s.hitFresh) {
+            // (after every read of it before: the other slot's frame read it as its last frame's hits)
+            VkMemoryBarrier rb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            rb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            rb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &rb, 0, nullptr, 0,
+                                 nullptr);
+            vkCmdFillBuffer(s.cmd, s.bufs[B_FAR_HIT].buf, 0, VK_WHOLE_SIZE, 0u);  // (no hit: distance 0, never taken)
+            transferToCompute(s.cmd);
+            s.hitFresh = false;
+        }
         if (s.surfaceFresh) {
             vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
             vkCmdFillBuffer(s.cmd, s.bufs[B_NEAR_AGE].buf, 0, VK_WHOLE_SIZE, 0u);
@@ -2843,6 +2937,28 @@ private:
             s.gt.mark(s.cmd, "sunMap");
         }
         prevSlot_ = int(&s - slots_);
+    }
+
+    // (FRAME_FAR_AMORT_BIT) the split frames of the unified field: the far range's primary rays reused across frames
+    // (ATLAS_FAR_AMORT=0: off; read each frame, a measurement switches it)
+    // (and only with the other slot's last frame to read: the first frame's, or one after a failed frame's, slot would read
+    // its own buffer as it writes it; and with a buffer the device can bind)
+    void farAmortBit(FrameGpu& frame, const Slot& s) {
+        const char* e = std::getenv("ATLAS_FAR_AMORT");
+        const bool lastOk = prevSlot_ >= 0 && prevSlot_ != int(&s - slots_);
+        const bool fits = VkDeviceSize(frame.dims[0]) * frame.dims[1] * 32 <= maxStorageRange_;
+        bool on = !(e && *e == '0') && lastOk && fits && (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) &&
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT);
+        if (on) frame.dims[2] |= FRAME_FAR_AMORT_BIT;
+        else frame.dims[2] &= ~FRAME_FAR_AMORT_BIT;
+    }
+
+    static void transferToCompute(VkCommandBuffer cmd) {
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0,
+                             nullptr);
     }
 
     static void computeBarrier(VkCommandBuffer cmd) {

@@ -1009,6 +1009,37 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
     uint64_t steps = 0;
     for (uint32_t c : ctx->targets.counters) steps += c;
     ctx->stats.raySteps = steps;
+    // (dev: ATLAS_STEP_STATS=1, the per-pixel steps' spread: a warp (8 x 4 pixels of an 8 x 8 group) runs as long as its
+    // slowest pixel, so the mean of the warps' maxima is what the pass costs, not the mean)
+    static const bool stepStats = [] { const char* e = std::getenv("ATLAS_STEP_STATS"); return e && *e == '1'; }();
+    if (stepStats && ctx->targets.counters.size() >= size_t(f->width) * f->height) {
+        const uint32_t W = f->width, H = f->height;
+        std::vector<uint32_t> v(ctx->targets.counters.begin(), ctx->targets.counters.begin() + size_t(W) * H);
+        double warpMax = 0;
+        size_t warps = 0;
+        for (uint32_t y = 0; y < H; y += 4)
+            for (uint32_t x = 0; x < W; x += 8) {
+                uint32_t m = 0;
+                for (uint32_t j = y; j < std::min(y + 4, H); j++)
+                    for (uint32_t i = x; i < std::min(x + 8, W); i++) m = std::max(m, v[size_t(j) * W + i]);
+                warpMax += m;
+                warps++;
+            }
+        std::sort(v.begin(), v.end());
+        fprintf(stderr, "[atlas] steps: mean %.1f p50 %u p90 %u p99 %u p999 %u max %u warp-max mean %.1f\n",
+                double(steps) / double(v.size()), v[v.size() / 2], v[v.size() * 9 / 10], v[v.size() * 99 / 100],
+                v[v.size() * 999 / 1000], v.back(), warpMax / double(std::max<size_t>(warps, 1)));
+        // (and by eighths of the image, top to bottom: the sky's rows against the ground's)
+        char band[256];
+        int at = 0;
+        for (uint32_t b = 0; b < 8; b++) {
+            double s = 0;
+            for (uint32_t y = H * b / 8; y < H * (b + 1) / 8; y++)
+                for (uint32_t x = 0; x < W; x++) s += ctx->targets.counters[size_t(y) * W + x];
+            at += snprintf(band + at, sizeof(band) - at, " %.0f", s / (double(W) * (H * (b + 1) / 8 - H * b / 8)));
+        }
+        fprintf(stderr, "[atlas] steps by eighth, top to bottom:%s\n", band);
+    }
     ctx->stats.lastFrameMs = ms;
     return ATLAS_OK;
     ATLAS_CATCH(ctx)

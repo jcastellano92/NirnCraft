@@ -161,6 +161,7 @@ struct FarGlobals {
     // (the split under PRIMARY_NEAR_LIT: the Vulkan backend only) the water over each pixel's surface
     CpuBuffer<Float4> waterAdd;
     CpuBuffer<uint32_t> brickData;  // (abi 0.18) the micro-voxel bricks (bricks.hpp; atlas_bricks.slang)
+    CpuBuffer<Uint4> farHit, prevFarHit;  // (FRAME_FAR_AMORT, Vulkan only: the C++ build never reads them) stand-ins
 };
 
 }  // namespace atlas

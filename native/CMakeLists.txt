@@ -319,6 +319,10 @@ target_link_libraries(atlas_bench PRIVATE atlas_core ${ATLAS_TEST_GL_LIBS})
 # Exact terrain height (atlas_height.slang): precise floating point, then spv_exact adds the float controls and
 # refuses the build unless every arithmetic instruction is NoContraction and no inexact extended instruction is used.
 add_executable(spv_exact tools/spv_exact.cpp)
+# The kernels' budget (shaders/kernel_budget.json), a ratchet: spv_budget checks every built module's SPIR-V after
+# atlas_core links (no GPU: instructions, thread-private statics, groupshared, struct-passing calls, function-scope
+# arrays), and the Vulkan backend checks the driver's pipeline statistics against its "pipe" part (ATLAS_PIPE_BUDGET)
+add_executable(spv_budget tools/spv_budget.cpp)
 set(HEIGHT_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_height.slang")
 # spirv-val: the SDK's on Windows; on Linux the SDK's, else PATH (spirv-tools / SPIRV-Tools package). spv_exact checks
 # the float contract itself; the validator is an extra structural check, skipped with a warning when absent on Linux.
@@ -566,3 +570,10 @@ endif()
 
 # the flight recorder (docs/ATLAS-PLAN.md stage 0.2): always-on CPU zones and GPU timestamps, spike dumps
 target_sources(atlas_core PRIVATE src/flight_recorder.cpp src/texturepack.cpp)
+
+# the kernels' budget after atlas_core links (spv_budget above); the backend's pipeline statistics against its "pipe" part
+add_dependencies(atlas_core spv_budget)
+add_custom_command(TARGET atlas_core POST_BUILD
+  COMMAND spv_budget "${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json" "${GEN}"
+  COMMENT "spv_budget: the kernels' SPIR-V against shaders/kernel_budget.json")
+target_compile_definitions(atlas_core PRIVATE ATLAS_KERNEL_BUDGET="${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json")

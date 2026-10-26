@@ -28,6 +28,7 @@
 
 #include "atlas/atlas.h"
 #include "../src/camera.hpp"
+#include "../src/png.hpp"
 
 static std::vector<uint32_t> load(const std::string& path) {
     std::ifstream f(path, std::ios::binary | std::ios::ate);
@@ -70,6 +71,247 @@ static std::string jsonBytes(const uint64_t b[8]) {
 
 static const char bytes_nl[] = {10, 0};
 
+extern "C" ATLAS_API const char* atlas_fr_dump(const char* reason);  // (flight_recorder.cpp)
+extern "C" ATLAS_API void atlas_fr_frame(void);
+
+static int infoInt(const std::string& inf, const char* key) {
+    size_t p = inf.find(key);
+    return p == std::string::npos ? -1 : std::atoi(inf.c_str() + p + std::strlen(key));
+}
+
+// mode=views: the grid alone as the far structure, as the game has it (the generator's terrain in every level, no SVDAG
+// regions: no preview raster is loaded), its far pass timed at the game's resolution in the unified field, per view:
+//   views=x,z,above,yaw,pitch[;...] (atlas_render's conventions: yaw 0 north, pitch < 0 down; above: blocks over the
+//   generator's ground at x, z) w=2560 h=1440 frames=12 near=16 (level-0 chunks generated around the camera) out=<prefix>
+// For each view: the grid's windows placed at the camera, every coarse level's 5 x 5 tiles around it made by the far path
+// (atlas_gen_far_ingest: the bake's own), the near chunks generated, the grid settled; then the timed frames (the far pass
+// GPU ms from the flight recorder, ATLAS_RECORDER=1), the steps a pixel, the share of grazing primary hits (the view ray
+// within 15 degrees of the surface: |cos| < 0.26), the image <out>_<i>.png. One JSON line a view.
+static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
+    uint32_t W = uint32_t(std::atoi(arg(argc, argv, "w", "2560").c_str())), H = uint32_t(std::atoi(arg(argc, argv, "h", "1440").c_str()));
+    int frames = std::atoi(arg(argc, argv, "frames", "12").c_str()), nearR = std::atoi(arg(argc, argv, "near", "16").c_str());
+    // (tiles=r: each coarse level's tiles within r of the camera's, 2: 5 x 5; tilesK=r1,r2,..: per level from 1)
+    int tileR[7] = {2, 2, 2, 2, 2, 2, 2};
+    {
+        int r = std::atoi(arg(argc, argv, "tiles", "2").c_str());
+        for (int k = 0; k < 7; k++) tileR[k] = std::clamp(r, 0, 16);
+        std::string tk = arg(argc, argv, "tilesK", "");
+        int k = 1;
+        for (size_t a = 0; a < tk.size() && k <= 6; k++) {
+            size_t e = tk.find(',', a);
+            tileR[k] = std::clamp(std::atoi(tk.substr(a, e == std::string::npos ? std::string::npos : e - a).c_str()), 0, 16);
+            a = e == std::string::npos ? tk.size() : e + 1;
+        }
+    }
+    std::string outPrefix = arg(argc, argv, "out", "views"), list = arg(argc, argv, "views", "0,0,60,90,-6");
+    const uint32_t INFO = 164;
+    std::vector<uint32_t> color(size_t(W) * H), normal(size_t(W) * H);
+    std::vector<float> depth(size_t(W) * H), linear(size_t(W) * H * 4), nearLight(size_t(W) * H * 4);
+    AtlasFrameOutput out{color.data(), normal.data(), depth.data(), linear.data(), nearLight.data()};
+    int vi = 0;
+    size_t s0 = 0;
+    while (s0 < list.size()) {
+        size_t s1 = list.find(';', s0);
+        std::string v = list.substr(s0, s1 == std::string::npos ? std::string::npos : s1 - s0);
+        s0 = s1 == std::string::npos ? list.size() : s1 + 1;
+        double vx = 0, vz = 0, above = 60, yaw = 0, pitch = 0;
+        if (std::sscanf(v.c_str(), "%lf,%lf,%lf,%lf,%lf", &vx, &vz, &above, &yaw, &pitch) != 5) continue;
+        // the generator's ground at the camera: one chunk made, its highest solid section's top
+        int32_t c0[2] = {int32_t(std::floor(vx / 16)), int32_t(std::floor(vz / 16))};
+        std::vector<uint32_t> info(64 * INFO), flags(64);
+        double ground = 64;
+        if (atlas_gen_run(g, c0, 1, nullptr, flags.data(), info.data(), nullptr) == ATLAS_OK) {
+            // (the info row: 4 words, then per section 4 words, the third its kind: 1 mixed, 2 solid; section 0 at y -64)
+            for (int s = 39; s >= 0; s--)
+                if (info[4 + s * 4 + 2] != 0) { ground = -64 + 16.0 * (s + 1); break; }
+        }
+        AtlasFrame f{};
+        f.cameraPos[0] = vx;
+        f.cameraPos[1] = ground + above;
+        f.cameraPos[2] = vz;
+        atlas::cameraMatrix(yaw, pitch, 70, double(W) / H, f.invViewProj);
+        f.width = W;
+        f.height = H;
+        f.maxDistance = 40000;
+        f.sunDir[0] = 0.3f, f.sunDir[1] = 0.6f, f.sunDir[2] = -0.74f;
+        f.lodBias = 1;
+        f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS | ATLAS_FRAME_SKY | ATLAS_FRAME_NEAR_LIGHT | ATLAS_FRAME_PRIMARY_NEAR_LIT;
+        double cam[3] = {f.cameraPos[0], f.cameraPos[1], f.cameraPos[2]};
+        atlas_update(ctx, cam, 0);
+        for (int i = 0; i < 4; i++) atlas_render(ctx, &f, &out);  // (the grid's windows placed)
+        double t0 = nowMs();
+        // every coarse level's tiles around the camera, by the far path (coarsest first)
+        size_t made = 0, busy = 0, cachedTiles = 0, cachedChunks = 0;
+        size_t tilesAll = 0;
+        for (int k = 1; k <= 6; k++) tilesAll += size_t(2 * tileR[k] + 1) * (2 * tileR[k] + 1);
+        double lastSaid = nowMs();
+        // (progress for the queue's watchers: every half minute)
+        auto say = [&](const char* what, size_t done, size_t all) {
+            if (nowMs() - lastSaid < 30000.0) return;
+            lastSaid = nowMs();
+            std::fprintf(stderr, "TRACE progress view %d %s %zu / %zu\n", vi, what, done, all);
+        };
+        for (int k = 6; k >= 1; k--) {
+            int span = 256 << k;
+            int tx0 = int(std::floor(vx / span)), tz0 = int(std::floor(vz / span));
+            uint32_t rows = (44u + (1u << k) - 1u) >> k;
+            std::vector<uint32_t> kinds(256 * size_t(rows) * 2), ff(1);
+            for (int dz = -tileR[k]; dz <= tileR[k]; dz++)
+                for (int dx = -tileR[k]; dx <= tileR[k]; dx++) {
+                    int32_t t[2] = {tx0 + dx, tz0 + dz};
+                    say("tiles", made + cachedTiles, tilesAll);
+                    // (a saved scene: the tile from the cache, the inner loop's seconds, when the cache knows it)
+                    uint8_t served = 0;
+                    uint32_t ch = 0, tk = 0;
+                    if (atlas_gen_far_cache_ingest(g, k, t, 1, &served, &ch, &tk) == ATLAS_OK && served) {
+                        cachedTiles++;
+                        continue;
+                    }
+                    for (int tries = 0; tries < 200; tries++) {
+                        uint32_t mixed = 0, taken = 0;
+                        if (atlas_gen_far_ingest(g, k, t, 1, 256 * rows, kinds.data(), &mixed, &taken, ff.data(), nullptr) == ATLAS_OK) {
+                            made++;
+                            break;
+                        }
+                        busy++;
+                        atlas_render(ctx, &f, &out);  // (every far buffer still read: a frame frees them)
+                    }
+                }
+            atlas_render(ctx, &f, &out);
+        }
+        double tFar = nowMs();
+        // level 0 around the camera, nearest first
+        std::vector<std::pair<int, int>> todo;
+        for (int dz = -nearR; dz <= nearR; dz++)
+            for (int dx = -nearR; dx <= nearR; dx++)
+                if (dx * dx + dz * dz <= nearR * nearR) todo.push_back({c0[0] + dx, c0[1] + dz});
+        std::sort(todo.begin(), todo.end(), [&](auto& a, auto& b) {
+            return (a.first - c0[0]) * (a.first - c0[0]) + (a.second - c0[1]) * (a.second - c0[1]) <
+                   (b.first - c0[0]) * (b.first - c0[0]) + (b.second - c0[1]) * (b.second - c0[1]);
+        });
+        auto masksOf = [&](const uint32_t* row) {
+            int highest = -1;
+            for (int s = 0; s < 40; s++)
+                if (row[4 + s * 4 + 2] == 1) highest = s;
+            uint64_t m = 0;
+            bool started = false;
+            for (int s = 0; s <= highest; s++) {
+                uint32_t kind = row[4 + s * 4 + 2];
+                if (kind == 2 || (kind == 0 && !started)) continue;
+                started = true;
+                m |= uint64_t(1) << s;
+            }
+            return m;
+        };
+        for (size_t at = 0; at < todo.size();) {
+            say("chunks", at, todo.size());
+            std::vector<int32_t> batch;
+            while (at < todo.size() && batch.size() < 128) batch.push_back(todo[at].first), batch.push_back(todo[at].second), at++;
+            uint32_t n0 = uint32_t(batch.size() / 2);
+            // (the cache first: a saved scene's chunks read back)
+            std::vector<uint8_t> hit(n0);
+            std::vector<int32_t> miss, hits;
+            std::vector<uint64_t> hitMasks;
+            if (atlas_gen_cache_lookup(g, batch.data(), n0, info.data(), hit.data()) == ATLAS_OK) {
+                for (uint32_t i = 0; i < n0; i++)
+                    if (hit[i]) hits.push_back(batch[i * 2]), hits.push_back(batch[i * 2 + 1]), hitMasks.push_back(masksOf(info.data() + size_t(i) * INFO));
+                    else miss.push_back(batch[i * 2]), miss.push_back(batch[i * 2 + 1]);
+            } else {
+                miss = batch;
+            }
+            if (!hits.empty()) {
+                uint32_t sent = 0;
+                atlas_gen_cache_ingest(g, hits.data(), uint32_t(hits.size() / 2), hitMasks.data(), &sent);
+                cachedChunks += hits.size() / 2;
+            }
+            if (miss.empty()) {
+                atlas_render(ctx, &f, &out);
+                continue;
+            }
+            batch = miss;
+            uint32_t m = uint32_t(batch.size() / 2);
+            if (atlas_gen_run(g, batch.data(), m, nullptr, flags.data(), info.data(), nullptr) != ATLAS_OK) break;
+            std::vector<uint64_t> masks(m);
+            for (uint32_t i = 0; i < m; i++) masks[i] = flags[i] ? 0 : masksOf(info.data() + size_t(i) * INFO);
+            uint32_t sent = 0;
+            atlas_gen_ingest(g, masks.data(), &sent, nullptr);
+            atlas_render(ctx, &f, &out);
+        }
+        // settled: nothing pending in any level
+        int settle = 0;
+        for (; settle < 3000; settle++) {
+            std::string inf = atlas_info(ctx);
+            if (settle > 4 && infoInt(inf, "\"pending\":") == 0 && infoInt(inf, "\"coarseWaiting\":") <= 0) break;
+            say("settle frames (pending)", size_t(settle), size_t(infoInt(inf, "\"pending\":")));
+            atlas_render(ctx, &f, &out);
+        }
+        double tSettled = nowMs();
+        // the timed frames (outputs on the device, as in game), then one read back for the image and the hit statistics
+        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
+        std::vector<double> ms;
+        uint64_t steps = 0;
+        for (int i = 0; i < frames; i++) {
+            atlas_render(ctx, &f, &out);
+            atlas_fr_frame();
+            AtlasStats st{};
+            atlas_get_stats(ctx, &st);
+            ms.push_back(st.lastFrameMs);
+            steps = st.raySteps;
+        }
+        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
+        atlas_render(ctx, &f, &out);
+        AtlasStats st{};
+        atlas_get_stats(ctx, &st);
+        steps = st.raySteps;
+        std::string dump = std::getenv("ATLAS_RECORDER") ? atlas_fr_dump(("view " + std::to_string(vi)).c_str()) : "";
+        // grazing primary hits: the view ray within 15 degrees of the hit's face (its normal, packed as packNormal)
+        double yr = yaw * 3.14159265358979323846 / 180, pr = pitch * 3.14159265358979323846 / 180;
+        double fx = std::sin(yr) * std::cos(pr), fy = std::sin(pr), fz = -std::cos(yr) * std::cos(pr);
+        double rx = std::cos(yr), rz = std::sin(yr);
+        double ux = -rz * fy, uy = rz * fx - rx * fz, uz = rx * fy;
+        double th = std::tan(70.0 * 3.14159265358979323846 / 360), asp = double(W) / H;
+        size_t hits = 0, grazing = 0;
+        for (uint32_t y = 0; y < H; y++)
+            for (uint32_t x = 0; x < W; x++) {
+                uint32_t n = normal[size_t(y) * W + x];
+                if (((n >> 16) & 0x80u) == 0u) continue;  // (not a surface of the field)
+                double ex = (n & 255u) / 255.0 * 2 - 1, ey = ((n >> 8) & 255u) / 255.0 * 2 - 1;
+                double nx = ex, nz = ey, ny = 1 - std::fabs(ex) - std::fabs(ey);
+                if (ny < 0) {
+                    double ox = (1 - std::fabs(nz)) * (nx >= 0 ? 1 : -1), oz = (1 - std::fabs(nx)) * (nz >= 0 ? 1 : -1);
+                    nx = ox, nz = oz;
+                }
+                double nl = std::sqrt(nx * nx + ny * ny + nz * nz);
+                double sx = ((x + 0.5) / W * 2 - 1) * asp * th, sy = (1 - (y + 0.5) / H * 2) * th;
+                double dx = fx + rx * sx + ux * sy, dy = fy + uy * sy, dz = fz + rz * sx + uz * sy;
+                double dl = std::sqrt(dx * dx + dy * dy + dz * dz);
+                double c = std::fabs((dx * nx + dy * ny + dz * nz) / (dl * nl));
+                hits++;
+                grazing += c < 0.26;
+            }
+        std::vector<double> sorted = ms;
+        std::sort(sorted.begin(), sorted.end());
+        std::string png = outPrefix + "_" + std::to_string(vi) + ".png";
+        atlas::writePng(png, color.data(), W, H);
+        {  // the grid's coverage after the settle (atlas_info voxgrid.coverage: holes and partial columns per level)
+            std::this_thread::sleep_for(std::chrono::milliseconds(1700));  // (cached 1.5 s: a fresh one)
+            std::string inf = atlas_info(ctx);
+            size_t p = inf.find("\"coverage\":");
+            if (p != std::string::npos)
+                std::printf("{\"view\":%d,%s}%s", vi, inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p).c_str(), bytes_nl);
+        }
+        std::printf("{\"view\":%d,\"camera\":[%.0f,%.0f,%.0f],\"yaw\":%.0f,\"pitch\":%.0f,\"cachedTiles\":%zu,\"cachedChunks\":%zu,\"farTiles\":%zu,\"farBusy\":%zu,\"farMs\":%.0f,"
+                    "\"settleFrames\":%d,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
+                    "\"hitShare\":%.3f,\"grazingShare\":%.3f,\"png\":\"%s\",\"dump\":\"%s\"}\n",
+                    vi, cam[0], cam[1], cam[2], yaw, pitch, cachedTiles, cachedChunks, made, busy, tFar - t0, settle, tSettled - tFar, sorted.front(),
+                    sorted[sorted.size() / 2], double(steps) / (double(W) * H), double(hits) / (double(W) * H),
+                    hits ? double(grazing) / hits : 0.0, png.c_str(), dump.c_str());
+        std::fflush(stdout);
+        vi++;
+    }
+    return 0;
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         std::fprintf(stderr, "gen_bake_tool <dump dir> <cache dir> [mode=bake|load] [x= z= seed= fp= lod2= bg= bgcap=]\n");
@@ -91,6 +333,12 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::vector<AtlasMaterial> mats(256, AtlasMaterial{{0.5f, 0.5f, 0.5f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+    if (mode == "views")  // (the stand-in ids told apart: earthy colours of their own)
+        for (size_t i = 1; i < mats.size(); i++) {
+            uint32_t h = uint32_t(i) * 2654435761u;
+            float t = float(h & 255u) / 255.0f, u = float((h >> 8) & 255u) / 255.0f;
+            mats[i].albedo[0] = 0.25f + 0.35f * t, mats[i].albedo[1] = 0.3f + 0.3f * u, mats[i].albedo[2] = 0.2f + 0.2f * t * u;
+        }
     atlas_set_materials(ctx, 1, mats.data(), uint32_t(mats.size()));
     AtlasGen* g = nullptr;
     if (atlas_gen_create_for(ctx, &g) != ATLAS_OK) {
@@ -129,8 +377,14 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "decoration attached in %.0f ms\n", nowMs() - a0);
     }
     atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
-    atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
+    if (cache != "-") atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
     double tReady = nowMs();
+    if (mode == "views") {
+        int r = viewsMode(ctx, g, argc, argv);
+        atlas_gen_destroy(g);
+        atlas_destroy(ctx);
+        return r;
+    }
     AtlasFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = std::atof(arg(argc, argv, "y", "360").c_str());

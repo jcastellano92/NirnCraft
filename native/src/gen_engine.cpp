@@ -3211,6 +3211,13 @@ void refreshFingerprint(AtlasGen* h) {
     // set of the launch before was deleted as another generator's: every launch started from an empty cache)
     if (!h->ctx || !h->fpProg || !h->fpIngest || !h->fpArmed) return;
     uint64_t bh = genHash();  // (the generator's own code: its kernels, store, stages' engines' C++; not the renderer's)
+    // (dev, ATLAS_GEN_FP_NO_BUILD=1: the inner loop's saved scenes outlive a rebuild of the generator too; never in the
+    // game, where a changed generator must not read another's cache)
+    if (const char* e = std::getenv("ATLAS_GEN_FP_NO_BUILD"); e && *e == '1') {
+        bh = 0;
+        static bool said = false;
+        if (!said) said = true, std::fprintf(stderr, "[atlas] ATLAS_GEN_FP_NO_BUILD: the generator's cache key leaves the build out (dev tools only)\n");
+    }
     uint64_t f = fnv64(&h->fpProg, 8, fnv64(&bh, 8));
     f = fnv64(&h->fpIngest, 8, f);
     f = fnv64(&h->fpMap, 8, f);
