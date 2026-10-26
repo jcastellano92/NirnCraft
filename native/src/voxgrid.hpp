@@ -253,13 +253,13 @@ public:
         return t;
     }
     std::string refineInfo() const {
-        char b[160];
+        char b[224];
         {
             std::lock_guard<std::mutex> lock(mu_);
             size_t lost = 0, given = 0;
             for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size(), given += cgiven_[k].size();
-            std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", lost,
-                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_);
+            std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,\"wantedReasked\":%llu,", lost,
+                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_, (unsigned long long)reasked_);
         }
         return std::string(b) + coverageJson();  // (its own lock)
     }
@@ -486,6 +486,7 @@ private:
     std::unordered_map<Key, uint64_t, KeyHash> wantedAt_;
     static constexpr uint64_t WANT_AGAIN = 240;
     uint64_t wantedAgain_ = 0, wantedHeld_ = 0;  // (stats: asks, asks held back)
+    uint64_t reasked_ = 0;  // (stats: asks made again because the answer never came: vgask)
     std::deque<std::pair<Key3, VgGpuRef>> bake_;  // (lod: 0 a section, k a level-k chunk)
     void putSrc(int sx, int sy, int sz, VgSrc src);  // (caller holds mu_)
     int baseOx_ = INT32_MIN, baseOz_ = INT32_MIN;

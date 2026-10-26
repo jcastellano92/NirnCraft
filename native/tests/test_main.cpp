@@ -20,6 +20,7 @@
 #include "camera.hpp"
 #include "svdag.hpp"
 #include "parallel.hpp"
+#include "vgask.hpp"
 
 using namespace atlas;
 
@@ -2063,6 +2064,19 @@ static void testOverhang() {
     atlas_destroy(cpu);
 }
 
+// Level 0's asks (vgask, VoxGrid's gpuStandby_): a section never asked is asked now; one asked lately is held back (the
+// generator would remake it each batch); one asked long ago and never answered is asked again (a lost answer kept a hole
+// in the near field for good, 2026-10-26).
+static void testReask() {
+    std::printf("reask\n");
+    const uint64_t again = 240;
+    CHECK(vgask::due(false, 0, 5, again));             // never asked
+    CHECK(!vgask::due(true, 100, 101, again));         // asked a batch ago
+    CHECK(!vgask::due(true, 100, 100 + again - 1, again));
+    CHECK(vgask::due(true, 100, 100 + again, again));  // the answer never came: again
+    CHECK(vgask::due(true, 0, 1000000, again));
+}
+
 // The GPU generator's far terrain into the grid (VoxGrid::ingestCoarseGpu, through atlas_debug_coarse_chunks): level-1
 // chunks given whole over flat tiles (ground y 100) with no sections, the camera straight down from y 300 over the
 // chunk at x, z 0..32, its row y 192..224. A pixel there needs level 0, which has nothing: the trace takes the grid's
@@ -2427,7 +2441,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"tiers", testTiers}, {"edits", testEdits},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"tiers", testTiers}, {"edits", testEdits},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;
