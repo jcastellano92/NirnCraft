@@ -234,7 +234,7 @@ follows the design without new tests.
 
 | Requirement | How the design meets it | State | Vital experiment (only if risk) |
 |---|---|---|---|
-| Terrain, near to horizon | NAADF grid per level (clipmap, levels 0-6), footprint picks the level per pixel, baked coarse floor | Built; in game the grid is the far path (~17 km reach) | **E1** grid far cost on 3 views (valley, 10 km horizon, grazing): fits ~6 ms at 1440p? Else hybrid or height pyramid |
+| Terrain, near to horizon | NAADF grid per level (clipmap, levels 0-6), footprint picks the level per pixel, baked coarse floor | Built; in game the grid is the far path (~17 km reach) | **E1** grid far cost on 3 views (valley, 10 km horizon, grazing): fits ~6 ms at 1440p? Else hybrid or height pyramid. **2026-10-26: 43.6 / 58.0 / 9.9 ms, 7-10x over; the ceiling table and the deciding ablations are in [ATLAS-E1-CEILINGS.md](ATLAS-E1-CEILINGS.md)** |
 | Vanilla and custom blocks, materials | Level-0 blocks plus 16³ micro-bricks from baked quads; the gallery against vanilla | 113/300 pass; causes now lighting, not shape | No new experiment: the gallery is the measure |
 | Water and fluids | Medium in the trace (in and under), waterlogged bricks | Built; look gap (tint, waves) | None: a look decision, done in the lighting pass |
 | Sky light, sun, moon, night | Physical sky, light by need, tile schedules | Built; night not rechecked since the kernel rework | None: route captures at night |
