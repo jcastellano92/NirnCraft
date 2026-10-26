@@ -73,6 +73,7 @@ static const char bytes_nl[] = {10, 0};
 
 extern "C" ATLAS_API const char* atlas_fr_dump(const char* reason);  // (flight_recorder.cpp)
 extern "C" ATLAS_API void atlas_fr_frame(void);
+extern "C" ATLAS_API double atlas_fr_pass_ms(const char* name);
 
 static int infoInt(const std::string& inf, const char* key) {
     size_t p = inf.find(key);
@@ -87,6 +88,11 @@ static int infoInt(const std::string& inf, const char* key) {
 // (atlas_gen_far_ingest: the bake's own), the near chunks generated, the grid settled; then the timed frames (the far pass
 // GPU ms from the flight recorder, ATLAS_RECORDER=1), the steps a pixel, the share of grazing primary hits (the view ray
 // within 15 degrees of the surface: |cos| < 0.26), the image <out>_<i>.png. One JSON line a view.
+// (the settle: nothing pending in any level, then (ATLAS_RECORDER=1) the far work's GPU time, farTrace + far, within
+// 3 % over 8 frames with the streaming queues empty (settle=<cap> frames at most, 150): the levels still fill in after
+// nothing is pending, and a bench timed then measured the fill, not the kernel (the horizon's far pass +-20 %).
+// stableFrames on the line; farTraceMs / farShadeMs the timed frames' medians, farTraceP10 / farShadeP10 their tenth
+// percentiles: the GPU's clocks step between blocks of frames, the median moves with the mix of blocks)
 static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
     uint32_t W = uint32_t(std::atoi(arg(argc, argv, "w", "2560").c_str())), H = uint32_t(std::atoi(arg(argc, argv, "h", "1440").c_str()));
     int frames = std::atoi(arg(argc, argv, "frames", "12").c_str()), nearR = std::atoi(arg(argc, argv, "near", "16").c_str());
@@ -245,10 +251,30 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             say("settle frames (pending)", size_t(settle), size_t(infoInt(inf, "\"pending\":")));
             atlas_render(ctx, &f, &out);
         }
+        // stable: the far work's time steady and the streaming idle (recorder on; else as before)
+        int stableFrames = 0;
+        bool idle = false;
+        if (std::getenv("ATLAS_RECORDER")) {
+            int cap = std::atoi(arg(argc, argv, "settle", "150").c_str());
+            std::vector<double> win;
+            for (; stableFrames < cap; stableFrames++) {
+                atlas_render(ctx, &f, &out);
+                atlas_fr_frame();
+                double tr = atlas_fr_pass_ms("farTrace"), fa = atlas_fr_pass_ms("far");
+                win.push_back((tr > 0 ? tr : 0.0) + (fa > 0 ? fa : 0.0));
+                if (win.size() > 8) win.erase(win.begin());
+                std::string inf = atlas_info(ctx);
+                idle = infoInt(inf, "\"pending\":") == 0 && infoInt(inf, "\"waiting\":") <= 0 && infoInt(inf, "\"gpuWaiting\":") <= 0 &&
+                       infoInt(inf, "\"coarseWaiting\":") <= 0 && infoInt(inf, "\"baking\":") <= 0;
+                double lo = *std::min_element(win.begin(), win.end()), hi = *std::max_element(win.begin(), win.end());
+                if (win.size() == 8 && lo > 0 && hi <= 1.03 * lo && idle) break;
+                if (stableFrames % 10 == 0) say("settle frames (far ms steady)", size_t(stableFrames), size_t(hi * 100));
+            }
+        }
         double tSettled = nowMs();
         // the timed frames (outputs on the device, as in game), then one read back for the image and the hit statistics
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
-        std::vector<double> ms;
+        std::vector<double> ms, trMs, faMs;
         uint64_t steps = 0;
         for (int i = 0; i < frames; i++) {
             atlas_render(ctx, &f, &out);
@@ -257,7 +283,15 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             atlas_get_stats(ctx, &st);
             ms.push_back(st.lastFrameMs);
             steps = st.raySteps;
+            trMs.push_back(atlas_fr_pass_ms("farTrace"));
+            faMs.push_back(atlas_fr_pass_ms("far"));
+            if (std::getenv("ATLAS_SETTLE_DEBUG")) std::fprintf(stderr, "timed %d farTrace %.3f far %.3f frame %.3f\n", i, trMs.back(), faMs.back(), st.lastFrameMs);
         }
+        // (the median, and the tenth percentile: the GPU's clocks step between blocks of frames, the low end the kernel's)
+        auto pct = [](std::vector<double> v, double q) {
+            std::sort(v.begin(), v.end());
+            return v.empty() ? -1.0 : v[size_t(q * double(v.size() - 1) + 0.5)];
+        };
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
         atlas_render(ctx, &f, &out);
         AtlasStats st{};
@@ -324,9 +358,10 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
                 std::printf("{\"view\":%d,%s}%s", vi, inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p).c_str(), bytes_nl);
         }
         std::printf("{\"view\":%d,\"camera\":[%.0f,%.0f,%.0f],\"yaw\":%.0f,\"pitch\":%.0f,\"cachedTiles\":%zu,\"cachedChunks\":%zu,\"farTiles\":%zu,\"farBusy\":%zu,\"farMs\":%.0f,"
-                    "\"settleFrames\":%d,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
+                    "\"settleFrames\":%d,\"stableFrames\":%d,\"idle\":%s,\"farTraceMs\":%.3f,\"farShadeMs\":%.3f,\"farTraceP10\":%.3f,\"farShadeP10\":%.3f,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
                     "\"hitShare\":%.3f,\"grazingShare\":%.3f,\"png\":\"%s\",\"dump\":\"%s\"}\n",
-                    vi, cam[0], cam[1], cam[2], yaw, pitch, cachedTiles, cachedChunks, made, busy, tFar - t0, settle, tSettled - tFar, sorted.front(),
+                    vi, cam[0], cam[1], cam[2], yaw, pitch, cachedTiles, cachedChunks, made, busy, tFar - t0, settle, stableFrames, idle ? "true" : "false",
+                    pct(trMs, 0.5), pct(faMs, 0.5), pct(trMs, 0.1), pct(faMs, 0.1), tSettled - tFar, sorted.front(),
                     sorted[sorted.size() / 2], double(steps) / (double(W) * H), double(hits) / (double(W) * H),
                     hits ? double(grazing) / hits : 0.0, png.c_str(), dump.c_str());
         std::fflush(stdout);
