@@ -123,6 +123,10 @@ bool VoxGrid::coarseRefusedForRoom(int k, int cx, int cz) const {
 
 VoxGrid::Coverage VoxGrid::coverage() const {
     std::lock_guard<std::mutex> lock(mu_);
+    return coverageLocked();
+}
+
+VoxGrid::Coverage VoxGrid::coverageLocked() const {
     Coverage c;
     if (!centred_) return c;
     constexpr int CELL = 128, RMAX = 20000, N = 2 * RMAX / CELL;
@@ -241,6 +245,75 @@ std::string VoxGrid::coverageJson() const {
     return o + "]},";
 }
 
+VoxGrid::InfoSnap VoxGrid::infoSnap() const {
+    std::unique_lock<std::mutex> l(mu_, std::try_to_lock);
+    if (!l.owns_lock()) {  // (busy: the ingest's put, the frame's take ...: the last snapshot, never a wait)
+        std::lock_guard<std::mutex> g(infoMu_);
+        return infoCache_;
+    }
+    InfoSnap prev;
+    {
+        std::lock_guard<std::mutex> g(infoMu_);
+        prev = infoCache_;
+    }
+    InfoSnap s;
+    s.valid = true;
+    s.res = residencyLocked();
+    s.st = statsLocked();
+    s.pending = pendingLocked();
+    s.bakeQueued = bake_.size();
+    s.chunkWords = size_t(D) * H * D;
+    s.totalSlots = slotCap;
+    s.levels = 1 + activeCoarse_;
+    s.slotsUsed[0] = slotsUsed_;
+    s.slotCap[0] = slotCap;
+    for (int k = 1; k < VG_LEVELS; k++) {
+        s.coarseLost += lostCells_[k].size();
+        s.coarseGiven += cgiven_[k].size();
+    }
+    for (int k = 1; k <= activeCoarse_; k++) {
+        s.chunkWords += size_t(lv_[k].D) * lv_[k].H * lv_[k].D;
+        s.totalSlots += lv_[k].cap;
+        s.lv[k] = levelInfoLocked(k);
+        s.slotsUsed[k] = lv_[k].used;
+        s.slotCap[k] = lv_[k].cap;
+    }
+    s.wantedAgain = wantedAgain_;
+    s.wantedHeld = wantedHeld_;
+    auto now = std::chrono::steady_clock::now();
+    if (prev.valid && prev.covAt != std::chrono::steady_clock::time_point{} && now - prev.covAt < std::chrono::milliseconds(1500)) {
+        s.cov = prev.cov;
+        s.covAt = prev.covAt;
+    } else {
+        s.cov = coverageLocked();
+        s.covAt = now;
+    }
+    l.unlock();
+    std::lock_guard<std::mutex> g(infoMu_);
+    infoCache_ = s;
+    return s;
+}
+
+std::string VoxGrid::refineJson(const InfoSnap& s) {
+    char b[200];
+    std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", s.coarseLost, s.coarseGiven,
+                  (unsigned long long)s.wantedAgain, (unsigned long long)s.wantedHeld);
+    const Coverage& c = s.cov;
+    int active = s.levels - 1;
+    std::string o = std::string(b) + "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"nearHoles\":" + std::to_string(c.nearHoles) +
+                    ",\"l0Near6\":" + std::to_string(c.l0Near6) + ",\"nearReach\":" + std::to_string(int(c.nearReach)) + ",\"holes\":[";
+    for (int k = 0; k <= active; k++) o += (k ? "," : "") + std::to_string(c.holes[k]);
+    o += "],\"partial\":[";
+    for (int k = 0; k <= active; k++) o += (k ? "," : "") + std::to_string(c.partial[k]);
+    o += "],\"columns\":[";
+    for (int k = 0; k <= active; k++) o += (k ? "," : "") + std::to_string(c.columns[k]);
+    o += "],\"slotsUsed\":[";
+    for (int k = 0; k <= active; k++) o += (k ? "," : "") + std::to_string(s.slotsUsed[k]);
+    o += "],\"slotCap\":[";
+    for (int k = 0; k <= active; k++) o += (k ? "," : "") + std::to_string(s.slotCap[k]);
+    return o + "]},";
+}
+
 float VoxGrid::priority(int sx, int sy, int sz) const {
     // the eye (the camera's block) to the section's box
     float cx = float(sx * 16 + 8 - camB_[0]), cy = float(sy * 16 + 8 - camB_[1]), cz = float(sz * 16 + 8 - camB_[2]);
@@ -258,6 +331,10 @@ float VoxGrid::priority(int sx, int sy, int sz) const {
 
 VoxGrid::Residency VoxGrid::residency() const {
     std::lock_guard<std::mutex> lock(mu_);
+    return residencyLocked();
+}
+
+VoxGrid::Residency VoxGrid::residencyLocked() const {
     Residency r;
     r.resident = slotsUsed_;
     r.cap = slotCap;
@@ -619,6 +696,10 @@ void VoxGrid::origin(int32_t o[4]) const {
 
 size_t VoxGrid::pending() const {
     std::lock_guard<std::mutex> lock(mu_);
+    return pendingLocked();
+}
+
+size_t VoxGrid::pendingLocked() const {
     bool freeSlot = nextSlot_ < slotCap || !freeSlots_.empty();
     // (waiting with free slots: until a ranking says none in reach waits)
     size_t waiting = gpuRank && freeSlot && (!rankSeen_ || rankWaitBest_ < 255) ? standby_.size() : 0;
@@ -627,6 +708,10 @@ size_t VoxGrid::pending() const {
 
 VoxGrid::Stats VoxGrid::stats() const {
     std::lock_guard<std::mutex> lock(mu_);
+    return statsLocked();
+}
+
+VoxGrid::Stats VoxGrid::statsLocked() const {
     Stats s = stats_;
     s.ox = ox_;
     s.oz = oz_;
@@ -727,6 +812,10 @@ uint32_t VoxGrid::totalSlots() const {
 
 VoxGrid::LevelInfo VoxGrid::levelInfo(int k) const {
     std::lock_guard<std::mutex> lock(mu_);
+    return levelInfoLocked(k);
+}
+
+VoxGrid::LevelInfo VoxGrid::levelInfoLocked(int k) const {
     LevelInfo i;
     if (k < 1 || k > activeCoarse_) return i;
     const Level& L = lv_[k];

@@ -61,7 +61,7 @@ public final class AtlasClient {
     static final long LOSS_COOLDOWN_NS = 60_000_000_000L;
 
     private static AtlasNative lib;
-    private static AtlasNative.Context ctx;
+    private static volatile AtlasNative.Context ctx;  // (volatile: the info thread reads it, AtlasInfo)
     private static volatile AtlasMaterials materials;  // (atlas-info: the exact ids' use)
     private static Path libPath;  // the loaded core (the client generator binds its own calls there)
     private static volatile AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
@@ -943,10 +943,17 @@ public final class AtlasClient {
         return ctx != null;
     }
 
-    /** atlas_info's JSON (AtlasReady), or null without a context. */
+    /**
+     * atlas_info's JSON as the info thread last read it (AtlasReady; the per-tick callers), or null without a context or before
+     * the first read. Never waits for the core: the call itself walks books the generator's threads hold.
+     */
     static String coreInfoJson() {
-        var c = ctx;
-        return c == null ? null : c.info();
+        return ctx == null ? null : AtlasInfo.latest();
+    }
+
+    /** The running context for AtlasInfo's thread. */
+    static AtlasNative.Context infoContext() {
+        return ctx;
     }
 
     static boolean failedForSession() {
@@ -1184,14 +1191,32 @@ public final class AtlasClient {
         var mc = Minecraft.getInstance();
         if (mc.player == null) return;
         try {
-            String line = java.time.LocalTime.now() + String.format(java.util.Locale.ROOT, " pos=%.1f,%.1f,%.1f ",
-                    mc.player.getX(), mc.player.getY(), mc.player.getZ()) + debugInfo().replaceAll("\\s+", " ") + "\n";
-            java.nio.file.Files.writeString(mc.gameDirectory.toPath().resolve("atlas-profile.log"), line,
-                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            // (the render thread's part: the position, the frame line, a few reads of the client; the rest is composed and written
+            // on a thread of its own: the core's report, the feeds' states and the file append took 0.2 to 4.2 s of a tick)
+            String when = java.time.LocalTime.now() + String.format(java.util.Locale.ROOT, " pos=%.1f,%.1f,%.1f ",
+                    mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            String frame = frameLine(ctx);
+            java.nio.file.Path file = mc.gameDirectory.toPath().resolve("atlas-profile.log");
+            PROFILE_WRITER.execute(() -> {
+                try {
+                    String line = when + debugInfo(frame, AtlasInfo.fresh(1000)).replaceAll("\\s+", " ") + "\n";
+                    java.nio.file.Files.writeString(file, line, java.nio.file.StandardOpenOption.CREATE,
+                            java.nio.file.StandardOpenOption.APPEND);
+                } catch (Exception e) {
+                    // (a profiler never takes the game down)
+                }
+            });
         } catch (Exception e) {
             // (a profiler never takes the game down)
         }
     }
+
+    private static final java.util.concurrent.ExecutorService PROFILE_WRITER = new java.util.concurrent.ThreadPoolExecutor(1, 1, 0L,
+            java.util.concurrent.TimeUnit.MILLISECONDS, new java.util.concurrent.ArrayBlockingQueue<>(4), r -> {
+                Thread t = new Thread(r, "nirncraft-atlas-profile");
+                t.setDaemon(true);
+                return t;
+            }, new java.util.concurrent.ThreadPoolExecutor.DiscardPolicy());  // (bounded: a slow disk drops lines, never backs up ticks)
 
     /**
      * What atlas makes of one block state (the gallery's "describe" op): its model's quads and parts, whether the near
@@ -1253,14 +1278,24 @@ public final class AtlasClient {
 
     /** The autotest's atlas-info: the core's own report (the grid's pool among it) and the feeds' queues. */
     public static String debugInfo() {
-        var c = ctx;
-        long iz = AtlasRecorder.begin();
-        String core = c != null ? c.info() : "no context";
-        AtlasRecorder.end(Z_INFO, iz, 1_000_000);
+        return debugInfo(frameLine(ctx), null);
+    }
+
+    /** The "frame{...}" part of the profile line (the client's own numbers; the render thread). */
+    private static String frameLine(AtlasNative.Context c) {
         var lvl = Minecraft.getInstance().level;
-        String frame = c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
+        return c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
                 lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
+    }
+
+    /** The profile line from a frame part and the core's JSON (null: read it now, at most 0.5 s old). Any thread. */
+    private static String debugInfo(String frame, String coreJson) {
+        var c = ctx;
+        long iz = AtlasRecorder.begin();
+        String core = c == null ? "no context" : coreJson != null ? coreJson : AtlasInfo.fresh(500);
+        if (core == null) core = "no context";
+        AtlasRecorder.end(Z_INFO, iz, 1_000_000);
         long sz = AtlasRecorder.begin();
         String sections = AtlasClientSections.state();
         AtlasRecorder.end(Z_STATE_SECTIONS, sz, 1_000_000);

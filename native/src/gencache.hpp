@@ -79,8 +79,12 @@ public:
     void forgetFarTile(int lod, int tx, int tz);
     bool farStandIn(int lod, int tx, int tz);                            // (known, and still the placeholder: not true data)
     std::shared_ptr<const std::vector<uint32_t>> coarse(const Key3& k);
+    // Never blocks (the render thread's per-tick atlas_info reads it): the numbers as the last caller that got the lock
+    // saw them when the lock is busy (the writer's index updates, a scan), else fresh.
     Stats stats();
     void flush();  // (waits for the queue: tests, shutdown)
+    // (tests) holds mu_ until release is set, as a thread of the writer would while it scans a region file
+    void holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held);
 
 private:
     struct Loc {
@@ -89,6 +93,7 @@ private:
     };
     struct Region {
         bool scanned = false;
+        bool scanning = false;  // (a thread reads the file's index now, mu_ let go: the others wait on scanCv_)
         uint64_t fileBytes = 0;
         struct Chunk {
             Loc loc;
@@ -118,8 +123,14 @@ private:
         uint32_t hash = 0;
         bool standIn = true;
     };
-    std::mutex mu_;  // the index, the queue, the files' appends
-    std::condition_variable cv_, idle_;
+    // The index and the queue. Never held across file I/O (a region's scan, a record's append, a region's whole read): a
+    // write of the writer's thread that Windows stretched to seconds held every thread that asked the cache anything,
+    // the render thread's atlas_info and its packedDone among them.
+    std::mutex mu_;
+    std::condition_variable cv_, idle_, scanCv_;
+    int scanning_ = 0;  // (regions being scanned now: configure waits for none)
+    Stats snap_;        // (stats(): what the last caller that got mu_ saw)
+    std::mutex snapMu_;
     std::deque<Job> queue_;
     bool stop_ = false, busy_ = false;
     std::thread writer_;
@@ -141,7 +152,10 @@ private:
     void dropOldSets();  // (caller holds mu_)
     void eraseFarTile(Region& r, int lod, int tx, int tz);  // (caller holds mu_)
     std::string regionPath(uint64_t rk) const;
-    Region& region(uint64_t rk);  // (caller holds mu_; scanned on first use)
+    // (caller holds l on mu_) the region, its file's index read on first use: l is let go while the file is read, so
+    // anything may have changed on return; the reference stays (nodes of regions_ do not move; configure waits for scans)
+    Region& region(std::unique_lock<std::mutex>& l, uint64_t rk);
+    void scanFile(const std::string& path, Region& r);  // (no lock: fills a region that no other thread touches)
     void writerLoop();
     bool readBytes(uint64_t rk, const Loc& l, std::vector<uint8_t>& out);
 };

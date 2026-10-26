@@ -67,7 +67,7 @@ public final class AtlasReady {
         JsonObject info = null;
         if (core != null) {
             try {
-                info = JsonParser.parseReader(new JsonReader(new StringReader(core))).getAsJsonObject();
+                info = parsed(core);
             } catch (RuntimeException e) {
                 return "atlas_info unreadable";
             }
@@ -93,6 +93,18 @@ public final class AtlasReady {
             return "";
         }
         return gridPending(v);
+    }
+
+    // (the info thread hands out one string a tenth of a second: parsed once each, not at every ask of every caller)
+    private static String parsedFrom;
+    private static JsonObject parsedObj;
+
+    private static synchronized JsonObject parsed(String core) {
+        if (core != parsedFrom) {
+            parsedObj = JsonParser.parseReader(new JsonReader(new StringReader(core))).getAsJsonObject();
+            parsedFrom = core;
+        }
+        return parsedObj;
     }
 
     /** The grid's part of {@link #pending}: atlas_info's voxgrid block; "" when nothing there holds readiness. */
