@@ -311,6 +311,5 @@ Read these first:
 * **Merges into atlas-render keep the native suite green (2026-10-26).** After each merge, the orchestrator runs the
   native suite (`harness.py run check-native`, or native/build.ps1) and the kernel-budget check. A failing check
   blocks further merges until it's fixed or listed below with a reason and an owner.
-  - Known failures: test_main.cpp:2133 (coarse-chunk depth) and :2264 (awayTier == 6), present since at least
-    ce0009be; owner: the renderer agent.
+  - Known failures: none (2026-10-26: coarse:2133 fixed in 96f76680, tiers:2264 in 6fca5506).
 
