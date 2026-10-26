@@ -1,5 +1,6 @@
 #include "world.hpp"
 #include "flight_recorder.hpp"
+#include "slice.hpp"
 
 #include "sectionpack.hpp"
 #include "sectionstore.hpp"
@@ -723,30 +724,32 @@ void World::takePackQueue(size_t max, std::vector<PackReq>& out, size_t burst) {
 }
 
 void World::packedApply(const std::vector<PackDone>& done, Made* made) {
-    for (const PackDone& d : done) {
-        if (d.gen & BAKE) {
-            if (d.words) {
-                if (d.key.lod > 0) genCache_->putCoarse(d.key, d.words, d.hash);  // (a far tile's mixed chunk)
-                else genCache_->putSection(d.key, d.words, d.hash);             // (to disk on the cache's own thread)
-            }
-            continue;
+    for (const PackDone& d : done) packedApplyOne(d, made);
+}
+
+void World::packedApplyOne(const PackDone& d, Made* made) {
+    if (d.gen & BAKE) {
+        if (d.words) {
+            if (d.key.lod > 0) genCache_->putCoarse(d.key, d.words, d.hash);  // (a far tile's mixed chunk)
+            else genCache_->putSection(d.key, d.words, d.hash);             // (to disk on the cache's own thread)
         }
-        if (d.gen & BASE_FETCH) {
-            // (an edit layer's base, the GPU's own, packed there and read back)
-            if (!d.words) continue;
-            uint16_t ids[4096];
-            unpackSection(d.words->data(), ids);
-            baseIn(d.key, ids, made);
-            continue;
-        }
-        auto m = rawMeta_.find(d.key);
-        if (m == rawMeta_.end() || m->second.gen != d.gen || !d.words) continue;  // (an upload since replaced it)
-        store_->put(d.key, d.words, d.hash, m->second.flags);
-        sections_.erase(d.key);
-        undigested_.erase(d.key);
-        rawMeta_.erase(m);
-        packedCount_++;
+        return;
     }
+    if (d.gen & BASE_FETCH) {
+        // (an edit layer's base, the GPU's own, packed there and read back)
+        if (!d.words) return;
+        uint16_t ids[4096];
+        unpackSection(d.words->data(), ids);
+        baseIn(d.key, ids, made);
+        return;
+    }
+    auto m = rawMeta_.find(d.key);
+    if (m == rawMeta_.end() || m->second.gen != d.gen || !d.words) return;  // (an upload since replaced it)
+    store_->put(d.key, d.words, d.hash, m->second.flags);
+    sections_.erase(d.key);
+    undigested_.erase(d.key);
+    rawMeta_.erase(m);
+    packedCount_++;
 }
 
 void World::drainInbox() {
@@ -777,8 +780,36 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
         lock.lock();
     }
     uint64_t t1 = fr::nowNs();
-    drainInbox();
-    packedApply(done, made);
+    // The render thread's share: an edit's base fetch at once (its sections go back in `made`), then what waited and this
+    // frame's results, oldest first, a slice of ATLAS_PACK_SLICE_MS (2) at most (64 at least, so it always progresses);
+    // the rest waits in the inbox for the next frame or the update's and the spiller's turns (they drain it whole, off
+    // this thread). It applied the whole backlog: 0.5 to 2.2 s frames, the far field waiting on the lock behind it.
+    static const uint64_t sliceNs = [] {
+        const char* e = std::getenv("ATLAS_PACK_SLICE_MS");
+        double ms = e ? std::atof(e) : 2.0;
+        return uint64_t((ms > 0 ? ms : 2.0) * 1e6);
+    }();
+    std::vector<PackDone> take;
+    {
+        std::lock_guard<std::mutex> g(inboxMu_);
+        take.swap(inbox_);
+        inboxFull_.store(false, std::memory_order_release);
+    }
+    take.reserve(take.size() + done.size());
+    for (const PackDone& d : done) {
+        if (d.gen & BASE_FETCH) packedApplyOne(d, made);
+        else take.push_back(d);
+    }
+    applySlice(take, 64, [&](const PackDone& d) { packedApplyOne(d, nullptr); }, [&] { return fr::nowNs() - t1 >= sliceNs; });
+    if (!take.empty()) {
+        std::lock_guard<std::mutex> g(inboxMu_);
+        take.insert(take.end(), inbox_.begin(), inbox_.end());  // (what came meanwhile goes after the older)
+        inbox_.swap(take);
+        inboxFull_.store(true, std::memory_order_release);
+        packBacklog_.store(inbox_.size(), std::memory_order_relaxed);
+    } else {
+        packBacklog_.store(0, std::memory_order_relaxed);
+    }
     uint64_t t2 = fr::nowNs();
     if (t2 - t1 >= 1000000) fr::record("hold:world.mu(packedDone)", t1, t2);
 }

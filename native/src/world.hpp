@@ -470,7 +470,11 @@ private:
     std::mutex inboxMu_;  // (never held long: pack results that found mu_ busy wait here)
     std::vector<PackDone> inbox_;
     std::atomic<bool> inboxFull_{false};
+public:
+    std::atomic<size_t> packBacklog_{0};  // (pack results left in the inbox by packedDone's last slice)
+private:
     void packedApply(const std::vector<PackDone>& done, Made* made);  // (mu_ held)
+    void packedApplyOne(const PackDone& d, Made* made);                // (mu_ held)
     void drainInbox();                                                 // (mu_ held)
     std::condition_variable spillCv_;
     bool spillStop_ = false;

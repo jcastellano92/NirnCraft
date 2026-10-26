@@ -21,6 +21,7 @@
 #include "svdag.hpp"
 #include "parallel.hpp"
 #include "vgask.hpp"
+#include "slice.hpp"
 
 using namespace atlas;
 
@@ -2064,6 +2065,24 @@ static void testOverhang() {
     atlas_destroy(cpu);
 }
 
+// A bounded slice of queued work (slice.hpp, World::packedDone): the front applied until the time is up, never fewer
+// than the minimum, the rest kept in order.
+static void testSlice() {
+    std::printf("slice\n");
+    std::vector<int> q(1000);
+    for (int i = 0; i < 1000; i++) q[size_t(i)] = i;
+    std::vector<int> got;
+    int ticks = 0;
+    size_t n = applySlice(q, 64, [&](int v) { got.push_back(v); }, [&] { return ++ticks > 100; });  // (time up after 100 checks)
+    CHECK(n == 164);                    // 64 before the clock is read, then 100 more
+    CHECK(got.size() == 164 && got.front() == 0 && got.back() == 163);
+    CHECK(q.size() == 836 && q.front() == 164 && q.back() == 999);
+    n = applySlice(q, 64, [&](int) {}, [] { return true; });  // (over at once: the minimum still goes)
+    CHECK(n == 64 && q.front() == 228);
+    n = applySlice(q, 0, [&](int) {}, [] { return false; });  // (time enough: all)
+    CHECK(n == 772 && q.empty());
+}
+
 // Level 0's asks (vgask, VoxGrid's gpuStandby_): a section never asked is asked now; one asked lately is held back (the
 // generator would remake it each batch); one asked long ago and never answered is asked again (a lost answer kept a hole
 // in the near field for good, 2026-10-26).
@@ -2441,7 +2460,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"tiers", testTiers}, {"edits", testEdits},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"slice", testSlice}, {"tiers", testTiers}, {"edits", testEdits},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;
