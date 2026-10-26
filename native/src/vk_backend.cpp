@@ -26,6 +26,11 @@
 #include <cstdio>
 #include <mutex>
 #include <cstdlib>
+#ifdef _WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -1945,7 +1950,12 @@ private:
             if (vkGetPipelineCacheData(dev_, pipeCache_, &n, nullptr) == VK_SUCCESS && n) {
                 std::vector<char> data(n);
                 if (vkGetPipelineCacheData(dev_, pipeCache_, &n, data.data()) == VK_SUCCESS) {
-                    std::string tmp = pipeCachePath_ + ".tmp";
+                    // (a name of this process's own: a prewarm process, gen_bake_tool mode=pipes, may write the same file)
+#ifdef _WIN32
+                    std::string tmp = pipeCachePath_ + "." + std::to_string(_getpid()) + ".tmp";
+#else
+                    std::string tmp = pipeCachePath_ + "." + std::to_string(getpid()) + ".tmp";
+#endif
                     if (FILE* f = std::fopen(tmp.c_str(), "wb")) {
                         bool ok = std::fwrite(data.data(), 1, n, f) == n;
                         std::fclose(f);
