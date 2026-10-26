@@ -405,6 +405,10 @@ float3 regionOriginRel(RegionGpu r) {
 
 #include "atlas_groups.slang"
 #include "atlas_bricks.slang"  // (the micro-voxel bricks: non-cube blocks at 1/16 block)
+// (FRAME_FAR_AMORT) each pixel's primary hit, this frame's and the last's (farHitStore), two words a pixel. (The last
+// globals: gpu_layout.hpp FarGlobals lists them in declaration order for the C++ build, which never reads them)
+[[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
+[[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
 
 // What a secondary ray loses per block of path through a voxel of material `mat` (-1: it stops there, solid): a
 // cut-out shape (leaves, plants: the game classes plants as terrain, and a solid cube of grass tuft blocked every
@@ -3703,6 +3707,74 @@ float eyeWaterDepth(out uint mat) {
     return 48.0;
 }
 
+// ---- the far range's primary rays across frames (FRAME_FAR_AMORT) ---------------------------------------------------
+// A primary ray's hit where a block covers no more than a pixel (the footprint: distance x pixel angle >= 1 block, or the
+// sky) is what the last frame's ray there met, reprojected (the camera moves a little against such distances): the pass
+// keeps each pixel's hit (farHitStore: farHit, this frame's; prevFarHit, the last frame's) and a pixel takes the last
+// frame's at its reprojected point while that point agrees about the surface (the same distance from the last camera)
+// and the hit is younger than FAR_AMORT_N frames. Every 8 x 8 tile is traced whole one frame in FAR_AMORT_N, staggered
+// by a hash of the tile (a warp's rays are traced together or not at all: one traced lane in a warp costs the warp's
+// whole walk). Pixels drive it, never a distance: the footprint and the reprojection decide. What moves or shines is
+// not in the hit: the movers (traceActors) and the light (nearLightMain, its lights) are this frame's, every frame.
+static const uint FAR_AMORT_N = 4u;
+// (the store: tHit, tW, the hit's material and albedo flags; its axis, level and the water's level, the water's
+// material, the albedo as halves, the frame it was traced: frame.temporal.x's low 16 bits)
+// (inlined: as a [noinline] call its two TraceResults went through memory, and the split kernel's shared memory grew
+// from 7936 to 16640 bytes a group, the L1 the walk lives on with it: its far pass 40 % slower with this off)
+void farHitStore(uint pix, float tHit, float tW, TraceResult res, TraceResult wRes, uint stamp) {
+    uint i = pix * 2u;
+    farHit[i] = uint4(asuint(tHit), asuint(tW), res.mat, res.hasAlbedo);
+    uint packed = uint(res.axis + 1) | (uint(clamp(res.lod, 0, 15)) << 2) | (uint(clamp(wRes.lod, 0, 15)) << 6);
+    farHit[i + 1u] = uint4(packed, wRes.mat, f32tof16(res.albedo.x) | (f32tof16(res.albedo.y) << 16),
+                           f32tof16(res.albedo.z) | ((stamp & 0xFFFFu) << 16));
+}
+// the last frame's hit pixel px (its ray dir) takes, at its reprojected point: its index in prevFarHit (0xFFFFFFFF: none,
+// the pixel traces its own) and d, this ray's distance to that hit's first surface (the water's where it met water)
+// (scalars only across the call: a [noinline] call passing TraceResults went through memory, the kernel's shared memory
+// grew from 7936 to 16640 bytes a group and the far pass was 40 % slower)
+[noinline]  // (out of farMain's inlined body: it reads no thread-private static, its inputs are arguments)
+uint farHitSource(uint2 px, float3 dir, out float d) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    d = -1.0;
+    // (the tile's own frame: traced whole)
+    uint2 tile = px / 8u;
+    if (((hashU(tile.x * 73856093u ^ (tile.y * 19349663u)) + frame.temporal.x) % FAR_AMORT_N) == 0u) return 0xFFFFFFFFu;
+    uint n = w * h, count, stride;
+    prevFarHit.GetDimensions(count, stride);
+    if (count < 2u * n) return 0xFFFFFFFFu;  // (no last frame of this size)
+    prevSurface.GetDimensions(count, stride);
+    if (count < n) return 0xFFFFFFFFu;
+    float pa = frame.params.w * frame.params.z;
+    // the point the last frame's surface along this ray stood at (its distance here at the same pixel: the camera
+    // moves little against a far one), reprojected into the last frame
+    float ds = prevSurface[px.y * w + px.x];
+    bool sky = !(ds < 1e29);
+    if (!sky && ds * pa < 1.0) return 0xFFFFFFFFu;  // (near: its own ray)
+    float R = frame.camFrac.w;
+    float k = R > 0 && !sky ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;  // (the sky: a direction)
+    float3 X = worldAt(frame.camFrac.xyz, dir, k, sky ? 1e7 : ds) - frame.prevCam.xyz;
+    float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
+    if (clip.w <= 1e-4) return 0xFFFFFFFFu;
+    float2 pn = clip.xy / clip.w - frame.farLight.zw;  // (the last frame's jitter taken off, as nearHistoryAt)
+    int2 q = int2(floor(float2((pn.x * 0.5 + 0.5) * float(w), (0.5 - pn.y * 0.5) * float(h))));
+    if (any(q < int2(0, 0)) || q.x >= int(w) || q.y >= int(h)) return 0xFFFFFFFFu;
+    uint i = (uint(q.y) * w + uint(q.x)) * 2u;
+    uint4 a = prevFarHit[i], b = prevFarHit[i + 1u];
+    if (((frame.temporal.x - (b.w >> 16)) & 0xFFFFu) >= FAR_AMORT_N) return 0xFFFFFFFFu;  // (traced FAR_AMORT_N frames ago or more)
+    float tq = asfloat(a.x), wq = asfloat(a.y);
+    float tf = tq >= 0.0 ? tq : wq;  // (what prevSurface holds: the bed under water, the water's surface over deep water)
+    if (sky) {
+        if (tf >= 0.0) return 0xFFFFFFFFu;  // (the sky here, a surface there: a silhouette moved)
+        return i;
+    }
+    // the same surface: the last camera's distance to the point agrees with what its ray there met
+    if (!(tf >= 0.0) || tf * pa < 1.0) return 0xFFFFFFFFu;
+    float lx = length(X);
+    if (abs(lx - tf) > 0.02 * tf + 1.0) return 0xFFFFFFFFu;
+    d = ds + (tf - lx);  // (first order: the point the hit was, along this ray)
+    return i;
+}
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
@@ -3811,36 +3883,67 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     uint eyeMat = 0u;
     float eyeDepth = unified ? eyeWaterDepth(eyeMat) : -1.0;
     bool eyeWater = eyeDepth >= 0.0;
-    gSkipWater = eyeWater;
-    gTr = res;
-    // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
-    float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
-    float tHit = traceView(o, dir, tStart, tEye, lodDither);
-    res = gTr;
-    gSkipWater = false;
-    // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
-    // what is under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped);
-    // (_LIT) atlas draws it at any distance, and what lies behind it is traced on from it, WATER_SEE blocks at most
-    // (one call site for both: NVIDIA merges a [noinline] call with the same arguments, and each traceView is one more
-    // inlined copy of the walk)
+    float tHit = -1.0;
     float tW = -1.0;
     TraceResult wRes = res;
-    if (primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[res.mat].emisClass.y) == 2u) {
-        tW = unified ? tHit : -1.0;
-        // a fresh result: only the pixel's dither carries over (the water hit's texel albedo tinted the bed)
-        TraceResult r2;
-        r2.t = 0; r2.mat = 0; r2.axis = -1; r2.lod = 0; r2.steps = res.steps; r2.dither = res.dither;
-        r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
-        gSkipWater = true;
-        gTr = r2;
-        tHit = traceView(o, dir, unified ? tHit : tStart, unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y,
-                         lodDither);
+    // (FRAME_FAR_AMORT) the last frame's hit where this pixel may take it
+    bool amort = (frame.dims.z & FRAME_FAR_AMORT) != 0u && !eyeWater;
+    uint hitStamp = frame.temporal.x;
+    float hitD = -1.0;
+    uint hitSrc = amort ? farHitSource(id.xy, dir, hitD) : 0xFFFFFFFFu;
+    bool taken = hitSrc != 0xFFFFFFFFu;
+    if (taken) {
+        // (the record, farHitStore's: res keeps this pixel's own dither)
+        uint4 ha = prevFarHit[hitSrc], hb = prevFarHit[hitSrc + 1u];
+        float tq = asfloat(ha.x), wq = asfloat(ha.y);
+        float tf = tq >= 0.0 ? tq : wq;
+        tHit = tq < 0.0 || hitD < 0.0 ? -1.0 : hitD + (tq - tf);
+        tW = wq < 0.0 || hitD < 0.0 ? -1.0 : hitD + (wq - tf);
+        res.mat = ha.z;
+        res.hasAlbedo = ha.w;
+        res.axis = int(hb.x & 3u) - 1;
+        res.lod = int((hb.x >> 2) & 15u);
+        res.albedo = float3(f16tof32(hb.z & 0xFFFFu), f16tof32(hb.z >> 16), f16tof32(hb.w & 0xFFFFu));
+        res.steps = 0u;
+        res.t = 0.0;
+        wRes = res;
+        wRes.mat = hb.y;
+        wRes.lod = int((hb.x >> 6) & 15u);
+        hitStamp = hb.w >> 16;
+    }
+    if (!taken) {
+        hitStamp = frame.temporal.x;
+        gSkipWater = eyeWater;
+        gTr = res;
+        // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
+        float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
+        tHit = traceView(o, dir, tStart, tEye, lodDither);
         res = gTr;
         gSkipWater = false;
-        // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on to
-        // what the ray met: a pool's wall it leaves by is rare)
-        if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+        // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
+        // what is under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped);
+        // (_LIT) atlas draws it at any distance, and what lies behind it is traced on from it, WATER_SEE blocks at most
+        // (one call site for both: NVIDIA merges a [noinline] call with the same arguments, and each traceView is one more
+        // inlined copy of the walk)
+        wRes = res;
+        if (primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[res.mat].emisClass.y) == 2u) {
+            tW = unified ? tHit : -1.0;
+            // a fresh result: only the pixel's dither carries over (the water hit's texel albedo tinted the bed)
+            TraceResult r2;
+            r2.t = 0; r2.mat = 0; r2.axis = -1; r2.lod = 0; r2.steps = res.steps; r2.dither = res.dither;
+            r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
+            gSkipWater = true;
+            gTr = r2;
+            tHit = traceView(o, dir, unified ? tHit : tStart, unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y,
+                             lodDither);
+            res = gTr;
+            gSkipWater = false;
+            // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on to
+            // what the ray met: a pool's wall it leaves by is rare)
+            if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+        }
     }
+    if (amort) farHitStore(pix, tHit, tW, res, wRes, hitStamp);
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
     gSecAblate = gAblate;
     gSecMode = (gAblate >> 23) & 7u;

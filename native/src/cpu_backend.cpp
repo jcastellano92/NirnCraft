@@ -123,6 +123,7 @@ public:
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
     std::vector<uint32_t> dummyInfo_ = std::vector<uint32_t>(1, 0u);
     std::vector<uint32_t> dummyU32_ = std::vector<uint32_t>(1, 0u);
+    std::vector<uint32_t> dummyU32x4_ = std::vector<uint32_t>(4, 0u);
     std::vector<uint64_t> dummyU64_ = std::vector<uint64_t>(1, 0u);
     std::vector<float> dummyLight_ = std::vector<float>(4, 0.0f);
     std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
@@ -398,6 +399,9 @@ private:
         }
         g.texData = in.textures && !in.textures->empty() ? view(*in.textures) : view(dummyU32_);
         g.brickData = in.bricks && !in.bricks->empty() ? view(*in.bricks) : view(dummyU32_);
+        g.farHit = {reinterpret_cast<Uint4*>(dummyU32x4_.data()), 1};
+        g.prevFarHit = {reinterpret_cast<Uint4*>(dummyU32x4_.data()), 1};
+        frame.dims[2] &= ~FRAME_FAR_AMORT_BIT;  // (internal to the Vulkan backend: a host's bit 30 never reaches this kernel)
         if (in.voxgrid && !in.voxgrid->chunks.empty()) {
             VoxGrid& vg = *in.voxgrid;
             g.vgChunks = view(vg.chunks);

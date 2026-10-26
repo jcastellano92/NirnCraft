@@ -211,7 +211,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 41;
+constexpr uint32_t BINDINGS = 43;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -228,7 +228,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    // (the split under PRIMARY_NEAR_LIT) the water over each pixel's surface (farMain), for nearTemporalMain
                    B_WATER_ADD = 39,
                    // (abi 0.18) the micro-voxel bricks (bricks.hpp BrickStore::pack; atlas_bricks.slang)
-                   B_BRICKS = 40;
+                   B_BRICKS = 40,
+                   // (FRAME_FAR_AMORT_BIT) each pixel's primary hit, this frame's and the last's (atlas_far.slang farHit)
+                   B_FAR_HIT = 41, B_PREV_FAR_HIT = 42;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // gridLightMain (atlas_bricks.slang): its threads (GRID_LIGHT_THREADS: 4 x 4 x 4 blocks each of 192 x 96 x 192) and the
@@ -260,7 +262,8 @@ bool unifiedSplit(const FrameGpu& frame) {
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
-           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD;
+           b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD ||
+           b == B_FAR_HIT;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -351,6 +354,8 @@ struct SceneCopy {
 
 struct Slot {
     uint64_t frameNumber = 0;  // of its last submission
+    VkBuffer boundPrevHit = VK_NULL_HANDLE;   // and its primary hits (FRAME_FAR_AMORT_BIT)
+    bool hitFresh = false;                    // B_FAR_HIT newly allocated: filled with no hit in record
     int boundCopy = -1;        // scene copy its far descriptor set points at
     VkBuffer boundPrev = VK_NULL_HANDLE;  // the previous frame's surface buffer its cloud pass reads
     VkBuffer boundPrevNear = VK_NULL_HANDLE;  // and its near light (nearTemporalMain)
@@ -822,6 +827,7 @@ public:
             if (nearLight && primaryNear && (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) && !nearFull) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
             else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         }
+        farAmortBit(frame, s);
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
@@ -953,6 +959,7 @@ public:
         const bool lit = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0;
         if (nearLight && !nearFull && (!primaryNear || lit)) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
         else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
+        farAmortBit(frame, s);
         hostNearInputs_ = host && nearLight && !primaryNear;
         const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
         if (!prepare(s, in, frame, false, err)) return false;
@@ -2155,10 +2162,13 @@ private:
         if (ok) {
             VkBuffer before = s.bufs[B_SURFACE].buf;
             VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
+            VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
             ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
-                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err);
+                 ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err) &&
+                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) ? px * 32 : 32, false, Mem::DeviceOnly, err);
             // filled with "no surface" and "no samples" in record
             if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
+            if (ok && s.bufs[B_FAR_HIT].buf != hitBefore) s.hitFresh = true;
         }
         return ok;
     }
@@ -2169,10 +2179,12 @@ private:
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
         VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
         VkBuffer prevNear = slots_[prev].bufs[B_NEAR_LIGHT].buf;  // (not: it grows when the near light turns on)
+        VkBuffer prevHit = slots_[prev].bufs[B_FAR_HIT].buf;  // (nor: it grows when the far range is amortised)
         if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf ||
-            s.boundPrevNear != prevNear) {
+            s.boundPrevNear != prevNear || s.boundPrevHit != prevHit) {
             s.boundPrev = prevBuf;
             s.boundPrevNear = prevNear;
+            s.boundPrevHit = prevHit;
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
             VkDescriptorImageInfo noiseInfo{noiseSampler_, noiseView_, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
@@ -2192,6 +2204,7 @@ private:
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : i == B_PREV_NEAR_LIGHT ? (ps.bufs[B_NEAR_LIGHT].buf ? ps.bufs[B_NEAR_LIGHT] : s.bufs[B_NEAR_LIGHT])
                              : i == B_PREV_NEAR_AGE ? (ps.bufs[B_NEAR_AGE].buf ? ps.bufs[B_NEAR_AGE] : s.bufs[B_NEAR_AGE])
+                             : i == B_PREV_FAR_HIT ? (ps.bufs[B_FAR_HIT].buf ? ps.bufs[B_FAR_HIT] : s.bufs[B_FAR_HIT])
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
@@ -2769,6 +2782,17 @@ private:
                                  nullptr, 0, nullptr);
             sunFresh_ = false;
         }
+        if (s.hitFresh) {
+            // (after every read of it before: the other slot's frame read it as its last frame's hits)
+            VkMemoryBarrier rb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            rb.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            rb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &rb, 0, nullptr, 0,
+                                 nullptr);
+            vkCmdFillBuffer(s.cmd, s.bufs[B_FAR_HIT].buf, 0, VK_WHOLE_SIZE, 0u);  // (no hit: distance 0, never taken)
+            transferToCompute(s.cmd);
+            s.hitFresh = false;
+        }
         if (s.surfaceFresh) {
             vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
             vkCmdFillBuffer(s.cmd, s.bufs[B_NEAR_AGE].buf, 0, VK_WHOLE_SIZE, 0u);
@@ -2843,6 +2867,28 @@ private:
             s.gt.mark(s.cmd, "sunMap");
         }
         prevSlot_ = int(&s - slots_);
+    }
+
+    // (FRAME_FAR_AMORT_BIT) the split frames of the unified field: the far range's primary rays reused across frames
+    // (ATLAS_FAR_AMORT=0: off; read each frame, a measurement switches it)
+    // (and only with the other slot's last frame to read: the first frame's, or one after a failed frame's, slot would read
+    // its own buffer as it writes it; and with a buffer the device can bind)
+    void farAmortBit(FrameGpu& frame, const Slot& s) {
+        const char* e = std::getenv("ATLAS_FAR_AMORT");
+        const bool lastOk = prevSlot_ >= 0 && prevSlot_ != int(&s - slots_);
+        const bool fits = VkDeviceSize(frame.dims[0]) * frame.dims[1] * 32 <= maxStorageRange_;
+        bool on = !(e && *e == '0') && lastOk && fits && (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) &&
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT);
+        if (on) frame.dims[2] |= FRAME_FAR_AMORT_BIT;
+        else frame.dims[2] &= ~FRAME_FAR_AMORT_BIT;
+    }
+
+    static void transferToCompute(VkCommandBuffer cmd) {
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, nullptr, 0,
+                             nullptr);
     }
 
     static void computeBarrier(VkCommandBuffer cmd) {
