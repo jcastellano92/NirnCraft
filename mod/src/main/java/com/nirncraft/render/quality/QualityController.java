@@ -266,18 +266,49 @@ public final class QualityController {
         boolean hold = cpuLimited || hostBusy;
         // a probe changes the frame on purpose: no decisions on its frames (nor the ones measured just after it)
         if (probeKnob >= 0 || now - probeEnded < SECOND / 2) return;
+        double[] was = target.clone();
         if (over && !hold) {
             if (model.frameMs(cand, context) < model.frameMs(target, context) - 1e-6) System.arraycopy(cand, 0, target, 0, N);
         } else if (under) {
             if (Allocator.value(cand) > Allocator.value(target) + 1e-6) System.arraycopy(cand, 0, target, 0, N);
         }
         // inside the band (or CPU-bound while over): hold
+        atlasDetailByMeasure(was, now, over && !hold, under);
+    }
+
+    /**
+     * atlas's scale and LOD go up by what the frame measures, not by the model: their cost follows level 0's reach and its
+     * fill, seconds late and far from linear (126 -> 1208 blocks: 2.5 -> 30 ms), which the model priced cheap, so each
+     * reallocation under the budget sent them to the top and the frame over it (the static camera's cycle, 10-26). Under
+     * the budget they rise ATLAS_RAISE_STEP at most, once the last rise has had ATLAS_RAISE_SETTLE to show its cost; over
+     * it they follow the model down; in the band they hold.
+     */
+    static final double ATLAS_RAISE_STEP = 0.05;
+    static final long ATLAS_RAISE_SETTLE = 4 * SECOND;
+    private long atlasRaisedAt = Long.MIN_VALUE / 2;
+
+    private void atlasDetailByMeasure(double[] was, long now, boolean over, boolean under) {
+        boolean rose = false;
+        for (Knob k : new Knob[] {Knob.ATLAS_SCALE, Knob.ATLAS_LOD}) {
+            int i = k.ordinal();
+            if (target[i] <= was[i]) continue;  // (down, or held: as the model says)
+            if (!under || now - atlasRaisedAt < ATLAS_RAISE_SETTLE) {
+                target[i] = was[i];
+                continue;
+            }
+            target[i] = Math.min(target[i], Math.max(was[i], applied[i]) + ATLAS_RAISE_STEP);
+            rose = true;
+        }
+        if (rose) atlasRaisedAt = now;
     }
 
     private void updateFallback(long now, double budget) {
         if (gpuEma < 0) return;
         boolean noRoom = model.frameMs(floor, context) + residual > budget;
-        boolean wayOver = gpuEma > budget * 1.15 && noRoom && !cpuLimited && !hostBusy;
+        // (atlas's scale and LOD still sliding down to their target: the frame has not had what they give back yet, no fall)
+        boolean sliding = applied[Knob.ATLAS_SCALE.ordinal()] > target[Knob.ATLAS_SCALE.ordinal()] + 0.02
+                || applied[Knob.ATLAS_LOD.ordinal()] > target[Knob.ATLAS_LOD.ordinal()] + 0.02;
+        boolean wayOver = gpuEma > budget * 1.15 && noRoom && !cpuLimited && !hostBusy && !sliding;
         boolean atlasHeavy = atlasEma > 0 && atlasEma >= 0.25 * gpuEma;
         if (wayOver && fallback < 2 && (fallback == 0 ? context.atlasActive : atlasHeavy)) {
             if (overSince < 0) overSince = now;
@@ -329,11 +360,21 @@ public final class QualityController {
         residual = 0;
     }
 
+    /**
+     * atlas's render scale and LOD bias move continuously and damped, in every direction and in every tier (a tier is a
+     * ceiling they slide under, never a jump): up ATLAS_UP, down ATLAS_DOWN (ATLAS_DOWN_HEAVY over 120 % of the budget),
+     * knob units a second. They move level 0's reach, the far trace's level choice, the streaming behind them: at the old
+     * rates (up 0.12, down 2.0) a static camera cycled 2.5 -> 30 ms every 30 s (10-26).
+     */
+    static final double ATLAS_UP = 0.05, ATLAS_DOWN = 0.10, ATLAS_DOWN_HEAVY = 0.15;
+
     private void slew(double dt, double budget) {
         boolean heavy = gpuEma > budget * 1.2;
         for (int k = 0; k < N; k++) {
             double d = target[k] - applied[k];
-            double rate = d > 0 ? 0.12 : heavy ? 2.0 : 0.6;  // per second: up gently, down quickly
+            boolean atlasDetail = k == Knob.ATLAS_SCALE.ordinal() || k == Knob.ATLAS_LOD.ordinal();
+            double rate = atlasDetail ? (d > 0 ? ATLAS_UP : heavy ? ATLAS_DOWN_HEAVY : ATLAS_DOWN)
+                    : d > 0 ? 0.12 : heavy ? 2.0 : 0.6;  // per second: up gently, down quickly
             applied[k] += Math.copySign(Math.min(Math.abs(d), rate * dt), d);
         }
     }
@@ -405,6 +446,10 @@ public final class QualityController {
             Knob knob = Knob.ALL[k];
             double v = applied[k];
             if (k == probeKnob) v -= probeDelta;
+            // (atlas's scale and LOD: the slewed value as it is, under the memory's ceiling only; a tier's ceiling is their
+            // target, which they slide to)
+            boolean atlasDetail = knob == Knob.ATLAS_SCALE || knob == Knob.ATLAS_LOD;
+            double cap = atlasDetail ? memCeil[k] : ceil[k];
             if (knob.discrete()) {
                 double want = knob.snap(Math.min(target[k], ceil[k]));
                 boolean down = want < discreteOut[k];
@@ -414,7 +459,7 @@ public final class QualityController {
                 }
                 v = discreteOut[k];
             } else if (knob == Knob.ATLAS_SCALE) {
-                double want = quantScale(Math.min(v, ceil[k]));
+                double want = quantScale(Math.min(v, cap));
                 boolean down = want < scaleOut;
                 if (want != scaleOut && now - scaleChanged > (down && heavy ? SECOND / 2 : 2 * SECOND)) {
                     scaleOut = want;
@@ -422,7 +467,7 @@ public final class QualityController {
                 }
                 v = scaleOut;
             }
-            out[k] = Math.max(Math.min(floor[k], ceil[k]), Math.min(ceil[k], Math.min(1, v)));
+            out[k] = Math.max(Math.min(floor[k], cap), Math.min(cap, Math.min(1, v)));
         }
     }
 

@@ -185,6 +185,64 @@ class QualityControllerTest {
         assertTrue(qc.gpuMs() < qc.budgetMs(), qc.describe());
     }
 
+    /** The reach factor the 10-26 cycle measured against the static camera's atlas frame (ms): 126 -> 1208 blocks. */
+    static final double[][] LIVE_CYCLE = {{1.0, 2.5}, {1.42, 7.3}, {2.13, 11.5}, {2.5, 14.6}, {4.2, 17.9}, {9.6, 29.5}};
+
+    static double liveCost(double r) {
+        for (int i = 1; i < LIVE_CYCLE.length; i++)
+            if (r <= LIVE_CYCLE[i][0]) {
+                double f = (r - LIVE_CYCLE[i - 1][0]) / (LIVE_CYCLE[i][0] - LIVE_CYCLE[i - 1][0]);
+                return LIVE_CYCLE[i - 1][1] + Math.max(0, f) * (LIVE_CYCLE[i][1] - LIVE_CYCLE[i - 1][1]);
+            }
+        return LIVE_CYCLE[LIVE_CYCLE.length - 1][1];
+    }
+
+    /**
+     * The static camera of 10-26 (the controller fed the live cycle's cost): level 0's reach follows atlas's render scale
+     * and LOD bias (126 blocks at their floor, 1208 at their top; the native filter, reachstep.hpp: 10 % a second up, 30 %
+     * down, 10 % held) and the frame follows the reach 3 s later (its sections fill). Live it cycled every 30 s, 2.5 to
+     * 30 ms; now it settles: the last 5 of 8 minutes flat within 15 % of their median, no tier change.
+     */
+    @Test
+    void aStaticCameraSettlesOnTheLiveCycleTrace() {
+        QualityController qc = controller(HardwareTier.HIGH, 60);
+        qc.context.megapixels = 3.7;
+        qc.context.atlasActive = true;
+        long now = 1, end = now + 480_000_000_000L, tail = end - 300_000_000_000L;
+        double reach = 126, want;
+        java.util.ArrayDeque<double[]> lag = new java.util.ArrayDeque<>();  // {time, reach}
+        java.util.List<Double> late = new java.util.ArrayList<>();
+        int tier = -1, lateChanges = 0;
+        while (now < end) {
+            double[] q = qc.frame(now).clone();
+            double r = Knob.atlasScale(q[Knob.ATLAS_SCALE.ordinal()]) / 0.4 * 3.0 / Knob.atlasLodBias(q[Knob.ATLAS_LOD.ordinal()]);
+            want = 126 * r * 9.6 / 7.5;
+            double dt = 1.0 / 60;
+            if (System.getenv("QC_NOFILTER") != null) reach = want;  // (the evidence run: the old behaviour, no reach filter)
+            if (want > reach * 1.1) reach = Math.min(want, reach * Math.exp(dt * Math.log1p(0.10)));
+            else if (want < reach / 1.1) reach = Math.max(want, reach * Math.exp(-dt * Math.log1p(0.30)));
+            lag.add(new double[]{now, reach});
+            while (lag.size() > 1 && now - lag.peek()[0] > 3_000_000_000L) lag.poll();
+            double atlas = liveCost(lag.peek()[1] / 126);
+            double ms = atlas + 2.0;
+            qc.observeFrame(q, ms, Math.max(ms, 3), now);
+            qc.observeAtlas(q, atlas);
+            if (now > tail) {
+                late.add(ms);
+                if (tier >= 0 && qc.fallbackTier() != tier) lateChanges++;
+            }
+            if (System.getenv("QC_TRACE") != null && (now / 2_000_000_000L) != ((now - (long) (Math.max(ms, 1000.0 / 60) * 1e6)) / 2_000_000_000L))
+                System.out.println(String.format("QCT %6.1f s tier %d ms %5.1f reach %5.0f want %5.0f %s", now / 1e9, qc.fallbackTier(), ms, reach, want, qc.profileLine()));
+            tier = qc.fallbackTier();
+            now += (long) (Math.max(ms, 1000.0 / 60) * 1e6);
+        }
+        java.util.List<Double> s = new java.util.ArrayList<>(late);
+        java.util.Collections.sort(s);
+        double med = s.get(s.size() / 2), lo = s.get(s.size() / 100), hi = s.get(s.size() * 99 / 100);
+        assertEquals(0, lateChanges, "tier changes in the last 5 minutes; " + qc.describe());
+        assertTrue(lo >= med * 0.85 && hi <= med * 1.15, String.format("not flat: median %.1f ms, p1 %.1f, p99 %.1f; %s", med, lo, hi, qc.describe()));
+    }
+
     @Test
     void deckLikeMachineFallsBackAndRecovers() {
         // far slower than even the Deck prior: nothing fits at the floor, and atlas is a big share of it

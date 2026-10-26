@@ -22,6 +22,7 @@
 #include "parallel.hpp"
 #include "vgask.hpp"
 #include "slice.hpp"
+#include "reachstep.hpp"
 
 using namespace atlas;
 
@@ -2065,6 +2066,22 @@ static void testOverhang() {
     atlas_destroy(cpu);
 }
 
+// Level 0's reach filtered (reachstep.hpp): the quality's knobs at the top ask 1208 blocks from 126; in 8 s it may only
+// grow 10 % a second (to about 270), it holds within 10 %, and falls at most 30 % a second.
+static void testReachStep() {
+    std::printf("reachstep\n");
+    float r = reachStep(1e30f, 126.0f, 0.0);
+    CHECK(r == 126.0f);  // (the first value at once)
+    for (int i = 0; i < 8 * 60; i++) r = reachStep(r, 1208.0f, 1.0 / 60.0);
+    CHECK(r > 126.0f * 2.0f && r < 126.0f * 2.3f);  // 1.1^8 = 2.14
+    float held = reachStep(200.0f, 215.0f, 1.0);
+    CHECK(held == 200.0f);  // (within 10 %)
+    float down = reachStep(1000.0f, 126.0f, 1.0);
+    CHECK(down > 760.0f && down < 775.0f);  // 1000 / 1.3
+    for (int i = 0; i < 30 * 60; i++) down = reachStep(down, 126.0f, 1.0 / 60.0);
+    CHECK(down >= 126.0f && down <= 126.0f * 1.1f);  // (it stops at the band's edge: hysteresis)
+}
+
 // A bounded slice of queued work (slice.hpp, World::packedDone): the front applied until the time is up, never fewer
 // than the minimum, the rest kept in order.
 static void testSlice() {
@@ -2554,7 +2571,7 @@ int main(int argc, char** argv) {
         {"actormotion", testActorMotion}, {"transitions", testTransitions}, {"lights", testLights}, {"faults", testFaults},
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
-        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"slice", testSlice}, {"tiers", testTiers}, {"edits", testEdits},
+        {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"slice", testSlice}, {"reachstep", testReachStep}, {"tiers", testTiers}, {"edits", testEdits},
         {"stalls", testStalls},
     };
     for (const Suite& t : suites) {

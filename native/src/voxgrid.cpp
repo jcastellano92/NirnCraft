@@ -1,5 +1,6 @@
 #include "voxgrid.hpp"
 #include "vgask.hpp"
+#include "reachstep.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -736,7 +737,15 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
         const char* e = std::getenv("ATLAS_VOXGRID_FOOT");
         return e ? std::clamp(float(std::atof(e)), 0.25f, 64.0f) : 2.0f;
     }();
-    reach_ = pixelAngle_ > 0.0f ? foot * std::exp2(-levelBias_) / pixelAngle_ : 1e30f;
+    // (filtered: each step of the reach is real streaming work, and the render scale and LOD bias the adaptive quality
+    // moves would take it from 126 to 1208 blocks in 8 s and back in one: up at most ATLAS_REACH_UP (10 %) a second, down
+    // at most 30 %, changes within 10 % ignored)
+    float want = pixelAngle_ > 0.0f ? foot * std::exp2(-levelBias_) / pixelAngle_ : 1e30f;
+    reachWant_ = want;
+    auto rnow = std::chrono::steady_clock::now();
+    double rdt = std::clamp(std::chrono::duration<double>(rnow - reachAt_).count(), 0.0, 1.0);
+    reachAt_ = rnow;
+    reach_ = reachStep(reach_, want, rdt);
     stats_.frames++;
     // the window follows the camera a few sections behind (each move frees the columns it leaves and reads the ones
     // it enters: the cells keep their place in memory, chunk (x, y, z) at (x mod D, y, z mod D))
