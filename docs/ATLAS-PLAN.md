@@ -101,6 +101,16 @@ gate, and a new one replaces a slower one. The process itself keeps improving, a
 The stages below reach this end state in order. Early stages may keep vanilla drawing some things (composited
 into our frame) only as a step; stage 4 and stage 5 remove every one of those steps.
 
+**Continuation checkpoint (2026-10-26):** Codex recovered the original `a938b173` handoff, tagged
+`before-codex-atlas-render-2026-10-26`. Workflow/role setup and branch recovery are in
+[CODEX-WORKFLOW.md](CODEX-WORKFLOW.md). The clean loading lane's lighting-floor/hysteresis fix (`e733082f`) is being
+integrated with two consumer corrections: fallback no longer bypasses the slewed scale, and unified mode keeps its
+terrain renderer enabled at tier 2. Java build: 353 tests, no failures/errors, 19 opt-in skips; all three new
+quality/fallback regressions pass. The defined GPU scale floor is now consistently 0.4 rather than a consumer-only
+0.33 override (about 47% more pixels at the floor, not yet timed live). This is correctness evidence, not a stage
+gate: route/gallery/relaunch, seam metrics and frame budgets remain to be demonstrated. Cache corruption recovery and
+the unfinished seam work are separate lanes; Vulkan's last parity run is red and is not ready to merge.
+
 ## 1. The bar (what "done" means, measurable)
 
 The owner's target (2026-10-20): one renderer from the player's feet to the horizon, everything Minecraft draws

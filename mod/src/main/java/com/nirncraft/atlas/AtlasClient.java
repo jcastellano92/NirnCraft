@@ -333,9 +333,10 @@ public final class AtlasClient {
             if (ctx == null && !start(mc)) return;
             if (farField != null && farField.workerError() != null) throw farField.workerError();
             quality.begin();
-            if (!quality.enabled()) {
+            if (!quality.enabled(AtlasNearPass.unified())) {
                 // adaptive quality's last fallback: no far field (the targets shrink to 1 x 1: the pack's own sky
-                // and cloud deck take over); the context and its tiles stay for when it comes back
+                // and cloud deck take over); the context and its tiles stay for when it comes back. In unified mode
+                // vanilla's terrain is suppressed, so atlas must keep drawing its minimum-quality world instead.
                 if (targets != null) {
                     targets.close();
                     targets = null;

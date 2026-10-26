@@ -1,6 +1,6 @@
 # NirnCraft: instructions for Codex and other coding agents
 
-The Git repository is this directory (`Skycraft/` inside the workspace). Work on the owner's checked-out branch;
+The Git repository is this directory (nested one level inside the workspace). Work on the owner's checked-out branch;
 the renderer branch is `atlas-render`. Never push unless the owner explicitly asks. Commit small green steps locally.
 
 ## Read before working

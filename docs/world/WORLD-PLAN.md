@@ -473,6 +473,7 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 
 | Phase | Status | Where (worktree / commit) | Gate result | Updated |
 | --- | --- | --- | --- | --- |
+| Infinite ATLAS renderer continuation | in progress | `atlas-render`; `e733082f` lighting floors + quality consumer fixes | Java build: 353 tests, 0 failures/errors, 19 opt-in skips; 3 new quality/fallback regressions pass. Live stage gates pending. | 2026-10-26 |
 | P1 road plan | done | 464c430 | roadplan_lint 0; 6 failed trail links (R1b) | 2026-10-13 |
 | P2 terrain obeys plan | done | 7b0816c | 95.5% bed columns exact | 2026-10-13 |
 | P3 paint and crossings | done | 5d0ffe7 | p3_corridors all zeros; legacy measure 11 gaps in settlement zones (P5/R1b) | 2026-10-13 |

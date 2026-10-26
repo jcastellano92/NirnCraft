@@ -7,8 +7,8 @@ import com.nirncraft.render.quality.QualityClient;
  * atlas's side of adaptive quality v2 (com.nirncraft.render.quality, docs/ADAPTIVE-QUALITY.md): this frame's knobs
  * from the quality controller, as atlas's render scale (0.4 .. 1 of the window, in 0.05 steps; the pack upsamples),
  * LOD bias (1 .. 3: far detail coarsens first), cloud-pass resolution (half / quarter), far-terrain shadows and the sun
- * map's size (1024 / 512 / 256, shadows off), and the fallbacks below the floor: tier 1 renders at 0.33 out to 16 km,
- * tier 2 turns the far field off (the pack's own sky and cloud deck take over). The controller measures atlas's
+ * map's size (1024 / 512 / 256), and the fallbacks: tier 1 slews towards the knob floor (scale 0.4) out to 16 km;
+ * tier 2 may turn off an optional far field, but never the unified field that owns all terrain. The controller measures atlas's
  * GPU time (reported by AtlasClient each frame) and the whole frame's, and keeps both inside the frame budget.
  */
 final class AtlasQuality {
@@ -27,8 +27,13 @@ final class AtlasQuality {
 
     /** Takes this frame's knobs (render thread, before the frame is set up). */
     void begin() {
-        q = QualityClient.knobs();
-        tier = QualityClient.fallbackTier();
+        begin(QualityClient.knobs(), QualityClient.fallbackTier());
+    }
+
+    /** Apply the controller's output as drawn, including during tier transitions. */
+    void begin(double[] knobs, int fallbackTier) {
+        q = knobs;
+        tier = fallbackTier;
     }
 
     void setMemory(AtlasMemory.Plan plan) {
@@ -47,14 +52,14 @@ final class AtlasQuality {
         return fallbackMode;
     }
 
-    /** False at fallback tier 2: no far field this frame. */
-    boolean enabled() {
-        return tier < 2;
+    /** Tier 2 can drop an optional far field; the only terrain renderer must keep drawing at its floor. */
+    boolean enabled(boolean unified) {
+        return unified || tier < 2;
     }
 
     float scale() {
         if (cpu) return (float) Math.min(cpuScale, memory.maxScale());
-        float s = tier >= 1 ? 0.33f : (float) Knob.atlasScale(q[Knob.ATLAS_SCALE.ordinal()]);
+        float s = (float) Knob.atlasScale(q[Knob.ATLAS_SCALE.ordinal()]);
         return Math.min(s, (float) memory.maxScale());  // the controller already holds it there; a non-adaptive game too
     }
 
@@ -117,18 +122,18 @@ final class AtlasQuality {
         return cpu && cpuLightLow;
     }
 
-    /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds; 0 without a pack). */
+    /** The sun map's size (256 at the shadows' floor: far shadows stay on; 0 without a pack). */
     int sunMapSize() {
         if (fallbackMode) return 0;
         int s = Knob.atlasSunMap(q[Knob.ATLAS_SHADOWS.ordinal()]);
-        return Math.min(s == 0 ? 256 : s, memory.maxSunMap());
+        return Math.min(s, memory.maxSunMap());
     }
 
     int flags(int base) {
         int f = base;
         if (Knob.ATLAS_CLOUDS.snap(q[Knob.ATLAS_CLOUDS.ordinal()]) < 1 || memory.quarterClouds())
             f |= AtlasNative.FRAME_CLOUDS_QUARTER;
-        if (Knob.atlasSunMap(q[Knob.ATLAS_SHADOWS.ordinal()]) == 0) f &= ~AtlasNative.FRAME_SHADOWS;
+        // (the far shadows are never switched off by quality: their floor is the 256 sun map, the owner, 10-26)
         if (fallbackMode) f &= ~(AtlasNative.FRAME_CLOUDS | AtlasNative.FRAME_CLOUDS_QUARTER);
         return f;
     }

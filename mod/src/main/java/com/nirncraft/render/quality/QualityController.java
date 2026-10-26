@@ -283,11 +283,12 @@ public final class QualityController {
      * the budget they rise ATLAS_RAISE_STEP at most, once the last rise has had ATLAS_RAISE_SETTLE to show its cost; over
      * it they follow the model down; in the band they hold.
      */
-    static final double ATLAS_RAISE_STEP = 0.05;
-    static final long ATLAS_RAISE_SETTLE = 4 * SECOND;
+    static final double ATLAS_RAISE_STEP = 0.05, ATLAS_RAISE_BELOW = 0.75;
+    static final long ATLAS_RAISE_SETTLE = 8 * SECOND;
     private long atlasRaisedAt = Long.MIN_VALUE / 2;
 
     private void atlasDetailByMeasure(double[] was, long now, boolean over, boolean under) {
+        under = under && gpuEma < budgetMs() * ATLAS_RAISE_BELOW;  // (a wider band than the others: noise and lag)
         boolean rose = false;
         for (Knob k : new Knob[] {Knob.ATLAS_SCALE, Knob.ATLAS_LOD}) {
             int i = k.ordinal();
@@ -353,8 +354,9 @@ public final class QualityController {
     }
 
     private void applyFallbackCeilings() {
+        // (tier 1: atlas's knobs at their floors, never under them: the far shadows' floor is the 256 sun map)
         for (Knob k : new Knob[] {Knob.ATLAS_SCALE, Knob.ATLAS_LOD, Knob.ATLAS_CLOUDS, Knob.ATLAS_SHADOWS})
-            ceil[k.ordinal()] = fallback > 0 ? 0 : memCeil[k.ordinal()];
+            ceil[k.ordinal()] = fallback > 0 ? floor[k.ordinal()] : Math.max(floor[k.ordinal()], memCeil[k.ordinal()]);
         for (int k = 0; k < N; k++) target[k] = Math.min(target[k], ceil[k]);
         gpuEma = -1;  // the new tier measures afresh
         residual = 0;

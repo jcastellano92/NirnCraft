@@ -85,7 +85,7 @@ Annotated recovery tag: `before-codex-atlas-render-2026-10-26` points to that or
 | `atlas-int2` | 1 | `eacae2f5` is occupancy-mask work. Seam/default-lean work remains uncommitted in four files; prior green suite predates it. |
 | `atlas-iq` | 3 | Seven dirty native files and untracked `atlas-trace/`; compile evidence alone does not establish native or visual readiness. |
 | `atlas-vk` | 6 | Dirty natives/test. Latest parity run fails five checks; live timing run hit paging/allocation failures. Do not integrate as ready. |
-| `atlas-loadhang` | 1 | Clean `e733082f`: lighting floors and wider recovery hysteresis; reviewed, requires integration checks. |
+| `atlas-loadhang` | 1 | `e733082f` integrated with quality consumer fixes: Java build green (353 tests, 19 opt-in skips), 3 new regressions pass. Live gate still pending. |
 | `harness-title` | 0 | Uncommitted `owner_play.py`, `game.py`, `HarnessTitle.java` and test, plus natives; recover selected source changes, not DLLs. |
 
 Confirmed review findings to address first: corrupt BLOCKS cache records are ingested as AIR; unified terrain can
