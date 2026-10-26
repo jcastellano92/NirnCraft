@@ -114,6 +114,10 @@ Cache recovery integration now passes the full native suite and kernel-budget ch
 reads cannot publish AIR; failed masks retry; persistent invalidation and torn-tail repair survive relaunch. The
 shaderless disk test covers a real checksum bit flip, eight concurrent readers, regeneration and torn records.
 This does not yet establish the live route/revisit gate; the scene-level cache relaunch check remains required.
+The packaged Windows and Linux natives are now both current ABI 0.17 with 166 exports (2026-10-26). Linux was
+rebuilt against the existing glibc-2.28 sysroot and loaded successfully in WSL; the build reports GLIBC_2.27 as its
+newest required symbol. This is build/load evidence, not cross-vendor rendering acceptance. The harness now retains
+full check logs, streams TRACE progress and preserves partial timeout evidence, including owned-tree cleanup.
 
 ## 1. The bar (what "done" means, measurable)
 

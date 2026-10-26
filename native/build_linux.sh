@@ -119,7 +119,7 @@ fi
 if [ ! -f "$BUILD/CMakeCache.txt" ]; then
   cmake -S "$HERE" -B "$BUILD" "${GEN[@]}" -DCMAKE_BUILD_TYPE="$CONFIG" "${LINK[@]}"
 fi
-cmake --build "$BUILD" --parallel
+cmake --build "$BUILD" --parallel "${CMAKE_BUILD_PARALLEL_LEVEL:-2}"
 echo "built: $BUILD/libatlas_core.so"
 if command -v objdump >/dev/null 2>&1 && objdump -p "$BUILD/libatlas_core.so" | grep -qE '^ *(RPATH|RUNPATH) '; then
   echo "WARNING: libatlas_core.so has an RPATH/RUNPATH (the toolchain's): do not ship it" >&2

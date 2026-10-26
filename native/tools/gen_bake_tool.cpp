@@ -47,6 +47,15 @@ static double nowMs() {
     return duration<double, std::milli>(steady_clock::now().time_since_epoch()).count();
 }
 
+static void setEnv(const char* key, const char* value) {
+#ifdef _WIN32
+    _putenv_s(key, value);
+#else
+    if (*value) setenv(key, value, 1);
+    else unsetenv(key);
+#endif
+}
+
 static std::string arg(int argc, char** argv, const char* key, const char* def) {
     size_t n = std::strlen(key);
     for (int i = 3; i < argc; i++)
@@ -397,7 +406,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             return r;
         };
         FarSide sa{"farTrace", "far", "farWater", "farRefine"}, sb{"farTrace B", "far B", "farWater B", "farRefine B"};
-        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");  // (no read back from here: the timed frames' conditions)
+        setEnv("ATLAS_TIMING_DEVICE_OUTPUTS", "1");  // (no read back from here: the timed frames' conditions)
         if (std::getenv("ATLAS_RECORDER")) {
             int cap = std::atoi(arg(argc, argv, "settle", "150").c_str());
             std::vector<double> win;
@@ -453,8 +462,8 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             std::sort(v.begin(), v.end());
             return v.empty() ? -1.0 : v[size_t(q * double(v.size() - 1) + 0.5)];
         };
-        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
-        _putenv_s("ATLAS_FARHIT_DUMP_NOW", "1");  // (ATLAS_FARHIT_DUMP: this frame's hit records)
+        setEnv("ATLAS_TIMING_DEVICE_OUTPUTS", "");
+        setEnv("ATLAS_FARHIT_DUMP_NOW", "1");  // (ATLAS_FARHIT_DUMP: this frame's hit records)
         {
             // (dumps=N: N read-back frames, each dumped: a still camera's frame-to-frame changes, the level flips;
             // jitter=1: the host's TAA sub-pixel jitter on, Halton 2/3, from the steady phase on)
@@ -464,7 +473,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
                 atlas_render(ctx, &f, &out);
             }
         }
-        _putenv_s("ATLAS_FARHIT_DUMP_NOW", "");
+        setEnv("ATLAS_FARHIT_DUMP_NOW", "");
         AtlasStats st{};
         atlas_get_stats(ctx, &st);
         steps = st.raySteps;

@@ -27,9 +27,11 @@ import json
 import math
 import os
 import re
+import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -83,6 +85,71 @@ CHECK_SKIP_EXIT = 3  # a check command's "I cannot judge this case" (its last li
 
 def check_skipped(returncode):
     return returncode == CHECK_SKIP_EXIT
+
+
+def check_command(cmd, log_file, timeout, cwd=ROOT):
+    """Keep complete check output, including timeouts, and expose TRACE progress while a check is running."""
+    log_file = Path(log_file)
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    if log_file.exists():
+        log_file.replace(log_file.with_name(log_file.stem + ".before" + log_file.suffix))
+    log_file.write_text("", encoding="utf-8")
+    stop = threading.Event()
+
+    def follow():
+        last_report = 0.0
+        pending = ""
+        with log_file.open(encoding="utf-8", errors="replace") as stream:
+            while True:
+                line = stream.readline()
+                if not line:
+                    if stop.is_set():
+                        if pending:
+                            say(pending.rstrip()[:500])
+                        break
+                    stop.wait(0.2)
+                    continue
+                pending += line
+                if not pending.endswith("\n"):
+                    continue
+                text = pending.rstrip()
+                pending = ""
+                now = time.monotonic()
+                if text.startswith("TRACE ") or "spv_budget:" in text or re.search(r"\b(?:FAIL|FAILED|error C\d+)\b", text):
+                    say(text[:500])
+                    last_report = now
+                elif text and now - last_report >= 30:
+                    say(f"check progress: {text[:240]}")
+                    last_report = now
+
+    reader = threading.Thread(target=follow, daemon=True)
+    reader.start()
+    try:
+        with log_file.open("w", encoding="utf-8") as log:
+            child = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, text=True,
+                                     start_new_session=os.name != "nt")
+            try:
+                code = child.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                # This exact Popen owns the tree. Stop it before its root is reaped; never target other jobs.
+                if os.name == "nt":
+                    if child.poll() is None:
+                        subprocess.run(["taskkill", "/PID", str(child.pid), "/T", "/F"],
+                                       stdout=log, stderr=subprocess.STDOUT, timeout=10)
+                else:
+                    try:
+                        os.killpg(child.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                if child.poll() is None:
+                    child.kill()
+                child.wait()
+                raise
+            result = subprocess.CompletedProcess(cmd, code)
+    finally:
+        stop.set()
+        reader.join()
+    return result, log_file.read_text(encoding="utf-8", errors="replace")
 
 
 def tag_match(q, tags):
@@ -498,8 +565,8 @@ class Runner:
     def run_check(self, s, v, fp):
         cmd = [c.replace("{core}", str(self.game.GAME / "mods/nirncraft-core.jar")) for c in s["run"]]
         t0 = time.monotonic()
-        r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=s.get("timeout", 900))
-        out = (r.stdout + r.stderr)
+        log_file = results.stem(s["id"], v).parent / f"{v}.output.txt"
+        r, out = check_command(cmd, log_file, s.get("timeout", 900))
         tr.step("check_command", cmd=cmd, exit=r.returncode, seconds=round(time.monotonic() - t0, 1),
                 tail=out.strip().splitlines()[-3:] if out.strip() else [])
         m = {"seconds": round(time.monotonic() - t0, 1), "exit": r.returncode}
@@ -511,12 +578,6 @@ class Runner:
                     m[name] = float(h)
                 except ValueError:
                     m[name] = h
-        d = results.stem(s["id"], v).parent
-        d.mkdir(parents=True, exist_ok=True)
-        log_file = d / f"{v}.output.txt"
-        if log_file.exists():  # like images: the newest output and the one before it
-            log_file.replace(d / f"{v}.output.before.txt")
-        log_file.write_text(out[-20000:], encoding="utf-8")
         if check_skipped(r.returncode):  # the check cannot judge this case (says why): neither a pass nor a fail
             return results.record(s["id"], v, "check", "skip", m, fp, extra={"error": out.strip().splitlines()[-1][:300] if out.strip() else ""})
         failed = r.returncode != 0

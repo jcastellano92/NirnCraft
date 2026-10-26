@@ -418,5 +418,49 @@ with _tf.TemporaryDirectory() as _td:
     expect(_to is not None and not (_g / "atlas-shaders").exists() and (_to / "atlas_far.spv").exists() and _closed,
            "atlas-shaders with kernels is moved aside, the client closed first")
 
+# A slow check's output is evidence even when it times out; the complete log is not truncated to its tail.
+import subprocess as _subprocess
+from unittest.mock import patch as _patch
+with _tf.TemporaryDirectory() as _td:
+    _log = Path(_td) / "check.output.txt"
+    _r, _out = harness.check_command([sys.executable, "-c", "print('x' * 25000)"], _log, 5)
+    expect(_r.returncode == 0 and len(_out) > 25000 and _log.read_text() == _out,
+           "a check retains its complete output beyond 20 KB")
+    _seen = []
+    with _patch.object(harness, "say", side_effect=_seen.append):
+        harness.check_command([sys.executable, "-u", "-c",
+                               "import sys,time; sys.stdout.write('TRA'); sys.stdout.flush(); time.sleep(.1); "
+                               "print('CE begin chunked'); print('TRACE done at-exit', flush=True)"], _log, 5)
+    expect("TRACE begin chunked" in _seen and "TRACE done at-exit" in _seen,
+           "chunked TRACE lines are reconstructed and exit-time output is drained")
+    try:
+        harness.check_command([sys.executable, "-u", "-c", "import time; print('TRACE begin slow', flush=True); time.sleep(5)"],
+                              _log, 0.5)
+        expect(False, "a check timeout propagates")
+    except _subprocess.TimeoutExpired:
+        expect("TRACE begin slow" in _log.read_text() and _log.with_name("check.output.before.txt").exists(),
+               "a timed-out check keeps partial output and the preceding complete log")
+    _sentinel = _subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        _heartbeat = Path(_td) / "owned-child.heartbeat"
+        _child_code = ("from pathlib import Path; import time\np=" + repr(str(_heartbeat))
+                       + "\nwhile True:\n Path(p).write_text(str(time.monotonic())); time.sleep(.02)")
+        _parent_code = ("import subprocess,sys,time; p=subprocess.Popen([sys.executable,'-u','-c',"
+                        + repr(_child_code) + "]); print('OWNED_CHILD',p.pid,flush=True); time.sleep(30)")
+        try:
+            harness.check_command([sys.executable, "-u", "-c", _parent_code], _log, 2)
+            expect(False, "an owned child tree times out")
+        except _subprocess.TimeoutExpired:
+            expect(_heartbeat.exists() and "OWNED_CHILD" in _log.read_text(), "the timeout fixture really started a grandchild")
+            _beat = _heartbeat.read_text() if _heartbeat.exists() else None
+            _time.sleep(.15)
+            expect(_beat is not None and _heartbeat.read_text() == _beat,
+                   "a timed-out check stops its owned grandchild")
+            expect(_sentinel.poll() is None, "timeout cleanup preserves an unrelated live process")
+    finally:
+        if _sentinel.poll() is None:
+            _sentinel.kill()
+        _sentinel.wait(timeout=5)
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

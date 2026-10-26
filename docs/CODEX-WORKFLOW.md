@@ -111,3 +111,13 @@ outputs and locks instead of sharing main's Gradle output. The focused `check-bu
 build/output/lock regressions, all passing. The broader pre-existing process-guard module timed out in live-action
 coverage during exploration; it is not claimed green. The merchant lint now reads the platform's singular
 `tags/item` path; fourteen false failures are resolved and the genuine crafter menu coverage failure remains.
+
+Native portability follow-up: both packaged platforms now pass `check-natives` at ABI 0.17 with 166 exports and
+matching source hashes. The rebuilt Linux library also loads in WSL. Linux build repairs add loader/thread
+libraries to the offline tools and replace Windows-only environment calls in `gen_bake_tool`; its numeric compiler
+job limit is passed explicitly by the shell script. The Windows build also passes with these portable changes.
+
+Check execution now writes complete output directly to each test log and streams TRACE progress while running.
+The runner regression verifies logs over 20 KB, fragmented TRACE lines, exit-time output, partial timeout logs,
+owned grandchild termination and survival of an unrelated process. All five check-tier harness items pass.
+These are tooling/packaging results; the seam branch still needs driver-resource, paired-hit/albedo and jitter proof.

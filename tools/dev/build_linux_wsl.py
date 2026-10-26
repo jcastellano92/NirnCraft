@@ -29,12 +29,16 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--distro", default=os.environ.get("NIRNCRAFT_WSL_DISTRO", "Ubuntu-24.04"))
     ap.add_argument("--test", action="store_true", help="run the native suites (software Vulkan: slow)")
+    ap.add_argument("--jobs", type=int, default=2, help="maximum compiler jobs inside WSL (default: 2)")
     a = ap.parse_args()
+    if a.jobs < 1:
+        ap.error("--jobs must be positive")
     digest = native_sources.source_hash()
     # one build directory per checkout: a shared one silently built whichever worktree configured it first
     build = "~/atlas-build-" + hashlib.sha256(str(ROOT.resolve()).lower().encode()).hexdigest()[:10]
     cores = max(1, (os.cpu_count() or 2) // 2)
     script = (f"cd {wsl_path(ROOT)} && PATH=~/.atlas-tc/env/bin:$PATH CXX=x86_64-conda-linux-gnu-g++ BUILD_DIR={build} "
+              f"CMAKE_BUILD_PARALLEL_LEVEL={a.jobs} "
               f"taskset -c 0-{cores - 1} nice -n 15 native/build_linux.sh {'--software' if a.test else '--no-test'}")
     r = subprocess.run(["wsl", "-d", a.distro, "-e", "bash", "-lc", script])
     if r.returncode:
