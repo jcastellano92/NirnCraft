@@ -1005,8 +1005,10 @@ typedef struct AtlasGenBakeInfo {
 ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz);
 /* The cache set's key in its parts (out[8]): build, program, ingest table, map, extra, stages, the whole, stage count. */
 ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out);
-/* While on, the far field's submissions (atlas_gen_far_ingest, so the bake) are not paced and take nothing from the near
-   work's budget: for a loading screen that holds the player, where no frame is to be protected. */
+/* on = 1: the far field's submissions (atlas_gen_far_ingest, so the bake) are not paced and take nothing from the near
+   work's budget: for a loading screen that holds the player, where no frame is to be protected. on = 2: in play, the near
+   field empty: the near work's budget is at least ATLAS_GEN_NEAR_BOOST_MS (8) of GPU a frame period, and at most that much
+   at once (still paced: between the frames, a few ms in flight). 0: off. (A library before 2 reads 2 as 1.) */
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on);
 /* The idle verifier of the generation and bake caches (they are keyed by the generator's own sources, data and seed, not by
    the whole native build: a key that misses a change would serve stale data). atlas_gen_verify_far_tile makes one cached

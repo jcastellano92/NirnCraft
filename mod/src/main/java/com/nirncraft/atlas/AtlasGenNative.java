@@ -571,20 +571,27 @@ final class AtlasGenNative {
         }
 
         /** Why the generator runs unpaced: the loading screen holds the player (the bake's thread), the near field is empty (the worker's). */
-        static final int BOOST_HOLD = 1, BOOST_NEAR = 2;
+        static final int BOOST_HOLD = 1, BOOST_NEAR = 2, BOOST_BURST = 4;
         private int boostReasons;
 
-        /** The submissions are unpaced while any reason is on (each owner sets its own). */
+        /**
+         * The pacer's boost from its reasons (each owner sets its own): the loading screen's unpaced (1); the near field's a raised
+         * floor of GPU a frame period, still paced (2: a boosted arrival's frames reached 288 ms unpaced).
+         */
         synchronized void boost(int reason, boolean on) {
             int r = on ? boostReasons | reason : boostReasons & ~reason;
-            boolean was = boostReasons != 0, now = r != 0;
+            int was = boostMode(boostReasons), now = boostMode(r);
             boostReasons = r;
             if (was == now || paceBoost == null) return;
             try {
-                int s = (int) paceBoost.invokeExact(ptr, now ? 1 : 0);
+                int s = (int) paceBoost.invokeExact(ptr, now);
             } catch (Throwable t) {
                 throw rethrow(t);
             }
+        }
+
+        private static int boostMode(int reasons) {
+            return (reasons & (BOOST_HOLD | BOOST_BURST)) != 0 ? 1 : (reasons & BOOST_NEAR) != 0 ? 2 : 0;
         }
 
         /** Whether this library has the whole-map coarse bake (atlas_gen_bake_*). */

@@ -590,6 +590,7 @@ final class AtlasClientGen implements AutoCloseable {
         featuredSinceJump.clear();
         firstUpNs = windowUpNs = windowFeaturesNs = 0;
         jumpNs = System.nanoTime();
+        burstUntilNs = jumpNs + BURST_NS;  // (the camera's own chunks, unpaced for a moment: nearBoost)
         synchronized (ready) {
             ready.removeIf(u -> !near(u.cx(), u.cz(), cx, cz, RADIUS + 1));
         }
@@ -746,8 +747,8 @@ final class AtlasClientGen implements AutoCloseable {
         String cache = c.statCacheLine;
         pagesNow += ", " + (cache != null ? cache : "genCache{not in this library}");
         pagesNow += String.format(", generated chunks %d (cache served %d)", c.generatedChunks, c.cachedChunks);
-        pagesNow += String.format(", nearBoost{%s missing %d, on %.0f ms in %d}", c.nearBoostOn ? "on" : "off", c.nearMissing,
-                (c.nearBoostMs + (c.nearBoostOn ? System.nanoTime() - c.nearBoostSinceNs : 0)) / 1e6, c.nearBoosts);
+        pagesNow += String.format(", nearBoost{%s missing %d, on %.0f ms in %d, bursts %d %d ms}", c.nearBoostOn ? "on" : "off", c.nearMissing,
+                (c.nearBoostMs + (c.nearBoostOn ? System.nanoTime() - c.nearBoostSinceNs : 0)) / 1e6, c.nearBoosts, c.bursts, c.burstMs);
         return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
                 c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
@@ -1098,12 +1099,14 @@ final class AtlasClientGen implements AutoCloseable {
 
     /**
      * The near field empty (chunks within NEAR_BOOST_R of the camera not up: generated, served from the cache or the loaded
-     * chunk's own blocks): the generator's submissions go unpaced until it is whole (atlas_gen_pace_boost; the loading
-     * screen's boost is another reason, the bake's). A teleport's arrival or a fast flight waited for the pacer: one patch
+     * chunk's own blocks): the near work's budget is raised to ATLAS_GEN_NEAR_BOOST_MS (8) of GPU a frame period and held
+     * to it until the field is whole (atlas_gen_pace_boost 2; the loading screen's unpaced boost is another reason, the bake's;
+     * unpaced, a boosted arrival's frames reached 288 ms). A teleport's arrival or a fast flight waited for the pacer: one patch
      * of 64 chunks in 6.5 s, the 96-block field empty for 12 s after a jump (10-26).
      */
     private void nearBoost() {
         long now = System.nanoTime();
+        burstStep(now);
         if (now - nearBoostCheckNs < 100_000_000L || !camSet) return;
         nearBoostCheckNs = now;
         int ccx = camCx, ccz = camCz, r = NEAR_BOOST_R, miss = 0;
@@ -1122,6 +1125,36 @@ final class AtlasClientGen implements AutoCloseable {
             nearBoostMs += now - nearBoostSinceNs;
         }
         gen.boost(AtlasGenNative.Gen.BOOST_NEAR, on);
+    }
+
+    /** The burst after a jump: at most this long (nirncraft.atlas.burstMs, 750), ended once the camera's 3 x 3 chunks are up. */
+    static final long BURST_NS = Long.getLong("nirncraft.atlas.burstMs", 750L) * 1_000_000L;
+    private volatile long burstUntilNs;
+    private boolean burstOn;
+    private volatile long bursts, burstMs;
+
+    /**
+     * Right after a jump the camera's own chunk and its 8 neighbours go unpaced (BOOST_BURST: the loading screen's mode) until
+     * they are up or BURST_NS has passed; then the near field's capped boost (8 ms a frame period). Capped from the start,
+     * the first chunk was up 3.3 s after a jump, unpaced 0.72 s (10-26).
+     */
+    private void burstStep(long now) {
+        boolean want = now < burstUntilNs && camSet && !threeByThreeUp(camCx, camCz);
+        if (want == burstOn) return;
+        burstOn = want;
+        if (want) bursts++;
+        else {
+            burstMs += Math.max(0, (now - (burstUntilNs - BURST_NS)) / 1_000_000L);
+            burstUntilNs = 0;
+        }
+        gen.boost(AtlasGenNative.Gen.BOOST_BURST, want);
+    }
+
+    private static boolean threeByThreeUp(int ccx, int ccz) {
+        for (int dz = -1; dz <= 1; dz++)
+            for (int dx = -1; dx <= 1; dx++)
+                if (!AtlasClientSections.isUp(ccx + dx, ccz + dz)) return false;
+        return true;
     }
 
     private void markCovered(int cx, int cz) {

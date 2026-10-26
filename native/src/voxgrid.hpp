@@ -530,6 +530,8 @@ private:
     std::vector<uint16_t> uniId_;  // per cell: its one id while VG_UNIFORM
     // the view (setView), the footprint's reach, the cut-off of a full pool, when the waiting were last ranked
     float fwd_[3] = {0, 0, -1}, cosView_ = 0.5f, pixelAngle_ = 0.0f, levelBias_ = 0.0f, reach_ = 1e30f, cutoff_ = 1e30f;
+    float reachWant_ = 1e30f;  // (the footprint's reach before reachStep's filter)
+    std::chrono::steady_clock::time_point reachAt_ = std::chrono::steady_clock::now();
     int camB_[3] = {0, 0, 0};
     int rankedSx_ = INT32_MIN, rankedSy_ = 0, rankedSz_ = 0;
     float rankedFwd_[3] = {0, 0, 0};
