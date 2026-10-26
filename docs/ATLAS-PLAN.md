@@ -112,6 +112,7 @@ distance. As numbers:
 | Looks like Minecraft | Every block state (vanilla + NirnCraft), atlas vs vanilla, same view at 2 m and 16 m | 100% of states within the diff threshold, failures shown on one sheet |
 | Same block near and far | The same states, atlas at 2 m vs its coarse levels at 64 m-2 km (colour, coverage) | Mean colour within threshold at every level |
 | No line, no holes | Scripted route (walk, sprint, fly, turn) in the real game | 0 holes in view over the whole route; no ring in the captures |
+| Seamless detail levels (owner, 2026-10-26) | Every level boundary (level 0 to 1 and up) on the route captures and the bench views: colour and luminance either side, level flips per pixel per frame, and a Haiku check of the boundary bands | Step at any boundary ΔE < 2; no visible band; flips under jitter with a still camera < 1% of pixels |
 | Smooth | Same route, 1440p, RTX 3090 | p99 frame ≤ 20 ms, worst ≤ 50 ms, no frame over 50 ms caused by atlas |
 | Instant revisit | Relaunch, same route | 0 chunks generated in visited places; full radius in under 2 s |
 | Everything drawn | ATLAS-RENDER-INVENTORY's checklist | Every item ticked in route captures (ours, or vanilla composited and lit by ours) |
