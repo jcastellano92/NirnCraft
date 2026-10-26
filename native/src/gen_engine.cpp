@@ -4200,6 +4200,7 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
         struct Item {
             uint32_t chunk, sec;
             std::shared_ptr<const std::vector<uint32_t>> words;
+            bool valid = false;
         };
         std::vector<Item> items;
         for (uint32_t i = 0; i < count; i++) {
@@ -4213,12 +4214,18 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
         }
         std::atomic<size_t> next{0};
         atlas::parallelRun([&] {
-            for (size_t k; (k = next.fetch_add(1)) < items.size();)
-                items[k].words = gc->section(Key3{0, chunkXZ[items[k].chunk * 2], int32_t(items[k].sec) - 4, chunkXZ[items[k].chunk * 2 + 1]});
+            for (size_t k; (k = next.fetch_add(1)) < items.size();) {
+                Item& it = items[k];
+                it.valid = gc->readSection(Key3{0, chunkXZ[it.chunk * 2], int32_t(it.sec) - 4, chunkXZ[it.chunk * 2 + 1]}, it.words);
+            }
         }, 8);
         uint32_t sent = 0;
         for (const Item& it : items) {
             int32_t cx = chunkXZ[it.chunk * 2], cz = chunkXZ[it.chunk * 2 + 1], sy = int32_t(it.sec) - 4;
+            if (!it.valid) {
+                masks[it.chunk] &= ~(uint64_t(1) << it.sec);  // (a cache miss is retried/generated, never uploaded as air)
+                continue;
+            }
             if (!it.words) {
                 // (air: never baked) one id throughout, no slot in the grid
                 std::vector<uint16_t> ids(4096, 0);
