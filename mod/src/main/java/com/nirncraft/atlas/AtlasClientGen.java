@@ -479,6 +479,40 @@ final class AtlasClientGen implements AutoCloseable {
         c.wake();
     }
 
+    /**
+     * Whether the generator's GPU is idle enough for background work in play (the coarse bake's level 2): the frames are at
+     * their target (the pacer's duty has not been cut), the near window leaves its bucket nearly full, and the camera is not
+     * moving fast (blocks a second over the last second).
+     */
+    static boolean backgroundRoom() {
+        AtlasClientGen c = active;
+        if (c == null) return true;
+        double[] p = c.gen.paceNow();
+        if (p != null && p[0] > 0.0 && (p[1] < 0.4 || p[2] < 20.0)) return false;
+        return c.cameraSpeed() < BACKGROUND_SPEED;
+    }
+
+    static final double BACKGROUND_SPEED = Double.parseDouble(System.getProperty("nirncraft.atlas.bake.maxSpeed", "12"));
+    private long speedNs;
+    private double speedX, speedZ, speed;
+
+    /** The camera's speed, blocks a second, over about the last second (called from one thread at a time, roughly). */
+    private synchronized double cameraSpeed() {
+        long now = System.nanoTime();
+        if (speedNs == 0) {
+            speedNs = now;
+            speedX = camX;
+            speedZ = camZ;
+        } else if (now - speedNs > 500_000_000L) {
+            double dt = (now - speedNs) / 1e9;
+            speed = Math.hypot(camX - speedX, camZ - speedZ) / dt;
+            speedNs = now;
+            speedX = camX;
+            speedZ = camZ;
+        }
+        return speed;
+    }
+
     static boolean hasCamera() {
         return camSet && active != null;
     }
@@ -1290,6 +1324,13 @@ final class AtlasClientGen implements AutoCloseable {
     }
 
     private long cachedChunks, cachedSections, farCached;
+    private volatile long cacheAsked;  // (chunks looked up in the cache: the denominator of "served from the cache")
+
+    /** Chunks looked up in the cache since the start (served ones are {@link Progress#cached}); 0 without a generator. */
+    static long cacheAsked() {
+        AtlasClientGen c = active;
+        return c == null ? 0 : c.cacheAsked;
+    }
     // (direct, the store) the cache's misses waiting for the window's lookups to finish (directBatch's defer); any thread
     // may drop one (regenerate)
     private final Set<Long> deferred = java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -1342,6 +1383,7 @@ final class AtlasClientGen implements AutoCloseable {
     /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
     private int[] fromCache(int[] batch, int[] info) {
         int n = batch.length / 2;
+        cacheAsked += n;
         byte[] hit = new byte[n];
         if (gen.cacheLookup(batch, info, hit) == 0) return batch;
         int ccx = camCx, ccz = camCz;
@@ -1360,7 +1402,10 @@ final class AtlasClientGen implements AutoCloseable {
                 done.remove(ChunkPos.pack(cx, cz));
                 continue;
             }
-            if (AtlasClientSections.isReal(cx, cz)) continue;  // the loaded chunk's own blocks are up: they stay
+            if (AtlasClientSections.isReal(cx, cz)) {  // the loaded chunk's own blocks are up: they stay (and count as up: the spawn area waited for 152 of these for good)
+                markCovered(cx, cz);
+                continue;
+            }
             masks[nk / 2] = masksOf(cx, cz, info, i * AtlasGenNative.INFO_WORDS + 4);
             known[nk++] = cx;
             known[nk++] = cz;

@@ -44,13 +44,15 @@ def main():
     t0 = time.monotonic()
     print("TRACE begin loadwatch", flush=True)
     launched = None
+    failure = None
     try:
         # (the launch call returns once the loading screen lets the client's heartbeat through: it waits for the load)
         import threading
         th = threading.Thread(target=lambda: game.ensure("atlas", groups), daemon=True)
         th.start()
         last = 0
-        while time.monotonic() - t0 < a.limit and not load.exists():
+        spawn_seen, spawn_at = None, time.monotonic()
+        while time.monotonic() - t0 < a.limit and not load.exists() and not failure:
             time.sleep(2.0)
             if time.monotonic() - last < 10:
                 continue
@@ -65,11 +67,30 @@ def main():
             bk = re.search(r"levels 3-6 (\d+)/(\d+)", line)
             st = re.search(r"store\{[^}]*\}", line)
             rd = re.search(r"ready\{([^}]{0,60})", line)
+            # invariants, named when broken (a stall like "289 of 441 for good, the cache served 1893" names itself here):
+            # a ratio never over 100%, and while the spawn area is pending its count moves within 45 s
+            for m in re.finditer(r"(\d+) of (\d+) (?:chunks|tiles)", rd.group(1) if rd else ""):
+                if int(m.group(1)) > int(m.group(2)):
+                    failure = f"a progress ratio over 100%: {m.group(0)}"
+            sp = re.search(r"spawn area (\d+) of (\d+) chunks", rd.group(1) if rd else "")
+            cs = re.search(r"cached chunks (\d+)", line)
+            ch = re.search(r"clientGen\{[^}]*? chunks=(\d+)", line)
+            if sp:
+                if spawn_seen != int(sp.group(1)):
+                    spawn_seen, spawn_at = int(sp.group(1)), time.monotonic()
+                elif time.monotonic() - spawn_at > 45:
+                    failure = (f"the spawn area stuck at {sp.group(1)} of {sp.group(2)} chunks for 45 s (the cache served "
+                               f"{cs.group(1) if cs else '?'}, the worker asked for {ch.group(1) if ch else '?'}): chunks served or made are not up in the grid")
+            else:
+                spawn_seen, spawn_at = None, time.monotonic()
             print(f"TRACE progress loadwatch {time.monotonic() - t0:.0f}s chunks up {up.group(1) if up else '?'} bake {bk.group(1) if bk else '?'}/"
                   f"{bk.group(2) if bk else '?'} {st.group(0) if st else ''} {rd.group(1) if rd else ''}", flush=True)
         launched = time.monotonic() - t0
     finally:
         game.close()
+    if failure:
+        print(f"FAIL: {failure}")
+        return 1
     if not load.exists():
         print(f"FAIL: atlas was not ready after {launched:.0f} s")
         return 1

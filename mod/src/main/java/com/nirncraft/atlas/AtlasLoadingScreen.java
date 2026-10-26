@@ -218,8 +218,7 @@ final class AtlasLoadingScreen extends Screen {
         if (pp != null && pp.split() == 1) y = line(g, cx, y, "Renderer (fast far kernel)", "compiling in the background", -1);
         y = line(g, cx, y, "Generator", p != null && p.running() ? "ready" : renderer ? "starting" : "waiting", p != null && p.running() ? 1 : 0);
         double near = p == null || p.nearTotal() == 0 ? 0 : Math.min(1.0, p.near() / (double) p.nearTotal());
-        String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks"
-                + (p.cached() > 0 ? " (" + p.cached() + " from the cache)" : "");
+        String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks";
         y = line(g, cx, y, "Spawn area", nearText, p != null && p.nearDone() ? 1 : near);
         AtlasCoarseBake.Progress bake = AtlasCoarseBake.progress();
         if (bake != null && bake.phase() > 0) {
@@ -277,7 +276,9 @@ final class AtlasLoadingScreen extends Screen {
             long known = bake.served() + bake.servePending();
             t.append("   tiles ").append(bake.served()).append(" / ").append(known);
         }
-        t.append(bake != null && bake.phase() > 0 ? ",  chunks " : "   chunks ").append(p.cached()).append(" / ").append(p.nearTotal());
+        // (one ratio: the chunks the cache served of the chunks it was asked for, never over the whole)
+        long asked = Math.max(AtlasClientGen.cacheAsked(), p.cached());
+        t.append(bake != null && bake.phase() > 0 ? ",  chunks served " : "   chunks served ").append(p.cached()).append(" of ").append(asked).append(" asked");
         return note(g, cx, y, t.toString());
     }
 

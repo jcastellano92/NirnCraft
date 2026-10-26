@@ -287,7 +287,9 @@ final class AtlasCoarseBake implements Runnable {
             if (!whole && !AtlasLoadingScreen.holding()) {
                 boolean[] idle = AtlasClientGen.idle();
                 long now = System.nanoTime();
-                if ((ALWAYS || idle == null || idle[0]) && now - lastStepNs > 30_000_000L) {
+                // (in play the bake is the GPU's leftovers: the near window idle, the frames at their target, the camera not
+                // moving fast: a tile of it beside frames took a frame's whole GPU, and a flight moves the horizon anyway)
+                if ((ALWAYS || ((idle == null || idle[0]) && AtlasClientGen.backgroundRoom())) && now - lastStepNs > 30_000_000L) {
                     step(1, false);
                     lastStepNs = System.nanoTime();
                     AtlasGenNative.Gen.BakeInfo i = info;

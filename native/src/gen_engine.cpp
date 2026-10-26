@@ -974,7 +974,7 @@ public:
                     fb.part = part;
                     fb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
                     fb.lastPartUs = uint32_t(std::min(lastSubMs_ * 1000.0, 4e9));  // (the latest done, the ring's)
-                    fb.budgetUs = uint32_t(partMs * 1000.0);
+                    fb.budgetUs = uint32_t((pace_.cls == 2 || boost_.load(std::memory_order_relaxed) ? 2.0 * partMs : partMs) * 1000.0);  // (play: 4 ms a part; the loading phase's 8)
                     fb.partsDone = partsDone_;
                     fb.partUs = partUs_.data();
                     int32_t r = st.ffn(st.user, &fb);
@@ -2582,8 +2582,9 @@ private:
         // near first: the duty, or the floor of 4 ms a frame period when the frames are slow (the share of a period 4 ms is)
         double nearFloor = pace_.periodMs > 0.0 ? std::clamp(4.0 / pace_.periodMs, 0.1, 0.5) : 0.0;
         pace_.tokens += dt * std::max(pace_.duty, nearFloor);
-        if (pace_.tokens > 30.0) {  // (the near bucket is full: the far path has the rest)
-            pace_.tokensFar = std::min(30.0, pace_.tokensFar + (pace_.tokens - 30.0));
+        if (pace_.tokens > 30.0) {  // (the near bucket is full: the far path has the rest, but at most 3 ms of GPU a frame period)
+            double farRate = pace_.periodMs > 0.0 ? 3.0 / pace_.periodMs : 0.1;
+            pace_.tokensFar = std::min(30.0, pace_.tokensFar + std::min(pace_.tokens - 30.0, dt * farRate));
             pace_.tokens = 30.0;
         }
     }
@@ -2640,7 +2641,8 @@ private:
         return uint32_t(std::clamp(sl, std::min(64.0, double(n)), double(n)));  // (64 groups at least: beside the frames a slice's time holds their share, and slices shrunk by it made a tile in 200 submissions)
     }
     void farSliceSeen(uint32_t kind, uint32_t units, double ms) {
-        static const double limit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
+        static const double loadLimit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
+        const double limit = pace_.cls == 2 || boost_.load(std::memory_order_relaxed) ? loadLimit : std::min(loadLimit, 4.0);  // (play: 4 ms, as far as the pass's floor lets it)
         double& sl = farSlice_[kind];
         if (sl <= 0.0 || units == 0) return;
         if (ms > limit) sl = std::max(64.0, double(units) * limit / ms * 0.85);
@@ -2680,7 +2682,10 @@ private:
             pace_.lastSubAt = std::chrono::steady_clock::now();
         }
         double& bucket = pace_.cls == 1 ? pace_.tokensFar : pace_.tokens;
-        while ((bucket < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
+        // (the far path: also not while the frames are over their target (a duty the pacer has cut); a part every 300 ms at most
+        // then, so that a tile begun finishes)
+        while ((((bucket < need) || (pace_.cls == 1 && pace_.periodMs > 0.0 && pace_.duty < 0.4)) && waited < 300.0) ||
+               (pace_.probing && waited < 1300.0)) {
             if (pace_.probing && !pace_.probeDrained) {
                 // (the probe times the frames alone: ours in flight done first, then from the next frame)
                 std::string e;
