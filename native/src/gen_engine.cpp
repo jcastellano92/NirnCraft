@@ -1609,7 +1609,7 @@ public:
         grid_->origin(org);
         if (!org[3]) return fail(err, "busy: the grid has no window yet (no frame rendered)");
         struct Want {
-            uint32_t chunk, sec;
+            uint32_t chunk, sec, kind;
         };
         std::vector<Want> want;
         for (uint32_t i = 0; i < n; i++) {
@@ -4206,17 +4206,26 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
         for (uint32_t i = 0; i < count; i++) {
             int32_t cx = chunkXZ[i * 2], cz = chunkXZ[i * 2 + 1];
             bool in = cx >= org[0] && cx < org[0] + grid->D && cz >= org[2] && cz < org[2] + grid->D;
+            uint32_t info[INFO_WORDS];
+            if (!in || !masks[i] || !gc->chunk(cx, cz, info)) {
+                masks[i] = 0;
+                continue;
+            }
             for (uint32_t s = 0; s < 40; s++) {
                 int32_t sy = int32_t(s) - 4;
-                if (!in || sy < org[1] || sy >= org[1] + grid->H) masks[i] &= ~(uint64_t(1) << s);
-                if ((masks[i] >> s) & 1u) items.push_back({i, s, nullptr});
+                if (sy < org[1] || sy >= org[1] + grid->H) masks[i] &= ~(uint64_t(1) << s);
+                if ((masks[i] >> s) & 1u) items.push_back({i, s, info[4 + s * 4 + 2], nullptr});
             }
         }
         std::atomic<size_t> next{0};
         atlas::parallelRun([&] {
             for (size_t k; (k = next.fetch_add(1)) < items.size();) {
                 Item& it = items[k];
-                it.valid = gc->readSection(Key3{0, chunkXZ[it.chunk * 2], int32_t(it.sec) - 4, chunkXZ[it.chunk * 2 + 1]}, it.words);
+                if (it.kind == GenCache::KIND_AIR) it.valid = true;
+                else if (it.kind == GenCache::KIND_BLOCKS) {
+                    it.words = gc->section(Key3{0, chunkXZ[it.chunk * 2], int32_t(it.sec) - 4, chunkXZ[it.chunk * 2 + 1]});
+                    it.valid = it.words != nullptr;
+                }
             }
         }, 8);
         uint32_t sent = 0;
