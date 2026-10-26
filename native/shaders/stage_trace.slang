@@ -109,13 +109,15 @@ bool levelOn(int k) {
 }
 
 // along d (|d| ~ 1) from camera-relative p: where level j's run of chunks not loaded around p ends (its chunk word's box,
-// as atlas_far.slang vgUnloadedEnd's first box), 0 when level j holds p, 1e30 when it is off or p is outside its window
+// as atlas_far.slang vgUnloadedEnd's first box), 0 when level j holds p, 1e30 when it is off, holds nothing anywhere
+// (level 0: vgOrigin.w bit 1; a coarse level: its data bit) or p is outside its window
 float unloadedExit(int j, float3 p, float3 d) {
-    if (!levelOn(j)) return 1e30;
-    int4 L = frame.vgLevel[clamp(j, 1, 6) - 1];
+    if (!levelOn(j) || (j == 0 && (frame.vgOrigin.w & 2) == 0)) return 1e30;
+    int4 L = j == 0 ? int4(frame.vgOrigin.x, frame.vgOrigin.z, 0, int(frame.vgDims.x) | (int(frame.vgDims.y) << 8))
+                    : frame.vgLevel[clamp(j, 1, 6) - 1];
     float cs = float(16 << j);
-    int X = L.w & 255, Y = (L.w >> 8) & 255, Z = X;
-    float3 q = (p + float3(frame.camInt.xyz - int3(L.x * (16 << j), -64, L.y * (16 << j)))) / cs;
+    int X = L.w & 255, Y = (L.w >> 8) & 255, Z = j == 0 ? int(frame.vgDims.z) : X;
+    float3 q = (p + float3(frame.camInt.xyz - (j == 0 ? frame.vgOrigin.xyz * 16 : int3(L.x * (16 << j), -64, L.y * (16 << j))))) / cs;
     int3 c = int3(floor(q));
     if (any(c < int3(0, 0, 0)) || c.x >= X || c.y >= Y || c.z >= Z) return 1e30;
     int px = (c.x + L.x) % X, pz = (c.z + L.y) % Z;
@@ -440,15 +442,18 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                         float lim = runEnd - t0;  // (the run's end along the chord)
                         if (entering) {
                             float ue = u;
-                            if (!held) ue = 1e30;  // (outside level 0's window: the run goes on while the chords want level 0)
+                            // (outside level 0's window, or level 0 holding nothing yet: the run goes on while the chords
+                            // want level 0)
+                            if (!held || (frame.vgOrigin.w & 2) == 0) ue = 1e30;
                             else {
                                 // the run's end: across the boxes of chunks not loaded (each chunk word's box, as an empty
                                 // one's), chunk by chunk to the first loaded one (atlas_far.slang vgUnloadedEnd)
                                 float3 roC = ro / 16.0, dC = dv / 16.0, invC = inv * 16.0;
                                 int3 cc = c;
                                 [loop]
-                                for (int it2 = 0; it2 < 64; it2++) {
+                                for (int it2 = 0; it2 < 16; it2++) {
                                     if (ue >= 1e29) break;
+                                    steps++;  // (each box a step: the ray's budget bounds a scan of unloaded chunks)
                                     if (any(cc < int3(0, 0, 0)) || cc.x >= X || cc.y >= Y || cc.z >= Z) {
                                         ue = 1e30;
                                         break;
@@ -524,7 +529,14 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                     } else if (finer && k > 0) {
                         k--;
                     } else {
-                        float sk = min(max(skip, 1e-3), len);
+                        // past the hole at the coarsest granularity there is: to where some level's run of chunks not
+                        // loaded ends (its chunk word's box; a level holding nothing at all, or this point outside its
+                        // window, none), the chord's end at most: never a level-0 chunk at a time across unheld space
+                        // (a grid still empty walked every 16 blocks of a far chord, to the step cap: 39 ms in game)
+                        float sk = len;
+                        [loop]
+                        for (int j = 0; j <= 6; j++) sk = min(sk, unloadedExit(j, a, d));
+                        sk = min(max(sk, 1e-3), len);
                         a = a + d * sk;
                         t0 += sk;
                         hitFrom = t0;
