@@ -128,7 +128,7 @@ final class AtlasProbe {
         JsonObject v = obj(core, "voxgrid");
         if (v == null) return;
         copy(o, v, "pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections", "built", "batches", "lastGpuMs",
-                "stageCpuMs", "stageCpuMaxMs", "framesSinceMove", "resident", "uniform", "nearestMissing", "reach");
+                "stageCpuMs", "stageCpuMaxMs", "framesSinceMove", "resident", "uniform", "nearestMissing", "reach", "cutoff");
         JsonObject rd = obj(core, "ready");
         if (rd != null) put(o, "pipelinesBuilding", rd, "pipelinesBuilding");
         if (v.has("settled")) o.addProperty("gridSettled", v.get("settled").getAsBoolean());

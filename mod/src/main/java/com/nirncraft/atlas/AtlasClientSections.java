@@ -275,7 +275,7 @@ final class AtlasClientSections {
             ready = READY.size();
         }
         return "clientSections{on=" + ON + " queued=" + QUEUED.size() + " ready=" + ready + " up=" + UP.size()
-                + " read=" + readCount + " dirtySections=" + dirtyCount + " dirtyQueued=" + DIRTY.size() + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
+                + " read=" + readCount + " dirtySections=" + dirtyCount + " dirtyQueued=" + DIRTY.size() + " rereads=" + rereads + String.format(java.util.Locale.ROOT, " readMsEach=%.3f", readCount > 0 ? readNs / 1e6 / readCount : 0.0) + "}";
     }
 
     /** The read chunk nearest block (x, z) for atlas, or null (far-field worker). */
@@ -303,6 +303,21 @@ final class AtlasClientSections {
     static void real(int cx, int cz) {
         REAL.add(ChunkPos.pack(cx, cz));
     }
+
+    /**
+     * Level 0 asks again for a section of a loaded chunk (AtlasClientGen.gridReports: its GPU copy was let go while it
+     * waited past the reach, and the claim that kept the feed from putting it up again is gone): read it again from the
+     * chunk, which the generator never remakes (its own blocks stand). Returns whether it was queued. Any thread.
+     */
+    static boolean reread(int cx, int sy, int cz) {
+        if (!ON || !REAL.contains(ChunkPos.pack(cx, cz))) return false;
+        DIRTY.add(net.minecraft.core.SectionPos.asLong(cx, sy, cz));
+        rereads++;
+        return true;
+    }
+
+    /** Sections read again for level 0 (reread), for the profile. */
+    static volatile long rereads;
 
     /** Whether the loaded chunk's own blocks are up (then generated ones must not replace them). */
     static boolean isReal(int cx, int cz) {

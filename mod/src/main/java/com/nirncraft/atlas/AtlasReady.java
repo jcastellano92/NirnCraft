@@ -116,8 +116,7 @@ public final class AtlasReady {
         // or past a full pool's cut-off; the coarse levels draw them, and they wait for the camera to come near, never for
         // time: readiness waited on "gpuWaiting 10280" for good while the outer rings' sections came in.
         long nm = v.has("nearestMissing") ? v.get("nearestMissing").getAsLong() : -1;
-        double cut = v.has("cutoff") ? v.get("cutoff").getAsDouble() : Double.MAX_VALUE;
-        boolean l0Takes = nm != 0 && nm <= cut;  // (0: none of them in the reach; -1: an older library, as before)
+        boolean l0Takes = levelZeroTakes(v);
         for (String k : new String[]{"pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections"}) {
             long n = v.has(k) ? v.get(k).getAsLong() : 0;
             if (n <= 0 || (!l0Takes && (k.equals("waiting") || k.equals("gpuWaiting")))) continue;
@@ -131,6 +130,17 @@ public final class AtlasReady {
                 if (n > 0 && waitOn("level " + e.getAsJsonObject().get("level").getAsInt(), n, what)) return what;
             }
         return "";
+    }
+
+    /**
+     * Whether level 0 would take one of its waiting sections (waiting, gpuWaiting) now, from atlas_info's voxgrid block or a
+     * sample with its fields (nearestMissing, cutoff): the nearest of them is within its reach (nearestMissing 0: none is)
+     * and its pool's cut-off. Without nearestMissing (an older library): true, as before.
+     */
+    public static boolean levelZeroTakes(JsonObject v) {
+        if (v == null || !v.has("nearestMissing")) return true;
+        double nm = v.get("nearestMissing").getAsDouble(), cut = v.has("cutoff") ? v.get("cutoff").getAsDouble() : Double.MAX_VALUE;
+        return nm > 0 && nm <= cut;
     }
 
     // (each grid queue's drain guard: a queue that does not fall for 30 s while readiness waits on it no longer holds it)
