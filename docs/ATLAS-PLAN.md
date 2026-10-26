@@ -437,6 +437,7 @@ branch is merged only when its stage comes and a quick re-check shows it still a
 | Component tooling gaps: GPU-vs-Java checks per component, seconds-long visuals for terrain, rivers and settlement placement | docs/COMPONENTS.md | when each component is worked on | — |
 | Generator column-cache statics (`g_colX/g_colZ/g_colOwn/g_colVals`) to a per-thread scratch buffer | conformance audit, blueprint §7 | next generator work | timing run on tileBiome |
 | Settled-state snapshot as shared tooling (gallery batches, wide-scene benches; never loading or route tests) | idea, 2026-10-26 | when the gallery or a wide scene is iterated | First measure the settle share from existing gallery logs; build only if large; a restored snapshot must give identical images |
+| Blueprint step 2b/2c (single call sites: 133k to 67k instructions, but shared 7936 to 16640 B and slower while the kernel sits at 168 registers) | E:/NirnCraft-scratch/atlas-int2/patches/atlas_far.2b2c.slang, atlas_far.2c.slang | after the lean trace kernel | Retry once trace is walk-only and under the register cap |
 | Bridge vanilla Profiler zones (worker threads) into the flight recorder | idea (spikes) | when CPU matters | — |
 
 ## 5. How the work runs (cost)
