@@ -288,3 +288,15 @@ Read these first:
   even with the feature switched off. Check "Shared Memory Size" with `ATLAS_PIPE_STATS=1` on any far-kernel change:
   7936 B is the good value.
 
+* **Adding content safely (2026-10-25).** Three layers, each with its guard:
+  1. **Content** (structures, biomes, trees, settlements, new blocks) is data and generator rules. The render kernel
+     sees only voxels and materials, and a new block's bricks come from its model, so content never changes the
+     render kernel's cost.
+     - Guards: GPU-vs-Java exactness; the generator's job limits (≤ 4-8 ms a dispatch, the pacer, recorder verdicts);
+       the gallery for looks; the cache fingerprint per generator stage (only affected data rebakes).
+  2. **Generator rules** (a new feature shape, a new biome step) change generator kernels. Their trap is one placement
+     on one lane for many ms. Guards: dispatch timing, exactness, and the same build-time pipeline-stats guard.
+  3. **Rendering features** (entities, volumes, light types, effects) change the render kernels. Guards: the build-time
+     pipeline-stats check (shared memory, local memory, registers), the no-struct-[noinline] and no-statics rules, a
+     ceiling test first, and a reviewer.
+
