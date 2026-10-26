@@ -108,22 +108,25 @@ static int infoInt(const std::string& inf, const char* key) {
 struct FarSide {
     const char* tr;
     const char* fa;
+    const char* wa;  // (the lean stage's water pass: counted with its trace)
     uint64_t seq = 0;
-    std::vector<double> trMs, faMs;
+    std::vector<double> trMs, faMs, waMs;
     // a new sample when the far pass's resolves moved (the trace's from the same resolve: no trace, 0)
     void sample() {
         uint64_t q = 0;
         double fa = atlas_fr_pass_ms(this->fa, &q);
         if (q == seq || fa < 0) return;
         seq = q;
-        double t = atlas_fr_pass_ms(this->tr, nullptr);
-        trMs.push_back(t > 0 ? t : 0.0);
+        double t = atlas_fr_pass_ms(this->tr, nullptr), wt = atlas_fr_pass_ms(this->wa, nullptr);
+        trMs.push_back((t > 0 ? t : 0.0) + (wt > 0 ? wt : 0.0));
+        waMs.push_back(wt > 0 ? wt : 0.0);
         faMs.push_back(fa);
     }
     void reset() {
         sample();
         trMs.clear();
         faMs.clear();
+        waMs.clear();
     }
 };
 static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
@@ -379,7 +382,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         // stable: the far work's time steady and the streaming idle (recorder on; else as before)
         int stableFrames = 0;
         bool idle = false;
-        FarSide sa{"farTrace", "far"}, sb{"farTrace B", "far B"};
+        FarSide sa{"farTrace", "far", "farWater"}, sb{"farTrace B", "far B", "farWater B"};
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");  // (no read back from here: the timed frames' conditions)
         if (std::getenv("ATLAS_RECORDER")) {
             int cap = std::atoi(arg(argc, argv, "settle", "150").c_str());
@@ -500,12 +503,12 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
                 std::printf("{\"view\":%d,%s}%s", vi, inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p).c_str(), bytes_nl);
         }
         std::printf("{\"view\":%d,\"camera\":[%.0f,%.0f,%.0f],\"yaw\":%.0f,\"pitch\":%.0f,\"cachedTiles\":%zu,\"cachedChunks\":%zu,\"farTiles\":%zu,\"farBusy\":%zu,\"farMs\":%.0f,"
-                    "\"settleFrames\":%d,\"stableFrames\":%d,\"idle\":%s,\"farTraceMs\":%.3f,\"farShadeMs\":%.3f,\"farTraceP10\":%.3f,\"farShadeP10\":%.3f,"
+                    "\"settleFrames\":%d,\"stableFrames\":%d,\"idle\":%s,\"farTraceMs\":%.3f,\"farShadeMs\":%.3f,\"farTraceP10\":%.3f,\"farShadeP10\":%.3f,\"farWaterMs\":%.3f,\"bWaterMs\":%.3f,"
                     "\"bTraceMs\":%.3f,\"bShadeMs\":%.3f,\"bTraceP10\":%.3f,\"bShadeP10\":%.3f,\"abRatio\":%.4f,\"abRatioP10\":%.4f,"
                     "\"abRatioP90\":%.4f,\"abTraceRatio\":%.4f,\"abPairs\":%zu,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
                     "\"hitShare\":%.3f,\"grazingShare\":%.3f,\"png\":\"%s\",\"dump\":\"%s\"}\n",
                     vi, cam[0], cam[1], cam[2], yaw, pitch, cachedTiles, cachedChunks, made, busy, tFar - t0, settle, stableFrames, idle ? "true" : "false",
-                    pct(trMs, 0.5), pct(faMs, 0.5), pct(trMs, 0.1), pct(faMs, 0.1), pct(sb.trMs, 0.5), pct(sb.faMs, 0.5),
+                    pct(trMs, 0.5), pct(faMs, 0.5), pct(trMs, 0.1), pct(faMs, 0.1), pct(sa.waMs, 0.5), pct(sb.waMs, 0.5), pct(sb.trMs, 0.5), pct(sb.faMs, 0.5),
                     pct(sb.trMs, 0.1), pct(sb.faMs, 0.1), pct(ratio, 0.5), pct(ratio, 0.1), pct(ratio, 0.9), pct(trRatio, 0.5), ratio.size(),
                     tSettled - tFar, sorted.front(),
                     sorted[sorted.size() / 2], double(steps) / (double(W) * H), double(hits) / (double(W) * H),

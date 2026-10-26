@@ -18,6 +18,12 @@
 #ifndef ATLAS_LEAN_CLOCK
 #define ATLAS_LEAN_CLOCK 0
 #endif
+// ATLAS_LEAN_PASS 0: the primary walk (a water surface met from above: its pixel listed in leanList); 1: the water pass
+// over that compacted list, the trace on behind each surface (the blueprint's work lists: each pass its own small
+// state; the water trace inside the primary walk spilled its registers to shared memory, 1280 -> 6912 B a group)
+#ifndef ATLAS_LEAN_PASS
+#define ATLAS_LEAN_PASS 0
+#endif
 
 [[vk::binding(0, 0)]] ConstantBuffer<FrameGpu> frame;
 [[vk::binding(7, 0)]] StructuredBuffer<MaterialGpu> palette;
@@ -29,6 +35,8 @@
 [[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;  // (the last frame's surface distance per pixel)
 [[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
 [[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
+// the water pass's work list: [0] the pixels listed, [1..3] its indirect dispatch (groups of 64, 1, 1), [4..] the pixels
+[[vk::binding(43, 0)]] RWStructuredBuffer<uint> leanList;
 
 static const uint ST_EMPTY = 0u, ST_UNLOADED = 2u, ST_UNIFORM = 3u;  // (voxgrid.hpp VG_*; 1 mixed)
 static const uint RAY_STEPS = 24576u;  // a ray's steps at most (farMain's)
@@ -101,13 +109,15 @@ bool levelOn(int k) {
 }
 
 // along d (|d| ~ 1) from camera-relative p: where level j's run of chunks not loaded around p ends (its chunk word's box,
-// as atlas_far.slang vgUnloadedEnd's first box), 0 when level j holds p, 1e30 when it is off or p is outside its window
+// as atlas_far.slang vgUnloadedEnd's first box), 0 when level j holds p, 1e30 when it is off, holds nothing anywhere
+// (level 0: vgOrigin.w bit 1; a coarse level: its data bit) or p is outside its window
 float unloadedExit(int j, float3 p, float3 d) {
-    if (!levelOn(j)) return 1e30;
-    int4 L = frame.vgLevel[clamp(j, 1, 6) - 1];
+    if (!levelOn(j) || (j == 0 && (frame.vgOrigin.w & 2) == 0)) return 1e30;
+    int4 L = j == 0 ? int4(frame.vgOrigin.x, frame.vgOrigin.z, 0, int(frame.vgDims.x) | (int(frame.vgDims.y) << 8))
+                    : frame.vgLevel[clamp(j, 1, 6) - 1];
     float cs = float(16 << j);
-    int X = L.w & 255, Y = (L.w >> 8) & 255, Z = X;
-    float3 q = (p + float3(frame.camInt.xyz - int3(L.x * (16 << j), -64, L.y * (16 << j)))) / cs;
+    int X = L.w & 255, Y = (L.w >> 8) & 255, Z = j == 0 ? int(frame.vgDims.z) : X;
+    float3 q = (p + float3(frame.camInt.xyz - (j == 0 ? frame.vgOrigin.xyz * 16 : int3(L.x * (16 << j), -64, L.y * (16 << j))))) / cs;
     int3 c = int3(floor(q));
     if (any(c < int3(0, 0, 0)) || c.x >= X || c.y >= Y || c.z >= Z) return 1e30;
     int px = (c.x + L.x) % X, pz = (c.z + L.y) % Z;
@@ -124,11 +134,20 @@ float unloadedExit(int j, float3 p, float3 d) {
 }
 
 [shader("compute")]
+#if ATLAS_LEAN_PASS == 1
+[numthreads(64, 1, 1)]
+void traceMain(uint3 gid : SV_DispatchThreadID) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    if (gid.x >= leanList[0]) return;
+    uint pix = leanList[4u + gid.x];
+    uint3 id = uint3(pix % w, pix / w, 0u);
+#else
 [numthreads(8, 8, 1)]
 void traceMain(uint3 id : SV_DispatchThreadID) {
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
+#endif
 #if ATLAS_LEAN_CLOCK
     uint64_t clk0 = clockARB();
 #endif
@@ -141,7 +160,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     bool nearRaster = (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) == FRAME_PRIMARY_NEAR;
     bool seeThrough = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
     float eyeDepth = -1.0;  // (farMain's eyeWaterDepth: the water above the eye, blocks; -1 not in water)
-    if (unified && levelOn(0)) {
+    if (ATLAS_LEAN_PASS == 0 && unified && levelOn(0)) {
         int3 g0 = frame.vgOrigin.xyz * 16;
         int3 ve = int3(floor(frame.camFrac.xyz + float3(frame.camInt.xyz - g0)));
         int X0 = int(frame.vgDims.x), Y0 = int(frame.vgDims.y), Z0 = int(frame.vgDims.z);
@@ -167,7 +186,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     // wider than the pixel), or the sky. (Not the clock build: no shade after it writes the surface it reprojects by.
     // Not with the eye under water, as farMain. Under ATLAS_AB both sides take the other's
     // records: a valid pair when both amortise, biased when one side does not)
-#if !ATLAS_LEAN_CLOCK
+#if !ATLAS_LEAN_CLOCK && ATLAS_LEAN_PASS == 0
     if ((frame.dims.z & FRAME_FAR_AMORT) != 0u && !eyeWater) {
         uint2 tile = id.xy / 8u;
         uint n = w * h, cnt, strd, cnt2;
@@ -224,6 +243,17 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     int wK = 0;
     float tStart = primaryNear ? 0.0 : frame.params.x, hitFrom = 0.0;  // (the walk's start; the start of the chord that hit)
     float tStart0 = tStart;
+#if ATLAS_LEAN_PASS == 1
+    // (the water pass: the surface the primary walk met, from its record: the trace on from it, water passed)
+    uint4 wa0 = farHit[pix * 2u], wb0 = farHit[pix * 2u + 1u];
+    tW = asfloat(wa0.y);
+    wMat = wb0.y;
+    wK = int((wb0.x >> 6) & 15u);
+    steps = wb0.x >> 10;
+    skipWater = true;
+    tStart = unified ? tW : tStart0;
+    tB = unified ? min(tW + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
+#endif
     uint hasAlbedo = 0u;
     float3 alb = float3(0, 0, 0);
     // (6.5, the grazing look: a hit whose face's footprint wants a coarser level than its chord's walks that level
@@ -241,7 +271,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     // ray's set-up and the walk's state live inside a pass: set up outside, they were live across the smooth search, and
     // the driver's 72 registers and 4352 bytes of shared memory a group were 64 and 768)
     [loop]
-    for (int ph = 0; ph < 2; ph++) {
+    for (int ph = ATLAS_LEAN_PASS; ph < 2; ph++) {
         // (ph 0 the view ray, ph 1 on behind a water surface: each a full trace, its passes and grazing looks)
         pass = 0;
         grazing = false;
@@ -412,15 +442,18 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                         float lim = runEnd - t0;  // (the run's end along the chord)
                         if (entering) {
                             float ue = u;
-                            if (!held) ue = 1e30;  // (outside level 0's window: the run goes on while the chords want level 0)
+                            // (outside level 0's window, or level 0 holding nothing yet: the run goes on while the chords
+                            // want level 0)
+                            if (!held || (frame.vgOrigin.w & 2) == 0) ue = 1e30;
                             else {
                                 // the run's end: across the boxes of chunks not loaded (each chunk word's box, as an empty
                                 // one's), chunk by chunk to the first loaded one (atlas_far.slang vgUnloadedEnd)
                                 float3 roC = ro / 16.0, dC = dv / 16.0, invC = inv * 16.0;
                                 int3 cc = c;
                                 [loop]
-                                for (int it2 = 0; it2 < 64; it2++) {
+                                for (int it2 = 0; it2 < 16; it2++) {
                                     if (ue >= 1e29) break;
+                                    steps++;  // (each box a step: the ray's budget bounds a scan of unloaded chunks)
                                     if (any(cc < int3(0, 0, 0)) || cc.x >= X || cc.y >= Y || cc.z >= Z) {
                                         ue = 1e30;
                                         break;
@@ -496,7 +529,14 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                     } else if (finer && k > 0) {
                         k--;
                     } else {
-                        float sk = min(max(skip, 1e-3), len);
+                        // past the hole at the coarsest granularity there is: to where some level's run of chunks not
+                        // loaded ends (its chunk word's box; a level holding nothing at all, or this point outside its
+                        // window, none), the chord's end at most: never a level-0 chunk at a time across unheld space
+                        // (a grid still empty walked every 16 blocks of a far chord, to the step cap: 39 ms in game)
+                        float sk = len;
+                        [loop]
+                        for (int j = 0; j <= 6; j++) sk = min(sk, unloadedExit(j, a, d));
+                        sk = min(max(sk, 1e-3), len);
                         a = a + d * sk;
                         t0 += sk;
                         hitFrom = t0;
@@ -732,9 +772,21 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
         wK = k;
         if (!(primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[mat].emisClass.y) == 2u)) break;
         tW = unified ? tHit : -1.0;
+#if ATLAS_LEAN_PASS == 0
+        // (a water surface: the trace behind it is the water pass's, its pixel listed; the record holds the surface,
+        // tW, for it: in the unified field its own hit, else the near raster's: the water pass starts where this did)
+        {
+            uint at;
+            InterlockedAdd(leanList[0], 1u, at);
+            if ((at & 63u) == 0u) InterlockedAdd(leanList[1], 1u);
+            leanList[4u + at] = pix;
+        }
+        break;
+#else
         tStart = unified ? tHit : tStart0;
         tB = unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
         skipWater = true;
+#endif
     }
     // the hit record (atlas_far.slang farHitStore's layout: tHit, tW, material, albedo flags; axis, level, water's level,
     // steps; the water's material; the albedo as halves, the frame it was traced: the amortisation's age)
