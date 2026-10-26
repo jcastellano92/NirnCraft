@@ -299,4 +299,11 @@ Read these first:
   3. **Rendering features** (entities, volumes, light types, effects) change the render kernels. Guards: the build-time
      pipeline-stats check (shared memory, local memory, registers), the no-struct-[noinline] and no-statics rules, a
      ceiling test first, and a reviewer.
+  **Standards that make the right way the default:**
+  - **Content is data:** Minecraft-style features compile to GPU programs automatically (AtlasFeatureProgram), and
+    settlements are recorded tapes. Add or change content in data; code changes only for a new feature type.
+  - **A new feature type** follows the bounded-work template (resumable phases, a per-lane op budget), as the tree
+    phases do, so it can't become one long placement. Write the template when the next new type is needed.
+  - **The build runs the pipeline-stats guard (fails) and the shader lint (warns, with a fix hint each).**
+  - **`harness.py run --changed`** runs exactness, dispatch timing and the gallery for what changed (impact.json).
 
