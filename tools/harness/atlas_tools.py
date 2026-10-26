@@ -352,6 +352,7 @@ def summarize(data):
     # a counter no reading had is not a number: the route fails on it ("metric X absent"), nothing is reported as -1 or 0
     absent = [k for k in REQUIRED if not any(k in a for a in atlas)] if any(atlas) else list(REQUIRED)
     absent = sorted(set(absent) | set(data.get("absentMetrics") or []))
+    # Storage-window residency, not screen pixels: a coarser resident level can cover a finer missing column.
     holes = [int(sum(a["holes"])) for a in atlas if a.get("holes") is not None]
     partial = [int(sum(a["partial"])) for a in atlas if a.get("partial") is not None]
     per_level = [max(a["holes"][k] for a in atlas if a.get("holes") and k < len(a["holes"])) for k in range(7)] if holes else None
@@ -484,7 +485,7 @@ def summarize(data):
     if m["max"] > BAR["max"]:
         fails.append(f"worst frame {m['max']} ms > {BAR['max']:g} ({m['over50']} over 50 ms)")
     if m["holesMax"] is not None and m["holesMax"] > BAR["holes"]:
-        fails.append(f"holes up to {m['holesMax']} (per level max {m['holesPerLevelMax']}), {m['holesAtEnd']} at the end; "
+        fails.append(f"window residency: up to {m['holesMax']} columns without data (per level max {m['holesPerLevelMax']}), {m['holesAtEnd']} at the end; "
                      f"far reach down to {m['farReachMin']} m")
     return m, fails
 
@@ -627,7 +628,8 @@ def html(folder, title, runs, verdict, extra=""):
 <style>body{{font:13px system-ui;background:#111;color:#ddd;margin:16px;max-width:1300px}}table{{border-collapse:collapse;margin:6px 0}}
 td,th{{border:1px solid #444;padding:3px 8px;text-align:right}}h1{{font-size:18px}}h3{{margin:12px 0 2px}}img{{max-width:100%}}</style>
 <h1>{title}</h1><p>{verdict}</p>{''.join(rows)}{extra}
-<img src="charts.png"><img src="captures.png"><p>report.json holds every second; bar: p99 &lt;= {BAR['p99']:g} ms, max &lt;= {BAR['max']:g} ms, holes 0 over the route.</p>"""
+<img src="charts.png"><img src="captures.png"><p>report.json holds every second; bar: p99 &lt;= {BAR['p99']:g} ms, max &lt;= {BAR['max']:g} ms, window-residency holes 0 over the route.
+The holes counters count unloaded storage-window columns; coarser levels may cover them. They do not measure screen-visible missing terrain. That gate needs separate pixel evidence.</p>"""
     (folder / "report.html").write_text(page, encoding="utf-8")
 
 

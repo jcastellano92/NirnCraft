@@ -110,7 +110,7 @@ quality/fallback regressions pass. The defined GPU scale floor is now consistent
 0.33 override (about 47% more pixels at the floor, not yet timed live). This is correctness evidence, not a stage
 gate: route/gallery/relaunch, seam metrics and frame budgets remain to be demonstrated. Cache corruption recovery and
 the unfinished seam work are separate lanes; Vulkan's last parity run is red and is not ready to merge.
-Cache recovery integration now passes the full native suite and kernel-budget check (2026-10-26): failed BLOCKS
+Cache recovery integration now passes the full native suite and SPIR-V kernel-budget check (2026-10-26): failed BLOCKS
 reads cannot publish AIR; failed masks retry; persistent invalidation and torn-tail repair survive relaunch. The
 shaderless disk test covers a real checksum bit flip, eight concurrent readers, regeneration and torn records.
 This does not yet establish the live route/revisit gate; the scene-level cache relaunch check remains required.
@@ -118,6 +118,19 @@ The packaged Windows and Linux natives are now both current ABI 0.17 with 166 ex
 rebuilt against the existing glibc-2.28 sysroot and loaded successfully in WSL; the build reports GLIBC_2.27 as its
 newest required symbol. This is build/load evidence, not cross-vendor rendering acceptance. The harness now retains
 full check logs, streams TRACE progress and preserves partial timeout evidence, including owned-tree cleanup.
+
+First integrated scripted-route baseline (2026-10-26, main `4e407ed5`): 2560×1440 RTX 3090, 4,950 measured frames,
+ten captures (the harness excludes 100 capture-overhead frames). **FAIL:** p99 41.23 ms, worst 90.06 ms, 11 frames
+over 50 ms. Recorder evidence includes generator queue delays and a 68.7-ms `api:setView` CPU stall alongside a
+66.3-ms background `world.sectionsIn` hold. The route's `coverage.holes` counters measure missing columns across
+storage windows, not screen-visible holes; existing residency assertions remain, and the pixel-hole gate is still
+unmeasured. Full-resolution review flagged a floating tree-like fragment/distant band and requested further crops.
+Evidence is retained in `E:/NirnCraft-scratch/codex-route-evidence/20261026-190239`.
+
+A separate production driver-resource audit fails existing limits (2026-10-26): split shared memory 16,640 versus
+7,936 bytes, plus smaller general/local and binary overruns. These failures exist on the current production shaders;
+functional native tests and SPIR-V checks do not establish a driver-budget pass. Keep these limits and failures
+visible while evaluating isolated lean color experiments. No experimental shader change is integrated into main.
 
 ## 1. The bar (what "done" means, measurable)
 
