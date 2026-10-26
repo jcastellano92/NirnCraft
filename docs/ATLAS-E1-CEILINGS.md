@@ -4,6 +4,12 @@ A read-only Opus planner's report on the far pass at 2560×1440: today 43.6 / 58
 **M** means measured from the logs or read from the code. **E** means estimated. Ablations 1–3 at the end decide the
 next lever.
 
+**Correction (2026-10-26):** the far-pass ms here and in lean steps 6.2/6.3 (lean trace 2.0/2.4 and 2.7/5.2 ms, the
+"~11 ms of shade") were medians over frames that read the outputs back to the host, which costs the far kernel about
+8 ms; timed without read back, as the game runs, and settled (p10, 6.3 with smooth, valley/horizon/slope): lean trace
+2.3 / 4.5 / 0.43 ms, shade 2.3 / 3.7 / 0.96 ms, farMain 58 / 84 / 4.2 ms (amortisation off). Absolute ms move 20–40 %
+between runs with the GPU's clocks; the paired ratio holds (farMain over the lean far work: 12.4× / 14.1× / 2.9×).
+
 ## The main finding: the cost is in how the kernel is built, not in the number of steps
 
 - **M** — Steps per pixel today (`E:/NirnCraft-scratch/atlas-int2/e2/v45e_pw3_a1.log`): valley 12.7, horizon 13.5,

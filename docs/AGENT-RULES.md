@@ -40,6 +40,9 @@ below apply to every session and agent.
   initializers); shared helpers take state as parameters. Check: `spirv-dis <kernel>.spv | grep -c 'OpVariable.*Private'`
   is 0 for every kernel. Offline timings of a new kernel are valid only once its driver compile is cached and the grid
   is settled (atlas_render's warm-up: "settled in ... N frames" with N > 0 and nothing pending).
+  A kernel decision rests on the paired ratio, not on ms: gen_bake_tool views with `ATLAS_AB` (side B every other frame
+  in one process; `abRatio` and its p10/p90 on the line). The GPU's clocks step between blocks of frames, so absolute ms
+  move 20-40 % between identical runs; the ratio holds within ~1 %. Timed frames never read the outputs back.
 * **Reviewers:** the orchestrator puts read-only reviewer agents on new GPU code and on any stuck debugging; their
   findings come to the owning agent through the orchestrator.
 * **Lessons that cost hours (2026-10-21), don't repeat:**

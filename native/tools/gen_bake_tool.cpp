@@ -73,7 +73,7 @@ static const char bytes_nl[] = {10, 0};
 
 extern "C" ATLAS_API const char* atlas_fr_dump(const char* reason);  // (flight_recorder.cpp)
 extern "C" ATLAS_API void atlas_fr_frame(void);
-extern "C" ATLAS_API double atlas_fr_pass_ms(const char* name);
+extern "C" ATLAS_API double atlas_fr_pass_ms(const char* name, uint64_t* seq);
 
 static int infoInt(const std::string& inf, const char* key) {
     size_t p = inf.find(key);
@@ -92,7 +92,32 @@ static int infoInt(const std::string& inf, const char* key) {
 // 3 % over 8 frames with the streaming queues empty (settle=<cap> frames at most, 150): the levels still fill in after
 // nothing is pending, and a bench timed then measured the fill, not the kernel (the horizon's far pass +-20 %).
 // stableFrames on the line; farTraceMs / farShadeMs the timed frames' medians, farTraceP10 / farShadeP10 their tenth
-// percentiles: the GPU's clocks step between blocks of frames, the median moves with the mix of blocks)
+// percentiles: the GPU's clocks step between blocks of frames, the median moves with the mix of blocks. Neither the
+// steady phase nor the timed frames read the outputs back (a G-buffer written across the bus costs the far kernel
+// ~8 ms: the game keeps them on the device). ATLAS_AB (vk_backend.cpp): every other frame side B; its ms as bTraceMs ...,
+// and abRatio, side B's far work over side A's frame by frame (median; abRatioP10 / P90 its spread over abPairs):
+// the decision number, the ms indicative)
+struct FarSide {
+    const char* tr;
+    const char* fa;
+    uint64_t seq = 0;
+    std::vector<double> trMs, faMs;
+    // a new sample when the far pass's resolves moved (the trace's from the same resolve: no trace, 0)
+    void sample() {
+        uint64_t q = 0;
+        double fa = atlas_fr_pass_ms(this->fa, &q);
+        if (q == seq || fa < 0) return;
+        seq = q;
+        double t = atlas_fr_pass_ms(this->tr, nullptr);
+        trMs.push_back(t > 0 ? t : 0.0);
+        faMs.push_back(fa);
+    }
+    void reset() {
+        sample();
+        trMs.clear();
+        faMs.clear();
+    }
+};
 static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
     uint32_t W = uint32_t(std::atoi(arg(argc, argv, "w", "2560").c_str())), H = uint32_t(std::atoi(arg(argc, argv, "h", "1440").c_str()));
     int frames = std::atoi(arg(argc, argv, "frames", "12").c_str()), nearR = std::atoi(arg(argc, argv, "near", "16").c_str());
@@ -254,14 +279,18 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         // stable: the far work's time steady and the streaming idle (recorder on; else as before)
         int stableFrames = 0;
         bool idle = false;
+        FarSide sa{"farTrace", "far"}, sb{"farTrace B", "far B"};
+        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");  // (no read back from here: the timed frames' conditions)
         if (std::getenv("ATLAS_RECORDER")) {
             int cap = std::atoi(arg(argc, argv, "settle", "150").c_str());
             std::vector<double> win;
             for (; stableFrames < cap; stableFrames++) {
                 atlas_render(ctx, &f, &out);
                 atlas_fr_frame();
-                double tr = atlas_fr_pass_ms("farTrace"), fa = atlas_fr_pass_ms("far");
-                win.push_back((tr > 0 ? tr : 0.0) + (fa > 0 ? fa : 0.0));
+                size_t had = sa.faMs.size();
+                sa.sample();
+                if (sa.faMs.size() == had) continue;
+                win.push_back(sa.trMs.back() + sa.faMs.back());
                 if (win.size() > 8) win.erase(win.begin());
                 std::string inf = atlas_info(ctx);
                 idle = infoInt(inf, "\"pending\":") == 0 && infoInt(inf, "\"waiting\":") <= 0 && infoInt(inf, "\"gpuWaiting\":") <= 0 &&
@@ -273,8 +302,9 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         }
         double tSettled = nowMs();
         // the timed frames (outputs on the device, as in game), then one read back for the image and the hit statistics
-        _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
-        std::vector<double> ms, trMs, faMs;
+        sa.reset();
+        sb.reset();
+        std::vector<double> ms;
         uint64_t steps = 0;
         for (int i = 0; i < frames; i++) {
             atlas_render(ctx, &f, &out);
@@ -283,9 +313,19 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             atlas_get_stats(ctx, &st);
             ms.push_back(st.lastFrameMs);
             steps = st.raySteps;
-            trMs.push_back(atlas_fr_pass_ms("farTrace"));
-            faMs.push_back(atlas_fr_pass_ms("far"));
-            if (std::getenv("ATLAS_SETTLE_DEBUG")) std::fprintf(stderr, "timed %d farTrace %.3f far %.3f frame %.3f\n", i, trMs.back(), faMs.back(), st.lastFrameMs);
+            sa.sample();
+            sb.sample();
+            if (std::getenv("ATLAS_SETTLE_DEBUG"))
+                std::fprintf(stderr, "timed %d A %zu %.3f %.3f B %zu %.3f %.3f\n", i, sa.faMs.size(), sa.trMs.empty() ? -1 : sa.trMs.back(),
+                             sa.faMs.empty() ? -1 : sa.faMs.back(), sb.faMs.size(), sb.trMs.empty() ? -1 : sb.trMs.back(), sb.faMs.empty() ? -1 : sb.faMs.back());
+        }
+        const std::vector<double>&trMs = sa.trMs, &faMs = sa.faMs;
+        // (the pairs: side A's k-th sample and side B's, adjacent frames)
+        std::vector<double> ratio, trRatio;
+        for (size_t k = 0; k < std::min(sa.faMs.size(), sb.faMs.size()); k++) {
+            double a = sa.trMs[k] + sa.faMs[k], b = sb.trMs[k] + sb.faMs[k];
+            if (a > 0) ratio.push_back(b / a);
+            if (sa.trMs[k] > 0 && sb.trMs[k] > 0) trRatio.push_back(sb.trMs[k] / sa.trMs[k]);
         }
         // (the median, and the tenth percentile: the GPU's clocks step between blocks of frames, the low end the kernel's)
         auto pct = [](std::vector<double> v, double q) {
@@ -358,10 +398,14 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
                 std::printf("{\"view\":%d,%s}%s", vi, inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p).c_str(), bytes_nl);
         }
         std::printf("{\"view\":%d,\"camera\":[%.0f,%.0f,%.0f],\"yaw\":%.0f,\"pitch\":%.0f,\"cachedTiles\":%zu,\"cachedChunks\":%zu,\"farTiles\":%zu,\"farBusy\":%zu,\"farMs\":%.0f,"
-                    "\"settleFrames\":%d,\"stableFrames\":%d,\"idle\":%s,\"farTraceMs\":%.3f,\"farShadeMs\":%.3f,\"farTraceP10\":%.3f,\"farShadeP10\":%.3f,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
+                    "\"settleFrames\":%d,\"stableFrames\":%d,\"idle\":%s,\"farTraceMs\":%.3f,\"farShadeMs\":%.3f,\"farTraceP10\":%.3f,\"farShadeP10\":%.3f,"
+                    "\"bTraceMs\":%.3f,\"bShadeMs\":%.3f,\"bTraceP10\":%.3f,\"bShadeP10\":%.3f,\"abRatio\":%.4f,\"abRatioP10\":%.4f,"
+                    "\"abRatioP90\":%.4f,\"abTraceRatio\":%.4f,\"abPairs\":%zu,\"settleMs\":%.0f,\"frameMsBest\":%.2f,\"frameMsMedian\":%.2f,\"stepsPerPixel\":%.2f,"
                     "\"hitShare\":%.3f,\"grazingShare\":%.3f,\"png\":\"%s\",\"dump\":\"%s\"}\n",
                     vi, cam[0], cam[1], cam[2], yaw, pitch, cachedTiles, cachedChunks, made, busy, tFar - t0, settle, stableFrames, idle ? "true" : "false",
-                    pct(trMs, 0.5), pct(faMs, 0.5), pct(trMs, 0.1), pct(faMs, 0.1), tSettled - tFar, sorted.front(),
+                    pct(trMs, 0.5), pct(faMs, 0.5), pct(trMs, 0.1), pct(faMs, 0.1), pct(sb.trMs, 0.5), pct(sb.faMs, 0.5),
+                    pct(sb.trMs, 0.1), pct(sb.faMs, 0.1), pct(ratio, 0.5), pct(ratio, 0.1), pct(ratio, 0.9), pct(trRatio, 0.5), ratio.size(),
+                    tSettled - tFar, sorted.front(),
                     sorted[sorted.size() / 2], double(steps) / (double(W) * H), double(hits) / (double(W) * H),
                     hits ? double(grazing) / hits : 0.0, png.c_str(), dump.c_str());
         std::fflush(stdout);

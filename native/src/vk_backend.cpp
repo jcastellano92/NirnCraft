@@ -490,6 +490,8 @@ public:
             if (farSplitShader_) vkDestroyShaderModule(dev_, farSplitShader_, nullptr);
             if (leanPipe_) vkDestroyPipeline(dev_, leanPipe_, nullptr);
             if (leanShader_) vkDestroyShaderModule(dev_, leanShader_, nullptr);
+            if (leanPipeB_) vkDestroyPipeline(dev_, leanPipeB_, nullptr);
+            if (leanShaderB_) vkDestroyShaderModule(dev_, leanShaderB_, nullptr);
             if (shadePipe_) vkDestroyPipeline(dev_, shadePipe_, nullptr);
             if (shadeShader_) vkDestroyShaderModule(dev_, shadeShader_, nullptr);
             for (int i = 0; i < RELOAD_KERNELS; i++) {  // (built and never swapped in)
@@ -599,50 +601,66 @@ public:
             return false;
         // (dev: ATLAS_FAR_LEAN=1, the lean trace stage in place of the split frames' far pass, its steps in the counters;
         // 2 its clock build, the counters its cycles / 16. Step 6 of docs/ATLAS-RENDER-BLUEPRINT.md: measured, not drawn)
+        // (dev: ATLAS_AB, the bench's paired comparison: every other frame's far work is side B, the frames between side
+        // A (ATLAS_FAR_LEAN's): "lean" the built-in lean stage, "lean:<file.spv>" a lean variant, "farmain" the split
+        // frames' farMain; ATLAS_AB_ABLATE=<bits> side B's ATLAS_ABLATE. Its passes are marked "farTrace B" / "far B".
+        // The GPU's clocks step between blocks of frames: the two sides' ratio frame by frame holds, their ms do not)
+        auto readSpv = [](const char* f, std::vector<uint32_t>& code) {
+            FILE* fp = f && *f ? std::fopen(f, "rb") : nullptr;
+            if (!fp) return false;
+            std::fseek(fp, 0, SEEK_END);
+            long n = std::ftell(fp);
+            std::fseek(fp, 0, SEEK_SET);
+            code.resize(size_t(n > 0 ? n : 0) / 4);
+            bool ok = n > 0 && std::fread(code.data(), 4, code.size(), fp) == code.size();
+            std::fclose(fp);
+            if (ok) std::fprintf(stderr, "[atlas] lean trace stage from %s (%ld bytes)\n", f, n);
+            return ok;
+        };
+        auto makeLean = [&](const uint32_t* code, size_t size, VkShaderModule& sm, VkPipeline& pipe, const char* name) {
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = size;
+            smci.pCode = code;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &sm) != VK_SUCCESS) return;
+            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cp.stage.module = sm;
+            cp.stage.pName = "main";
+            cp.layout = farLayout_;
+            if (makePipeline(cp, &pipe, name) != VK_SUCCESS) pipe = VK_NULL_HANDLE;
+        };
         if (const char* e = std::getenv("ATLAS_FAR_LEAN"); e && (*e == '1' || *e == '2')) {
             farLean_ = *e - '0';
-            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-            smci.codeSize = farLean_ == 2 ? stage_trace_clock_spv_size : stage_trace_spv_size;
-            smci.pCode = farLean_ == 2 ? stage_trace_clock_spv : stage_trace_spv;
             // (ATLAS_LEAN_SPV: a .spv file in its place, a variant measured without a rebuild)
             std::vector<uint32_t> leanFile;
-            if (const char* f = std::getenv("ATLAS_LEAN_SPV"); f && *f) {
-                if (FILE* fp = std::fopen(f, "rb")) {
-                    std::fseek(fp, 0, SEEK_END);
-                    long n = std::ftell(fp);
-                    std::fseek(fp, 0, SEEK_SET);
-                    leanFile.resize(size_t(n > 0 ? n : 0) / 4);
-                    if (n > 0 && std::fread(leanFile.data(), 4, leanFile.size(), fp) == leanFile.size()) {
-                        smci.codeSize = leanFile.size() * 4;
-                        smci.pCode = leanFile.data();
-                        std::fprintf(stderr, "[atlas] lean trace stage from %s (%ld bytes)\n", f, n);
-                    }
-                    std::fclose(fp);
-                }
+            if (readSpv(std::getenv("ATLAS_LEAN_SPV"), leanFile))
+                makeLean(leanFile.data(), leanFile.size() * 4, leanShader_, leanPipe_, farLean_ == 2 ? "traceMain (lean, clock)" : "traceMain (lean)");
+            else if (farLean_ == 2)
+                makeLean(stage_trace_clock_spv, stage_trace_clock_spv_size, leanShader_, leanPipe_, "traceMain (lean, clock)");
+            else
+                makeLean(stage_trace_spv, stage_trace_spv_size, leanShader_, leanPipe_, "traceMain (lean)");
+        }
+        if (const char* e = std::getenv("ATLAS_AB"); e && *e) {
+            if (std::strncmp(e, "lean", 4) == 0) {
+                abMode_ = 1;
+                std::vector<uint32_t> bFile;
+                if (e[4] == ':' && readSpv(e + 5, bFile))
+                    makeLean(bFile.data(), bFile.size() * 4, leanShaderB_, leanPipeB_, "traceMain (lean B)");
+                else
+                    makeLean(stage_trace_spv, stage_trace_spv_size, leanShaderB_, leanPipeB_, "traceMain (lean B)");
+            } else if (std::strcmp(e, "farmain") == 0) {
+                abMode_ = 2;
             }
-            if (vkCreateShaderModule(dev_, &smci, nullptr, &leanShader_) == VK_SUCCESS) {
-                VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-                cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-                cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-                cp.stage.module = leanShader_;
-                cp.stage.pName = "main";
-                cp.layout = farLayout_;
-                if (makePipeline(cp, &leanPipe_, farLean_ == 2 ? "traceMain (lean, clock)" : "traceMain (lean)") != VK_SUCCESS)
-                    leanPipe_ = VK_NULL_HANDLE;
+            if (const char* a = std::getenv("ATLAS_AB_ABLATE"); a && *a) {
+                abAblate_ = uint32_t(std::strtoul(a, nullptr, 10));
+                abAblateSet_ = true;
             }
-            // (and the shade side drawing from its hits: farMain, ATLAS_FAR_PASS 2)
-            VkShaderModuleCreateInfo sm2{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-            sm2.codeSize = atlas_farshade_spv_size;
-            sm2.pCode = atlas_farshade_spv;
-            if (leanPipe_ && vkCreateShaderModule(dev_, &sm2, nullptr, &shadeShader_) == VK_SUCCESS) {
-                VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-                cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-                cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-                cp.stage.module = shadeShader_;
-                cp.stage.pName = "main";
-                cp.layout = farLayout_;
-                if (makePipeline(cp, &shadePipe_, "farMain (shade)") != VK_SUCCESS) shadePipe_ = VK_NULL_HANDLE;
-            }
+            std::fprintf(stderr, "[atlas] A/B: side B %s%s\n", e, abAblateSet_ ? " (own ablate)" : "");
+        }
+        if (leanPipe_ || leanPipeB_) {
+            // (and the shade side drawing from the lean hits: farMain, ATLAS_FAR_PASS 2)
+            makeLean(atlas_farshade_spv, atlas_farshade_spv_size, shadeShader_, shadePipe_, "farMain (shade)");
         }
         // the split frames' far kernel (the game's unified field: atlas_far.slang ATLAS_FAR_SPLIT, every trace inlined, its
         // state in registers: about half the far pass's time). Its driver compile takes a minute or two the first time (the
@@ -887,6 +905,7 @@ public:
             else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         }
         farAmortBit(frame, s);
+        abSide(frame);
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
@@ -2299,7 +2318,7 @@ private:
             VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
             ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
                  ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err) &&
-                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) || farLean_ ? px * 32 : 32, false, Mem::DeviceOnly, err);
+                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) || farLean_ || abMode_ == 1 ? px * 32 : 32, false, Mem::DeviceOnly, err);
             // filled with "no surface" and "no samples" in record
             if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
             if (ok && s.bufs[B_FAR_HIT].buf != hitBefore) s.hitFresh = true;
@@ -2976,15 +2995,18 @@ private:
         // (the split frames of the unified field: their own far kernel once built; never once a shader folder reloaded the
         // far kernel, the dev loop's edits are drawn with)
         bool splitKernel = nearSplit && lit && !farReloaded_ && farSplitReady_.load(std::memory_order_acquire);
-        if (splitKernel && leanPipe_ && shadePipe_ && farLean_ == 1) {  // (2, the clock build: its counters, no shade)
+        // (ATLAS_AB: this frame's side; B a lean variant, or farMain's split kernel)
+        VkPipeline lean = abB_ ? (abMode_ == 1 ? leanPipeB_ : VK_NULL_HANDLE) : (farLean_ == 1 ? leanPipe_ : VK_NULL_HANDLE);
+        if (splitKernel && lean && shadePipe_) {  // (ATLAS_FAR_LEAN 2, the clock build: its counters, no shade)
             // (ATLAS_FAR_LEAN) the lean trace stage writes the hits, the shade side draws from them
-            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, leanPipe_);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lean);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
-            s.gt.mark(s.cmd, "farTrace");
+            s.gt.mark(s.cmd, abB_ ? "farTrace B" : "farTrace");
             computeBarrier(s.cmd);
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, shadePipe_);
         } else {
-            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, splitKernel && leanPipe_ ? leanPipe_ : splitKernel ? farSplitPipe_ : farPipe_);
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                              splitKernel && leanPipe_ && farLean_ == 2 && !abB_ ? leanPipe_ : splitKernel ? farSplitPipe_ : farPipe_);
         }
         // (dev: ATLAS_FAR_GROUP=WxH, the far kernel's workgroup when a shader folder's farMain was built with another
         // numthreads: measurements of the group size; 8x8 the kernels' own)
@@ -2995,7 +3017,7 @@ private:
             farGx = std::max(farGx, 1u), farGy = std::max(farGy, 1u);
         }
         vkCmdDispatch(s.cmd, (w + farGx - 1) / farGx, (h + farGy - 1) / farGy, 1);
-        s.gt.mark(s.cmd, "far");
+        s.gt.mark(s.cmd, abB_ ? "far B" : "far");
         if (nearSplit) {
             // the near light: one pixel of each 2 x 2 traced, then the other three filled (both after the far pass:
             // the upsample darkens the air it wrote over covered surfaces)
@@ -3701,6 +3723,20 @@ private:
     VkShaderModule farSplitShader_ = VK_NULL_HANDLE;
     VkPipeline farSplitPipe_ = VK_NULL_HANDLE;
     int farLean_ = 0;  // (ATLAS_FAR_LEAN) the lean trace stage in the split frames' far pass's place
+    // (ATLAS_AB) the paired comparison: side B's set-up (1 a lean stage, 2 farMain's split kernel), this frame's side,
+    // the frames counted, side B's own ablate bits
+    int abMode_ = 0;
+    bool abB_ = false;
+    uint64_t abFrame_ = 0;
+    uint32_t abAblate_ = 0;
+    bool abAblateSet_ = false;
+    VkShaderModule leanShaderB_ = VK_NULL_HANDLE;
+    VkPipeline leanPipeB_ = VK_NULL_HANDLE;
+    // every other frame side B (its ablate bits in the frame's jitter.w, as ATLAS_ABLATE's)
+    void abSide(FrameGpu& frame) {
+        abB_ = abMode_ != 0 && (abFrame_++ & 1u) != 0;
+        if (abB_ && abAblateSet_) std::memcpy(&frame.jitter[3], &abAblate_, 4);
+    }
     VkShaderModule leanShader_ = VK_NULL_HANDLE;
     VkPipeline leanPipe_ = VK_NULL_HANDLE;
     VkShaderModule shadeShader_ = VK_NULL_HANDLE;
