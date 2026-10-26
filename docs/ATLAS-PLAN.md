@@ -106,6 +106,12 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   deltas too, so changes load as fast as the rest.
 - **Location:** stored with the world (deleting the world deletes it), with an estimate shown at creation and a warning
   when disk is low.
+- **What a server sends (2026-10-25):**
+  - always: block changes as deltas by interest, plus region fingerprints;
+  - on first join: the whole-map coarse view (~10-15 MB compressed);
+  - level-0 detail: adaptive per region. A client asks for data only where downloading is faster than its own GPU
+    would generate it (it measures its own generation rate against its bandwidth), so strong GPUs generate and weak
+    ones download. No fixed rule, the same spirit as pixels-drive-everything.
 
 ### Frame budget (2026-10-25)
 
