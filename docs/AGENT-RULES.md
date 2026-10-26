@@ -255,3 +255,11 @@ Read these first:
   makes no sense, say so: `py -3 E:/NirnCraft-scratch/locks/feedback.py "<what, and your suggestion>"`. The orchestrator
   sees it within about 5 minutes and changes the process. Keep working meanwhile.
 
+* **Own your jobs and your waits (2026-10-25).** The agents and the Haiku gatekeeper handle these, not the orchestrator.
+  * Any job that runs more than a few minutes prints its progress at least every 2 minutes ("tiles 120/600",
+    "phase 3/5"), so a waiting agent and Haiku see real movement and an ETA, not just CPU use.
+  * Follow your own jobs with `heavy.py --follow <label>`.
+  * When you wait more than ~15 minutes, run `heavy.py --stuck "<what I wait for>"`: Haiku explains it (normal, with an
+    ETA) or escalates it.
+  * The orchestrator only sees what Haiku can't resolve.
+
