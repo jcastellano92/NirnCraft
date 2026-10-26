@@ -420,6 +420,19 @@ walking through or floating on anything); the owner flies every stress scene.
 **Then, in the owner's order:** far settlements (the overlays agent's far stage), far life (R5: far players
 building in real time), multiplayer at scale, baked light, weather.
 
+### Minecraft's Vulkan backend (owner decision, 2026-10-26)
+
+Minecraft 26.3 ships its own Vulkan backend (`com/mojang/renderpearl/backend/vulkan`, chosen by options.txt
+`preferredGraphicsBackend`) beside OpenGL. ATLAS moves onto it:
+- **Direct sharing:** the GPU and images are shared directly with the game's Vulkan device, with no GL interop bridge.
+- **Composite:** the UI and hand are composited on top in Vulkan.
+- **Modern Vulkan:** features the bridge blocked are now open: shared device and queues, timeline semaphores, async compute
+  beside the game's frame.
+- **GL interop is a fallback only,** kept green until the Vulkan path is proven, then retired.
+- **macOS is out of scope for now.**
+
+The integration plan comes from a read-only spike of the renderpearl backend (same day).
+
 ## 4b. Parked work (saved, not lost; revisit at its stage)
 
 Deferred work is saved on a branch or in this list, so it never blocks the main line and is never forgotten. A parked
