@@ -283,3 +283,8 @@ Read these first:
   yours), never merged into atlas-render until its stage comes, and add a row to ATLAS-PLAN §4b "Parked work" with
   where it is and what to re-check when it's resumed.
 
+* **No [noinline] call that passes structs by value on the far kernel's path (2026-10-25).** The driver moves such
+  structs through shared memory (16640 B a group instead of 7936), which takes L1 from the walk and slows every pixel,
+  even with the feature switched off. Check "Shared Memory Size" with `ATLAS_PIPE_STATS=1` on any far-kernel change:
+  7936 B is the good value.
+
