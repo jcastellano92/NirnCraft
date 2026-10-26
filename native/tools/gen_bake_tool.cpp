@@ -22,6 +22,8 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <set>
+#include <tuple>
 #include <string>
 #include <thread>
 #include <vector>
@@ -184,6 +186,21 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         }
         exGround = exportdata::ground(secs, lib, ex);
         haveExport = true;
+        // the exported columns' air (fillair=1, the default): an export keeps only sections with blocks, so the air over
+        // the ground read as chunks not loaded (the grid's holes: its coarse levels answered there); the game's client
+        // has every section of a loaded column, air ones known empty. Uploaded as empty sections, y -64 to 320
+        size_t airSecs = 0;
+        if (std::atoi(arg(argc, argv, "fillair", "1").c_str()) > 0) {
+            std::set<std::tuple<int, int, int>> have;
+            for (const exportdata::Section& sc : secs) have.insert({sc.cx, sc.sy, sc.cz});
+            std::vector<uint16_t> air(4096, 0);
+            for (const auto& [key, span] : ex.chunks) {
+                int cx = int(int32_t(uint32_t(key >> 32))), cz = int(int32_t(uint32_t(key)));
+                for (int sy = -4; sy < 20; sy++)
+                    if (!have.count({cx, sy, cz}) && atlas_upload_section(ctx, cx, sy, cz, air.data()) == ATLAS_OK) airSecs++;
+            }
+        }
+        std::printf("{\"exportAirSections\":%zu}\n", airSecs);
         // (its water: blocks of the water class and their columns' bounds, where a view finds it)
         size_t wat = 0;
         std::map<std::pair<int, int>, size_t> wcell;
@@ -416,7 +433,9 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             return v.empty() ? -1.0 : v[size_t(q * double(v.size() - 1) + 0.5)];
         };
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
+        _putenv_s("ATLAS_FARHIT_DUMP_NOW", "1");  // (ATLAS_FARHIT_DUMP: this frame's hit records)
         atlas_render(ctx, &f, &out);
+        _putenv_s("ATLAS_FARHIT_DUMP_NOW", "");
         AtlasStats st{};
         atlas_get_stats(ctx, &st);
         steps = st.raySteps;
