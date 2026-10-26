@@ -87,15 +87,22 @@ def main():
               + f"  {row.get('frame', {}).get('p99', '-')}")
 
     def first_zero(key, phase):
+        # (after the jump: the coverage is read every 1.5 s, so the first seconds still show the old place; the field
+        # counts from the jump once it has been seen not whole)
+        start = next((s for s, ph, at in rows if ph == phase), None)
+        seen = False
         for s, ph, at in rows:
-            if ph == phase and at.get(key) == 0:
-                return s
-        return None
+            if ph != phase:
+                continue
+            seen = seen or (at.get(key) or 0) > 0
+            if seen and at.get(key) == 0:
+                return s - start
+        return None if seen else 0
     t_near = first_zero("l0Near6", "arrive")
     t_all = first_zero("nearestMissing", "arrive")
     fly = [at for s, ph, at in rows if ph == "fly"]
     bad = [at.get("l0Near6", 0) for at in fly if (at.get("l0Near6") or 0) > 0]
-    print(f"VERDICT after the teleport: l0Near6 0 at {t_near} s, nearestMissing 0 at {t_all} s (targets 2 s, 5 s)")
+    print(f"VERDICT after the teleport: l0Near6 0 {t_near} s after the jump, nearestMissing 0 {t_all} s after (targets 2 s, 5 s)")
     print(f"VERDICT flight at {a.speed} b/s: {len(bad)} of {len(fly)} s with level-0 columns empty within 96 blocks, worst {max(bad, default=0)}")
     print("subs", data.get("subs", "")[:600])
     return 0
