@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <condition_variable>
@@ -257,9 +258,15 @@ public:
     // then VoxGrid::ingestCoarseGpu; kinds as far()'s; taken: the chunks the grid took
     // (the self-baking cache) where farIngest bakes the tiles it lacks (null: none)
     GenCache* farBake = nullptr;
+    // (the idle verifier, atlas_gen_verify_far_tile) set for one farIngest call: the tile made is compared with the cache's
+    // instead of going into the grid; -1 not comparable, 0 the same, 1 it differed (and was baked again)
+    int32_t* verifyResult = nullptr;
     // the GPU budget (VulkanEngine's pacer): the class of the work submitted from now (0 the near terrain, 1 the far
     // field: it takes only what the near work left), and the pacer's numbers (atlas_gen_pace_stats)
     virtual void paceClass(int c) { (void)c; }
+    // the loading phase (a screen holds the player: no frame to keep): every submission of the generator unpaced, the near
+    // window's too (any thread)
+    virtual void setBoost(bool on) { (void)on; }
     struct PaceStats {
         double periodMs = 0, duty = 1, tokensMs = 0, usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
         uint64_t submissions = 0;
@@ -269,6 +276,13 @@ public:
         char recentPhase[48] = {};
     };
     virtual PaceStats paceStats() const { return {}; }
+    // the submissions' GPU times by what they held (a phase class: "far stage", "store stage 1000" ...) since the last reset:
+    // one line, the longest classes first (atlas_gen_sub_stats; any thread, no generator lock)
+    virtual size_t subStats(char* out, size_t cap, bool reset) {
+        (void)reset;
+        if (cap) out[0] = 0;
+        return 0;
+    }
     virtual bool stageInParts(uint32_t) const { return false; }  // (a store stage seen recording in parts)
     virtual bool farIngest(const std::vector<int32_t>& jobs, int lod, uint32_t rows, uint32_t cap, uint32_t* kinds, uint32_t& mixed,
                            uint32_t& taken, uint32_t* bad, double& ms, std::string& err) {
@@ -867,10 +881,14 @@ public:
             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
             vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &p);
             vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
-            uint32_t groups = k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : (256 * rows + GROUP - 1) / GROUP;
-            if (k < 3) {
-                // (the tile's columns in slices of groups, a submission each: their columns are independent)
-                uint32_t slice = sliceOf(100u + k, groups);
+            // (farChunk: a workgroup a chunk, its 64 lanes the chunk's voxels)
+            uint32_t groups = k == 1 ? 3 * TILE_COLS / GROUP : k < 3 ? TILE_COLS / GROUP : 256 * rows;
+            {
+                // (the tile's columns, or its chunks, in slices of groups, a submission each: they are independent. A pass
+                // not yet timed starts small and learns its time a group from the first slices; none is "latency bound"
+                // here: a group is a few microseconds, and what the frames cost a slice was once read as such, leaving the
+                // whole pass, 70 to 120 ms, in one submission)
+                uint32_t slice = farSliceOf(100u + k, groups, k == 3 ? 256.0 : 64.0);
                 for (uint32_t g0 = 0; g0 < groups; g0 += slice) {
                     uint32_t m = std::min(slice, groups - g0);
                     vkCmdDispatchBase(cmd_, g0, 0, 0, m, 1, 1);
@@ -887,8 +905,6 @@ public:
                         vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipes[k]]);
                     }
                 }
-            } else {
-                vkCmdDispatch(cmd_, groups, 1, 1);
             }
             barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -918,8 +934,10 @@ public:
         bool any = false;
         for (const Stage& st : stages_) any = any || st.ffn;
         if (!any) return true;
-        // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each
+        // in parts of about ATLAS_GEN_PART_MS of GPU time (as storeStage), one submission each; the stage sizes its parts
+        // from their own GPU times (version 3), at most two of them in flight
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        static const bool farV2 = std::getenv("ATLAS_FAR_V2") && std::getenv("ATLAS_FAR_V2")[0] == '1';
         for (uint32_t ti = 0; ti < n; ti++) {
             bool cleared = false;
             for (size_t si = 0; si < stages_.size(); si++) {
@@ -927,8 +945,12 @@ public:
                 if (!st.ffn) continue;
                 double& perUnit = farUnitMs_[si];
                 if (!drain(err)) return false;  // (part 0 may write its descriptor sets: nothing of ours in flight)
+                partUs_.clear();
+                partsDone_ = 0;
                 for (uint32_t part = 0;; part++) {
                     poll();
+                    while (part > partsDone_ + 2)  // (their times are what the next part is sized from: up to two ahead of it done or not)
+                        if (!waitOldest(err)) return false;
                     begin();
                     if (!cleared) {
                         vkCmdFillBuffer(cmd_, out_.buf, (VkDeviceSize(ti) * TILE_PLANES + 5) * TILE_COLS * 4, VkDeviceSize(2) * TILE_COLS * 4, 0u);
@@ -937,7 +959,7 @@ public:
                         cleared = true;
                     }
                     AtlasGenFarBatch fb{};
-                    fb.version = 2;
+                    fb.version = farV2 ? 2 : 3;  // (ATLAS_FAR_V2=1: the units of the first version, to compare their output with the sized parts)
                     fb.lod = jobs[ti * 4];
                     fb.tx = jobs[ti * 4 + 1];
                     fb.tz = jobs[ti * 4 + 2];
@@ -952,6 +974,9 @@ public:
                     fb.part = part;
                     fb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
                     fb.lastPartUs = uint32_t(std::min(lastSubMs_ * 1000.0, 4e9));  // (the latest done, the ring's)
+                    fb.budgetUs = uint32_t((pace_.cls == 2 || boost_.load(std::memory_order_relaxed) ? 2.0 * partMs : partMs) * 1000.0);  // (play: 4 ms a part; the loading phase's 8)
+                    fb.partsDone = partsDone_;
+                    fb.partUs = partUs_.data();
                     int32_t r = st.ffn(st.user, &fb);
                     if (r != 0 && r != ATLAS_GEN_STAGE_MORE) {
                         vkEndCommandBuffer(cmd_);
@@ -959,11 +984,14 @@ public:
                     }
                     barrier(VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                    phase_ = "far stage, tile " + std::to_string(ti) + ", part " + std::to_string(part);
+                    phase_ = std::string("far stage") + (fb.label[0] ? " " : "") + std::string(fb.label, strnlen(fb.label, sizeof fb.label)) +
+                             ", tile " + std::to_string(ti) + ", part " + std::to_string(part);
                     Slot& sl = ring_[cur_];
-                    sl.perUnit = &perUnit;  // (its estimate; refined from its time when it retires, a whole part)
+                    sl.part = int(part);  // (its own GPU time: partUs_, for the stage to size the next)
+                    partUs_.push_back(0u);
+                    sl.perUnit = &perUnit;
                     sl.units = double(fb.units);
-                    sl.refine = r == ATLAS_GEN_STAGE_MORE;
+                    sl.refine = farV2 && r == ATLAS_GEN_STAGE_MORE;
                     if (!submit(err, false)) return fail(err, err + " (far stage)");
                     if (r != ATLAS_GEN_STAGE_MORE) break;
                     if (part > 100000) return fail(err, "far stage never finished");
@@ -1083,6 +1111,45 @@ public:
         std::swap(far_, slab.buf);
         writeSet();
         if (!ok) return false;
+        if (verifyResult) {
+            // the idle verifier: this stand-in tile made again, apart from the cache and the grid, against what the cache holds
+            // for it (every chunk's kind and uniform material; a mixed chunk's voxels are not compared here: LATER, a content
+            // digest in the record). A difference means the key missed a change: the tile is baked again from this run.
+            int32_t tx = jobs[1], tz = jobs[2];
+            *verifyResult = -1;
+            slab.busy = false;
+            slab.stamp = 0;
+            std::vector<uint32_t> cached;
+            if (!farBake || !farBake->on() || bad[0] || !farBake->farKnown(lod, tx, tz) || !farBake->farStandIn(lod, tx, tz) ||
+                !farBake->farTile(lod, tx, tz, cached) || cached.size() != 256 * size_t(rows))
+                return true;
+            std::vector<uint32_t> tk(256 * size_t(rows));
+            std::vector<uint64_t> bo;
+            std::vector<int32_t> bp;
+            bool whole = true, diff = false;
+            for (uint32_t k = 0; k < 256 * rows && whole; k++) {
+                uint32_t kind = kinds[size_t(k) * 2], slot = kinds[size_t(k) * 2 + 1];
+                if (kind == 0xFFFFFFFEu) whole = false;
+                tk[k] = kind;
+                diff = diff || kind != cached[k];
+                if (kind == 0u) {
+                    uint32_t cc = k / rows, cy = k % rows;
+                    bo.push_back((uint64_t(4 + chunks * 2) + uint64_t(slot) * 2048) * 4);
+                    bp.insert(bp.end(), {tx * 16 + int32_t(cc & 15u), int32_t(cy), tz * 16 + int32_t(cc >> 4)});
+                }
+            }
+            if (!whole) return true;
+            *verifyResult = diff ? 1 : 0;
+            if (diff) {
+                farBake->forgetFarTile(lod, tx, tz);  // (its records, kinds and chunks, no longer known; the new ones win)
+                farBake->putFarTile(lod, tx, tz, tk);
+                if (!bo.empty()) {
+                    grid_->bakeGpu(uint64_t(slab.buf.buf), bo.data(), bp.data(), bo.size(), lod);
+                    slab.busy = true;
+                }
+            }
+            return true;
+        }
         // to the grid: air and uniform chunks as kinds, mixed ones from their slot in the slab
         std::vector<uint64_t> offs;
         std::vector<int32_t> pos;
@@ -2023,6 +2090,7 @@ private:
         bool refine = false;  // (perUnit refined from it: a whole part)
         double est = 0.0;     // its GPU ms as charged when submitted (corrected when it retires)
         bool unpaced = false;  // (the loading phase's bake, pace class 2: charged no tokens, so the near work after it owes none)
+        bool far = false;      // (pace class 1: charged to the far bucket)
         int part = -1;  // (a store stage's part) its index in partUs_
         int sliceKind = -1;       // (a sliced dispatch: sliceOf's kind) its slice's units, for the next slices' size
         uint32_t sliceUnits = 0;
@@ -2130,7 +2198,7 @@ private:
         // (charged its estimate when submitted; now its own time, but never more than the estimate: a submission the
         // frames held back (the GPU theirs first) took longer without doing more, and charging that rationed the
         // generator to nothing at 1440p. The frames are kept by the duty's control, not by this charge)
-        if (!s.unpaced) pace_.tokens += s.est - std::min(gpu, std::max(s.est, 0.05));
+        if (!s.unpaced) (s.far ? pace_.tokensFar : pace_.tokens) += s.est - std::min(gpu, std::max(s.est, 0.05));
         inFlightMs_ = std::max(0.0, inFlightMs_ - s.est);
         pace_.usedMs += gpu;
         lastSubMs_ = gpu;
@@ -2139,10 +2207,12 @@ private:
         subEma_ = low(subEma_, gpu);
         if (s.refine && s.perUnit && s.units > 0.0) *s.perUnit = low(*s.perUnit, gpu / s.units);
         if (s.sliceKind >= 0 && s.sliceUnits > 0) sliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
+        if (s.sliceKind >= 100 && s.sliceKind <= 103 && s.sliceUnits > 0) farSliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
         if (s.part >= 0 && size_t(s.part) < partUs_.size()) {
             partUs_[size_t(s.part)] = uint32_t(std::min(gpu * 1000.0, 4e9));
             partsDone_ = std::max(partsDone_, uint32_t(s.part) + 1u);
         }
+        subNote(s.phase, gpu);
         if (gpu > pace_.maxSubMs) {
             pace_.maxSubMs = gpu;
             std::snprintf(pace_.maxPhase, sizeof pace_.maxPhase, "%s", s.phase.c_str());
@@ -2260,8 +2330,9 @@ private:
         // (the budget pays an estimate now, so work in flight counts against it: a part's from its stage's time a unit,
         // else the recent submissions'; corrected to its own GPU time when it retires)
         s.est = s.perUnit && *s.perUnit > 0.0 && s.units > 0.0 ? *s.perUnit * s.units : subEma_;
-        s.unpaced = pace_.cls == 2;  // (the loading bake takes no tokens from the near work after it)
-        if (!s.unpaced) pace_.tokens -= s.est;
+        s.unpaced = pace_.cls == 2 || boost_.load(std::memory_order_relaxed);  // (the loading phase takes no tokens from the work after it)
+        s.far = pace_.cls == 1;
+        if (!s.unpaced) (s.far ? pace_.tokensFar : pace_.tokens) -= s.est;
         inFlightMs_ += s.est;
         s.value = value;
         s.pending = true;
@@ -2301,7 +2372,11 @@ private:
     // for it to be 10 ms full. A wait is bounded (300 ms; a probe 1.3 s: a budget, not a stall); ATLAS_GEN_PACE=0 turns
     // it off; ATLAS_GEN_PACE_TRACE=1 prints the controller every 5 s.
     struct Pacer {
-        double tokens = 20.0, periodMs = 0.0, duty = 0.5;
+        // Two buckets. The near window (class 0) owns `tokens`: it refills at the duty, and at least 4 ms of GPU a frame period
+        // whatever the frames are doing (nearFloor): slow frames used to cut the duty to a tenth and the near window with it, 4
+        // chunks a second where the generator makes 78. The far path (class 1: far tiles, the coarse bake, level 2) only gets
+        // `tokensFar`, what the near bucket could not hold (it is full: the near window has nothing to make).
+        double tokens = 20.0, tokensFar = 20.0, periodMs = 0.0, duty = 0.5;
         std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now(), sampleAt = last;
         uint64_t sampleFrames = 0, lastFrames = 0;
         std::chrono::steady_clock::time_point lastFrameAt = last;  // (when the frame counter last moved)
@@ -2323,6 +2398,69 @@ private:
         std::chrono::steady_clock::time_point probeAt = last, probeMarkAt = last, lastSubAt = last, traceAt = last;
     } pace_;
     void paceClass(int c) override { pace_.cls = c; }
+    std::atomic<bool> boost_{false};
+    void setBoost(bool on) override { boost_ = on; }
+    // ---- the submissions by phase class (the recorder's GPU lane, kept as counters: the loading and route gates)
+    struct SubRow {
+        uint64_t n = 0, over4 = 0, over8 = 0, over16 = 0;
+        double sumMs = 0, maxMs = 0;
+    };
+    std::map<std::string, SubRow> subRows_;
+    std::mutex subMu_;
+    static std::string subClass(const std::string& phase) {
+        // "far stage, tile 0, part 9" -> "far stage"; "store stage 1000, 48 chunks, part 675" -> "store stage 1000"; "pass 12" -> "pass #"
+        size_t c = phase.find(',');
+        if (c != std::string::npos) return phase.substr(0, c);
+        std::string r;
+        for (size_t i = 0; i < phase.size(); i++) {
+            if (phase[i] >= '0' && phase[i] <= '9') {
+                if (r.empty() || r.back() != '#') r += '#';
+            } else {
+                r += phase[i];
+            }
+        }
+        return r;
+    }
+    void subNote(const std::string& phase, double ms) {
+        std::lock_guard<std::mutex> l(subMu_);
+        SubRow& r = subRows_[subClass(phase)];
+        r.n++;
+        r.sumMs += ms;
+        r.maxMs = std::max(r.maxMs, ms);
+        r.over4 += ms > 4.0;
+        r.over8 += ms > 8.0;
+        r.over16 += ms > 16.0;
+    }
+    size_t subStats(char* out, size_t cap, bool reset) override {
+        std::vector<std::pair<std::string, SubRow>> rows;
+        {
+            std::lock_guard<std::mutex> l(subMu_);
+            rows.assign(subRows_.begin(), subRows_.end());
+            if (reset) subRows_.clear();
+        }
+        std::sort(rows.begin(), rows.end(), [](const auto& a, const auto& b) { return a.second.maxMs > b.second.maxMs; });
+        std::string t = "subs{";
+        uint64_t total = 0, over8 = 0;
+        for (auto& r : rows) total += r.second.n, over8 += r.second.over8;
+        char b[200];
+        std::snprintf(b, sizeof b, "%llu submissions, %llu over 8 ms", (unsigned long long)total, (unsigned long long)over8);
+        t += b;
+        int shown = 0;
+        for (auto& r : rows) {
+            if (r.second.maxMs < 2.0 || shown++ >= 12) continue;
+            std::snprintf(b, sizeof b, "; %s: n %llu mean %.2f max %.1f ms, >4 %llu >8 %llu >16 %llu", r.first.c_str(),
+                          (unsigned long long)r.second.n, r.second.sumMs / double(r.second.n), r.second.maxMs,
+                          (unsigned long long)r.second.over4, (unsigned long long)r.second.over8, (unsigned long long)r.second.over16);
+            t += b;
+        }
+        t += "}";
+        if (cap) {
+            size_t n = std::min(cap - 1, t.size());
+            std::memcpy(out, t.data(), n);
+            out[n] = 0;
+        }
+        return t.size();
+    }
     PaceStats paceStats() const override {
         PaceStats r{pace_.periodMs, pace_.duty, pace_.tokens, pace_.usedMs, pace_.waitedMs, pace_.farWaitedMs, pace_.maxSubMs, pace_.subs};
         std::memcpy(r.maxPhase, pace_.maxPhase, sizeof r.maxPhase);
@@ -2441,7 +2579,14 @@ private:
                 std::fprintf(stderr, "TRACE gen slices:%s\n", sl.c_str());
             }
         }
-        pace_.tokens = std::min(30.0, pace_.tokens + dt * pace_.duty);
+        // near first: the duty, or the floor of 4 ms a frame period when the frames are slow (the share of a period 4 ms is)
+        double nearFloor = pace_.periodMs > 0.0 ? std::clamp(4.0 / pace_.periodMs, 0.1, 0.5) : 0.0;
+        pace_.tokens += dt * std::max(pace_.duty, nearFloor);
+        if (pace_.tokens > 30.0) {  // (the near bucket is full: the far path has the rest, but at most 3 ms of GPU a frame period)
+            double farRate = pace_.periodMs > 0.0 ? 3.0 / pace_.periodMs : 0.1;
+            pace_.tokensFar = std::min(30.0, pace_.tokensFar + std::min(pace_.tokens - 30.0, dt * farRate));
+            pace_.tokens = 30.0;
+        }
     }
     double lastSubMs_ = 0.0, slicedMs_ = 0.0;
     // (bounded dispatches) a dispatch in slices of its units (a pass's chunks, a far tile pass's groups), a submission
@@ -2474,8 +2619,34 @@ private:
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         if (!on || n <= 1) return std::max(1u, n);
         auto it = sliceFit_.find(kind);
-        if (it == sliceFit_.end() || it->second.latency || it->second.msPerUnit <= 0.0) return n;
+        if (it == sliceFit_.end() || it->second.msPerUnit <= 0.0) return std::min(n, 8u);  // (not measured yet: a few chunks, never the whole pass of 84 ms the first call took)
+        if (it->second.latency) return n;
         return uint32_t(std::clamp(partMs / it->second.msPerUnit, 1.0, double(n)));
+    }
+    // The far passes (tile, tileBiome, tileSurf, farChunk: kinds 100 to 103). A thread of these walks a column's noise in
+    // doubles, 4 to 5 ms whatever the groups beside it: a slice costs about 4.5 ms + 0.03 ms a group, so a time a group
+    // measured on a small slice is the floor over the groups, and sizing from it (the slice that fits 4 ms a group) shrank the
+    // slices to 8 groups of 5 ms each, a tile in 400 submissions. The slice follows its own time instead: it grows by half while
+    // slices run well under the target, and falls to the share of the target when one ran over (ATLAS_GEN_FAR_PASS_MS, 6: above
+    // the floor, under the 8 ms a submission may take).
+    std::unordered_map<uint32_t, double> farSlice_;
+    uint32_t farSliceOf(uint32_t kind, uint32_t n, double initial) {
+        static const bool on = [] {
+            const char* e = std::getenv("ATLAS_GEN_PACE");
+            return !e || std::atoi(e) != 0;
+        }();
+        if (!on || n <= 1) return std::max(1u, n);
+        double& sl = farSlice_[kind];
+        if (sl <= 0.0) sl = initial;
+        return uint32_t(std::clamp(sl, std::min(64.0, double(n)), double(n)));  // (64 groups at least: beside the frames a slice's time holds their share, and slices shrunk by it made a tile in 200 submissions)
+    }
+    void farSliceSeen(uint32_t kind, uint32_t units, double ms) {
+        static const double loadLimit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
+        const double limit = pace_.cls == 2 || boost_.load(std::memory_order_relaxed) ? loadLimit : std::min(loadLimit, 4.0);  // (play: 4 ms, as far as the pass's floor lets it)
+        double& sl = farSlice_[kind];
+        if (sl <= 0.0 || units == 0) return;
+        if (ms > limit) sl = std::max(64.0, double(units) * limit / ms * 0.85);
+        else if (ms < limit * 0.85 && double(units) >= sl * 0.95) sl = std::min(sl * 1.25, 4096.0);
     }
     // before a submission: wait for the budget; returns the wait
     double paceAcquire() {
@@ -2486,7 +2657,7 @@ private:
         if (!on || !shared_ || !backend_) return 0.0;
         pace_.lastSubAt = std::chrono::steady_clock::now();  // (busy from here: a window with a wait in it is not the frames' own)
         paceUpdate();
-        if (pace_.cls == 2) return 0.0;  // (the loading phase's bake: the card is its)
+        if (pace_.cls == 2 || boost_.load(std::memory_order_relaxed)) return 0.0;  // (the loading phase: the card is the generator's)
         double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
         auto t0 = std::chrono::steady_clock::now();
         // (the work in flight ahead of the frames: at most ATLAS_GEN_AHEAD_MS (6) of it, estimated)
@@ -2510,7 +2681,12 @@ private:
             }
             pace_.lastSubAt = std::chrono::steady_clock::now();
         }
-        while ((pace_.tokens < need && waited < 300.0) || (pace_.probing && waited < 1300.0)) {
+        double& bucket = pace_.cls == 1 ? pace_.tokensFar : pace_.tokens;
+        // (the far path waits for its tokens 40 ms a submission at most: a tile holds the generator's locks (the render thread's
+        // info call among them) for all its waits, and 300 ms a submission, with a duty gate the tile itself pulled down, held the
+        // frame thread 1.4 s, twice 10 s. Whether a background tile starts at all is the Java side's (AtlasClientGen.backgroundRoom).)
+        const double cap = pace_.cls == 1 ? 40.0 : 300.0;
+        while ((bucket < need && waited < cap) || (pace_.probing && waited < 1300.0)) {
             if (pace_.probing && !pace_.probeDrained) {
                 // (the probe times the frames alone: ours in flight done first, then from the next frame)
                 std::string e;
@@ -2519,7 +2695,7 @@ private:
                 pace_.probeFrames = backend_ ? backend_->framesSubmitted() : 0;
                 pace_.probeAt = std::chrono::steady_clock::now();
             }
-            double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - pace_.tokens) / std::max(pace_.duty, 0.05)));
+            double ms = pace_.probing ? 1.0 : std::min(8.0, std::max(1.0, (need - bucket) / std::max(pace_.duty, 0.05)));
             std::this_thread::sleep_for(std::chrono::microseconds(int64_t(ms * 1000.0)));
             waited = msSince(t0);
             pace_.lastSubAt = std::chrono::steady_clock::now();
@@ -2591,6 +2767,9 @@ int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint3
 
 struct AtlasGen {
     std::atomic<bool> paceBoost{false};  // (the loading phase's bake: the far field is paced as if no frame were running)
+    // the idle verifier's counts (atlas_gen_verify_stats): chunks and far tiles made again and compared with the cache's, and
+    // how many differed (a cache key that missed a change)
+    std::atomic<uint64_t> verifyChunks{0}, verifyChunksBad{0}, verifyTiles{0}, verifyTilesBad{0};
     std::unique_ptr<Engine> engine;
     std::mutex mu;       // the engine (one batch at a time)
     std::mutex pagesMu;  // the page map: atlas_gen_missing_pages answers while a batch runs
@@ -3031,7 +3210,7 @@ void refreshFingerprint(AtlasGen* h) {
     // stages, ingest and map are in. A fingerprint sent while the map was still to come opened another set, and the
     // set of the launch before was deleted as another generator's: every launch started from an empty cache)
     if (!h->ctx || !h->fpProg || !h->fpIngest || !h->fpArmed) return;
-    uint64_t bh = buildHash();  // (the native code: kernels, store, stages' engines' own C++)
+    uint64_t bh = genHash();  // (the generator's own code: its kernels, store, stages' engines' C++; not the renderer's)
     uint64_t f = fnv64(&h->fpProg, 8, fnv64(&bh, 8));
     f = fnv64(&h->fpIngest, 8, f);
     f = fnv64(&h->fpMap, 8, f);
@@ -4044,8 +4223,58 @@ ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out) {
     if (!h || !out) return ATLAS_ERR_ARG;
     uint64_t st = 0;
     for (const Stage& s : h->stages) st = fnv64(&s.order, 4, s.ffn ? fnv64(&s.fp, 8, st) : st);
-    out[0] = buildHash(), out[1] = h->fpProg, out[2] = h->fpIngest, out[3] = h->fpMap, out[4] = h->fpExtra, out[5] = st, out[6] = h->fpSent;
+    out[0] = genHash(), out[1] = h->fpProg, out[2] = h->fpIngest, out[3] = h->fpMap, out[4] = h->fpExtra, out[5] = st, out[6] = h->fpSent;
     out[7] = h->stages.size();
+    return ATLAS_OK;
+}
+
+// The idle verifier (AtlasClientGen.verifyStep): one far tile of the cache made again and compared; result: -1 not comparable
+// (not in the cache, or true data, or made in parts that did not fit), 0 the same, 1 it differed and was baked again.
+ATLAS_API AtlasStatus atlas_gen_verify_far_tile(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz, int32_t* outResult) {
+    if (!h || !outResult || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
+    return guarded([&] {
+        std::unique_lock<std::mutex> l(h->mu);
+        *outResult = -1;
+        if (!h->ctx || !h->devicePages || !h->ingestSet) return h->fail(ATLAS_ERR_STATE, "not made for a context with device pages");
+        if (!awaitIngest(h, l)) return h->fail(ATLAS_ERR_TIMEOUT, "busy: another thread's batch is not ingested yet");
+        std::vector<int32_t> jobs{lod, tx, tz, 0};
+        uint32_t rows = (44u + (1u << uint32_t(lod)) - 1u) >> uint32_t(lod);
+        std::vector<uint32_t> kinds(size_t(256) * rows * 2), bad(1);
+        uint32_t mixed = 0, taken = 0;
+        double ms = 0;
+        std::string err;
+        int32_t res = -1;
+        h->engine->farBake = contextWorld(h->ctx)->genCache();
+        h->engine->verifyResult = &res;
+        h->engine->paceClass(1);
+        bool ok = h->engine->farIngest(jobs, lod, rows, 256 * rows, kinds.data(), mixed, taken, bad.data(), ms, err);
+        h->engine->paceClass(0);
+        h->engine->verifyResult = nullptr;
+        h->last = Batch{};
+        if (!ok) return h->fail(err.rfind("busy:", 0) == 0 ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU, err);
+        *outResult = res;
+        if (res >= 0) {
+            h->verifyTiles++;
+            if (res == 1) h->verifyTilesBad++;
+        }
+        return ATLAS_OK;
+    });
+}
+
+// A chunk checked by the caller (AtlasClientGen: made again through the store and its section hashes compared): kind 0.
+ATLAS_API AtlasStatus atlas_gen_verify_note(AtlasGen* h, int32_t kind, int32_t bad) {
+    if (!h) return ATLAS_ERR_ARG;
+    if (kind == 0) {
+        h->verifyChunks++;
+        if (bad) h->verifyChunksBad++;
+    }
+    return ATLAS_OK;
+}
+
+// out: chunks checked, chunks that differed, far tiles checked, far tiles that differed (since the generator was made)
+ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out) {
+    if (!h || !out) return ATLAS_ERR_ARG;
+    out[0] = h->verifyChunks, out[1] = h->verifyChunksBad, out[2] = h->verifyTiles, out[3] = h->verifyTilesBad;
     return ATLAS_OK;
 }
 
@@ -4053,6 +4282,7 @@ ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out) {
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on) {
     if (!h) return ATLAS_ERR_ARG;
     h->paceBoost = on != 0;
+    if (h->engine) h->engine->setBoost(on != 0);
     return ATLAS_OK;
 }
 
@@ -4088,6 +4318,15 @@ ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) 
     out->recentMaxMs = s.recentMaxMs;
     std::memcpy(out->recentPhase, s.recentPhase, sizeof out->recentPhase);
     return ATLAS_OK;
+}
+
+ATLAS_API uint32_t atlas_gen_sub_stats(AtlasGen* h, char* out, uint32_t cap, int32_t reset) {
+    if (!h || !h->engine) return 0;
+    try {
+        return uint32_t(h->engine->subStats(out, cap, reset != 0));  // (its own small lock: answers while a batch runs)
+    } catch (...) {
+        return 0;
+    }
 }
 
 static AtlasStatus genCacheStats(AtlasGen* h, AtlasGenCacheStats* out, bool wait) {

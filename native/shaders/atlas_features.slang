@@ -4890,6 +4890,10 @@ void featFarPlacesMain(uint3 id : SV_DispatchThreadID) {
     if (slot < FAR_PLACES) scratch[1u + slot] = i;
 }
 // one real chunk a thread: every tree record the chunk's biomes list, as the decoration seeds it
+// (params.rec = FAR_ROWS: one record a ROW, the dispatch list's entry params.store + id.y, over the chunks from params.first:
+// a thousand chunks and the whole list are some hundred thousand threads at once, where one record a dispatch left the card
+// nearly idle; a thread's scratch is then its slot id.y * params.budget + id.x, params.budget the dispatch's width)
+static const uint FAR_ROWS = 0xFFFFFFFFu;
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
@@ -4897,11 +4901,20 @@ void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
     int side = lod <= 4 ? (16 << lod) : 256;  // chunks a tile side evaluated
     uint t = id.x + params.first;  // (params.first: the first chunk of this dispatch's slice; a chunk's trees are its own)
     if (t >= uint(side * side)) return;
+    uint dl = hdr(H_DISPATCH), nd = hdr(H_NDISPATCH);
+    uint r0 = params.rec != 0u ? nd - 1u : 0u, r1 = nd, slot = t;
+    if (params.rec == FAR_ROWS) {
+        r0 = params.store + id.y;
+        if (r0 >= nd) return;
+        r1 = r0 + 1u;
+        slot = id.y * params.budget + id.x;
+        if (fprog[fprog[dl + r0] + R_TYPE] != FT_TREE) return;
+    }
     int per = lod <= 4 ? 1 : (1 << (lod - 4));  // chunks a column side (lod > 4: one stands for them)
     int cx = params.origins * (16 << lod) + int(t % uint(side)) * per + (per >> 1);
     int cz = params.targets * (16 << lod) + int(t / uint(side)) * per + (per >> 1);
     uint weight = uint(per * per);
-    sG.base = FAR_THR + t * FAR_THR_W;  // (flag()'s word and the random: this thread's own)
+    sG.base = FAR_THR + slot * FAR_THR_W;  // (flag()'s word and the random: this thread's own)
     sRA = sG.base + SCR_META + 6u;
     // the biomes the chunk holds (its centre and corners: applyBiomeDecoration's listing)
     int b[5];
@@ -4909,11 +4922,10 @@ void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
     int cs[5] = {farCol(x0 + 8, z0 + 8), farCol(x0, z0), farCol(x0 + 15, z0), farCol(x0, z0 + 15), farCol(x0 + 15, z0 + 15)};
     for (int q = 0; q < 5; q++) b[q] = cs[q] < 0 ? -1 : farBiome(cs[q]);
     int64_t deco = decorationSeed(int64_t(pfU64(H_SEED)), x0, z0);
-    uint dl = hdr(H_DISPATCH), nd = hdr(H_NDISPATCH);
     // params.rec: that tree record only, a dispatch each (the far stage in parts: features_engine.cpp far(); each record
-    // is seeded on its own and writes by atomics, so the split is exact); 0: every tree record
-    for (uint r = params.rec != 0u ? nd - 1u : 0u; r < nd; r++) {
-        uint rec = params.rec != 0u ? params.rec : fprog[dl + r];
+    // is seeded on its own and writes by atomics, so the split is exact); 0: every tree record; FAR_ROWS: the row's record
+    for (uint r = r0; r < r1; r++) {
+        uint rec = params.rec != 0u && params.rec != FAR_ROWS ? params.rec : fprog[dl + r];
         if (fprog[rec + R_TYPE] != FT_TREE) continue;
         bool listed = false;
         for (int q = 0; q < 5 && !listed; q++) listed = b[q] >= 0 && biomeBit(fprog[rec + R_HERE], b[q]);

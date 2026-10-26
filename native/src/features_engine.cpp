@@ -714,6 +714,7 @@ public:
         // a dispatch over the tile's chunks (a record's trees: seeded on their own, written by atomics: any split is
         // exact); the canopy with the last
         uint32_t part = b->version >= 2 ? b->part : 0, units = b->version >= 2 ? b->units : 0;
+        const bool sized = b->version >= 3;  // (the stage sizes its parts itself: farSizedParts)
         if (part == 0) {
             VkBuffer planes = VkBuffer(b->planes);
             VkBuffer bufs[NB] = {prog_.buf, prog_.buf, scratch_.buf, prog_.buf, scratch_.buf, scratch_.buf, prog_.buf,
@@ -736,10 +737,10 @@ public:
         }
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &farSet_, 0, nullptr);
         FeatParams p{b->tx, b->tz, 0, uint32_t(b->lod), int32_t(b->tile), 0u, 0u, 0u};
-        auto dispatch = [&](uint32_t pipe, uint32_t gx) {
+        auto dispatch = [&](uint32_t pipe, uint32_t gx, uint32_t gy = 1) {
             vkCmdPushConstants(cmd, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(FeatParams), &p);
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[pipe]);
-            vkCmdDispatch(cmd, std::max(1u, gx), 1, 1);
+            vkCmdDispatch(cmd, std::max(1u, gx), std::max(1u, gy), 1);
             barrier(cmd, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         };
@@ -747,18 +748,32 @@ public:
         uint32_t groups = (side * side + GROUP - 1) / GROUP;
         if (part == 0) {
             dispatch(S_FARPLACES, (places_ + GROUP - 1) / GROUP);
-            if (units == 0) {
+            if (sized) {
+                // the rows of the grid: the dispatch list from its first tree record to its last (the kernel lets the others go)
+                farRow0_ = farRows_ = 0;
+                for (uint32_t i = 0; i < dispatch_.size(); i++) {
+                    uint32_t rec = dispatch_[i];
+                    if (rec >= types_.size() || types_[rec] != 4u) continue;
+                    if (farRows_ == 0) farRow0_ = i;
+                    farRows_ = i - farRow0_ + 1;
+                }
+                farOff_ = 0;
+                farPlan_.clear();
+                farFed_ = 0;
+            } else if (units == 0) {
                 dispatch(S_FARTREES, groups);  // (all at once: an older generator)
                 dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
                 return 0;
-            }
+            } else {
             // (a unit: a tree record over a slice of 4096 of the tile's chunks)
             farRecs_.clear();
             for (uint32_t rec : dispatch_)
                 if (rec < types_.size() && types_[rec] == 4u)
                     for (uint32_t t0 = 0; t0 < side * side; t0 += FAR_SLICE) farRecs_.push_back({rec, t0});
             farCursor_ = 0;
+            }
         }
+        if (sized) return farSizedParts(b, part, side * side, p, dispatch);
         for (uint32_t i = 0; i < std::max(1u, units) && farCursor_ < farRecs_.size(); i++) {
             p.rec = farRecs_[farCursor_].first;
             p.first = farRecs_[farCursor_].second;
@@ -774,6 +789,89 @@ public:
     static constexpr uint32_t FAR_SLICE = 4096;
     std::vector<std::pair<uint32_t, uint32_t>> farRecs_;  // (the far stage in parts) (tree record, first chunk) units, the next
     size_t farCursor_ = 0;
+
+    // ---- the far stage sized by itself (AtlasGenFarBatch version 3) ----
+    // A part is ONE dispatch of featFarTreesMain: a range of the tile's chunks by the tree records, one record a row of the
+    // grid (params.rec = FAR_ROWS), some hundred thousand threads at once. A record a dispatch left the card nearly idle (64
+    // groups of 64 threads of the 2000 it holds at a time, each thread a chunk's whole walk): a tile's trees took 0.45 s, and a
+    // dispatch's time did not fall with the chunks given it. The range is sized from the parts done (the generator gives each
+    // part's own GPU time and keeps at most two in flight): the time a chunk took (all the records), the next range that
+    // much for half the budget (ATLAS_GEN_PART_MS, 4), at most twice the last; smaller at once when a part ran long. A tree
+    // record is seeded on its own and writes by atomics, so any grouping of (chunk, record) pairs is exact.
+    // ATLAS_FAR_PROFILE=1: ATLAS_FAR_SLICE (4096) chunks a part, labelled with the level and the count (the budget's counters
+    // then show what a part of that size costs); ATLAS_FAR_SLICE_MAX (4096) caps a part.
+    struct FarCost {
+        double n = 0;  // (the chunks a part takes at this level now)
+    };
+    struct FarItem {
+        uint32_t n;
+    };
+    std::unordered_map<uint32_t, FarCost> farCost_;  // (per level)
+    std::vector<FarItem> farPlan_;
+    size_t farFed_ = 0;
+    uint32_t farOff_ = 0, farRow0_ = 0, farRows_ = 0;
+    template <class D>
+    int32_t farSizedParts(const AtlasGenFarBatch* b, uint32_t part, uint32_t chunks, FeatParams& p, D& dispatch) {
+        static const bool profile = std::getenv("ATLAS_FAR_PROFILE") != nullptr;
+        static const uint32_t maxN = [] {
+            const char* e = std::getenv("ATLAS_FAR_SLICE_MAX");
+            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 16384u) & ~63u);
+        }();
+        static const uint32_t profileN = [] {
+            const char* e = std::getenv("ATLAS_FAR_SLICE");
+            return std::max(64u, (e ? uint32_t(std::atoi(e)) : 4096u) & ~63u);
+        }();
+        const double budget = b->budgetUs ? double(b->budgetUs) / 1000.0 : 4.0;
+        const uint32_t lod = uint32_t(b->lod);
+        FarCost& c = farCost_[lod];
+        // The part's own time steers the size. A dispatch of these threads costs a floor (a thread's whole walk, some ms)
+        // and little more up to a few thousand chunks: sizing from a time a chunk (time over chunks) shrank the parts to the
+        // floor's 64 chunks, 260 parts a tile. The floor is 5 to 7 ms and the time hardly moves with the chunks up to a few
+        // hundred, so the part grows by a quarter while it runs under 85 % of the limit (twice the budget, 8 ms: what a
+        // submission may take) and is cut to the share of it when it ran over.
+        const double limit = budget;  // (the generator's: 4 ms in play, 8 while the loading screen holds the player)
+        const double floorN = budget < 6.0 ? 64.0 : 256.0;  // (in play a part may be small: beside the frames its time holds their share)
+        if (c.n <= 0.0) c.n = 256.0;
+        for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
+            double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
+            if (t > limit) c.n = std::max(floorN, used * limit / t * 0.85);
+            else if (t < limit * 0.85 && used >= c.n * 0.95) c.n = std::min(c.n * 1.25, double(maxN));
+        }
+        const uint32_t left = chunks - farOff_;
+        if (part == 0) c.n = std::min(c.n, 2048.0);  // (a new tile: not sized from the last tile's end alone)
+        uint32_t n = profile ? profileN : uint32_t(c.n);
+        n = std::min(left, std::max(64u, n & ~63u));
+        // (a thread's scratch is a slot of the dispatch: its width times the rows, past the places' list: within the scratch)
+        if (farRows_ > 0) {
+            uint64_t room = scratch_.size / 4 > 16384u + 12u * farRows_ * 64u ? (scratch_.size / 4 - 16384u) / (12ull * farRows_) : 0;
+            n = std::max(64u, std::min<uint32_t>(n, uint32_t(room) & ~63u));
+            uint32_t w = (n + GROUP - 1) / GROUP * GROUP;
+            p.rec = 0xFFFFFFFFu;  // (FAR_ROWS)
+            p.store = farRow0_;
+            p.first = farOff_;
+            p.budget = w;
+            dispatch(S_FARTREES, w / GROUP, farRows_);
+        }
+        farOff_ += n;
+        bool last = farOff_ >= chunks || farRows_ == 0;
+        if (last) {
+            p.rec = 0;
+            p.first = 0;
+            p.store = 0;
+            p.budget = 0;
+            dispatch(S_FARCANOPY, ATLAS_GEN_TILE_COLS / GROUP);
+        }
+        static const bool trace = std::getenv("ATLAS_FAR_TRACE") != nullptr;
+        if (trace && part < 40)
+            std::fprintf(stderr, "TRACE far lod %u part %u: %u chunks of %u (target n %.0f), %u rows, done %u, last part %.2f ms\n", lod, part, n, chunks,
+                         c.n, farRows_, b->partsDone, b->partsDone ? double(b->partUs[b->partsDone - 1]) / 1000.0 : 0.0);
+        if (part < farPlan_.size()) farPlan_.resize(part);
+        farPlan_.push_back({n});  // (index = the part: the generator calls once a part, in order)
+        char label[48] = {};
+        if (profile) std::snprintf(label, sizeof label, "lod %u n %u", lod, n);
+        std::memcpy(const_cast<char*>(b->label), label, sizeof label);
+        return last ? 0 : ATLAS_GEN_STAGE_MORE;
+    }
 
     // atlas_feat_set_overlays: the overlays whose piece boxes the mask reads (null: none)
     void setOverlays(AtlasOvl* o) { ovl_ = o; }
@@ -920,6 +1018,9 @@ public:
                 rs.sum += pms;
                 rs.n++;
                 if (pms > 8.0) rs.over++;
+                if (pms > 16.0)
+                    std::fprintf(stderr, "TRACE feat long round: record %u type %u%s%u round %u budget %u origins %u: %.1f ms\n", partRoundRec_,
+                                 types_[partRoundRec_], ph ? " vein pass " : "", ph ? ph - 1 : 0u, partRound_, bud, n, pms);
                 rs.minBud = std::min(rs.minBud, bud);
             }
             if (ptrace) {
@@ -968,8 +1069,15 @@ public:
                 }
             }
             if (ms > 0.0) {
+                // The round's time says what a unit of budget costs only when the round used its budget (origins left: it was
+                // cut short by it). A round that finished under it (a tree whose plan ended in a few operations, a feature of
+                // two placements) says nothing about the next, and growing on it by 4 sent a commit of 73 ms after a round
+                // of 1 (budget 65536 -> a part of 74 ms; 262144 -> 45): it keeps its budget, and a budget grows by 2 a round
+                // at most. A round over the target cuts it at once, by up to 8.
+                bool cut = left_.map && *static_cast<const uint32_t*>(left_.map) > 0u;
                 double want = double(bud) * partMs / ms;
-                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
+                double hi = ms > partMs ? double(bud) : cut ? double(bud) * 2.0 : double(bud);
+                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 8.0), hi));
                 bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
             }
             partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;

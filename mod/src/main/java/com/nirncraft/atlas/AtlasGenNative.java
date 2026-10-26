@@ -37,7 +37,7 @@ final class AtlasGenNative {
     // the pages made on the device (atlas_gen_read_page, atlas_gen_page_stats): null in a library without them
     private final MethodHandle readPage, pageStats, tiles, far, farIngest, gridReports;
     // the self-baking cache (atlas_gen_cache_lookup, atlas_gen_cache_ingest, atlas_gen_set_fingerprint): null without
-    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake;
+    private final MethodHandle cacheLookup, cacheIngest, setFingerprint, farCacheIngest, regenerate, coarseRoom, paceStats, coarseWindow, cachePeek, noBake, subStats, verifyTile, verifyNote, verifyStats;
     // the whole-map coarse bake (atlas_gen_bake_*, atlas_gen_far_known; AtlasCoarseBake): null in a library without them
     private final MethodHandle bakeBegin, bakeStep, bakeInfo, bakeEnd, farKnown, fingerprintParts, paceBoost;
     // the chunk store and the decoration's store stages (atlas_gen_store_*, atlas_feat_attach): null in a library without them
@@ -93,6 +93,12 @@ final class AtlasGenNative {
                 ? bind(l, lib, "atlas_gen_coarse_room", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT)) : null;
         paceStats = lib.find("atlas_gen_pace_stats").isPresent()
                 ? bind(l, lib, "atlas_gen_pace_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        boolean vf = lib.find("atlas_gen_verify_far_tile").isPresent();
+        verifyTile = vf ? bind(l, lib, "atlas_gen_verify_far_tile", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS)) : null;
+        verifyNote = vf ? bind(l, lib, "atlas_gen_verify_note", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT)) : null;
+        verifyStats = vf ? bind(l, lib, "atlas_gen_verify_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) : null;
+        subStats = lib.find("atlas_gen_sub_stats").isPresent()
+                ? bind(l, lib, "atlas_gen_sub_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT)) : null;
         noBake = lib.find("atlas_gen_set_no_bake").isPresent()
                 ? bind(l, lib, "atlas_gen_set_no_bake", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT)) : null;
         regenerate = lib.find("atlas_gen_regenerate").isPresent()
@@ -391,6 +397,32 @@ final class AtlasGenNative {
             }
         }
 
+        /**
+         * The near window's share of the GPU budget not yet spent, ms (atlas_gen_pace_stats tokensMs: the near bucket, 30 when
+         * the near window leaves it full), or -1 when there is no budget to read (an older library, or no frames to share with).
+         */
+        double[] paceNow() {
+            if (paceStats == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(8L * 8 + 48 + 16 + 48);
+                check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
+                return new double[]{s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 16)};  // period, duty, near tokens
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        double nearTokensMs() {
+            if (paceStats == null) return -1.0;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(8L * 8 + 48 + 16 + 48);
+                check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
+                return s.get(JAVA_DOUBLE, 0) <= 0.0 ? -1.0 : s.get(JAVA_DOUBLE, 16);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** The GPU budget's numbers (atlas_gen_pace_stats) as a profile line; null with an older library. */
         String paceLine() {
             if (paceStats == null) return null;
@@ -404,6 +436,64 @@ final class AtlasGenNative {
                         s.get(JAVA_DOUBLE, 0), s.get(JAVA_DOUBLE, 112), s.get(JAVA_DOUBLE, 8), s.get(JAVA_DOUBLE, 24), s.get(JAVA_DOUBLE, 32),
                         s.get(JAVA_DOUBLE, 40), s.get(JAVA_DOUBLE, 48), s.getString(64), s.get(JAVA_DOUBLE, 120), s.getString(128),
                         s.get(JAVA_LONG, 56));
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The generator's submissions by what they held (atlas_gen_sub_stats): count, mean, longest GPU ms and how many ran over
+         * 4, 8 and 16 ms, per phase class, since the last reset (reset: the counts start again). Answers while a batch runs
+         * (its own lock). Null with an older library.
+         */
+        String subLine(boolean reset) {
+            if (subStats == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment buf = a.allocate(4096);
+                int n = (int) subStats.invokeExact(ptr, buf, 4096, reset ? 1 : 0);
+                return n <= 0 ? null : buf.getString(0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        boolean verifySupported() {
+            return verifyTile != null;
+        }
+
+        /**
+         * The idle verifier: the cached stand-in far tile (level, tx, tz) made again apart from the cache and the grid and
+         * compared with the cache's: -1 not comparable, 0 the same, 1 it differed (baked again). Takes the generator's lock.
+         */
+        synchronized int verifyFarTile(int level, int tx, int tz) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment r = a.allocate(JAVA_INT);
+                int s = (int) verifyTile.invokeExact(ptr, level, tx, tz, r);
+                if (s == -8) return -1;  // busy: again later
+                check(s, "atlas_gen_verify_far_tile");
+                return r.get(JAVA_INT, 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** A near chunk the caller made again and compared (bad: it differed). */
+        void verifyNote(boolean bad) {
+            if (verifyNote == null) return;
+            try {
+                int s = (int) verifyNote.invokeExact(ptr, 0, bad ? 1 : 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** {chunks checked, chunks that differed, far tiles checked, far tiles that differed}, or null. */
+        long[] verifyStats() {
+            if (verifyStats == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment o = a.allocate(JAVA_LONG, 4);
+                int s = (int) verifyStats.invokeExact(ptr, o);
+                return new long[]{o.getAtIndex(JAVA_LONG, 0), o.getAtIndex(JAVA_LONG, 1), o.getAtIndex(JAVA_LONG, 2), o.getAtIndex(JAVA_LONG, 3)};
             } catch (Throwable t) {
                 throw rethrow(t);
             }

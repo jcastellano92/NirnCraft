@@ -57,10 +57,19 @@ static std::string arg(int argc, char** argv, const char* key, const char* def) 
 static int32_t noStage(void*, const AtlasGenStoreBatch*) { return 0; }
 
 static int storeMode(AtlasContext* ctx, AtlasGen* g, AtlasFrame& f, AtlasFrameOutput& out, int ccx, int ccz, int R, bool old,
-                     double steadyS, uint32_t slots) {
+                     double steadyS, uint32_t slots, const std::string& dump, bool feat, bool bg) {
     uint32_t id = 0;
-    if (atlas_gen_store_enable(g, slots) != ATLAS_OK || atlas_gen_add_store_stage(g, 1000, 2, noStage, nullptr, &id) != ATLAS_OK ||
-        atlas_gen_add_store_stage(g, 1100, 1, noStage, nullptr, &id) != ATLAS_OK) {
+    if (feat) {
+        // feat=1: the game's decoration stages (the dump's feat.bin, g2f.bin, f2g.bin), not stages of no work
+        std::vector<uint32_t> fw = load(dump + "/feat.bin"), g2f = load(dump + "/g2f.bin"), f2g = load(dump + "/f2g.bin");
+        AtlasFeat* fh = nullptr;
+        if (fw.empty() || g2f.empty() || f2g.empty() || atlas_gen_store_enable(g, slots) != ATLAS_OK ||
+            atlas_feat_attach(g, fw.data(), uint32_t(fw.size()), g2f.data(), uint32_t(g2f.size()), f2g.data(), uint32_t(f2g.size()), &fh) != ATLAS_OK) {
+            std::fprintf(stderr, "feat=1: %s\n", fw.empty() ? "no feat.bin / g2f.bin / f2g.bin in the dump" : atlas_gen_last_error(g));
+            return 1;
+        }
+    } else if (atlas_gen_store_enable(g, slots) != ATLAS_OK || atlas_gen_add_store_stage(g, 1000, 2, noStage, nullptr, &id) != ATLAS_OK ||
+               atlas_gen_add_store_stage(g, 1100, 1, noStage, nullptr, &id) != ATLAS_OK) {
         std::fprintf(stderr, "store: %s\n", atlas_gen_last_error(g));
         return 1;
     }
@@ -227,7 +236,8 @@ static int storeMode(AtlasContext* ctx, AtlasGen* g, AtlasFrame& f, AtlasFrameOu
                 }
             }
         }
-        atlas_render(ctx, &f, &out);
+        if (bg) std::this_thread::sleep_for(std::chrono::milliseconds(1));  // (the background thread owns the frames)
+        else atlas_render(ctx, &f, &out);
         // the window in: steady state from here, the camera still
         if (!tWindow && up.size() >= window.size()) {
             tWindow = nowMs();
@@ -243,6 +253,12 @@ static int storeMode(AtlasContext* ctx, AtlasGen* g, AtlasFrame& f, AtlasFrameOu
     uint64_t made = 0, runs = 0, packs = 0;
     atlas_gen_store_counters(g, &made, &runs, &packs);
     double s = tEnd && tWindow ? (tEnd - tWindow) / 1000.0 : 0;
+    {
+        // the submissions by phase (the game's table): the longest of each, what the frames did to them
+        char subs[6000] = {};
+        atlas_gen_sub_stats(g, subs, sizeof subs, 1);
+        std::printf("{\"subs\":\"%s\"}\n", subs);
+    }
     std::printf("{\"store\":{\"old\":%d,\"reach\":%u,\"slots\":%u,\"window\":%zu,\"up\":%zu,\"windowMs\":%.0f,\"steadyS\":%.1f,"
                 "\"total\":{\"planned\":%llu,\"made\":%llu,\"stageRuns\":%llu,\"packs\":%llu,\"sections\":%llu},"
                 "\"perSecondSteady\":{\"planned\":%.1f,\"made\":%.1f,\"stageRuns\":%.1f,\"packs\":%.1f}}}\n",
@@ -537,12 +553,13 @@ int main(int argc, char** argv) {
     f.cameraPos[1] = std::atof(arg(argc, argv, "y", "360").c_str());  // (above the build height by default: the ground below)
     f.cameraPos[2] = z;
     atlas::cameraMatrix(0, -35, 70, 16.0 / 9.0, f.invViewProj);
-    f.width = 320;
-    f.height = 180;
+    const int BW = std::atoi(arg(argc, argv, "w", "320").c_str()), BH = std::atoi(arg(argc, argv, "h", "180").c_str());
+    f.width = BW;
+    f.height = BH;
     f.maxDistance = 4000;
     f.sunDir[1] = 1;
     f.lodBias = 1;
-    std::vector<uint32_t> color(320 * 180);
+    std::vector<uint32_t> color(size_t(BW) * BH);
     AtlasFrameOutput out{color.data(), nullptr, nullptr};
     double centre[3] = {x, f.cameraPos[1], z};
     // bg=1: a thread renders frames from here on (the game's cadence: back to back), their wall times kept; the generation
@@ -563,7 +580,7 @@ int main(int argc, char** argv) {
         for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &out);  // (the grid placed)
         bgOn = true;
         bgThread = std::thread([&] {
-            std::vector<uint32_t> img(320 * 180);
+            std::vector<uint32_t> img(size_t(BW) * BH);
             AtlasFrameOutput o2{img.data(), nullptr, nullptr};
             while (!bgStop) {
                 auto t0 = std::chrono::steady_clock::now();
@@ -585,7 +602,18 @@ int main(int argc, char** argv) {
     }
     if (arg(argc, argv, "store", "0") != "0") {
         int r = storeMode(ctx, g, f, out, ccx, ccz, R, arg(argc, argv, "old", "0") != "0",
-                          std::atof(arg(argc, argv, "steady", "20").c_str()), uint32_t(std::atoi(arg(argc, argv, "slots", "768").c_str())));
+                          std::atof(arg(argc, argv, "steady", "20").c_str()), uint32_t(std::atoi(arg(argc, argv, "slots", "768").c_str())),
+                          dump, arg(argc, argv, "feat", "0") != "0", arg(argc, argv, "bg", "0") != "0");
+        if (bgThread.joinable()) {
+            bgStop = true;
+            bgThread.join();
+            std::vector<float> v = bgMs;
+            if (!v.empty()) {
+                std::sort(v.begin(), v.end());
+                std::printf("{\"bgFrames\":{\"n\":%zu,\"p50\":%.1f,\"p99\":%.1f,\"max\":%.1f}}\n", v.size(), v[v.size() / 2], v[v.size() * 99 / 100],
+                            v.back());
+            }
+        }
         atlas_gen_destroy(g);
         atlas_destroy(ctx);
         return r;

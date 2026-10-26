@@ -155,9 +155,8 @@ def write_flags_file(jvm, path=None):
     """The group's flags where the mod reads them at startup (NirnCraft.harnessFlags): Prism keeps its own copy of the
     instance settings and wrote it back over the JvmArgs edit at launch, so flags went missing from runs silently."""
     path = Path(path or FLAGS_FILE)
-    if not jvm:
-        path.unlink(missing_ok=True)
-        return
+    jvm = dict(jvm or {})
+    jvm["nirncraft.harness.authoritative"] = "true"  # (NirnCraft.harnessFlags: the file is the whole truth, stale -D flags go)
     lines = [f"{k}={str(v).replace(chr(92), '/')}" for k, v in sorted(jvm.items())]
     lw.atomic(path, ("\n".join(lines) + "\n").encode())
 
@@ -196,14 +195,23 @@ FRESH_WORLD = {"on": False}  # harness --fresh-world: make the test world again 
 
 def kept_world():
     """The test world for this world generation: kept between runs (places generated once load from disk in seconds);
-    a worldgen change (code or data) gets a new one; worlds of older generations are deleted."""
+    a worldgen change (code or data) gets a new one; the worlds of older generations are deleted once they are not among the
+    three last used (the instance is shared by every worktree: one launching used to delete the others' kept worlds, with the
+    player's saved spawn in them)."""
     import cameras
     name = f"harness_{cameras.worldgen_hash()}"
     saves = GAME / "saves"
     if saves.exists():
-        for d in saves.iterdir():
-            if d.is_dir() and d.name.startswith("harness_") and (d.name != name or FRESH_WORLD["on"]):
+        def used(d):
+            lv = d / "level.dat"
+            return (lv if lv.exists() else d).stat().st_mtime
+        others = sorted((d for d in saves.iterdir() if d.is_dir() and d.name.startswith("harness_") and d.name != name),
+                        key=used, reverse=True)
+        for i, d in enumerate(others):
+            if i >= 3:
                 shutil.rmtree(d, ignore_errors=True)
+        if FRESH_WORLD["on"]:
+            shutil.rmtree(saves / name, ignore_errors=True)
     return name
 
 
@@ -242,6 +250,8 @@ def _launch(group, groups, limit=900):
         jvm[k.strip()] = v.strip()
     if "nirncraft.autotest.world" not in jvm and (group == "live" or cfg.get("keptWorld")):
         jvm.update({"nirncraft.autotest.world": kept_world(), "nirncraft.autotest.keepWorld": "true"})
+    if os.environ.get("NIRNCRAFT_ATLAS_DUMP"):  # (dev) the generator's program, map and decoration program to that folder (AtlasClientGen.dumpWords)
+        jvm["nirncraft.atlas.dump"] = os.environ["NIRNCRAFT_ATLAS_DUMP"]
     _set_group_flags(jvm)
     _enable_overlay()
     code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True)
@@ -352,6 +362,10 @@ def ensure_current():
         dumps = sorted((d for d in trace.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime, reverse=True)
         for d in dumps[50:]:
             shutil.rmtree(d, ignore_errors=True)
+    # development: the newest three generation sets of atlas's cache stay (GenCache::configure), so worktrees and builds that
+    # alternate on this instance do not delete each other's bakes
+    (GAME / "atlas-cache").mkdir(parents=True, exist_ok=True)
+    (GAME / "atlas-cache" / "keep-gen-sets").write_text("3\n")
     sync_native()
     src = ROOT / "mod/src/main"
     newest = max((f.stat().st_mtime for f in src.rglob("*") if f.is_file()), default=0)

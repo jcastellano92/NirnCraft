@@ -186,6 +186,32 @@ tasks.register('farIdentity') {
 }
 sourceSets.main.resources.srcDir(files(farIdentityDir).builtBy('farIdentity'))
 
+// The generation and bake caches (gen-<fingerprint>/ of atlas's cache) are keyed by what PRODUCES their data: world generation
+// (above), the Java that makes the generator's program, map and decoration, and the native generator's own hash (in the key
+// already). Not the renderer's Java, nor the natives the jar carries (a render-kernel-only rebuild keeps the bake).
+def generatorIdentityDir = layout.buildDirectory.dir('generated/generator-identity')
+def generatorSources = fileTree('src/main/java/com/nirncraft/atlas') {
+    include 'AtlasGen*.java', 'AtlasFeatureProgram.java', 'AtlasOverlay*.java', 'AtlasOverlayTapes.java', 'AtlasSurface.java',
+            'AtlasSnowCover.java', 'AtlasTrees.java', 'AtlasNatural.java', 'AtlasGround.java', 'AtlasSettlements.java',
+            'AtlasTileCodec.java', 'AtlasExactSource.java', 'AtlasBiomes.java', 'AtlasHeightGpu.java'
+    exclude 'AtlasGenNative.java'  // (the binding: calls, not data)
+}
+tasks.register('generatorIdentity') {
+    inputs.files generationSources, generationData, generatorSources
+    outputs.dir generatorIdentityDir
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        (generationSources.files + generationData.files + generatorSources.files).sort { a, b -> a.path <=> b.path }.each { f ->
+            digest.update(project.relativePath(f).replace('\\', '/').getBytes('UTF-8'))
+            digest.update(java.security.MessageDigest.getInstance('SHA-256').digest(f.bytes))
+        }
+        def out = generatorIdentityDir.get().file('nirncraft/generator-identity.txt').asFile
+        out.parentFile.mkdirs()
+        out.setText('v1:' + digest.digest().encodeHex().toString() + '\n', 'UTF-8')
+    }
+}
+sourceSets.main.resources.srcDir(files(generatorIdentityDir).builtBy('generatorIdentity'))
+
 repositories {
     mavenCentral()
 }

@@ -30,7 +30,27 @@ final class AtlasTileCodec {
     /** What the tiles contain (not their format): caches made before a content change are not reused. 1: roads. */
     static final int CONTENT = 3;
 
-    private static String identity;
+    private static String identity, generatorIdentity;
+
+    /**
+     * What the generation and bake caches are a function of: the same as {@link #identity()} without the renderer's Java and the
+     * natives (nirncraft/generator-identity.txt, Gradle task generatorIdentity; the native generator's own hash is in the key too).
+     */
+    static synchronized String generatorIdentity() {
+        if (generatorIdentity != null) return generatorIdentity;
+        String id = "dev";
+        try (var in = AtlasTileCodec.class.getResourceAsStream("/nirncraft/generator-identity.txt")) {
+            if (in != null) {
+                String t = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
+                int c = t.indexOf(':');
+                id = (c >= 0 ? t.substring(c + 1) : t);
+                id = id.substring(0, Math.min(12, id.length()));
+            }
+        } catch (java.io.IOException e) {
+            // keep "dev"
+        }
+        return generatorIdentity = id;
+    }
 
     /**
      * What the tiles are a function of: world generation (code and data) and the far field's own painting code, hashed
