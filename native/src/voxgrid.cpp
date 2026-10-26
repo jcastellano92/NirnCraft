@@ -157,6 +157,16 @@ VoxGrid::Coverage VoxGrid::coverage() const {
                 known[k][size_t(z) * L.D + size_t(x)] = unl < L.H ? 1 : 0;
             }
     }
+    {
+        // level 0 within 6 chunks of the camera: the columns the player stands among, none may be missing
+        int cx0 = fdiv(camB_[0], 16), cz0 = fdiv(camB_[2], 16);
+        for (int dz = -6; dz <= 6; dz++)
+            for (int dx = -6; dx <= 6; dx++) {
+                if (dx * dx + dz * dz > 36) continue;
+                int sx = cx0 + dx, sz = cz0 + dz;
+                if (!(inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))])) c.l0Near6++;
+            }
+    }
     // the far reach: the nearest sample no level knows
     float best = float(RMAX);
     for (int j = 0; j < N; j++)
@@ -212,7 +222,7 @@ std::string VoxGrid::coverageJson() const {
         covAt_ = now;
     }
     const Coverage& c = covCache_;
-    std::string o = "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"nearHoles\":" + std::to_string(c.nearHoles) +
+    std::string o = "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"nearHoles\":" + std::to_string(c.nearHoles) + ",\"l0Near6\":" + std::to_string(c.l0Near6) +
                     ",\"nearReach\":" + std::to_string(int(c.nearReach)) + ",\"holes\":[";
     for (int k = 0; k <= activeCoarse_; k++) o += (k ? "," : "") + std::to_string(c.holes[k]);
     o += "],\"partial\":[";

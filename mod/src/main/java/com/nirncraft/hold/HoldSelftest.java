@@ -60,6 +60,7 @@ final class HoldSelftest {
             PlayerHold.clearForTests();
             ready(problems, info, held, viewer, control, zombie, home);
             crashRecord(problems, info, held, home);
+            arrivals(problems, info, held, viewer, home);
         } finally {
             server.setDifficulty(difficulty, true);
             PlayerHold.release(held, "selftest end");
@@ -166,6 +167,40 @@ final class HoldSelftest {
         if (zombie.getTarget() != held) problems.add("a released player cannot be targeted again");
         if (damageCancelled(held, level.damageSources().mobAttack(zombie))) problems.add("a released player's damage is still cancelled");
         info.add("hold, pin, release: ok=" + problems.isEmpty());
+    }
+
+    /** Holds on arriving: a far jump holds at the destination (with its reason), a short move does not, a release lands there. */
+    private static void arrivals(List<String> problems, List<String> info, ServerPlayer p, ServerPlayer viewer, Vec3 home) {
+        if (!PlayerHold.ARRIVAL) {
+            info.add("arrivals: skipped (nirncraft.hold.arrival is off in this run)");
+            return;
+        }
+        PlayerHold.release(p, "selftest arrivals");
+        PlayerHold.clearForTests();
+        p.setGameMode(GameType.SURVIVAL);
+        p.setPos(home.x, home.y, home.z);
+        PlayerHold.watchJump(p, true);                       // the first reading
+        double hop = PlayerHold.JUMP_BLOCKS / 2;
+        p.setPos(home.x + hop, home.y, home.z);              // a short move: not an arrival
+        if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a " + (int) hop + " block move held the player");
+        Vec3 far = new Vec3(home.x + hop + PlayerHold.JUMP_BLOCKS + 400, home.y - 20, home.z + 250);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(p, p.level(), far.x, far.y, far.z));
+        p.setPos(far.x, far.y, far.z);                       // a teleport command: far
+        if (!PlayerHold.watchJump(p, true) || !PlayerHold.isHeld(p)) {
+            problems.add("a far teleport did not hold the player");
+            return;
+        }
+        String d = PlayerHold.describe(p);
+        if (!d.contains(String.format(java.util.Locale.ROOT, "%.1f %.1f %.1f", far.x, far.y, far.z))) problems.add("the arrival is not held at the destination: " + d);
+        if (p.broadcastToPlayer(viewer)) problems.add("an arriving player is sent to another player");
+        if (p.gameMode() != GameType.SPECTATOR) problems.add("an arriving player is not frozen (spectator)");
+        PlayerHold.onReady(p, tokenOf(p), false);
+        if (PlayerHold.isHeld(p) || p.gameMode() != GameType.SURVIVAL) problems.add("the arrival was not released and restored");
+        if (p.position().distanceToSqr(far) > 0.01) problems.add("released away from the destination: " + p.position());
+        // a dimension change and a respawn hold likewise
+        if (!PlayerHold.arriveForTests(p, "dimension test") || !PlayerHold.isHeld(p)) problems.add("the dimension arrival did not hold");
+        PlayerHold.release(p, "selftest arrivals");
+        info.add("arrivals: " + (int) hop + " blocks free, " + (int) (PlayerHold.JUMP_BLOCKS + 400 + hop) + " blocks held at the destination and released there");
     }
 
     private static boolean damageCancelled(ServerPlayer p, DamageSource src) {

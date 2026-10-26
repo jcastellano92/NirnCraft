@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 
 #include "sectioncodec.hpp"
 #include "sectionpack.hpp"
@@ -162,10 +163,25 @@ void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     on_ = true;
     // (another generator's or build's sets: never read again; deleted in the background, the world's folder does not
     // grow with every build)
-    std::vector<std::filesystem::path> old;
+    std::vector<std::pair<std::filesystem::file_time_type, std::filesystem::path>> others;
     for (auto& e : std::filesystem::directory_iterator(root, ec))
         if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != sub + 1)
-            old.push_back(e.path());
+            others.push_back({e.last_write_time(ec), e.path()});
+    // In development (a file `keep-gen-sets` in the cache's root, its text the number of sets to keep, 3 if empty: the test
+    // harness writes it) the newest sets by last use stay beside this one, so builds and worktrees that alternate on one
+    // instance do not delete each other's bakes. A player's cache keeps this set alone.
+    size_t keep = 0;
+    {
+        std::ifstream kf(std::filesystem::path(root).parent_path() / "keep-gen-sets");
+        if (kf) {
+            int n = 0;
+            kf >> n;
+            keep = size_t(n > 0 ? n : 3) - 1;  // (this set is one of them)
+        }
+    }
+    std::sort(others.begin(), others.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+    std::vector<std::filesystem::path> old;
+    for (size_t i = keep; i < others.size(); i++) old.push_back(others[i].second);
     oldSets_ = std::move(old);  // (deleted once this set has written something: a set opened for a moment, while the
                                 // generator was being put together or taken apart, must not delete the real one)
 }
@@ -203,6 +219,8 @@ GenCache::Region& GenCache::region(uint64_t rk) {
             int32_t cx = int32_t(h[2]), cz = int32_t(h[4]);
             r.chunks.erase(chunkKey(cx, cz));
             for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
+        } else if (type == 5) {
+            eraseFarTile(r, int32_t(h[3]), int32_t(h[2]), int32_t(h[4]));
         } else if (type == 3) {
             Key3 k{int32_t(h[3] >> 16 & 0x7FFFu), int32_t(h[2]), int32_t(h[3] & 0xFFFFu), int32_t(h[4])};
             bool tru = (h[3] >> 31) != 0;
@@ -218,6 +236,32 @@ GenCache::Region& GenCache::region(uint64_t rk) {
     st_.chunks += r.chunks.size();
     st_.sections += r.secs.size();
     return r;
+}
+
+void GenCache::eraseFarTile(Region& r, int lod, int tx, int tz) {
+    r.tiles.erase(tileKey(tx, tz));
+    r.baked.erase(tileKey(tx, tz));
+    for (auto it = r.coarse.begin(); it != r.coarse.end();) {
+        if (it->first.lod == lod && tdiv(it->first.x) == tx && tdiv(it->first.z) == tz) {
+            r.coarseTrue.erase(it->first);
+            it = r.coarse.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void GenCache::forgetFarTile(int lod, int tx, int tz) {
+    if (!on()) return;
+    Job j;
+    j.type = 5;
+    j.k = Key3{lod, tx, 0, tz};
+    {
+        std::lock_guard<std::mutex> l(mu_);
+        eraseFarTile(region(farRegionOf(lod, tx, tz)), lod, tx, tz);  // (known no more at once; the tombstone follows in the queue)
+        queue_.push_back(std::move(j));
+    }
+    cv_.notify_one();
 }
 
 void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
@@ -267,7 +311,7 @@ void GenCache::writerLoop() {
         // (the compression outside the lock)
         std::vector<uint8_t> payload;
         auto t0 = std::chrono::steady_clock::now();
-        if (j.type == 4) {
+        if (j.type == 4 || j.type == 5) {
             // (a tombstone: no payload)
         } else if (j.type == 2) {
             encodeKinds(j.info, payload);
@@ -288,6 +332,18 @@ void GenCache::writerLoop() {
             uint64_t rk = regionOf(j.k.x, j.k.z);
             Region& r = region(rk);
             uint32_t h[HEAD] = {MAGIC, 4u, uint32_t(j.k.x), 0u, uint32_t(j.k.z), 0u};
+            FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
+            bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD;
+            if (f) std::fclose(f);
+            if (ok) {
+                r.fileBytes += uint64_t(HEAD) * 4;
+                st_.fileBytes += uint64_t(HEAD) * 4;
+            }
+        } else if (on && dir == dir_ && on_ && j.type == 5) {
+            uint64_t rk = farRegionOf(j.k.lod, j.k.x, j.k.z);
+            Region& r = region(rk);
+            eraseFarTile(r, j.k.lod, j.k.x, j.k.z);
+            uint32_t h[HEAD] = {MAGIC, 5u, uint32_t(j.k.x), uint32_t(j.k.lod), uint32_t(j.k.z), 0u};
             FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
             bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD;
             if (f) std::fclose(f);

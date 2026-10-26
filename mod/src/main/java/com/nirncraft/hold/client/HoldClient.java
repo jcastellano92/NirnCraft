@@ -21,12 +21,23 @@ public final class HoldClient {
     private static volatile boolean held;
     private static volatile long token;
     private static volatile long sinceMs;
+    private static volatile String reason = "login";
 
     private HoldClient() {}
 
     /** True while the server holds this player. */
     public static boolean held() {
         return held;
+    }
+
+    /** Why the server holds this player: "login", or the arrival (teleport, dimension, respawn, jump) in play. */
+    public static String reason() {
+        return reason;
+    }
+
+    /** Held again on arriving somewhere while in play (not the login hold). */
+    public static boolean arrival() {
+        return held && !"login".equals(reason);
     }
 
     public static long heldMillis() {
@@ -37,7 +48,8 @@ public final class HoldClient {
         if (m.held() && !held) sinceMs = System.currentTimeMillis();
         held = m.held();
         token = m.token();
-        NirnCraft.LOGGER.info("hold: the server {} this player (hold {})", m.held() ? "holds" : "released", m.token());
+        if (m.held()) reason = m.reason();
+        NirnCraft.LOGGER.info("hold: the server {} this player (hold {}, {})", m.held() ? "holds" : "released", m.token(), m.reason());
     }
 
     /** Reports that loading is complete ({@code fallback}: the player chose to enter without it). False when not sent. */

@@ -82,7 +82,16 @@ repository root.
   Third-party mod jars are cached in `dist\.cache\` (read-only).
 
 ## Code rules
-* No mixins, no access transformers. NeoForge events and public API; screens replaced via `ScreenEvent.Opening`.
+* No mixins or access transformers by default: NeoForge events and public API; screens replaced via
+  `ScreenEvent.Opening`.
+  * **Narrow exception (owner, 2026-10-25).** A mixin (or an access transformer) is allowed only when all of these hold:
+    1. no public NeoForge route exists;
+    2. the win is large and on the north-star path (e.g. turning vanilla's chunk meshing and drawing off for stage 5,
+       or later simulation hooks; see ATLAS-RENDER-INVENTORY.md §4);
+    3. it's small and targeted (one stable method), isolated in one package (`com.nirncraft.mixin`);
+    4. it has a switch that turns it off, with a fallback to the public path;
+    5. it's re-checked on every Minecraft update.
+  * Never for convenience. Propose each one in your report with its win and risk; the orchestrator approves it.
 * NEVER reference client classes (`Minecraft`, `Screen` and subclasses, `KeyMapping`, renderers, `LocalPlayer`)
   from common code, not even behind an `isClientSide` check: the bytecode verifier loads them and the dedicated
   server crashes. Hand off via `Sides.runOn(Dist.CLIENT, () -> () -> SomeClientClass.method(...))`
@@ -254,4 +263,48 @@ Read these first:
 * **Process feedback (2026-10-25).** When a rule, the gate, the harness or any step of the process slows you down or
   makes no sense, say so: `py -3 E:/NirnCraft-scratch/locks/feedback.py "<what, and your suggestion>"`. The orchestrator
   sees it within about 5 minutes and changes the process. Keep working meanwhile.
+
+* **Own your jobs and your waits (2026-10-25).** The agents and the Haiku gatekeeper handle these, not the orchestrator.
+  * Any job that runs more than a few minutes prints its progress at least every 2 minutes ("tiles 120/600",
+    "phase 3/5"), so a waiting agent and Haiku see real movement and an ETA, not just CPU use.
+  * Follow your own jobs with `heavy.py --follow <label>`.
+  * When you wait more than ~15 minutes, run `heavy.py --stuck "<what I wait for>"`: Haiku explains it (normal, with an
+    ETA) or escalates it.
+  * The orchestrator only sees what Haiku can't resolve.
+
+* **Measure the ceiling before building (owner, 2026-10-25).** Before building any optimisation, switch off the work it
+  would remove (an ablation on the saved scene or a bench: minutes) and measure the time saved. That is the most it can
+  ever gain.
+  * Build only if the ceiling is worth it; order the steps by ceiling.
+  * Ideas get a round-1 estimate first (minutes, from existing data); only the most valuable get real measurement.
+  * New ideas get one line in the notes, not chased.
+
+* **Park, don't drop (2026-10-25).** Work that's deferred stays safe: commit it on its own branch (or a WIP commit on
+  yours), never merged into atlas-render until its stage comes, and add a row to ATLAS-PLAN §4b "Parked work" with
+  where it is and what to re-check when it's resumed.
+
+* **No [noinline] call that passes structs by value on the far kernel's path (2026-10-25).** The driver moves such
+  structs through shared memory (16640 B a group instead of 7936), which takes L1 from the walk and slows every pixel,
+  even with the feature switched off. Check "Shared Memory Size" with `ATLAS_PIPE_STATS=1` on any far-kernel change:
+  7936 B is the good value.
+
+* **Adding content safely (2026-10-25).** Three layers, each with its guard:
+  1. **Content** (structures, biomes, trees, settlements, new blocks) is data and generator rules. The render kernel
+     sees only voxels and materials, and a new block's bricks come from its model, so content never changes the
+     render kernel's cost.
+     - Guards: GPU-vs-Java exactness; the generator's job limits (≤ 4-8 ms a dispatch, the pacer, recorder verdicts);
+       the gallery for looks; the cache fingerprint per generator stage (only affected data rebakes).
+  2. **Generator rules** (a new feature shape, a new biome step) change generator kernels. Their trap is one placement
+     on one lane for many ms. Guards: dispatch timing, exactness, and the same build-time pipeline-stats guard.
+  3. **Rendering features** (entities, volumes, light types, effects) change the render kernels. Guards: the build-time
+     pipeline-stats check (shared memory, local memory, registers), the no-struct-[noinline] and no-statics rules, a
+     ceiling test first, and a reviewer.
+  **Standards that make the right way the default:**
+  - **Content is data:** Minecraft-style features compile to GPU programs automatically (AtlasFeatureProgram), and
+    settlements are recorded tapes. Add or change content in data; code changes only for a new feature type.
+  - **A new feature type** follows the bounded-work template (resumable phases, a per-lane op budget), as the tree
+    phases do, so it can't become one long placement. Write the template when the next new type is needed.
+  - **The build runs the pipeline-stats guard (fails) and the shader lint (warns, with a fix hint each).**
+  - **`harness.py run --changed`** runs exactness, dispatch timing and the gallery for what changed (impact.json).
+  - **docs/COMPONENTS.md** lists, per generator or world component, the fast check, the visual tool and the one command. Run only those for what you touched. Fill a gap there only when you work on that component.
 

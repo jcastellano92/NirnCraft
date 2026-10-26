@@ -2,17 +2,25 @@
 
     harness.py run atlas-route                  the scripted route: walk, sprint, fly 2 km, turn, stand still
     harness.py run atlas-route --relaunch       twice across a client restart on one cache (chunks generated on the second)
-    harness.py run atlas-route --cold           wipe atlas's cache first (a first visit)
+    harness.py run atlas-route --cold           wipe atlas's cache first (a first visit: the first launch's loading, measured)
     harness.py run atlas-gallery                every block state group: vanilla raster vs atlas, 2 m and 16 m (atlas_gallery.py)
+
+Every run starts from the same place: the client restarts with the kept test world's player saved at START (ensure_spawn),
+so the loading phase builds the route's own spawn area and the world and atlas's cache (atlas-cache, the world's atlas
+data) are reused from run to run; --cold wipes the cache first. The launch is measured as a player's is (the client's
+loading screen holds the actions until atlas is ready; atlas-load.json has the time to ready, the frames, the generator's
+longest submissions).
 
 The route is one Java verb (AtlasRoute: `route SPEC.json`) that moves the player tick by tick and keeps the client's own
 frame intervals and atlas's counters; this module writes the spec, runs it, judges it against the bar and writes the
 one-page report. Results: .work/harness/atlas/route/<stamp>/ (report.html, report.json, charts, captures sheet) and
 .../latest/; the harness result is atlas-route|atlas.
 """
+import gzip
 import json
 import math
 import shutil
+import struct
 import time
 from pathlib import Path
 
@@ -22,7 +30,7 @@ OUT = ROOT / ".work/harness/atlas"
 # the bar (docs/ATLAS-PLAN.md section 1): smooth and no holes, 1440p on the RTX 3090
 REQUIRED = ["atlasMs", "loadedChunks", "genChunks", "farTiles", "farCached", "budgetFrameMs", "holes", "partial", "farReach",
             "stageCpuMs", "coldHits", "coldWrites", "ready"]  # AtlasProbe.REQUIRED: a gate never reports a counter it did not read
-BAR = {"p99": 20.0, "max": 50.0, "holes": 0, "relaunchGenerated": 0, "fullRadiusMs": 2000}
+BAR = {"p99": 20.0, "max": 50.0, "holes": 0, "relaunchGenerated": 0, "fullRadiusMs": 2000, "genSubmissionMs": 8.0}
 START = (-150, 260, 30)          # x, z, blocks above the surface: open ground south of Whiterun (catalog spawn pose)
 HEADING = -90.0                  # Minecraft yaw: -90 looks +x (east)
 WINDOW = (2560, 1440)
@@ -101,6 +109,124 @@ def wipe_cache(g):
     return n
 
 
+# ------------------------------------------------------------------------------------------------ the fixed spawn
+def _nbt_skip(b, i, t):
+    """The end of a tag's payload that starts at i (type t), in NBT bytes."""
+    if t in (1,):
+        return i + 1
+    if t == 2:
+        return i + 2
+    if t in (3, 5):
+        return i + 4
+    if t in (4, 6):
+        return i + 8
+    if t == 7:
+        return i + 4 + struct.unpack_from(">i", b, i)[0]
+    if t == 8:
+        return i + 2 + struct.unpack_from(">H", b, i)[0]
+    if t == 9:
+        et, n = b[i], struct.unpack_from(">i", b, i + 1)[0]
+        i += 5
+        for _ in range(n):
+            i = _nbt_skip(b, i, et)
+        return i
+    if t == 10:
+        while b[i] != 0:
+            ln = struct.unpack_from(">H", b, i + 1)[0]
+            i = _nbt_skip(b, i + 3 + ln, b[i])
+        return i + 1
+    if t == 11:
+        return i + 4 + 4 * struct.unpack_from(">i", b, i)[0]
+    if t == 12:
+        return i + 4 + 8 * struct.unpack_from(">i", b, i)[0]
+    raise ValueError(f"nbt tag type {t}")
+
+
+def set_player_pose(path, x, y, z, yaw, pitch):
+    """A player file's saved Pos and Rotation overwritten in place (the values are fixed-size: nothing else moves).
+    Returns the Pos it had."""
+    raw = gzip.decompress(Path(path).read_bytes())
+    if raw[0] != 10:
+        raise ValueError("not an NBT compound")
+    buf = bytearray(raw)
+    i = 3 + struct.unpack_from(">H", raw, 1)[0]
+    old = None
+    while raw[i] != 0:
+        t = raw[i]
+        ln = struct.unpack_from(">H", raw, i + 1)[0]
+        name = raw[i + 3:i + 3 + ln].decode("utf-8", "replace")
+        i += 3 + ln
+        if t == 9 and name in ("Pos", "Rotation"):
+            et, n = raw[i], struct.unpack_from(">i", raw, i + 1)[0]
+            if name == "Pos" and et == 6 and n == 3:
+                old = struct.unpack_from(">ddd", raw, i + 5)
+                struct.pack_into(">ddd", buf, i + 5, x, y, z)
+            elif name == "Rotation" and et == 5 and n == 2:
+                struct.pack_into(">ff", buf, i + 5, yaw, pitch)
+        i = _nbt_skip(raw, i, t)
+    if old is None:
+        raise ValueError("the player file has no Pos")
+    Path(path).write_bytes(gzip.compress(bytes(buf)))
+    return old
+
+
+def player_files(g):
+    d = g.GAME / "saves" / g.kept_world() / "players" / "data"
+    return sorted(d.glob("*.dat")) if d.exists() else []
+
+
+def ensure_spawn(runner, g, s, say=print):
+    """Every route starts at START: the client is closed, the kept world's player saved there, and the launch that follows
+    loads atlas around that very spot (it used to load around wherever the last scene left the player, then jump to START:
+    the spawn area built twice, the readiness gate never met). A world made this run has no player file until a launch has
+    made it: one launch and a close first."""
+    if g.running():
+        g.close()
+    files = player_files(g)
+    if not files:
+        say("  a new test world: one launch makes it (and its player file), then the spawn is set")
+        g.ensure(s["group"], runner.groups)
+        g.close()
+        files = player_files(g)
+        if not files:
+            raise RuntimeError("the test world has no player file after a launch and a close")
+    x, z, _ = START
+    for f in files:
+        old = set_player_pose(f, x + 0.5, 200.0, z + 0.5, HEADING, 0.0)
+        say(f"  spawn fixed at ({x}, {z}) (the player was saved at {old[0]:.0f}, {old[1]:.0f}, {old[2]:.0f})")
+
+
+def read_load(g):
+    """atlas-load.json (AtlasLoadStats: written when atlas became ready after the join), or None."""
+    f = g.GAME / "atlas-load.json"
+    try:
+        return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
+    except ValueError:
+        return None
+
+
+def trace_dumps(g, since):
+    """The recorder's spike dumps written since `since` (epoch seconds): [{dir, verdict}]; those that name the generator are
+    frames that queued behind it."""
+    out = []
+    root = g.GAME / "atlas-trace"
+    if not root.exists():
+        return out
+    for d in sorted(root.iterdir()):
+        try:
+            if d.stat().st_mtime < since:
+                continue
+            verdict = ""
+            for line in (d / "summary.txt").read_text(encoding="utf-8", errors="replace").splitlines():
+                if line.startswith("verdict:"):
+                    verdict = line[8:].strip()
+                    break
+            out.append({"dir": d.name, "verdict": verdict})
+        except OSError:
+            continue
+    return out
+
+
 def wait_alive(g, limit=420):
     """Atlas's first frames after a new build compile its pipelines on the render thread (a cold driver cache: 90 s with
     no heartbeat). The harness' ready check passes before that and its next action then fails on a stale heartbeat;
@@ -116,7 +242,17 @@ def wait_alive(g, limit=420):
     raise RuntimeError(f"the client did not answer within {limit} s (a pipeline compile that never ends?)")
 
 
-def fly_route(runner, s, tag=TAG, say=print):
+def load_log(g):
+    """The launch's own loading lines of the game log (the client's log restarts with every launch)."""
+    try:
+        text = g.LOG_FILE.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    keys = ("atlas load:", "atlas coarse bake:", "atlas loading phase:", "atlas client generation: far terrain")
+    return [l.strip()[:600] for l in text.splitlines() if any(k in l for k in keys)]
+
+
+def fly_route(runner, s, tag=TAG, say=print, since=None):
     """One run of the route in the running client; returns the parsed report (or raises)."""
     g = runner.game
     out_dir = g.GAME / "build/autotest-route"
@@ -164,6 +300,9 @@ def fly_route(runner, s, tag=TAG, say=print):
                 return "after the route"
             return [ph for e, ph in marks if e <= t][-1]
         data["osCpu"] = osr.report(phase_of)
+    data["load"] = read_load(g)
+    data["loadLog"] = load_log(g)
+    data["dumps"] = trace_dumps(g, since or (time.time() - 3600))
     data["shots"] = []
     for c in data.get("captures", []):
         f = g.SHOTS / f"{c['tag']}.png"
@@ -191,6 +330,18 @@ def delta(secs, key, sub="atlas"):
         out.append(None if v is None or prev is None else max(0, v - prev))
         prev = v if v is not None else prev
     return out
+
+
+def parse_subs(text):
+    """AtlasGen's `subs{N submissions, M over 8 ms; <phase>: n .. mean .. max .. ms, >4 .. >8 .. >16 ..; ...}` as rows."""
+    import re
+    rows = []
+    for m in re.finditer(r"; ([^;{}]+?): n (\d+) mean ([\d.]+) max ([\d.]+) ms, >4 (\d+) >8 (\d+) >16 (\d+)", text or ""):
+        rows.append({"phase": m.group(1), "n": int(m.group(2)), "mean": float(m.group(3)), "max": float(m.group(4)),
+                     "over4": int(m.group(5)), "over8": int(m.group(6)), "over16": int(m.group(7))})
+    head = re.match(r"subs\{(\d+) submissions, (\d+) over 8 ms", text or "")
+    return {"submissions": int(head.group(1)) if head else None, "over8": int(head.group(2)) if head else None,
+            "rows": sorted(rows, key=lambda r: -r["max"]), "max": max([r["max"] for r in rows], default=0.0)}
 
 
 def summarize(data):
@@ -258,6 +409,28 @@ def summarize(data):
                    for k, v in (data.get("phases") or {}).items()},
     }
     m["cpu"] = cpu_summary(data)
+    ld = data.get("load") or {}
+    m["load"] = {k: ld.get(k) for k in ("ready", "toReadyS", "toFirstFrameS", "toRendererS", "toGeneratorS", "toSpawnAreaS", "toHorizonS")}
+    m["loadFrames"] = ld.get("frames")
+    m["loadSubs"] = parse_subs(ld.get("subs"))
+    m["routeSubs"] = parse_subs(data.get("subs"))
+    m["loadBake"] = ld.get("bake")
+    # the near-first gate: level-0 columns within 6 chunks of the camera that hold no data, per second: none while walking and
+    # sprinting, and gone within 2 s of the end of the flight
+    ser = [(r["sec"], r.get("phase"), (r.get("atlas") or {}).get("l0Near6")) for r in secs]
+    ser = [(t, ph, v) for t, ph, v in ser if v is not None]
+    m["l0Near6"] = {}
+    for t, ph, v in ser:
+        m["l0Near6"][ph] = max(m["l0Near6"].get(ph, 0), v)
+    fly = [t for t, ph, v in ser if ph == "fly"]
+    fly_end = (max(fly) + 1) if fly else None
+    after = [(t, v) for t, ph, v in ser if fly_end is not None and t >= fly_end]
+    clean = next((t for t, v in after if v == 0), None)
+    m["l0Near6RecoverS"] = None if clean is None or fly_end is None else clean - fly_end
+    m["verify"] = {k: last_of(k) for k in ("verifyChunks", "verifyChunksDiffered", "verifyTiles", "verifyTilesDiffered")}
+    queued = [d for d in data.get("dumps") or [] if "queued behind" in d.get("verdict", "")]
+    m["dumps"] = len(data.get("dumps") or [])
+    m["dumpsQueuedBehindGen"] = len([d for d in queued if "generator" in d["verdict"]])
     cl = [r["collide"] for r in secs if isinstance(r.get("collide"), dict)]
     if cl:
         m.update({"collideSeconds": len(cl), "collideChecked": sum(c.get("checked", 0) for c in cl),
@@ -288,6 +461,24 @@ def summarize(data):
         if m["collideMismatches"]:
             fails.append(f"{m['collideMismatches']} of {m['collideChecked']} blocks differ between atlas level 0 and the client level")
         return m, fails
+    if not ld:
+        fails.append("no atlas-load.json: atlas did not report ready after the join")
+    elif not ld.get("ready"):
+        fails.append("the loading phase gave up (atlas not ready)")
+    for what, sub in (("loading", m["loadSubs"]), ("route", m["routeSubs"])):
+        if sub["max"] > BAR["genSubmissionMs"]:
+            top = sub["rows"][0]
+            fails.append(f"{what}: a generator submission of {top['max']} ms ({top['phase']}; {sub['over8']} over 8 ms of {sub['submissions']}) "
+                         f"> {BAR['genSubmissionMs']:g}")
+    if (m["verify"]["verifyChunksDiffered"] or 0) + (m["verify"]["verifyTilesDiffered"] or 0):
+        fails.append(f"the idle verifier found cached data that the generator no longer makes: {m['verify']} (a cache key that missed a change)")
+    for ph in ("walk", "sprint"):
+        if (m["l0Near6"].get(ph) or 0) > 0:
+            fails.append(f"level-0 holes within 6 chunks of the camera while the {ph} (up to {m['l0Near6'][ph]})")
+    if ser and fly_end is not None and (m["l0Near6RecoverS"] is None or m["l0Near6RecoverS"] > 2.0):
+        fails.append(f"level-0 holes near the camera not gone within 2 s of the end of the flight ({m['l0Near6RecoverS']})")
+    if m["dumpsQueuedBehindGen"]:
+        fails.append(f"{m['dumpsQueuedBehindGen']} frame(s) over 50 ms queued behind the generator (recorder dumps)")
     if m["p99"] > BAR["p99"]:
         fails.append(f"p99 frame {m['p99']} ms > {BAR['p99']:g}")
     if m["max"] > BAR["max"]:
@@ -404,6 +595,21 @@ def html(folder, title, runs, verdict, extra=""):
                                                                            "holesAtEnd", "farReachMin", "genChunks", "farTilesMade",
                                                                            "cachedChunks", "coldHits", "coldWrites", "stageCpuMaxMs",
                                                                            "atlasMsMax", "display")) + "</tr></table>")
+        ld = m.get("load") or {}
+        lf = m.get("loadFrames") or {}
+        rows.append("<h4>Loading (join to ready)</h4><table><tr>" + "".join(f"<th>{k}</th>" for k in (
+            "ready", "to renderer s", "to generator s", "to spawn area s", "to horizon s", "to ready s", "frames", "p50", "p99", "max",
+            "over 50 ms", "dumps", "queued behind gen")) + "</tr><tr>" + "".join(f"<td>{v}</td>" for v in (
+            ld.get("ready"), ld.get("toRendererS"), ld.get("toGeneratorS"), ld.get("toSpawnAreaS"), ld.get("toHorizonS"),
+            ld.get("toReadyS"), lf.get("n"), round(lf.get("p50", 0), 1), round(lf.get("p99", 0), 1), round(lf.get("max", 0), 1),
+            lf.get("over50"), m.get("dumps"), m.get("dumpsQueuedBehindGen"))) + "</tr></table>"
+            + f"<p>idle verifier (cached chunks and far tiles made again and compared): {m.get('verify')}; loading counters: {m.get('loadBake')}</p>")
+        for title, sub in (("generator and bake submissions while loading", m.get("loadSubs")), ("generator and bake submissions on the route", m.get("routeSubs"))):
+            if sub and sub.get("rows"):
+                rows.append(f"<h4>{title}: {sub['submissions']} submissions, {sub['over8']} over 8 ms</h4><table><tr><th>phase</th><th>n</th><th>mean ms</th>"
+                            "<th>max ms</th><th>&gt;4</th><th>&gt;8</th><th>&gt;16</th></tr>" + "".join(
+                    f"<tr><td style='text-align:left'>{r['phase']}</td><td>{r['n']}</td><td>{r['mean']}</td><td>{r['max']}</td>"
+                    f"<td>{r['over4']}</td><td>{r['over8']}</td><td>{r['over16']}</td></tr>" for r in sub["rows"]) + "</table>")
         cpu = [(k, v) for k, v in (m.get("cpu") or {}).items() if not k.startswith("_")]
         if cpu:
             rows.append("<h4>CPU by phase (the process's cores used; top consumers: OS threads, then the JVM's)</h4><table><tr><th>phase</th>"
@@ -443,21 +649,18 @@ def run_route_scene(runner, s, v, fp):
     folder.mkdir(parents=True, exist_ok=True)
     runs = []
     try:
-        if cold:
-            if g.running():
-                g.close()
-            n = wipe_cache(g)
-            print(f"  atlas cache wiped ({n} files): a first visit", flush=True)
-            g.ensure(s["group"], runner.groups)
         for i in range(2 if relaunch else 1):
-            if i:  # the client restarts on the same cache
-                time.sleep(3)
-                g.close()
-                time.sleep(2)
-                g.ensure(s["group"], runner.groups)
-            label = "run 2 (relaunch, same cache)" if i else ("run 1 (cold cache)" if relaunch else "run")
+            # the client restarts every run, the kept world's player saved at START (the same spawn, the same cache)
+            ensure_spawn(runner, g, s, say=lambda m: print(m, flush=True))
+            if i == 0 and cold:
+                n = wipe_cache(g)
+                print(f"  atlas cache wiped ({n} files): a first visit", flush=True)
+            (g.GAME / "atlas-load.json").unlink(missing_ok=True)
+            t_start = time.time()
+            g.ensure(s["group"], runner.groups)
+            label = "run 2 (relaunch, same cache)" if i else ("run 1 (cold cache)" if (relaunch or cold) else "run (kept cache)")
             try:
-                data = fly_route(runner, s, tag=TAG)
+                data = fly_route(runner, s, tag=TAG, since=t_start)
             except RuntimeError as e:
                 if "not ready:" not in str(e):
                     raise

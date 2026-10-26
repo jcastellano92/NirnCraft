@@ -66,13 +66,40 @@ final class AtlasLoadingScreen extends Screen {
         return armed || open;
     }
 
+    /** An arrival that is ready within this long never shows the screen (a warm teleport stays instant). */
+    static final long ARRIVAL_SHOW_MS = 1500;  // (vanilla itself sends the destination's chunks about 0.6 to 0.9 s after the teleport)
+    private static AtlasLoadingScreen quiet;  // (polling an arrival's readiness before the screen is due)
+
     /** (client tick) Opens the screen when armed or held, and the world is in. */
     static void tick(Minecraft mc) {
-        if (mc.level == null || mc.player == null || mc.gui.screen() != null) return;
-        if (!HoldClient.held() && !armed) return;
+        if (mc.level == null || mc.player == null) return;
+        boolean held = HoldClient.held();
+        if (!held) quiet = null;
+        if (mc.gui.screen() != null) return;
+        if (!held && !armed) return;
+        if (held && !armed && HoldClient.arrival() && HoldClient.heldMillis() < ARRIVAL_SHOW_MS) {
+            // arriving in play: no screen unless it is slow; report ready the moment it is
+            if (quiet == null) quiet = new AtlasLoadingScreen();
+            quiet.pollQuietly();
+            return;
+        }
+        if (quiet != null && held) com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: the arrival is not ready after {} ms: the screen shows", HoldClient.heldMillis());
+        quiet = null;
         armed = false;
         open = true;
         mc.gui.setScreen(new AtlasLoadingScreen());
+    }
+
+    /** The arrival's readiness without a screen: tells the server as soon as it is ready. */
+    private void pollQuietly() {
+        check();
+        if (isReady && HoldClient.held() && (!sentReady || (System.nanoTime() - sentAtNs) / 1e9 > 2)) {
+            if (HoldClient.sendReady(false) && !sentReady) {
+                com.nirncraft.NirnCraft.LOGGER.info("atlas loading phase: the arrival is ready after {} ms, told the server (no screen)", HoldClient.heldMillis());
+                sentReady = true;
+            }
+            sentAtNs = System.nanoTime();
+        }
     }
 
     @Override
@@ -130,11 +157,12 @@ final class AtlasLoadingScreen extends Screen {
 
     /** Vanilla's own readiness: the chunks around the player are in (the fallback when atlas cannot be waited for). */
     private boolean vanillaReady() {
-        if (minecraft.level == null || minecraft.player == null) return false;
-        int cx = minecraft.player.blockPosition().getX() >> 4, cz = minecraft.player.blockPosition().getZ() >> 4;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) return false;
+        int cx = mc.player.blockPosition().getX() >> 4, cz = mc.player.blockPosition().getZ() >> 4;
         for (int dx = -2; dx <= 2; dx++)
             for (int dz = -2; dz <= 2; dz++)
-                if (!minecraft.level.getChunkSource().hasChunk(cx + dx, cz + dz)) return false;
+                if (!mc.level.getChunkSource().hasChunk(cx + dx, cz + dz)) return false;
         return true;
     }
 
@@ -218,8 +246,7 @@ final class AtlasLoadingScreen extends Screen {
         if (pp != null && pp.split() == 1) y = line(g, cx, y, "Renderer (fast far kernel)", "compiling in the background", -1);
         y = line(g, cx, y, "Generator", p != null && p.running() ? "ready" : renderer ? "starting" : "waiting", p != null && p.running() ? 1 : 0);
         double near = p == null || p.nearTotal() == 0 ? 0 : Math.min(1.0, p.near() / (double) p.nearTotal());
-        String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks"
-                + (p.cached() > 0 ? " (" + p.cached() + " from the cache)" : "");
+        String nearText = p == null ? "waiting" : p.nearDone() ? "done" : p.near() + " / " + p.nearTotal() + " chunks";
         y = line(g, cx, y, "Spawn area", nearText, p != null && p.nearDone() ? 1 : near);
         AtlasCoarseBake.Progress bake = AtlasCoarseBake.progress();
         if (bake != null && bake.phase() > 0) {
@@ -231,6 +258,8 @@ final class AtlasLoadingScreen extends Screen {
             double far = Math.min(1.0, p.far() / (double) p.farTotal());
             y = line(g, cx, y, "Horizon", p.far() + " / " + p.farTotal() + " tiles" + (p.farCached() > 0 ? " (" + p.farCached() + " from the cache)" : ""), far);
         }
+        y = bakeLevels(g, cx, y, bake);
+        y = cacheLoad(g, cx, y, p, bake);
         if (problem != null) {
             int ty = y + 6;
             for (var line : font.split(Component.literal(problem), Math.min(360, width - 40))) {
@@ -240,7 +269,8 @@ final class AtlasLoadingScreen extends Screen {
             g.centeredText(font, Component.literal(vanillaIn ? "You stay held (invisible, untouchable) until you choose."
                     : "You stay held until the terrain around you has arrived."), cx, ty + 4, SkyUi.DIM);
         } else {
-            String held = HoldClient.held() ? (sentReady ? "Entering the world" : "Preparing the world: you are not in play yet") : "";
+            String held = HoldClient.held() ? (sentReady ? "Entering the world" : HoldClient.arrival()
+                    ? "Arriving (" + HoldClient.reason() + "): you are not in play yet" : "Preparing the world: you are not in play yet") : "";
             if (!pending.isEmpty()) held += (held.isEmpty() ? "" : " - ") + pending;
             g.centeredText(font, Component.literal(held), cx, y + 6, SkyUi.DIM);
         }
@@ -248,6 +278,44 @@ final class AtlasLoadingScreen extends Screen {
         String text = nearText;
         if (!text.equals(lastLine)) lastLine = text;
         super.extractRenderState(g, mouseX, mouseY, partialTick);
+    }
+
+    /** The bake of the coarse levels, one count a level (tiles finished of planned: on disk, made or given up), from the bake's own tallies. */
+    private int bakeLevels(GuiGraphicsExtractor g, int cx, int y, AtlasCoarseBake.Progress bake) {
+        if (bake == null || bake.phase() <= 0 || bake.levelTiles() == null) return y;
+        StringBuilder t = new StringBuilder("Bake by level");
+        boolean any = false;
+        for (int k = 6; k >= 3; k--) {
+            int n = bake.levelTiles()[k];
+            if (n == 0) continue;
+            t.append(any ? ",  L" : "   L").append(k).append(' ').append(bake.levelDone()[k]).append(" / ").append(n);
+            any = true;
+        }
+        return any ? note(g, cx, y, t.toString()) : y;
+    }
+
+    /**
+     * What is read from disk instead of made: the horizon's tiles into the grid (read of the known ones: those read and those
+     * still waiting), the spawn area's chunks from the cache (of the window's chunks), and the cache's sections behind them.
+     */
+    private int cacheLoad(GuiGraphicsExtractor g, int cx, int y, AtlasClientGen.Progress p, AtlasCoarseBake.Progress bake) {
+        if (p == null) return y;
+        StringBuilder t = new StringBuilder("Cache");
+        if (bake != null && bake.phase() > 0) {
+            long known = bake.served() + bake.servePending();
+            t.append("   tiles ").append(bake.served()).append(" / ").append(known);
+        }
+        // (one ratio: the chunks the cache served of the chunks it was asked for, never over the whole)
+        long asked = Math.max(AtlasClientGen.cacheAsked(), p.cached());
+        t.append(bake != null && bake.phase() > 0 ? ",  chunks served " : "   chunks served ").append(p.cached()).append(" of ").append(asked).append(" asked");
+        return note(g, cx, y, t.toString());
+    }
+
+    /** A line of small text under a stage (no bar). */
+    private int note(GuiGraphicsExtractor g, int cx, int y, String text) {
+        int w = Math.min(320, width - 40), x0 = cx - w / 2;
+        g.text(font, Component.literal(text), x0, y, SkyUi.DIM, false);
+        return y + font.lineHeight + 4;
     }
 
     /** One stage: its name, its state and a bar. */

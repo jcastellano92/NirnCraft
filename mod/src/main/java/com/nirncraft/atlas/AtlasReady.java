@@ -25,6 +25,26 @@ public final class AtlasReady {
         return pending().isEmpty();
     }
 
+    /** The loading screen is armed or open: the player is held (a test run in the client waits, and does not close it). */
+    public static boolean loadingScreenHeld() {
+        return AtlasLoadingScreen.holding();
+    }
+
+    /** A string that changes while the loading phase progresses ("" when it is not held): the harness fails a step whose progress stops. */
+    public static String loadingProgress() {
+        if (!AtlasLoadingScreen.holding()) return "";
+        var p = AtlasClientGen.progress();
+        var b = AtlasCoarseBake.progress();
+        var pp = AtlasClient.building();  // (the kernels compiling: minutes on a cold driver cache)
+        return "|load" + (pp == null ? "" : "p" + pp.done()) + (p == null ? "" : p.near() + "/" + p.generated() + "/" + p.cached()) + (b == null ? "" : "/" + b.done() + "/" + b.servePending());
+    }
+
+    /** The generator's submissions by phase since atlas became ready (the route's own; AtlasLoadStats reset the count), or "". */
+    public static String genSubs() {
+        String s = AtlasClientGen.subStats(false);
+        return s == null ? "" : s;
+    }
+
     /** Atlas gave up for this session (a lost device, a crash guard): there is nothing to wait for. */
     public static boolean offForSession() {
         return AtlasClient.failedForSession();
@@ -63,7 +83,9 @@ public final class AtlasReady {
             var p = AtlasClientGen.progress();
             if (p == null || !p.running()) return "generator not running";
             if (!p.nearDone()) return "spawn area " + p.near() + " of " + p.nearTotal() + " chunks";
-            if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (coarse bake) " + p.far() + " of " + p.farTotal() + " tiles";
+            var bk = AtlasCoarseBake.progress();  // (levels 3-6: the whole-map bake's own count, made or read; farStep makes the finer levels')
+            if (bk != null && bk.phase() > 0 && !bk.loaded()) return "horizon (coarse bake) " + bk.done() + " of " + bk.total() + " tiles";
+            if (p.farTotal() > 0 && p.far() < p.farTotal()) return "horizon (finer levels) " + p.far() + " of " + p.farTotal() + " tiles";
         }
         var v = info.has("voxgrid") && info.get("voxgrid").isJsonObject() ? info.getAsJsonObject("voxgrid") : null;
         if (v == null) {  // (the level-0 grid exists in the unified / client-generated modes; the plain far field has none to wait for)

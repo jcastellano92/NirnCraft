@@ -224,6 +224,7 @@ public:
         // a fine probe (32-block samples within 1.5 km): how many no level knows, the nearest such place (the ring
         // right outside level 0 would show here)
         uint32_t nearHoles = 0;
+        uint32_t l0Near6 = 0;  // level-0 columns within 6 chunks of the camera that hold no data (the walking gate: 0)
         float nearReach = 1500.0f;
     };
     Coverage coverage() const;

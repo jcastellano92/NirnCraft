@@ -928,6 +928,10 @@ typedef struct AtlasGenPaceStats {
     char recentPhase[48];
 } AtlasGenPaceStats;
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out);
+/* The generator's submissions by what they held, since the last reset, as one text line ("subs{N submissions, M over 8 ms;
+   far stage: n, mean, max ms, >4 >8 >16 ...}", the longest classes first): their GPU times (timestamps). Returns the full
+   length (cap-limited copy, NUL-terminated); reset != 0 starts the counts again. Answers while a batch runs. */
+ATLAS_API uint32_t atlas_gen_sub_stats(AtlasGen* h, char* out, uint32_t cap, int32_t reset);
 typedef struct AtlasGenCacheStats {
     uint32_t on;
     uint64_t fingerprint, chunks, sections, fileBytes, chunkHits, chunkMisses, sectionWrites, sectionReads;
@@ -1004,6 +1008,14 @@ ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out);
 /* While on, the far field's submissions (atlas_gen_far_ingest, so the bake) are not paced and take nothing from the near
    work's budget: for a loading screen that holds the player, where no frame is to be protected. */
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on);
+/* The idle verifier of the generation and bake caches (they are keyed by the generator's own sources, data and seed, not by
+   the whole native build: a key that misses a change would serve stale data). atlas_gen_verify_far_tile makes one cached
+   stand-in far tile again, apart from the cache and the grid, and compares its chunks' kinds with the cache's: *outResult -1
+   not comparable, 0 the same, 1 it differed (the tile is baked again). atlas_gen_verify_note(kind 0, bad) counts a near
+   chunk the caller checked; atlas_gen_verify_stats gives {chunks checked, chunks differed, tiles checked, tiles differed}. */
+ATLAS_API AtlasStatus atlas_gen_verify_far_tile(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz, int32_t* outResult);
+ATLAS_API AtlasStatus atlas_gen_verify_note(AtlasGen* h, int32_t kind, int32_t bad);
+ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out);
 ATLAS_API AtlasStatus atlas_gen_bake_begin(AtlasGen* h, const AtlasGenBakeSpec* spec, AtlasGenBakeInfo* out);
 /* Makes the next maxTiles tiles not yet known (each one atlas_gen_far_ingest, paced as the far field is: the leftovers of
    the GPU budget). Returns early with info.busy set; call again after a frame. */
@@ -1162,7 +1174,7 @@ typedef int32_t (*AtlasGenStoreStageFn)(void* user, const AtlasGenStoreBatch* ba
 #define ATLAS_GEN_TILE_COLS 65536u   /* a tile's columns, 256 x 256, row-major (z outer) */
 #define ATLAS_GEN_TILE_PLANES 7u     /* a tile's planes of ATLAS_GEN_TILE_COLS words */
 typedef struct AtlasGenFarBatch {
-    uint32_t version;              /* 1 */
+    uint32_t version;              /* 1, 2 (parts), 3 (sized by the stage) */
     int32_t lod;                   /* the tiles' level: a column is 2^lod blocks square */
     int32_t tx, tz;                /* the tile: blocks tx * 256 * 2^lod .. (columns from there) */
     uint32_t tile;                 /* its index in the planes buffer: planes at tile * TILE_PLANES * TILE_COLS words */
@@ -1182,6 +1194,13 @@ typedef struct AtlasGenFarBatch {
     uint32_t units;
     uint32_t lastPartUs;
     uint32_t pad2;
+    /* (version 3) the stage sizes its own parts: `budgetUs` of GPU time a part at most, and the GPU time (microseconds) of this
+       tile's parts done so far, by part (`partUs`, `partsDone` of them: parts retire in order, at most two are in flight);
+       the stage names what a part held in `label` (a phase for the budget's counters and the trace; may stay empty) */
+    uint32_t budgetUs;
+    uint32_t partsDone;
+    const uint32_t* partUs;
+    char label[48];
 } AtlasGenFarBatch;
 typedef int32_t (*AtlasGenFarStageFn)(void* user, const AtlasGenFarBatch* batch);
 /* Registers a far stage (outId: for atlas_gen_remove_stage). */

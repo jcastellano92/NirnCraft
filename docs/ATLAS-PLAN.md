@@ -18,7 +18,39 @@ hardware.
 - **Supported, built when their stage comes:** distant storms and 3D cloud weather, far entities changing, fast AI
   pathing, water.
 
-**How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
+**Later phase: own the simulation (owner, 2026-10-25).** Modernise the game's simulation the way the renderer was.
+- Simulation level of detail: full rate near players, coarse or statistical far, paused when nobody is near.
+- Regions ticked in parallel; data-oriented entities.
+- GPU simulation for fluids, fire, crowds, pathing and weather on the same world data.
+- Cosmetic simulation on clients; interest-managed sync.
+
+Scope: everything NirnCraft adds (NPCs, creatures, battles, fluids, weather) can be ours within the no-mixins rule.
+Replacing vanilla's own tick may use the narrow mixin exception (AGENT-RULES, owner, 2026-10-25), case by case. It starts after
+the renderer milestone, with a read-only design study first.
+
+**Owning the loader (owner, 2026-10-25).** Owner's note: "we could just create our own NeoForge if need be"; a
+conversion layer would make it a win-win.
+- **(A) First choice:** a thin NeoForge fork that only adds events and hooks (skip chunk meshing, tick scheduling and
+  rate limits, simulation level of detail, our chunk loading) and changes nothing, so every NeoForge mod runs as is with
+  no conversion layer. A small rebase per update; offer the hooks upstream.
+- **(B) Only if needed:** a real fork plus a compatibility layer translating NeoForge mod calls (precedent: Sinytra
+  Connector).
+- **(C) Our own engine or server:** only if the game outgrows Minecraft.
+- **Default direction: host plus our engine (2026-10-25).** Minecraft and NeoForge stay the host: vanilla rules,
+  inventory and the mod ecosystem. Our native engine, as Infinite ATLAS already is for rendering and generation,
+  also runs NirnCraft's simulation (NPCs, creatures, battles, fluids, weather, crowd pathing), data-oriented, on the GPU
+  where it fits. Our network layer runs over custom payloads (deltas, bakes, cooperative baking, far players). On
+  servers the engine can run as a companion process beside the Minecraft server over a fast local link. Hooks into
+  vanilla's depths only through (A) or the narrow mixin exception.
+- **Terms:** NeoForge is LGPL-2.1, so our changes stay open under it; ship patches, never Minecraft's code.
+- **Timing:** decided when the simulation phase starts.
+- **Deferred quick spikes for that phase (2026-10-25)**, each a round-1 estimate first:
+  - simulation level of detail: server tick saved with distant mobs ticked less often;
+  - thin-fork cost: patch size and rebase effort of one added hook;
+  - companion-process throughput: chunks/s over shared memory.
+
+**How we get there:** be agile. When we're not sure, shift focus to whatever reduces the uncertainty most, with a
+quick estimate or ceiling test; park the rest, and come back when the numbers say so. Start with what we have; take targeted, focused steps with one agent each; iterate fast and
 experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
 gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
 
@@ -106,6 +138,30 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   deltas too, so changes load as fast as the rest.
 - **Location:** stored with the world (deleting the world deletes it), with an estimate shown at creation and a warning
   when disk is low.
+- **What a server sends (2026-10-25):**
+  - always: block changes as deltas by interest, plus region fingerprints;
+  - on first join: the whole-map coarse view (~10-15 MB compressed);
+  - level-0 detail: adaptive per region. A client asks for data only where downloading is faster than its own GPU
+    would generate it (it measures its own generation rate against its bandwidth), so strong GPUs generate and weak
+    ones download. No fixed rule, the same spirit as pixels-drive-everything.
+- **Many players (2026-10-25):** the per-player cost on the server stays small and bounded.
+  - The server never renders or bakes for players.
+  - Updates are interest-managed: changes and entity state by nearness and visibility, with far players and mobs as
+    rarer position-only updates.
+  - Downloads share one server upload budget; when it's busy, clients generate locally instead of waiting.
+  - The remaining limit is vanilla's simulation around players, reduced by the server view cap and the GPU-fed
+    server chunks.
+- **Players sharing bakes (2026-10-25):** every received region is checked against the server's region fingerprint and
+  discarded on a mismatch, so no peer needs to be trusted.
+  - Same local network first: fast, with no privacy cost.
+  - Internet peer-to-peer later, opt-in (IP exposure, routers, abuse limits).
+  - A shared mirror for a seed's baseline coarse view covers most first joins more simply.
+- **Cooperative baking (owner, 2026-10-25: "work as a team"):** the server coordinates; the clients bake.
+  - The server keeps the index of which regions exist and who holds them.
+  - Each client contributes what it bakes anyway; idle client GPUs are asked to bake regions other players are heading
+    for. More players means a faster world for everyone.
+  - Trust without a server GPU: a region is accepted once two independent clients agree on its fingerprint, the
+    server's CPU generator spot-checks a few, and peers that send bad data are dropped.
 
 ### Frame budget (2026-10-25)
 
@@ -119,6 +175,7 @@ the reserved slices stay free for what comes later:
 | Entities and effects (far movers as points, emitters in the light list) | 1-2 ms |
 | **Reserved:** clouds and weather (volumetric, amortised, same trace) | ~2 ms |
 | Post-processing | ~1 ms |
+| World generation during play (near-first; background bake only on idle GPU) | up to ~3 ms moving, ~0 idle |
 
 Far edits re-ingest only the changed sections and their coarse levels (microseconds to a ms each). Far fires and
 lightning go in the light layer; far battles are points or silhouettes. In game the renderer was 25-29 ms on
@@ -197,6 +254,23 @@ follows the design without new tests.
   - Sky light from the atmosphere model.
   - Far players and creatures as points or silhouettes drawn every frame.
   - Test right after the sky and height exit, on the horizon view: far pass ms, plus a still-and-moving capture.
+
+- **(H) Smoothness computed when a level is built, not per frame:**
+  - first choice: contour planes per coarse voxel (Laine & Karras, Efficient Sparse Voxel Octrees), so the trace is one
+    ray-plane test;
+  - fallback: a stored normal plus corner densities, solved directly;
+  - the far terrain as height fields with max-height pyramids, which also gives the sky exit.
+  - Test offline on the saved scene against the current look, after the levels-1-2 completeness experiment.
+
+**Adoption checklist for any new technique (2026-10-25).** It is adopted only if it:
+1. stays inside the one grid and trace, with no separate near or far renderer;
+2. is chosen per pixel from the footprint;
+3. rebuilds cheaply when a section changes, so far edits still show;
+4. gives the same result on every machine (multiplayer and caches depend on it);
+5. keeps the look and the light (gallery and captures);
+6. fits its slice of the frame budget.
+
+Height fields may serve only as a skip structure inside the coarse levels, never as a far-terrain renderer.
 
 Rejected: raster meshlets near with SDF morphing in a middle zone, because it reintroduces a near/middle/far split
 (§0.1-0.2).
@@ -313,6 +387,11 @@ scene (hundreds of entities) within the frame bar; an owner test at night with f
 ### Stage 5: one world: vanilla chunks off, collisions ours, and scale
 
 - Vanilla's chunk meshing and its chunk sending off; vanilla simulates only a small radius.
+  - Without mixins (ATLAS-RENDER-INVENTORY §3, 2026-10-25): the draws are already dropped (the visibleSections swap
+    in AtlasNearPass). Next, empty models while sections mesh (DelegateBlockStateModel in
+    `ModelEvent.ModifyBakingResult`, adding nothing for `RenderSectionRegion`); sections still compile, so entity
+    visibility, block entities and culling stay correct. Check whether NeoForge's custom fluid renderer covers
+    vanilla water and lava. Mixins only for what's left, under the narrow exception.
 - **Collisions and physical interactions from our voxel world** on the client: the player's and entities'
   collision shapes, raycasts (block targeting) and fluids read the same store the renderer draws, so they always
   agree. The server checks the key pieces only.
@@ -326,6 +405,23 @@ walking through or floating on anything); the owner flies every stress scene.
 
 **Then, in the owner's order:** far settlements (the overlays agent's far stage), far life (R5: far players
 building in real time), multiplayer at scale, baked light, weather.
+
+## 4b. Parked work (saved, not lost; revisit at its stage)
+
+Deferred work is saved on a branch or in this list, so it never blocks the main line and is never forgotten. A parked
+branch is merged only when its stage comes and a quick re-check shows it still applies.
+
+| Item | Where | Stage | Re-check when resumed |
+|---|---|---|---|
+| Water on its fluid level, far water under trees, waterlogged blocks as full cubes (3 commits, 2026-10-21) | branch `atlas-water` | 3 (fluids) | Superseded by later water and waterlogged work? Diff against atlas-render first |
+| Half-resolution far range (one ray per far 2x2 quad): ceiling only -7 / -11 ms, its quarter rays incoherent | branch `atlas-farquad` (58b3f45e) | revisit after the amortised field | Re-ceiling on top of amortisation |
+| Far settlements (overlays far stage) | branch `atlas-overlays` (its work merged except a merge commit) | after stage 3 | The far-stage design against the one-generator rule (§0.8) |
+| Vanilla meshing off without mixins: the empty-model trick, the fluid model swap | `docs/SPIKES-2026-10-25.md` | 5 | Round 2: bridge "Compile Section" into the recorder, one probe |
+| Simulation level of detail, thin NeoForge fork, companion process | the plan's "Owning the loader" section | simulation phase | Round-1 estimates first |
+| Candidate techniques C, E, F, G, H | §3b | their stage | Ceiling test first |
+| Cache lifecycle, cross-vendor exactness, low-end scaling, merge quality gates | §4 "Later, once it works here" | after it works here | — |
+| Component tooling gaps: GPU-vs-Java checks per component, seconds-long visuals for terrain, rivers and settlement placement | docs/COMPONENTS.md | when each component is worked on | — |
+| Bridge vanilla Profiler zones (worker threads) into the flight recorder | idea (spikes) | when CPU matters | — |
 
 ## 5. How the work runs (cost)
 
