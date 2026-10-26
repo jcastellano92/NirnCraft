@@ -950,7 +950,8 @@ int traceVoxGrid(VgGrid g, float3 p0, float3 dw, float u0, float u1, uint stepCa
                         // (the smooth surface itself is found once the view ray is done, traceView's smoothPrimaryHit: in
                         // the walk, a call inside the divergent step loop, it cost the horizon view's far pass 0.7 s)
                         float foot = (cChordT + t) * frame.params.w * frame.params.z;
-                        bool smooth = cPrimary && vs >= SMOOTH_COARSE_PX * foot && (cAblate & 32u) == 0u;
+                        // (not level 1: near the camera its smooth surface and level 0's cubes alternated)
+                        bool smooth = cPrimary && g.k >= 2 && vs >= SMOOTH_COARSE_PX * foot && (cAblate & 32u) == 0u;
                         if (voxelStops(mat, v, v + gVox, g.k, ro, d, inv, stepPos, t)) {
                             cTr.t = t;
                             cTr.mat = mat;
@@ -1624,6 +1625,7 @@ int lodPick(float level, float xi, int lodCount) { return clamp(int(floor(level 
 // the per-pixel threshold (farMain: interleaved gradient noise, rotated by the golden ratio each frame under the host's
 // TAA; 0.5 elsewhere)
 static float gLodXi = 0.5;
+static float gLodXiFix = 0.5;  // (the pixel's own, not rotated: where a stretch starts inside level 1's resident radius)
 static float sLodXi;  // (traceSecondaryCore's own)
 
 // Residency: each level's window (its region table) as the inner radius r_k it covers around the camera (Chebyshev,
@@ -1706,13 +1708,18 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
     bool graze = false;
     float grazeEnd = 0.0, fineT = 0.0, fineFrom = 0.0;
     TraceResult fine = gTr;
+    float xiS0 = xi;  // (the last stretch's threshold: a grazing look keeps its hit's)
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         float3 a = worldAt(o, dir, k, t);
         // rising above the world top: the parabola only climbs further from here
         if (!graze && a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
         float lc = rings || graze ? 0.0 : max(lodFromFootprint(t, pa, 1.0), lodResident(a));
-        int want = graze ? lod : max(lodPick(lc, xi, lodCount), groupsFrom);
+        // (where the stretch starts inside level 1's resident radius the threshold is the pixel's own, not rotated with
+        // the TAA: a rotating one flipped pixels between level 0 and level 1 every frame, the near shimmer)
+        float xiS = graze ? xiS0 : (max(abs(a.x), abs(a.z)) < lodRAt(1) ? gLodXiFix : xi);
+        xiS0 = xiS;
+        int want = graze ? lod : max(lodPick(lc, xiS, lodCount), groupsFrom);
         if (rings) want = gGroups ? groupsFrom : int(clamp(floor(log2(max(t * pa, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer && !graze) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
@@ -1723,7 +1730,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
             shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
         }
         if (!graze && !rings && lod == want && lod + 1 < lodCount) {
-            float target = float(lod + 1) - xi;
+            float target = float(lod + 1) - xiS;
             float tF = exp2(target) / pa;
             float tR = (lodResidentDist(target) - max(abs(o.x), abs(o.z))) / hz;
             tEnd = max(min(tF, tR), t + 0.5);
@@ -1753,7 +1760,7 @@ float traceViewBody(float3 o, float3 dir, float t0, float t1, float lodDither) {
             float cs = gTr.axis >= 0 ? abs(d[gTr.axis]) : 1.0;
             float lh = rings ? float(lod) : max(lodFromFootprint(th, pa, cs), lodResident(ph));
             gHitLod = rings ? float(lod) : max(lh, float(lod));
-            int k2 = lodPick(lh, xi, lodCount);
+            int k2 = lodPick(lh, xiS, lodCount);
             // (a coarse cube that wants its smooth surface, HIT_SMOOTH_WANT, has no second look: its cube face's cos is
             // the staircase's, not the surface's; the smooth surface is what the footprint asks for there)
             if (!rings && (gAblate & 2147483648u) == 0u && k2 > lod && !finer && gTr.hasAlbedo != HIT_SMOOTH_WANT) {
@@ -3805,6 +3812,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         uint2 cell = mode == 2 ? id.xy / 2u : (mode == 3 ? uint2(id.x / 8u, id.y / 4u) : id.xy);
         gLodXi = mode == 1 ? 0.5
                            : frac(pixelDither(cell, 11u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+        gLodXiFix = mode == 1 ? 0.5 : frac(pixelDither(cell, 11u));
         gAlphaXi = frac(pixelDither(id.xy, 13u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
     }
     float3 sun = frame.sunDir.xyz;
@@ -3903,6 +3911,32 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     wRes = res;
     wRes.mat = hb.y;
     wRes.lod = int((hb.x >> 6) & 15u);
+    if (tHit >= 0.0 && res.lod == 0 && res.hasAlbedo == 0u && res.axis >= 0) {
+        // (a plain level-0 cube of the lean stage: its material's 16 x 16 texel on the face entered, over the pixel's
+        // footprint, as farMain's walk takes it, vgTexel; the lean stage's own refined hits carry their colour)
+        uint at = vgTexture(res.mat);
+        if (at != 0u) {
+            float Rt = frame.camFrac.w;
+            float kt = Rt > 0 ? dot(dir.xz, dir.xz) / (2.0 * Rt) : 0.0;
+            float3 hp = worldAt(o, dir, kt, tHit) + dir * 1e-3;  // (just inside the voxel entered)
+            float3 lq = clamp(hp - floor(hp), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+            int ax = res.axis;
+            // (G_FACE_LOW / G_FACE_HIGH and texSample's mip table, without their arrays: no local-memory arrays here)
+            int f = dir[ax] > 0.0 ? (ax == 0 ? 4 : (ax == 1 ? 0 : 2)) : (ax == 0 ? 5 : (ax == 1 ? 1 : 3));
+            float2 uv = clamp(f <= 1 ? lq.xz : (f <= 3 ? float2(lq.x, 1.0 - lq.y) : float2(lq.z, 1.0 - lq.y)), float2(0, 0), float2(0.9999, 0.9999));
+            float fp = tHit * frame.params.w * frame.params.z / max(abs(dir[ax]), 0.2);
+            float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
+            int l0 = int(lv), l1 = min(4, l0 + 1);
+            int n0 = 16 >> l0, n1 = 16 >> l1;
+            uint m0 = l0 == 0 ? 0u : (l0 == 1 ? 256u : (l0 == 2 ? 320u : (l0 == 3 ? 336u : 340u)));
+            uint m1 = l1 == 0 ? 0u : (l1 == 1 ? 256u : (l1 == 2 ? 320u : (l1 == 3 ? 336u : 340u)));
+            uint tb = at + uint(f) * 341u;
+            uint c0 = texData[tb + m0 + uint(min(int(uv.x * float(n0)), n0 - 1) + n0 * min(int(uv.y * float(n0)), n0 - 1))];
+            uint c1 = texData[tb + m1 + uint(min(int(uv.x * float(n1)), n1 - 1) + n1 * min(int(uv.y * float(n1)), n1 - 1))];
+            res.albedo = lerp(srgbLinear(c0), srgbLinear(c1), lv - float(l0));
+            res.hasAlbedo = 1u;
+        }
+    }
     uint hitSrc = 0u;
     bool taken = true;  // (no walk here)
     if (false) {

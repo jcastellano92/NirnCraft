@@ -19,7 +19,7 @@
    ]
   },
   "atlas_far": {
-   "instructions": 77987,
+   "instructions": 78047,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 52,
@@ -36,7 +36,7 @@
    ]
   },
   "atlas_farsplit": {
-   "instructions": 133240,
+   "instructions": 133293,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 153,
@@ -1067,7 +1067,7 @@
    "structCallsOk": []
   },
   "atlas_nearlight": {
-   "instructions": 25855,
+   "instructions": 25864,
    "private": 28,
    "workgroup": 1,
    "fnArrays": 30,
@@ -1083,7 +1083,7 @@
    ]
   },
   "atlas_neartemporal": {
-   "instructions": 29126,
+   "instructions": 29135,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 30,
@@ -1099,7 +1099,7 @@
    ]
   },
   "atlas_nearup": {
-   "instructions": 17557,
+   "instructions": 17566,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 30,
@@ -1220,7 +1220,7 @@
    "structCallsOk": []
   },
   "atlas_sunmap": {
-   "instructions": 19148,
+   "instructions": 19157,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 31,
@@ -1347,7 +1347,7 @@
    "structCallsOk": []
   },
   "stage_trace": {
-   "instructions": 6880,
+   "instructions": 6906,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1355,7 +1355,7 @@
    "structCallsOk": []
   },
   "stage_trace_clock": {
-   "instructions": 6470,
+   "instructions": 6496,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1363,7 +1363,7 @@
    "structCallsOk": []
   },
   "atlas_farshade": {
-   "instructions": 65030,
+   "instructions": 65312,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 68,
@@ -1373,7 +1373,7 @@
    ]
   },
   "stage_trace_water": {
-   "instructions": 8258,
+   "instructions": 8284,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1381,7 +1381,7 @@
    "structCallsOk": []
   },
   "stage_trace_refine": {
-   "instructions": 8831,
+   "instructions": 8857,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
