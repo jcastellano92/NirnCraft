@@ -180,6 +180,27 @@
       "timeout": 3600
     },
     {
+      "id": "check-kernel-budget",
+      "title": "Kernels within their budget (native/shaders/kernel_budget.json: SPIR-V size, statics, groupshared, struct-passing calls), and the shader lint's warnings",
+      "tags": [
+        "check:kernel-budget",
+        "suite:lab"
+      ],
+      "run": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "& native/build/Release/spv_budget.exe native/shaders/kernel_budget.json native/build/gen; $r = $LASTEXITCODE; py -3 native/tools/shader_lint.py; exit $r"
+      ],
+      "inputs": [
+        "native/shaders",
+        "native/tools/spv_budget.cpp",
+        "native/tools/shader_lint.py"
+      ],
+      "fail_regex": "FAIL",
+      "timeout": 120
+    },
+    {
       "id": "check-pbr-materials",
       "title": "PBR / material audit: material ids, labPBR map coverage and validity, misclassified blocks",
       "tags": [

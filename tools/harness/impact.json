@@ -134,6 +134,19 @@
   },
   {
    "paths": [
+    "native/shaders/*",
+    "native/tools/spv_budget.cpp",
+    "native/tools/shader_lint.py"
+   ],
+   "tags": [
+    "check:kernel-budget"
+   ],
+   "reload": null,
+   "final": false,
+   "why": "a kernel change: the SPIR-V budget (a ratchet) and the shader lint in seconds; check-native builds and runs the rest"
+  },
+  {
+   "paths": [
     "native/*"
    ],
    "tags": [

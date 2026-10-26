@@ -1685,7 +1685,11 @@ private:
         // (dev: ATLAS_PIPE_STATS=1) each pipeline's executable statistics (registers, local memory...) on stderr
         VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR statsF{
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR};
-        if (std::getenv("ATLAS_PIPE_STATS") && std::getenv("ATLAS_PIPE_STATS")[0] == '1' &&
+        // (ATLAS_PIPE_BUDGET=1 or strict: and each against shaders/kernel_budget.json's "pipe" part, pipeBudget)
+        const char* budgetEnv = std::getenv("ATLAS_PIPE_BUDGET");
+        pipeBudget_ = budgetEnv && *budgetEnv && *budgetEnv != '0';
+        pipeBudgetStrict_ = budgetEnv && std::string(budgetEnv) == "strict";
+        if (((std::getenv("ATLAS_PIPE_STATS") && std::getenv("ATLAS_PIPE_STATS")[0] == '1') || pipeBudget_) &&
             has(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME)) {
             enable.push_back(VK_KHR_PIPELINE_EXECUTABLE_PROPERTIES_EXTENSION_NAME);
             statsF.pipelineExecutableInfo = VK_TRUE;
@@ -1764,6 +1768,71 @@ private:
     // when ATLAS_PIPELINE_CACHE names a file (read once, written back after each pipeline that took long)
     // (ATLAS_PIPE_STATS=1) the driver's statistics of a pipeline's executables, one line each
     bool pipeStats_ = false;
+    // (ATLAS_PIPE_BUDGET) a pipeline's driver statistics against its budget in shaders/kernel_budget.json ("pipe", then
+    // the vendor, then the pipeline's name: registers, shared, local, stack, binary in bytes; local memory is the
+    // statistic's low 32 bits, bit 36 a flag): TRACE FAIL pipebudget for each over it, the process ends (exit 3) when
+    // strict. A ratchet: the budget changes only in a deliberate commit.
+    bool pipeBudget_ = false, pipeBudgetStrict_ = false;
+    void pipeBudget(const char* name, const std::vector<VkPipelineExecutableStatisticKHR>& st) {
+        static const std::string text = [] {
+            std::string t;
+#ifdef ATLAS_KERNEL_BUDGET
+            const char* path = std::getenv("ATLAS_PIPE_BUDGET_FILE") ? std::getenv("ATLAS_PIPE_BUDGET_FILE") : ATLAS_KERNEL_BUDGET;
+#else
+            const char* path = std::getenv("ATLAS_PIPE_BUDGET_FILE");
+#endif
+            if (std::FILE* f = path ? std::fopen(path, "rb") : nullptr) {
+                char buf[4096];
+                size_t k;
+                while ((k = std::fread(buf, 1, sizeof buf, f)) > 0) t.append(buf, k);
+                std::fclose(f);
+            }
+            return t;
+        }();
+        const char* vendor = props_.vendorID == 0x10DE ? "nvidia" : props_.vendorID == 0x1002 ? "amd" : props_.vendorID == 0x8086 ? "intel" : "other";
+        const std::string qt = "\"";
+        size_t at = text.find(qt + "pipe" + qt);
+        if (at != std::string::npos) at = text.find(qt + vendor + qt, at);
+        if (at != std::string::npos) at = text.find(qt + name + qt, at);
+        if (at == std::string::npos) {
+            std::fprintf(stderr, "TRACE pipebudget %s: no budget for %s (shaders/kernel_budget.json, pipe)\n", name, vendor);
+            return;
+        }
+        size_t end = text.find('}', at);
+        std::string obj = text.substr(at, end == std::string::npos ? std::string::npos : end - at);
+        auto limit = [&](const char* key, double& v) {
+            size_t k = obj.find(qt + key + qt);
+            if (k == std::string::npos) return false;
+            k = obj.find(':', k);
+            if (k == std::string::npos) return false;
+            v = std::atof(obj.c_str() + k + 1);
+            return true;
+        };
+        auto statOf = [&](const char* statName) -> uint64_t {
+            for (const auto& x : st)
+                if (std::strcmp(x.name, statName) == 0 && x.format == VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_UINT64_KHR) return x.value.u64;
+            return 0;
+        };
+        const struct { const char* key; const char* stat; uint64_t mask; } rows[] = {
+            {"registers", "Register Count", ~0ull}, {"shared", "Shared Memory Size", ~0ull},
+            {"local", "Local Memory Size", 0xFFFFFFFFull}, {"stack", "Stack Size", ~0ull}, {"binary", "Binary Size", ~0ull}};
+        bool fail = false;
+        for (const auto& r : rows) {
+            double lim;
+            if (!limit(r.key, lim)) continue;
+            uint64_t have = statOf(r.stat) & r.mask;
+            if (double(have) > lim) {
+                std::fprintf(stderr, "TRACE FAIL pipebudget %s %s %llu > budget %.0f (shaders/kernel_budget.json: the far walk lives on L1, "
+                                     "shared memory and spills cost every pixel)\n",
+                             name, r.key, (unsigned long long)have, lim);
+                fail = true;
+            }
+        }
+        if (fail && pipeBudgetStrict_) {
+            std::fflush(stderr);
+            std::exit(3);
+        }
+    }
     void pipelineStats(VkPipeline p, const char* name) {
         auto props = reinterpret_cast<PFN_vkGetPipelineExecutablePropertiesKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutablePropertiesKHR"));
         auto stats = reinterpret_cast<PFN_vkGetPipelineExecutableStatisticsKHR>(vkGetDeviceProcAddr(dev_, "vkGetPipelineExecutableStatisticsKHR"));
@@ -1794,6 +1863,7 @@ private:
                 line += b;
             }
             std::fprintf(stderr, "TRACE pipestats %s[%u]:%s\n", name, e, line.c_str());
+            if (pipeBudget_ && e == 0) pipeBudget(name, st);
             // (ATLAS_PIPE_IR=<dir>: the driver's internal representations of it, one file each)
             const char* irDir = std::getenv("ATLAS_PIPE_IR");
             auto irs = reinterpret_cast<PFN_vkGetPipelineExecutableInternalRepresentationsKHR>(
