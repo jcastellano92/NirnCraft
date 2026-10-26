@@ -1347,7 +1347,7 @@
    "structCallsOk": []
   },
   "stage_trace": {
-   "instructions": 1165,
+   "instructions": 1769,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1355,12 +1355,22 @@
    "structCallsOk": []
   },
   "stage_trace_clock": {
-   "instructions": 1172,
+   "instructions": 1776,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
    "structCalls": 0,
    "structCallsOk": []
+  },
+  "atlas_farshade": {
+   "instructions": 65030,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 68,
+   "structCalls": 0,
+   "structCallsOk": [
+    "cumulusDensity"
+   ]
   }
  },
  "pipe": {
@@ -1450,18 +1460,25 @@
     "binary": 74880
    },
    "traceMain (lean)": {
-    "registers": 53,
+    "registers": 59,
     "shared": 0,
     "local": 0,
     "stack": 0,
-    "binary": 9984
+    "binary": 14208
    },
    "traceMain (lean, clock)": {
-    "registers": 54,
+    "registers": 61,
     "shared": 0,
     "local": 0,
     "stack": 0,
-    "binary": 10240
+    "binary": 14592
+   },
+   "farMain (shade)": {
+    "registers": 128,
+    "shared": 12544,
+    "local": 1168,
+    "stack": 0,
+    "binary": 930944
    }
   }
  }
