@@ -10,13 +10,13 @@
 // Inc. business. Permission to use, copy, modify, and distribute this software is freely granted, provided that this
 // notice is preserved.
 //
-// Every function takes `inout uint g_bad` where an argument lies outside what is proven here (subnormal results,
+// Every function calls markBad where an argument lies outside what is proven here (subnormal results,
 // sin/cos beyond 2^20 pi / 2): the caller flags the chunk and the server's blocks correct it.
 
-// the flag every function sets where an argument lies outside what is proven (was an inout parameter: Slang
-// inlines a callee wherever one is forwarded, which made the page kernels megabytes of SPIR-V); a thread's own,
-// cleared at the start of each kernel
-static uint g_bad = 0u;
+// Where an argument lies outside what is proven, a function calls markBad(bits), which each module defines (atlas_gen.slang
+// ORs a word of a device buffer that the kernel chose at its start; atlas_store and the overlays ignore it). It was a mutable
+// static written inside [noinline] functions (and an inout parameter before that: Slang inlines a callee wherever one is
+// forwarded, which made the page kernels megabytes of SPIR-V); no callee writes private state any more.
 
 int hiW(double x) {
     uint lo, hi;
@@ -68,7 +68,7 @@ double divD(double a, double b) {
     double q = a / b;
     if (!isFiniteD(q) || q == 0.0l || !isFiniteD(a) || !isFiniteD(b)) return q;  // the exact special cases
     int e = (hiW(q) >> 20) & 0x7ff, ea = (hiW(a) >> 20) & 0x7ff, eb = (hiW(b) >> 20) & 0x7ff;
-    if (e < 60 || e > 2000 || ea < 60 || ea > 1990 || eb < 60 || eb > 1990) { g_bad = g_bad | 1u; return q; }
+    if (e < 60 || e > 2000 || ea < 60 || ea > 1990 || eb < 60 || eb > 1990) { markBad(1u); return q; }
     double best = q, r = residual(a, q, b);
     double u = nextUpD(q), d = nextDownD(q);
     double ru = residual(a, u, b), rd = residual(a, d, b);
@@ -91,7 +91,7 @@ double sqrtD(double x) {
         return x;  // +inf
     }
     int e = (hiW(x) >> 20) & 0x7ff;
-    if (e < 60 || e > 1990) { g_bad = g_bad | 1u; return 0.0l; }
+    if (e < 60 || e > 1990) { markBad(1u); return 0.0l; }
     // a guess with half the exponent, then Newton (approximate divisions are fine here)
     double s = asdouble(0u, uint(((e - 1023) / 2 + 1023) << 20));
     for (int i = 0; i < 7; i++) s = 0.5l * (s + x / s);
@@ -153,7 +153,7 @@ static const int NPIO2_HW[32] = {
 static const double INVPIO2 = asdouble(0x6DC9C883u, 0x3FE45F30u), PIO2_1 = asdouble(0x54400000u, 0x3FF921FBu), PIO2_1T = asdouble(0x1A626331u, 0x3DD0B461u),
                     PIO2_2 = asdouble(0x1A600000u, 0x3DD0B461u), PIO2_2T = asdouble(0x2E037073u, 0x3BA3198Au), PIO2_3 = asdouble(0x2E000000u, 0x3BA3198Au),
                     PIO2_3T = asdouble(0x252049C1u, 0x397B839Au);
-// __ieee754_rem_pio2 for |x| <= 2^19 pi / 2 (beyond: g_bad)
+// __ieee754_rem_pio2 for |x| <= 2^19 pi / 2 (beyond: markBad)
 [noinline]
 int remPio2(double x, out double y0, out double y1) {
     int hx = hiW(x);
@@ -227,7 +227,7 @@ int remPio2(double x, out double y0, out double y1) {
         y1 = y0;
         return 0;
     }
-    g_bad = g_bad | 1u;  // |x| > 2^19 pi / 2: __kernel_rem_pio2 is not ported
+    markBad(1u);  // |x| > 2^19 pi / 2: __kernel_rem_pio2 is not ported
     return 0;
 }
 
@@ -381,7 +381,7 @@ double hypotS(double x, double y) {  // StrictMath.hypot (finite, normal-range a
     if ((ha - hb) > 0x3c00000) return a + b;
     if (a > asdouble(0xFFFFFFFFu, 0x5F300000u) || b < asdouble(0x00000000u, 0x20B00000u)) {
         if (b == 0.0l) return a;
-        g_bad = g_bad | 1u;  // the rescaled ranges are not ported
+        markBad(1u);  // the rescaled ranges are not ported
         return a;
     }
     double t1, t2;
@@ -471,7 +471,7 @@ double powS(double x, double y) {  // StrictMath.pow
         double z_h, z_l, ss, s2, s_h, s_l, t_h, t_l;
         n = 0;
         if (ix < 0x00100000) {
-            g_bad = g_bad | 1u;  // subnormal x: not ported
+            markBad(1u);  // subnormal x: not ported
             return 0.0l;
         }
         n += ((ix) >> 20) - 0x3ff;
@@ -558,7 +558,7 @@ double powS(double x, double y) {  // StrictMath.pow
     j = hiW(z);
     j += (n << 20);
     if ((j >> 20) <= 0) {
-        g_bad = g_bad | 1u;  // a subnormal result (Math.scalb): not ported
+        markBad(1u);  // a subnormal result (Math.scalb): not ported
         return 0.0l;
     }
     int z_hi = hiW(z);
@@ -620,6 +620,6 @@ double expS(double x) {  // StrictMath.exp
         y = setHiW(y, hiW(y) + (k << 20));
         return y;
     }
-    g_bad = g_bad | 1u;  // a subnormal result: not ported
+    markBad(1u);  // a subnormal result: not ported
     return 0.0l;
 }

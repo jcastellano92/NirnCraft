@@ -1870,11 +1870,30 @@ uint axisOf(uint id, uint axis) { return btrans(id, T_AX + axis); }  // 0 x, 1 y
 struct TreeB {
     FMap leaves, logs, extras, anchors, root, kept, placed;
     uint tmp, queue, sortAt;
-    GBox box;
 };
-static TreeB sB;  // the tree being grown, thread-private
+// The tree being grown: its maps and areas sit at fixed offsets in the origin's scratch (all but the box are constants past
+// sG.base), so sB is computed where it is read; the box (and the sort's last point) are scratch words written when a tree begins
+// or its commit resumes (treeBegin). It was a mutable static written inside two [noinline] functions.
+static const uint T_BOXX = T_LAST + 4, T_BOXZ = T_LAST + 5;  // (T_LAST holds 4 words: has, x, y, z; within TREE_W: T_LAST + 8)
 [noinline]
-TreeB treeB(GBox box) {
+void treeBegin(int ccx, int ccz) {
+    uint t = sG.base + SCR_TREE;
+    scratch[t + T_LAST] = 0u;
+    scratch[t + T_BOXX] = uint(ccx);
+    scratch[t + T_BOXZ] = uint(ccz);
+}
+GBox treeBox() {  // (gbox's fields, from the chunk the tree's box was begun at; not gbox itself: that is a call)
+    uint t = sG.base + SCR_TREE;
+    GBox b;
+    b.ccx = int(scratch[t + T_BOXX]);
+    b.ccz = int(scratch[t + T_BOXZ]);
+    b.minX = b.ccx * 16 - 16;
+    b.maxX = b.ccx * 16 + 15 + 16;
+    b.minZ = b.ccz * 16 - 16;
+    b.maxZ = b.ccz * 16 + 15 + 16;
+    return b;
+}
+TreeB treeB() {
     TreeB b;
     uint t = sG.base + SCR_TREE;
     b.leaves.at = t + TM_LEAVES; b.leaves.cap = TC_LEAVES;
@@ -1887,10 +1906,9 @@ TreeB treeB(GBox box) {
     b.tmp = t + T_TMP;
     b.queue = t + T_QUEUE;
     b.sortAt = t + T_SORT;
-    scratch[t + T_LAST] = 0u;
-    b.box = box;
     return b;
 }
+#define sB treeB()
 
 // ---- TreeBuilder ----
 [noinline]
@@ -1907,7 +1925,7 @@ bool tIsLog(int x, int y, int z) { return fmHas(sB.logs, posKey(x, y, z)); }
 [noinline]
 void tSink(int x, int y, int z, uint state, int maxD) {
     for (int d = 1; d <= maxD; d++) {
-        uint here = gGet(sB.box, x, y - d, z);
+        uint here = gGet(treeBox(), x, y - d, z);
         bool soft = bis(here, B_SOFT) || bis(here, B_WATER_BLOCK);
         tAnchor(x, y - d, z, state);
         if (!soft) break;
@@ -2149,7 +2167,7 @@ void tCommitBegin(int baseX, int baseY, int baseZ) {
 [noinline]
 bool tCommitStep(uint budget) {
     uint h = tcAt();
-    GBox box = sB.box;
+    GBox box = treeBox();
     int baseX = int(scratch[h + TC_X]), baseY = int(scratch[h + TC_Y]), baseZ = int(scratch[h + TC_Z]);
     uint phase = scratch[h + TC_PHASE];
     int pos = int(scratch[h + TC_POS]);
@@ -2390,7 +2408,7 @@ bool tCommit(int baseX, int baseY, int baseZ) {
 bool treeResume(uint budget) {
     uint h = tcAt();
     if (scratch[h + TC_MAGIC] != TREE_PENDING) return true;
-    sB = treeB(gbox(int(scratch[h + TC_X]), int(scratch[h + TC_Z])));
+    treeBegin(int(scratch[h + TC_X]) >> 4, int(scratch[h + TC_Z]) >> 4);
     return tCommitStep(budget);
 }
 
@@ -2773,7 +2791,7 @@ void shBaldCypress(Grow t) {
     for (int i = 0; i < knees; i++) {
         double a = gAngle(), d = gu(2.5l, 5.5l);
         int kx = floorD_N(LX(c, 0) + cosS_N(a) * d), kz = floorD_N(LZ(c, 0) + sinS_N(a) * d);
-        int fl = floraGround(sB.box, kx, kz, t.y);
+        int fl = floraGround(treeBox(), kx, kz, t.y);
         if (fl == NONE || iabs(fl - t.y) > 2) continue;
         int kh = 1 + t.water / 2 + (rngIntB(3) == 0 ? 1 : 0);
         for (int k = -1; k < kh; k++) tAnchor(kx, fl + k, kz, axisOf(spU(sp, S_LOG), 1u));
@@ -3063,11 +3081,11 @@ int lying(Grow t, int x0, int z0, double a, int len, uint logBase, bool dress) {
     for (double s = 0.0l; s < double(len); s += 0.75l) {
         int x = floorD_N(double(x0) + 0.5l + ca * s), z = floorD_N(double(z0) + 0.5l + sa * s);
         if (x == lx && z == lz) continue;
-        int y = floraGround(sB.box, x, z, prevY == NONE ? t.y : prevY);
+        int y = floraGround(treeBox(), x, z, prevY == NONE ? t.y : prevY);
         if (y == NONE) break;
         if (prevY != NONE && iabs(y - prevY) > 1) break;
         if (prevY != NONE && y > prevY) y = prevY;
-        uint here = gGet(sB.box, x, y, z);
+        uint here = gGet(treeBox(), x, y, z);
         if (!bis(here, B_SOFT) || bis(here, B_FLUID)) break;
         if (lx != NONE && x != lx && z != lz) tLog(lx, prevY, z, log);
         tLog(x, y, z, log);
@@ -3189,9 +3207,9 @@ void shBamboo(Grow t) {
         double a = gAngle();
         double d = sqrtD_N(rngDouble()) * rad;
         int x = floorD_N(double(t.x) + 0.5l + cosS_N(a) * d), z = floorD_N(double(t.z) + 0.5l + sinS_N(a) * d);
-        int y = floraGround(sB.box, x, z, t.y);
+        int y = floraGround(treeBox(), x, z, t.y);
         if (y == NONE || iabs(y - t.y) > 3) continue;
-        if (!bis(gGet(sB.box, x, y - 1, z), B_BAMBOO_SOIL)) continue;
+        if (!bis(gGet(treeBox(), x, y - 1, z), B_BAMBOO_SOIL)) continue;
         int hh = gHeight(t);
         int h = d2i(double(hh) * (1.1l - divD_N(0.5l * d, rad)));
         for (int k = 0; k < h; k++) {
@@ -3279,7 +3297,7 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
                 ((soil & 16u) != 0u && bis(ground, B_SOIL_SNOW)) ? 1u : 0u;
     if (fits == 0u) return false;
     if (y > (MAX_Y + 1) - spI(sp, S_MAXH) - 12) return false;
-    sB = treeB(box);
+    treeBegin(box.ccx, box.ccz);
     fmInit(sB.leaves, 16u);
     fmInit(sB.logs, 16u);
     fmInit(sB.extras, 16u);
@@ -3823,12 +3841,13 @@ void featInitMain(uint3 id : SV_DispatchThreadID) {
     }
 }
 
+// the origin this thread decorates and its random's words, set by the kernel before it calls featBody
+#define FEAT_ENTER(o) { sG = orgOf(o); sRA = sG.base + SCR_META + 6u; }
 [noinline]
 void featBody<let T : uint>(uint o) {
-    sG = orgOf(o);
+    // (sG and sRA are the kernel's to set, FEAT_ENTER: a callee that writes private state is the pattern a driver may merge)
     uint rec = params.rec;
     uint meta = sG.base + SCR_META;
-    sRA = meta + 6u;
     bool first = params.first != 0u;
     if ((params.store & 2u) != 0u) {
         // (a vein of the round before: its writes first; none can wait at a feature's first round, whatever the
@@ -3914,51 +3933,51 @@ void featBody<let T : uint>(uint o) {
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featOreMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_ORE>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_ORE>(g.x); }
 }
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featCoverMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_COVER>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_COVER>(g.x); }
 }
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featRockMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_ROCK>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_ROCK>(g.x); }
 }
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featTreeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_TREE>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_TREE>(g.x); }
 }
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featFreezeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_FREEZE>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_FREEZE>(g.x); }
 }
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featDiskMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_DISK>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_DISK>(g.x); }
 }
 
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featSpringMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_SPRING>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_SPRING>(g.x); }
 }
 
 [shader("compute")]
 [numthreads(32, 1, 1)]
 void featLakeMain(uint3 g : SV_GroupID, uint3 t : SV_GroupThreadID) {
-    if (t.x == 0u && g.x < uint(params.origins)) featBody<FT_LAKE>(g.x);
+    if (t.x == 0u && g.x < uint(params.origins)) { FEAT_ENTER(g.x); featBody<FT_LAKE>(g.x); }
 }
 
 // the C++ build: one origin a group (the host's threads take groups), every type
 [shader("compute")]
 [numthreads(1, 1, 1)]
 void featOneMain(uint3 id : SV_DispatchThreadID) {
-    if (id.x < uint(params.origins)) featBody<0u>(id.x);
+    if (id.x < uint(params.origins)) { FEAT_ENTER(id.x); featBody<0u>(id.x); }
 }
 
 // ---- an ore vein on many threads (the store, params.store | 2) --------------------------------------------------------

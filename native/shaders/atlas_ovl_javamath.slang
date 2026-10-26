@@ -23,7 +23,7 @@ float lerpF(float t, float a, float b) { return a + t * (b - a); }  // Mth.lerp(
 // (int) Math.floor(d) for |d| < 2^31; anything else flags
 int floorD(double d) {
     if (!(d > -2147483647.0l && d < 2147483647.0l)) {
-        g_bad = 1u;
+        markBad(1u);
         return 0;
     }
     int i = int(d);
@@ -45,7 +45,7 @@ float divF(float a, float b) {
             return asfloat(((asuint(a) ^ asuint(b)) & 0x80000000u) | 0x7F800000u);
         }
         if (a == 0.0f) return asfloat((asuint(a) ^ asuint(b)) & 0x80000000u);
-        g_bad = 1u;  // extreme ranges: not proven here
+        markBad(1u);  // extreme ranges: not proven here
         return q;
     }
     double da = double(a), db = double(b);

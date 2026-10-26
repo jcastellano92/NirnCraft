@@ -308,3 +308,9 @@ Read these first:
   - **`harness.py run --changed`** runs exactness, dispatch timing and the gallery for what changed (impact.json).
   - **docs/COMPONENTS.md** lists, per generator or world component, the fast check, the visual tool and the one command. Run only those for what you touched. Fill a gap there only when you work on that component.
 
+* **Merges into atlas-render keep the native suite green (2026-10-26).** After each merge, the orchestrator runs the
+  native suite (`harness.py run check-native`, or native/build.ps1) and the kernel-budget check. A failing check
+  blocks further merges until it's fixed or listed below with a reason and an owner.
+  - Known failures: test_main.cpp:2133 (coarse-chunk depth) and :2264 (awayTier == 6), present since at least
+    ce0009be; owner: the renderer agent.
+

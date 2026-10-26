@@ -50,6 +50,12 @@ struct GenParams {
 // far chunks (atlas_page.slang farChunkMain): the counter, the chunks' kinds and slots, the slots' voxels
 [[vk::binding(14, 0)]] RWStructuredBuffer<uint> farOut;
 
+// The exactness flag (atlas_exact.slang markBad): a kernel says at its start where its thread's flag goes (BAD_TO) and the
+// functions it calls store into that word (a flag is only ever 1; a probe's bits are its thread's own word). kind 0: the chunk's flag word at the end of outIds (the host reads nonzero), 1: a
+// page / tile's word of pageBad, 2: a word of outIds that keeps the bits (the probes), 3: nowhere (a kernel that reads no
+// flag). The static is written only by the kernel's own body; no callee writes private state.
+static uint g_badTo = 3u << 30;  // (kind << 30 | word)
+#define BAD_TO(kind, at) { g_badTo = ((kind) << 30) | (at); }
 #include "atlas_exact.slang"
 #include "atlas_map.slang"
 #include "atlas_page.slang"
@@ -78,6 +84,13 @@ static const uint AQ_WORDS = 513 * 5 + 4;
 static const uint COL_WORDS = 256 + 8;   // heights, then [256] skipSamplingAboveY
 static const uint BLOCK_WORDS = 16 * 16 * 640;
 static const uint OUT_WORDS = 40 * 2048;
+[noinline]
+void markBad(uint bits) {  // (a call: the exact math has hundreds of sites, and the flag is the rare path)
+    uint kind = g_badTo >> 30, at = g_badTo & 0x3FFFFFFFu;
+    if (kind == 0u) outIds[uint(params.chunks) * OUT_WORDS + at] = 1u;  // (racing threads only ever store 1)
+    else if (kind == 1u) pageBad[at] = 1u;
+    else if (kind == 2u) outIds[at] = outIds[at] | bits;  // (a probe kernel: the thread's own word)
+}
 // block flags (the program's block table: word 0 flags, word 1 atlas material)
 static const uint F_AIR = 1, F_FLUID = 2, F_WATER = 4, F_LAVA = 8, F_MOTION = 16, F_SOFT = 32;
 // page layout: fields * 256 floats (field-major, lz * 16 + lx), 256 water words, then 4 * 4 * QY biome ids (u16)
@@ -114,7 +127,7 @@ float lerpF(float t, float a, float b) { return a + t * (b - a); }  // Mth.lerp(
 // (int) Math.floor(d) for |d| < 2^31; anything else flags
 int floorD(double d) {
     if (!(d > -2147483647.0l && d < 2147483647.0l)) {
-        g_bad = 1u;
+        markBad(1u);
         return 0;
     }
     int i = int(d);
@@ -136,7 +149,7 @@ float divF(float a, float b) {
             return asfloat(((asuint(a) ^ asuint(b)) & 0x80000000u) | 0x7F800000u);
         }
         if (a == 0.0f) return asfloat((asuint(a) ^ asuint(b)) & 0x80000000u);
-        g_bad = 1u;  // extreme ranges: not proven here
+        markBad(1u);  // extreme ranges: not proven here
         return q;
     }
     double da = double(a), db = double(b);
@@ -304,7 +317,7 @@ double wrapD(double x) {
 }
 float fracF(double X, int i) {
     double d = X - double(i);
-    if (d != 0.0 && d < MIN_FRACTION) g_bad = 1u;
+    if (d != 0.0 && d < MIN_FRACTION) markBad(1u);
     return float(d);
 }
 [noinline]
@@ -368,18 +381,18 @@ static float g_colVals[16];
 float column(uint field, int x, int z) {
     if (g_colOwn && x == g_colX && z == g_colZ && field < 16u) return g_colVals[field];
     int s = pageSlot(x >> 4, z >> 4);
-    if (s < 0) { g_bad = g_bad | 2u; return 0.0f; }
+    if (s < 0) { markBad(2u); return 0.0f; }
     return asfloat(pages[uint(s) * pageWords() + field * 256u + uint(((z & 15) << 4) | (x & 15))]);
 }
 uint waterWord(int x, int z) {
     int s = pageSlot(x >> 4, z >> 4);
-    if (s < 0) { g_bad = g_bad | 2u; return 0u; }
+    if (s < 0) { markBad(2u); return 0u; }
     return pages[uint(s) * pageWords() + hdr(H_FIELDS) * 256u + uint(((z & 15) << 4) | (x & 15))];
 }
 // the stored noise biome of a quart (ChunkAccess.getNoiseBiome: y clamped to the chunk)
 uint quartBiome(int qx, int qy, int qz) {
     int s = pageSlot(qx >> 2, qz >> 2);
-    if (s < 0) { g_bad = g_bad | 2u; return 0u; }
+    if (s < 0) { markBad(2u); return 0u; }
     int y = qy < -16 ? -16 : (qy > 159 ? 159 : qy);
     uint i = uint((((qx & 3) * 4 + (qz & 3)) * QY) + (y + 16));
     uint w = pages[uint(s) * pageWords() + hdr(H_FIELDS) * 256u + 256u + (i >> 1)];
@@ -540,7 +553,7 @@ void vmRunRange(uint start, uint stop, int x0, int y0, int z0, InterpCtx ic, ino
                 break;
             }
             case OP_INTERP: {
-                if (!ic.valid) { g_bad = g_bad | 4u; r[d] = 0.0f; }
+                if (!ic.valid) { markBad(4u); r[d] = 0.0f; }
                 else r[d] = interp(ic, prog[pc]);
                 pc++;
                 break;
@@ -561,7 +574,7 @@ void vmRunRange(uint start, uint stop, int x0, int y0, int z0, InterpCtx ic, ino
             }
             case OP_OUT: outv[d] = r[a]; break;
             case OP_MOV: r[d] = r[a]; break;
-            default: g_bad = g_bad | 8u; pc = end; break;
+            default: markBad(8u); pc = end; break;
         }
     }
 }
@@ -591,9 +604,6 @@ uint blockBase(uint ci) { return ci * BLOCK_WORDS; }
 uint colBase(uint ci) { return ci * COL_WORDS; }
 // blocks: x + 16 * (z + 16 * (y - MIN_Y)), like a section stack
 uint blockIndex(int lx, int ly, int lz) { return uint(lx + 16 * (lz + 16 * ly)); }
-void flagChunk(uint ci, uint flags) {
-    if (flags != 0u) outIds[uint(params.chunks) * OUT_WORDS + ci] = 1u;  // racing threads only ever store 1
-}
 
 // ---- pass 1: the interpolated inputs at the cell corners -----------------------------------------------------
 [shader("compute")]
@@ -603,7 +613,7 @@ void cornerMain(uint3 id : SV_DispatchThreadID) {
     if (c >= CORNERS || ci >= uint(params.chunks)) return;
     int cx = chunkList[ci * 2u], cz = chunkList[ci * 2u + 1u];
     int ix = int(c / 405u), rem = int(c % 405u), iz = rem / 81, iy = rem % 81;
-    g_bad = 0u;
+    BAD_TO(0u, ci);
     InterpCtx ic;
     ic.base = 0u; ic.lx = 0; ic.ly = 0; ic.lz = 0; ic.valid = false;
     float o[16];
@@ -612,7 +622,6 @@ void cornerMain(uint3 id : SV_DispatchThreadID) {
     uint K = hdr(H_K);
     for (uint k = 0; k < K && k < 16u; k++)
         corners[cornerBase(ci) + ((k * 5u + uint(iz)) * 5u + uint(ix)) * 81u + uint(iy)] = o[k];
-    flagChunk(ci, g_bad);
 }
 
 // ---- pass 2: the aquifer's cells (Aquifer.NoiseBasedAquifer) -------------------------------------------------
@@ -690,7 +699,7 @@ void computeFluid(int x, int y, int z, out int outLevel, out uint outType) {
         // Mth.quantize(spread, 3) = floor(spread / 3.0) * 3, exact: floor of the exact quotient
         double sd = double(spreadF);
         if (!(absF(spreadF) < 1.0e6f)) {  // (inf / NaN: the loops below would not end)
-            g_bad = g_bad | 1u;
+            markBad(1u);
             sd = 0.0l;
         }
         int q = floorD(sd * (1.0l / 3.0l));
@@ -715,7 +724,7 @@ void aquiferMain(uint3 id : SV_DispatchThreadID) {
     uint ci = id.y, c = id.x;
     if (c > AQ_CELLS || ci >= uint(params.chunks)) return;
     int cx = chunkList[ci * 2u], cz = chunkList[ci * 2u + 1u];
-    g_bad = 0u;
+    BAD_TO(0u, ci);
     if (c == AQ_CELLS) {
         // skipSamplingAboveY: the highest preliminary surface over the grid's blocks, at quart positions
         int minX = (cx - 1) * 16, maxX = (cx + 1) * 16 + 9, minZ = (cz - 1) * 16, maxZ = (cz + 1) * 16 + 9;
@@ -728,8 +737,7 @@ void aquiferMain(uint3 id : SV_DispatchThreadID) {
         int adj = best + 8;
         int skipGrid = floorDivI(adj + 12, 12) + 1;
         aqCells[aqBase(ci) + AQ_CELLS * 5u] = skipGrid * 12 + 11 - 1;
-        flagChunk(ci, g_bad);
-        return;
+            return;
     }
     int dx = int(c % 3u), dz = int((c / 3u) % 3u), gy = int(c / 9u) + GRID_MIN_Y;
     int gx = cx - 1 + dx, gz = cz - 1 + dz;
@@ -745,7 +753,6 @@ void aquiferMain(uint3 id : SV_DispatchThreadID) {
     aqCells[w + 2] = lz;
     aqCells[w + 3] = level;
     aqCells[w + 4] = int(type);
-    flagChunk(ci, g_bad);
 }
 
 // ---- pass 3: density and substance per block ------------------------------------------------------------------
@@ -801,7 +808,7 @@ uint substance(uint ci, int x, int y, int z, float density) {
             for (int z1 = 0; z1 <= 1; z1++) {
                 int gx = xa + x1, gy = ya + y1, gz = za + z1;
                 int ddx = gx - (cx - 1), ddz = gz - (cz - 1), ddy = gy - GRID_MIN_Y;
-                if (ddx < 0 || ddx > 2 || ddz < 0 || ddz > 2 || ddy < 0 || ddy > 56) { g_bad = g_bad | 16u; continue; }
+                if (ddx < 0 || ddx > 2 || ddz < 0 || ddz > 2 || ddy < 0 || ddy > 56) { markBad(16u); continue; }
                 uint idx = uint((ddy * 3 + ddz) * 3 + ddx);
                 uint w = ab + idx * 5u;
                 int dx = aqCells[w] - x, dy = aqCells[w + 1] - y, dz = aqCells[w + 2] - z;
@@ -881,7 +888,7 @@ void fillMain(uint3 id : SV_DispatchThreadID) {
     int cx = chunkList[ci * 2u], cz = chunkList[ci * 2u + 1u];
     int lx = int(i & 15u), lz = int((i >> 4) & 15u), ly = int(i >> 8);
     int x = cx * 16 + lx, y = MIN_Y + ly, z = cz * 16 + lz;
-    g_bad = 0u;
+    BAD_TO(0u, ci);
     InterpCtx ic;
     ic.base = cornerBase(ci); ic.lx = lx; ic.ly = ly; ic.lz = lz; ic.valid = true;
     float o[16];
@@ -897,7 +904,6 @@ void fillMain(uint3 id : SV_DispatchThreadID) {
         else value = debugAquifer(ci, x, y, z, o[0], sel);
     }
     blocks[blockBase(ci) + i] = value;
-    flagChunk(ci, g_bad);
 }
 
 // ---- pass 4: heights ----------------------------------------------------------------------------------------------
@@ -1046,7 +1052,7 @@ bool condition(uint cond, inout SurfaceCtx c) {
             res = c.y >= c.minSurface;
         } else if (kind == C_BIOME) {
             if (!c.haveBiome) {
-                if (c.far) g_bad = g_bad | 128u;  // (far columns come with their biomes)
+                if (c.far) markBad(128u);  // (far columns come with their biomes)
                 c.biome = biomeAt(c.x, c.y, c.z);
                 c.haveBiome = true;
             }
@@ -1054,11 +1060,11 @@ bool condition(uint cond, inout SurfaceCtx c) {
             uint word = prog[hdr(H_BIOMESETS) + set * hdr(H_SETWORDS) + (c.biome >> 5)];
             res = ((word >> (c.biome & 31u)) & 1u) != 0u;
         } else {
-            g_bad = g_bad | 32u;
+            markBad(32u);
         }
         return negate ? !res : res;
     }
-    g_bad = g_bad | 32u;
+    markBad(32u);
     return false;
 }
 
@@ -1108,9 +1114,9 @@ int runRules(inout SurfaceCtx c) {
             if (v >= 0) return v;
             pc++;
         } else if (op == R_BANDS) return bandAt(c.x, c.y, c.z);
-        else { g_bad = g_bad | 64u; return -1; }
+        else { markBad(64u); return -1; }
     }
-    g_bad = g_bad | 64u;
+    markBad(64u);
     return -1;
 }
 
@@ -1124,7 +1130,7 @@ void surfaceMain(uint3 id : SV_DispatchThreadID) {
     if (params.outMode >= 2u) return;  // debug modes: the fill's output as it is
     int cx = chunkList[ci * 2u], cz = chunkList[ci * 2u + 1u];
     int lx = int(col & 15u), lz = int(col >> 4);
-    g_bad = 0u;
+    BAD_TO(0u, ci);
     uint bb = blockBase(ci), cb = colBase(ci);
     SurfaceCtx c;
     c.ci = ci; c.lx = lx; c.lz = lz;
@@ -1197,7 +1203,6 @@ void surfaceMain(uint3 id : SV_DispatchThreadID) {
             }
         }
     }
-    flagChunk(ci, g_bad);
 }
 
 // ---- pass 6: sections out --------------------------------------------------------------------------------------
@@ -1269,7 +1274,7 @@ void secsMain(uint3 id : SV_DispatchThreadID) {
         secInfo[info + 1] = ~uint(high + 1024);
     }
     int cx = chunkList[ci * 2], cz = chunkList[ci * 2 + 1];
-    g_bad = 0u;
+    BAD_TO(0u, ci);
     uint biome = biomeAt(cx * 16 + 8, high, cz * 16 + 8);
     if (sec == 0u) secInfo[info + 2] = biome;
     uint64_t h = (uint64_t(0xCBF29CE4u) << 32) | uint64_t(0x84222325u);
@@ -1302,7 +1307,6 @@ void secsMain(uint3 id : SV_DispatchThreadID) {
     secInfo[o] = uint(h & 0xFFFFFFFFull);
     secInfo[o + 1u] = uint(h >> 32);
     secInfo[o + 2u] = kind;
-    flagChunk(ci, g_bad);
 }
 
 [shader("compute")]
@@ -1324,9 +1328,9 @@ void probeMain(uint3 id : SV_DispatchThreadID) {
     uint i = id.x;
     if (i >= uint(params.chunks)) return;
     int x = pageIndex[i * 2], z = pageIndex[i * 2 + 1];
-    g_bad = 0u;
     uint o = i * PROBE_WORDS;
     for (uint k = 0u; k < PROBE_WORDS; k++) outIds[o + k] = 0u;
+    BAD_TO(2u, o + PROBE_WORDS - 1u);  // (the probe returns the bits)
     if (params.outMode == 0u) {
         MapS s = tamrielSample(x, z);
         outIds[o] = uint(s.region);
@@ -1377,7 +1381,6 @@ void probeMain(uint3 id : SV_DispatchThreadID) {
         outIds[o + 8] = uint(loW(h));
         outIds[o + 9] = uint(hiW(h));
     }
-    outIds[o + PROBE_WORDS - 1u] = g_bad;
 }
 
 // ---- the exact math, checked against Java (atlas_gen_math) --------------------------------------------------------
@@ -1388,7 +1391,8 @@ void mathMain(uint3 id : SV_DispatchThreadID) {
     uint i = id.y * 65536u * 64u + id.x;
     if (i >= uint(params.chunks)) return;
     double a = asdouble(prog[i * 4u], prog[i * 4u + 1u]), b = asdouble(prog[i * 4u + 2u], prog[i * 4u + 3u]);
-    g_bad = 0u;
+    outIds[i * 3u + 2u] = 0u;
+    BAD_TO(2u, i * 3u + 2u);  // (the test returns the bits)
     double r = 0.0l;
     switch (params.outMode) {
         case 0u: r = divD(a, b); break;
@@ -1400,9 +1404,8 @@ void mathMain(uint3 id : SV_DispatchThreadID) {
         case 6u: r = atan2S(a, b); break;
         case 7u: r = hypotS(a, b); break;
         case 8u: r = atanS(a); break;
-        default: g_bad = 2u; break;
+        default: markBad(2u); break;
     }
     outIds[i * 3u] = uint(loW(r));
     outIds[i * 3u + 1u] = uint(hiW(r));
-    outIds[i * 3u + 2u] = g_bad;
 }

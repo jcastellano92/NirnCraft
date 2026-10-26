@@ -13,6 +13,8 @@
 // precise, spv_exact), square roots and divisions correctly rounded. Not done: a felled tree's crown in a neighbour
 // chunk (only inside this one; the server clears into the region's other chunks too).
 
+// (the roads read no exactness flag)
+void markBad(uint bits) {}
 #include "atlas_exact.slang"
 
 struct OvlParams {
