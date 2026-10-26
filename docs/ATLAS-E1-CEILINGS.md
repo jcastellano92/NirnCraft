@@ -9,6 +9,9 @@ next lever.
 8 ms; timed without read back, as the game runs, and settled (p10, 6.3 with smooth, valley/horizon/slope): lean trace
 2.3 / 4.5 / 0.43 ms, shade 2.3 / 3.7 / 0.96 ms, farMain 58 / 84 / 4.2 ms (amortisation off). Absolute ms move 20–40 %
 between runs with the GPU's clocks; the paired ratio holds (farMain over the lean far work: 12.4× / 14.1× / 2.9×).
+An amortised A/B (ATLAS_AB under FRAME_FAR_AMORT) is valid only when both sides amortise: each side takes the other
+side's last records, so one side tracing every pixel feeds the other only fresh hits (6.7's "a third off the trace"
+was measured that way and is optimistic).
 
 ## The main finding: the cost is in how the kernel is built, not in the number of steps
 
