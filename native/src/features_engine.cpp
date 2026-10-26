@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <memory>
 #include <string>
 #include <thread>
@@ -1028,8 +1029,26 @@ public:
                 if (now - recStatsAt_ > std::chrono::seconds(5)) {
                     recStatsAt_ = now;
                     std::vector<std::pair<double, uint32_t>> top;
-                    for (auto& [r, st] : recStats_) top.push_back({st.max, r});
+                    // (ATLAS_FEAT_PART_TRACE=sum: the records by their rounds' summed time, and a line of the sums by type:
+                    // where the decoration's GPU time goes)
+                    static const bool bySum = std::getenv("ATLAS_FEAT_PART_TRACE")[0] == 's';
+                    for (auto& [r, st] : recStats_) top.push_back({bySum ? st.sum : st.max, r});
                     std::sort(top.rbegin(), top.rend());
+                    if (bySum) {
+                        std::map<uint32_t, std::pair<double, uint64_t>> byType;
+                        for (auto& [r, st] : recStats_) {
+                            auto& t = byType[types_[r & 0x0FFFFFFFu]];
+                            t.first += st.sum;
+                            t.second += st.n;
+                        }
+                        std::string line;
+                        char cb[96];
+                        for (auto& [t, v] : byType) {
+                            std::snprintf(cb, sizeof cb, " type %u: %.0f ms in %llu rounds;", t, v.first, (unsigned long long)v.second);
+                            line += cb;
+                        }
+                        std::fprintf(stderr, "TRACE feat by type:%s\n", line.c_str());
+                    }
                     for (size_t i = 0; i < top.size() && i < 12; i++) {
                         const RecStat& st = recStats_[top[i].second];
                         uint32_t r = top[i].second & 0x0FFFFFFFu, ph = top[i].second >> 28;

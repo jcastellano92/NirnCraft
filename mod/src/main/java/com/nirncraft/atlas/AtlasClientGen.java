@@ -746,6 +746,8 @@ final class AtlasClientGen implements AutoCloseable {
         String cache = c.statCacheLine;
         pagesNow += ", " + (cache != null ? cache : "genCache{not in this library}");
         pagesNow += String.format(", generated chunks %d (cache served %d)", c.generatedChunks, c.cachedChunks);
+        pagesNow += String.format(", nearBoost{%s missing %d, on %.0f ms in %d}", c.nearBoostOn ? "on" : "off", c.nearMissing,
+                (c.nearBoostMs + (c.nearBoostOn ? System.nanoTime() - c.nearBoostSinceNs : 0)) / 1e6, c.nearBoosts);
         return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
                 c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
@@ -814,6 +816,7 @@ final class AtlasClientGen implements AutoCloseable {
         while (running) {
             try {
                 refreshStats();
+                nearBoost();
                 // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
                 if (serverGen != null && direct && storeOn) {
                     boolean served = false;
@@ -1081,6 +1084,46 @@ final class AtlasClientGen implements AutoCloseable {
      * A chunk of the spawn window that atlas does not upload itself counts as in: one not proven exact (the server's blocks
      * supply it) or one whose loaded blocks are up already. The window was never "up" while a couple of them stood in it.
      */
+    // ---- the near field's boost: the generator unpaced while chunks near the camera are not up ----
+
+    /** Chunks within this many of the camera's (about 96 blocks) none of whose blocks are up: the generator runs unpaced. */
+    static final int NEAR_BOOST_R = Integer.getInteger("nirncraft.atlas.nearBoost.radius", 6);
+    private static final boolean NEAR_BOOST = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.nearBoost"));
+    private long nearBoostCheckNs, nearBoostSinceNs, nearBoostMs;
+    private volatile boolean nearBoostOn;
+    private volatile int nearMissing, nearBoosts;
+    // (a missing chunk that never comes up, one the server's blocks supply that is not loaded yet, releases the boost after
+    // 10 s without a chunk coming up, until the near field is whole again)
+    private final AtlasWaitGuard nearBoostGuard = new AtlasWaitGuard(10_000_000_000L);
+
+    /**
+     * The near field empty (chunks within NEAR_BOOST_R of the camera not up: generated, served from the cache or the loaded
+     * chunk's own blocks): the generator's submissions go unpaced until it is whole (atlas_gen_pace_boost; the loading
+     * screen's boost is another reason, the bake's). A teleport's arrival or a fast flight waited for the pacer: one patch
+     * of 64 chunks in 6.5 s, the 96-block field empty for 12 s after a jump (10-26).
+     */
+    private void nearBoost() {
+        long now = System.nanoTime();
+        if (now - nearBoostCheckNs < 100_000_000L || !camSet) return;
+        nearBoostCheckNs = now;
+        int ccx = camCx, ccz = camCz, r = NEAR_BOOST_R, miss = 0;
+        for (int dz = -r; dz <= r; dz++)
+            for (int dx = -r; dx <= r; dx++)
+                if (dx * dx + dz * dz <= r * r && !AtlasClientSections.isUp(ccx + dx, ccz + dz)) miss++;
+        nearMissing = miss;
+        boolean on = NEAR_BOOST && miss > 0 && nearBoostGuard.blocks(miss, now) != 0;
+        if (miss == 0) nearBoostGuard.blocks(0, now);
+        if (on == nearBoostOn) return;
+        nearBoostOn = on;
+        if (on) {
+            nearBoostSinceNs = now;
+            nearBoosts++;
+        } else {
+            nearBoostMs += now - nearBoostSinceNs;
+        }
+        gen.boost(AtlasGenNative.Gen.BOOST_NEAR, on);
+    }
+
     private void markCovered(int cx, int cz) {
         if (jumpNs != 0 && inWindow(cx, cz, jumpCx, jumpCz, RADIUS)) {
             upSinceJump.add(ChunkPos.pack(cx, cz));
@@ -1206,8 +1249,14 @@ final class AtlasClientGen implements AutoCloseable {
             AtlasRecorder.end(Z_CACHE, cz, 50_000);
             if (batch.length == 0 && !storeOn) return;
             if (defer && storeOn && batch.length > 0) {
-                for (int i = 0; i < batch.length; i += 2) deferred.add(ChunkPos.pack(batch[i], batch[i + 1]));
-                return;
+                // the misses near the camera (NEAR_BOOST_R: the field the player sees first) go into the store now; the
+                // others wait for the window's lookups (a relaunch serves its whole window from disk first). All of them
+                // waited: after a jump the first chunk was up 8.3 s later, ~2 s of it the window's 1,800 lookups (10-26)
+                batch = nearFirst(batch, camCx, camCz);
+                if (batch.length == 0) {
+                    int[] st = gen.storeStats();  // (the store runs on what waits in it, the near ones, with each lookup)
+                    if (st == null || st.length < 2 || st[1] == 0) return;
+                }
             }
         }
         int n = batch.length / 2;
@@ -1902,6 +1951,26 @@ final class AtlasClientGen implements AutoCloseable {
 
 
     // ---- features (stage 4): parallel, never in the terrain's way ----
+
+    /** The chunks of batch near (ccx, ccz) (within NEAR_BOOST_R); the others go to `deferred`. */
+    private int[] nearFirst(int[] batch, int ccx, int ccz) {
+        int[] now = new int[batch.length];
+        int m = 0;
+        for (int i = 0; i < batch.length; i += 2) {
+            if (nearCircle(batch[i], batch[i + 1], ccx, ccz, NEAR_BOOST_R)) {
+                now[m++] = batch[i];
+                now[m++] = batch[i + 1];
+            } else {
+                deferred.add(ChunkPos.pack(batch[i], batch[i + 1]));
+            }
+        }
+        return java.util.Arrays.copyOf(now, m);
+    }
+
+    static boolean nearCircle(int cx, int cz, int ccx, int ccz, int r) {
+        long dx = cx - ccx, dz = cz - ccz;
+        return dx * dx + dz * dz <= (long) r * r;
+    }
 
     static boolean near(int cx, int cz, int ccx, int ccz, int r) {
         return Math.abs(cx - ccx) <= r && Math.abs(cz - ccz) <= r;

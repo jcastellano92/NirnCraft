@@ -567,9 +567,21 @@ final class AtlasGenNative {
 
         /** While on, the far field's submissions are not paced (a loading screen holds the player: atlas_gen_pace_boost). */
         void paceBoost(boolean on) {
-            if (paceBoost == null) return;
+            boost(BOOST_HOLD, on);
+        }
+
+        /** Why the generator runs unpaced: the loading screen holds the player (the bake's thread), the near field is empty (the worker's). */
+        static final int BOOST_HOLD = 1, BOOST_NEAR = 2;
+        private int boostReasons;
+
+        /** The submissions are unpaced while any reason is on (each owner sets its own). */
+        synchronized void boost(int reason, boolean on) {
+            int r = on ? boostReasons | reason : boostReasons & ~reason;
+            boolean was = boostReasons != 0, now = r != 0;
+            boostReasons = r;
+            if (was == now || paceBoost == null) return;
             try {
-                int s = (int) paceBoost.invokeExact(ptr, on ? 1 : 0);
+                int s = (int) paceBoost.invokeExact(ptr, now ? 1 : 0);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

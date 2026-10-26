@@ -1298,6 +1298,12 @@ public:
         // stage; the last part waited for
         sb.version = 3;
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        // (benches: ATLAS_GEN_STAGE_WHOLE=1 asks a store stage for all its work in one part, one submission a call: the
+        // batched ceiling against the parts' per-submission overhead; a long submission, never for the game)
+        static const bool whole = [] {
+            const char* e = std::getenv("ATLAS_GEN_STAGE_WHOLE");
+            return e && e[0] == '1';
+        }();
         double& perUnit = partUnitMs_[st.order];
         partUs_.clear();
         partsDone_ = 0;
@@ -1308,7 +1314,7 @@ public:
             sb.partsDone = partsDone_;
             sb.partUs = partUs_.data();
             sb.lastPartUs = partsDone_ ? partUs_[partsDone_ - 1] : 0u;
-            sb.units = perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
+            sb.units = whole ? 0u : perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;
             begin();
             sb.vkCommandBuffer = cmd_;
             phase_ = "store stage " + std::to_string(st.order) + ", " + std::to_string(count) + " chunks, part " + std::to_string(part);

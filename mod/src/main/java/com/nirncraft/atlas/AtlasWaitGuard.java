@@ -12,6 +12,16 @@ final class AtlasWaitGuard {
 
     private long last = -1, sinceNs, seenNs;
     private boolean released;
+    private final long stallNs;
+
+    AtlasWaitGuard() {
+        this(STALL_NS);
+    }
+
+    /** A guard that releases after {@code stallNs} without the count falling. */
+    AtlasWaitGuard(long stallNs) {
+        this.stallNs = stallNs;
+    }
 
     /**
      * Whether a count of {@code count} still blocks at {@code now}. Returns 1 when it blocks, 0 when it does not, -1 when
@@ -28,7 +38,7 @@ final class AtlasWaitGuard {
         last = count;
         seenNs = now;
         if (released) return 0;
-        if (now - sinceNs < STALL_NS) return 1;
+        if (now - sinceNs < stallNs) return 1;
         released = true;
         return -1;
     }
