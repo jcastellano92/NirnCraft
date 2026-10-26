@@ -421,6 +421,24 @@ with _tf.TemporaryDirectory() as _td:
 # A slow check's output is evidence even when it times out; the complete log is not truncated to its tail.
 import subprocess as _subprocess
 from unittest.mock import patch as _patch
+from types import SimpleNamespace as _NS
+_chosen = {"id": "chosen", "tier": "check", "group": "-", "tags": ["check:chosen"]}
+_other = {"id": "unrelated", "tier": "check", "group": "-", "tags": ["check:other"]}
+_gate_args = _NS(ids=[], tier="check", tag=["check:chosen"], suite=None, group=None, exclude=None, changed=None, limit=None)
+_planned = harness.select([_chosen, _other], _gate_args)
+harness.pin_gate_selection(_gate_args, _planned)
+expect(harness.select([_chosen, _other], _gate_args) == [_chosen],
+       "the gate executes its planned IDs without expanding to every test in the tier")
+with _patch.object(harness.subprocess, "run", return_value=_subprocess.CompletedProcess([], 128, "", "unknown revision")):
+    for _resolve in (harness.changed_files, harness.merge_base):
+        try:
+            _resolve("missing-gate-base")
+            expect(False, "an invalid gate base must be an error")
+        except RuntimeError as _error:
+            expect("unknown revision" in str(_error), "an invalid gate base is reported, never treated as no changes")
+with _patch.object(harness.subprocess, "run", side_effect=[_subprocess.CompletedProcess([], 0, "a file.txt\0", ""),
+                                                          _subprocess.CompletedProcess([], 0, "new file.txt\0", "")]):
+    expect(harness.changed_files("base") == ["a file.txt", "new file.txt"], "changed paths with spaces stay intact")
 with _tf.TemporaryDirectory() as _td:
     _log = Path(_td) / "check.output.txt"
     _r, _out = harness.check_command([sys.executable, "-c", "print('x' * 25000)"], _log, 5)

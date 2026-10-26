@@ -121,3 +121,9 @@ Check execution now writes complete output directly to each test log and streams
 The runner regression verifies logs over 20 KB, fragmented TRACE lines, exit-time output, partial timeout logs,
 owned grandchild termination and survival of an unrelated process. All five check-tier harness items pass.
 These are tooling/packaging results; the seam branch still needs driver-resource, paired-hit/albedo and jitter proof.
+
+The integrated check-tier gate against immutable base `a938b173` ran exactly 14 items: 13 passed and the existing
+crafter-screen coverage failure remained known, with no missing or newly failing items. Receipt:
+`.work/harness/gate/latest.json` (2026-10-26 18:16). Git command errors now fail the gate instead of looking like
+zero changes. Gate execution pins the planned IDs so additive tier filters cannot expand the run. Both cases have
+runner regressions. An earlier expanded run was stopped; its extra audits are not claimed as passing evidence.

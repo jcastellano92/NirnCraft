@@ -157,11 +157,17 @@ def tag_match(q, tags):
     return any(t.lower() == q or t.lower().startswith(q + "/") or t.lower().startswith(q + ":") for t in tags)
 
 
+def git_output(args):
+    r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    if r.returncode:
+        raise RuntimeError(f"git {' '.join(args)} failed ({r.returncode}): {r.stderr.strip()[:500]}")
+    return r.stdout
+
+
 def changed_files(ref):
-    out = subprocess.run(["git", "diff", "--name-only", ref], cwd=ROOT, capture_output=True, text=True).stdout.split()
-    out += subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=ROOT, capture_output=True,
-                          text=True).stdout.split()
-    return sorted(set(out))
+    out = git_output(["diff", "--name-only", "-z", ref, "--"]).split("\0")
+    out += git_output(["ls-files", "--others", "--exclude-standard", "-z"]).split("\0")
+    return sorted(set(p for p in out if p))
 
 
 def impact(paths):
@@ -1899,8 +1905,10 @@ def cmd_zoom(a):
 
 # ================================================================================================ gate (merge / push)
 def merge_base(ref):
-    r = subprocess.run(["git", "merge-base", "HEAD", ref], cwd=ROOT, capture_output=True, text=True)
-    return r.stdout.strip() or ref
+    base = git_output(["merge-base", "HEAD", ref]).strip()
+    if not base:
+        raise RuntimeError(f"git found no merge base for {ref!r}")
+    return base
 
 
 def problems(rec):
@@ -1950,6 +1958,12 @@ def gate_verdict(recs, is_blocking):
     return bad, known, unrun
 
 
+def pin_gate_selection(a, selected):
+    """Pass the planned scene IDs to run without additive filters expanding the scope a second time."""
+    a.ids = [s["id"] for s in selected]
+    a.tag, a.exclude, a.tier, a.group, a.suite, a.changed = None, None, None, None, None, None
+
+
 def cmd_gate(a):
     """Runs exactly the tests the changes since BASE can affect (impact.json), reusing fresh results, and fails when
     one of them newly fails (or fails worse). `--install-hook` makes it the git pre-push check
@@ -1983,7 +1997,7 @@ def cmd_gate(a):
             say(f"  {s['tier']:5} {v:8} {s['id']}")
         return 0
     a.reloads = reloads if a.live else []
-    a.ids, a.tag, a.exclude = [s["id"] for s in sel], None, None
+    pin_gate_selection(a, sel)
     cmd_run(a)
     bad, known, unrun = gate_verdict([(key(s, v), results.latest(s["id"], v)) for s, v in items], blocking)
     reviewed, review_state = [], "off"
