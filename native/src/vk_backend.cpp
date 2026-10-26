@@ -941,6 +941,23 @@ public:
             out.nearLight.resize(px * 4);
             std::memcpy(out.nearLight.data(), s.bufs[B_NEAR_LIGHT].map, px * 16);
         }
+        // (dev: ATLAS_FARHIT_DUMP=<prefix>, a read-back frame's hit records (farHit, 32 bytes a pixel: the lean stage's,
+        // or farMain's under its amortisation) to <prefix>_<n>.bin, while ATLAS_FARHIT_DUMP_NOW is set (the frame the
+        // caller wants): a kernel's hits against another's, water's bed and surface, material and face included)
+        if (const char* dp = std::getenv("ATLAS_FARHIT_DUMP"); dp && *dp && std::getenv("ATLAS_FARHIT_DUMP_NOW") && s.bufs[B_FAR_HIT].buf && s.bufs[B_FAR_HIT].size >= px * 32) {
+            static int dumps = 0;
+            std::string derr;
+            if (ensure(peek_, VkDeviceSize(px) * 32, false, Mem::HostRead, derr) &&
+                peekCopy(s.bufs[B_FAR_HIT].buf, {VkBufferCopy{0, 0, VkDeviceSize(px) * 32}}, derr)) {
+                std::string fn = std::string(dp) + "_" + std::to_string(dumps++) + ".bin";
+                if (FILE* fp = std::fopen(fn.c_str(), "wb")) {
+                    std::fwrite(peek_.map, 32, px, fp);
+                    std::fclose(fp);
+                }
+            } else {
+                std::fprintf(stderr, "[atlas] far hit dump: %s\n", derr.c_str());
+            }
+        }
         return true;
     }
 
