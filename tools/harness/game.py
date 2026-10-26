@@ -346,6 +346,12 @@ def ensure_current():
     if _CURRENT["checked"] or os.environ.get("NIRNCRAFT_HARNESS_NO_BUILD") == "1":
         return
     _CURRENT["checked"] = True
+    # flight-recorder dumps live on C: in the instance (about 4 MB each): keep the newest 50 (2026-10-25: 1714 dumps, 6.2 GB)
+    trace = GAME / "atlas-trace"
+    if trace.is_dir():
+        dumps = sorted((d for d in trace.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime, reverse=True)
+        for d in dumps[50:]:
+            shutil.rmtree(d, ignore_errors=True)
     sync_native()
     src = ROOT / "mod/src/main"
     newest = max((f.stat().st_mtime for f in src.rglob("*") if f.is_file()), default=0)
