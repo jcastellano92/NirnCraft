@@ -87,6 +87,19 @@ static int infoInt(const std::string& inf, const char* key) {
 static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
     uint32_t W = uint32_t(std::atoi(arg(argc, argv, "w", "2560").c_str())), H = uint32_t(std::atoi(arg(argc, argv, "h", "1440").c_str()));
     int frames = std::atoi(arg(argc, argv, "frames", "12").c_str()), nearR = std::atoi(arg(argc, argv, "near", "16").c_str());
+    // (tiles=r: each coarse level's tiles within r of the camera's, 2: 5 x 5; tilesK=r1,r2,..: per level from 1)
+    int tileR[7] = {2, 2, 2, 2, 2, 2, 2};
+    {
+        int r = std::atoi(arg(argc, argv, "tiles", "2").c_str());
+        for (int k = 0; k < 7; k++) tileR[k] = std::clamp(r, 0, 16);
+        std::string tk = arg(argc, argv, "tilesK", "");
+        int k = 1;
+        for (size_t a = 0; a < tk.size() && k <= 6; k++) {
+            size_t e = tk.find(',', a);
+            tileR[k] = std::clamp(std::atoi(tk.substr(a, e == std::string::npos ? std::string::npos : e - a).c_str()), 0, 16);
+            a = e == std::string::npos ? tk.size() : e + 1;
+        }
+    }
     std::string outPrefix = arg(argc, argv, "out", "views"), list = arg(argc, argv, "views", "0,0,60,90,-6");
     const uint32_t INFO = 164;
     std::vector<uint32_t> color(size_t(W) * H), normal(size_t(W) * H);
@@ -131,8 +144,8 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             int tx0 = int(std::floor(vx / span)), tz0 = int(std::floor(vz / span));
             uint32_t rows = (44u + (1u << k) - 1u) >> k;
             std::vector<uint32_t> kinds(256 * size_t(rows) * 2), ff(1);
-            for (int dz = -2; dz <= 2; dz++)
-                for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -tileR[k]; dz <= tileR[k]; dz++)
+                for (int dx = -tileR[k]; dx <= tileR[k]; dx++) {
                     int32_t t[2] = {tx0 + dx, tz0 + dz};
                     // (a saved scene: the tile from the cache, the inner loop's seconds, when the cache knows it)
                     uint8_t served = 0;
