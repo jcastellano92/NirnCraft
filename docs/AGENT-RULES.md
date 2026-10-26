@@ -323,6 +323,9 @@ Read these first:
 * **Merges into atlas-render keep the native suite green (2026-10-26).** After each merge, the orchestrator runs the
   native suite (`harness.py run check-native`, or native/build.ps1) and the kernel-budget check. A failing check
   blocks further merges until it's fixed or listed below with a reason and an owner.
+  - **An agent reports native changes ready only with its own green native suite** (`harness.py run check-native`
+    through heavy.py on its branch). A red suite found after the merge costs every agent (2026-10-26: the GL device-loss
+    test broke on a merge whose agent hadn't run the suite).
   - A merge that touches only docs or tools nothing builds or runs in the suite rides on the next code merge's
     suite run (so the suite doesn't hold the GPU from a running bench for no signal).
   - Known failures: none (2026-10-26: coarse:2133 fixed in 96f76680, tiers:2264 in 6fca5506).
