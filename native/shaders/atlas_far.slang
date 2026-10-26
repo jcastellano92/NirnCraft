@@ -1141,13 +1141,13 @@ int vgCoarseRun(float3 p0, float3 d, float u0, float u1, out float uncExit) {
 // With every input an argument, the same arguments do mean the same result.
 //
 // Each called core owns its state (2026-10-25): inside traceLodCore every helper uses the c-prefixed copies of the
-// statics (cTr, cSecondary, ...), set from TraceIn at entry; inside traceSecondaryCore the s-prefixed ones (sTr, sLodR,
+// statics (cTr, cSecondary, ...), set from TraceIn at entry; inside traceSecondaryCore the s-prefixed ones (sTr,
 // ...), set from SecIn; the outside (the entry points) keeps the g-ones. A static touched by two functions that are real
 // calls (NVIDIA honours [noinline]) is a module-scope Private global in local memory, every access a trip there (the far
 // pass ran 10x Oct 20's, then a single function with none), and its value across the call is the compiler's guess (a
 // build's picture depended on how it merged the calls). A copy used by one function becomes that function's locals:
 // every kernel has 0 Private globals (spirv-dis | grep -c 'OpVariable.*Private'). A helper shared by two worlds takes
-// the state it needs as parameters (shapeOfIn, secondarySigmaIn, lodResidentIn, secLevelAtIn) with a thin wrapper each;
+// the state it needs as parameters (shapeOfIn, secondarySigmaIn, secLevelAtIn) with a thin wrapper each;
 // the copies have no initializers (Slang stores those at the entry point's start), the root sets them on entry.
 struct TraceIn {
     uint mode;       // TM_*: secondary, skip water, groups, primary
@@ -1642,38 +1642,27 @@ float lodWindowR(int k) {
     }
     return r;
 }
-// (the radii once an invocation, filled at each entry point before any trace: every stretch of every ray asks;
-// computed per call they cost a third of a frame. Filled lazily by a [noinline] function that only wrote statics, the
-// fill was a call NVIDIA could treat as pure and drop.)
-static float gLodR[8];
-static float sLodR[8];  // (traceSecondaryCore's own)
-void lodFillInto(out float R[8]) {
-    int n = min(int(frame.dims.w), 8);
-    float prev = 1.0;
-    for (int k = 0; k < 8; k++) {
-        float r = k < n ? max(lodWindowR(k), prev * 1.01) : prev * 2.0;  // (nested: each wider than the one inside it)
-        R[k] = r;
-        prev = r;
-    }
-}
-void lodFillR() { lodFillInto(gLodR); }
-void lodFillRS() { lodFillInto(sLodR); }  // (traceSecondaryCore's)
-float lodResidentIn(float3 p, float R[8]) {
+// (the radii: FrameGpu.lodR, api.cpp lodRadii's port of lodWindowR above, once a frame: filled in every thread of five
+// kernels they were two arrays of eight in local memory)
+float lodRAt(int k) { return frame.lodR[k >> 2][k & 3]; }
+float lodResident(float3 p) {
     int n = int(frame.dims.w);
     float d = max(max(abs(p.x), abs(p.z)), 1.0);
-    if (d <= R[0]) return 1.0 + log2(d / R[0]);
-    for (int k = 0; k + 1 < n; k++)
-        if (d <= R[k + 1]) return float(k + 1) + log2(d / R[k]) / log2(R[k + 1] / R[k]);
+    float r0 = lodRAt(0);
+    if (d <= r0) return 1.0 + log2(d / r0);
+    for (int k = 0; k + 1 < n; k++) {
+        float rk = lodRAt(k), rn = lodRAt(k + 1);
+        if (d <= rn) return float(k + 1) + log2(d / rk) / log2(rn / rk);
+    }
     return float(n);
 }
-float lodResident(float3 p) { return lodResidentIn(p, gLodR); }
 // the distance (Chebyshev) at which lodResident reaches `level`
 float lodResidentDist(float level) {
     int n = int(frame.dims.w);
-    if (level <= 1.0) return gLodR[0] * exp2(level - 1.0);
+    if (level <= 1.0) return lodRAt(0) * exp2(level - 1.0);
     int k = min(int(floor(level)) - 1, 6);
     if (k + 1 >= n) return 1e30;
-    return gLodR[k] * pow(gLodR[k + 1] / gLodR[k], level - float(k + 1));
+    return lodRAt(k) * pow(lodRAt(k + 1) / lodRAt(k), level - float(k + 1));
 }
 
 // the continuous level of the last primary hit (FRAME_DEBUG_LOD shows it)
@@ -1903,9 +1892,9 @@ static float gSecSpread = 0.0;
 static float sSecSpread;  // (traceSecondaryCore's own)
 // the level a secondary ray takes at t (never finer than `lod`, the one it is on), and its stretch cut where the pick
 // changes; cap: the coarsest it may take
-int secLevelAtIn(float3 p, float3 dir, float t, int lod, int cap, float foot0, float spread, inout float len, float R[8], float xi) {
+int secLevelAtIn(float3 p, float3 dir, float t, int lod, int cap, float foot0, float spread, inout float len, float xi) {
     if (spread <= 0.0) return lod;
-    float lc = max(log2(max(foot0 + t * spread, 1e-6)), lodResidentIn(p + dir * t, R));
+    float lc = max(log2(max(foot0 + t * spread, 1e-6)), lodResident(p + dir * t));
     int want = min(max(lod, lodPick(lc, xi, cap + 1)), max(lod, cap));
     if (want < cap) {
         float tl = (exp2(float(want + 1) - xi) - foot0) / spread;
@@ -1923,7 +1912,7 @@ float traceShadow(float3 p, float3 dir, int lod) {
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
         float len = min(192.0 * float(1 << lod), maxT - t);
-        lod = secLevelAtIn(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len, gLodR, gLodXi);
+        lod = secLevelAtIn(p, dir, t, lod, lodCount - 1, gSecFoot0, gSecSpread, len, gLodXi);
         float s = float(1 << lod);
         len = min(len, 192.0 * s);
         float uncExit;
@@ -2060,13 +2049,12 @@ SecOut traceSecondaryCore(SecIn si, float3 p, float3 dir, float maxT, int lod) {
     float vis = 1.0;
     // (the far field's rays: the pixel's cone, the primary rays' continuous rule, over the levels' radii, filled here)
     bool farCone = sSecSpread > 0.0 && sSecCone <= 0.0 && sSecFoot <= 0.0;
-    if (farCone) lodFillRS();
     for (int seg = 0; seg < 48; seg++) {
         if (t >= maxT) break;
         float s = float(1 << lod);
         float len = min(192.0 * s, maxT - t);
         if (farCone) {
-            lod = secLevelAtIn(p, dir, t, lod, lodCount - 1, sSecFoot0, sSecSpread, len, sLodR, sLodXi);
+            lod = secLevelAtIn(p, dir, t, lod, lodCount - 1, sSecFoot0, sSecSpread, len, sLodXi);
             len = min(len, 192.0 * float(1 << lod));
         } else if ((sSecCone > 0.0 || sSecFoot >= 2.0 * s) && lod < SEC_CONE_LOD && lod + 1 < lodCount) {
             // (the footprint's coarsening while the next level's voxels are no wider than it, then the sun's cone)
@@ -3011,7 +2999,6 @@ float2 sunTexel(uint i, uint j) {
 [numthreads(8, 8, 1)]
 void sunMapMain(uint3 id : SV_DispatchThreadID) {
     airBegin();
-    lodFillR();
     gHead = groupData[0];
     gAblate = asuint(frame.jitter.w);
     gSecAblate = gAblate;
@@ -3248,7 +3235,6 @@ groupshared uint gsSplitFresh;
 [numthreads(8, 8, 1)]
 void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
     airBegin();
-    lodFillR();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     bool primary = splitPrimary();
@@ -3337,7 +3323,6 @@ float3 nearInfoNormal(uint info) {
 [numthreads(8, 8, 1)]
 void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
     airBegin();
-    lodFillR();
     gEyeRoofed = -1;
     // (eyeRoofed's ray: the material shapes and the measurements' switches, as every other entry's; without them
     // plants, fences and panes overhead counted as solid cover)
@@ -3428,7 +3413,6 @@ static const uint NEAR_SAMPLES = 8u;  // (PRIMARY_NEAR_LIT) a pixel's own sample
 [numthreads(8, 8, 1)]
 void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
     airBegin();
-    lodFillR();
     gEyeRoofed = -1;
     gHead = groupData[0];  // (eyeRoofed's and the fallback light's rays, as nearLightMain's)
     gAblate = asuint(frame.jitter.w);
@@ -3779,7 +3763,6 @@ uint farHitSource(uint2 px, float3 dir, out float d) {
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
     airBegin();
-    lodFillR();
     gEyeRoofed = -1;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;

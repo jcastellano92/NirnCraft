@@ -1225,6 +1225,49 @@ static void lightControl(AtlasContext* ctx, const AtlasFrame* f, const float fwd
     }
 }
 
+// (FrameGpu.lodR) each level's resident radius: atlas_far.slang lodWindowR and its nesting, the same float steps, once
+// a frame here (in the kernels every thread of five filled two arrays of eight)
+static void lodRadii(FrameGpu& g) {
+    uint32_t ablate;
+    std::memcpy(&ablate, &g.jitter[3], 4);
+    const bool vgOn = g.vgOrigin[3] != 0 && (ablate & 134217728u) == 0;  // (atlas_far.slang vgOn, vgLevelOn)
+    auto levelOn = [&](int k) {
+        if (k == 0) return vgOn;
+        if (k > 6 || !vgOn) return false;
+        return ((g.vgLevel[k - 1][3] >> 16) & 1) != 0 && (ablate & 1073741824u) == 0;
+    };
+    const int n = std::min(int(g.dims[3]), 8);
+    float prev = 1.0f;
+    for (int k = 0; k < 8; k++) {
+        float r;
+        if (k < n) {
+            const LodGpu& L = g.lods[k];
+            const int span = 256 << k;
+            float lox = float(L.origin[0] * span - g.camInt[0]) - g.camFrac[0];
+            float loz = float(L.origin[2] * span - g.camInt[2]) - g.camFrac[2];
+            float hix = lox + float(L.dim[0] * span), hiz = loz + float(L.dim[2] * span);
+            float w = std::max(std::min(std::min(-lox, hix), std::min(-loz, hiz)), 1.0f);
+            if (k <= 6 && (k == 0 ? (g.vgDims[3] & 2u) != 0 && vgOn : levelOn(k))) {
+                int gx0, gz0, X;
+                if (k == 0) {
+                    gx0 = g.vgOrigin[0] * 16, gz0 = g.vgOrigin[2] * 16, X = int(g.vgDims[0]);
+                } else {
+                    const int cs = 16 << k;
+                    gx0 = g.vgLevel[k - 1][0] * cs, gz0 = g.vgLevel[k - 1][1] * cs, X = g.vgLevel[k - 1][3] & 255;
+                }
+                float gs = float(X * (16 << k));
+                float gx = float(gx0 - g.camInt[0]) - g.camFrac[0], gz = float(gz0 - g.camInt[2]) - g.camFrac[2];
+                w = std::min(w, std::max(std::min(std::min(-gx, gx + gs), std::min(-gz, gz + gs)), 1.0f));
+            }
+            r = std::max(w, prev * 1.01f);
+        } else {
+            r = prev * 2.0f;
+        }
+        g.lodR[k] = r;
+        prev = r;
+    }
+}
+
 static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInputs& in) {
     auto tq = std::chrono::steady_clock::now();
     {
@@ -1538,6 +1581,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         return !e || std::atoi(e) != 0;
     }();
     g.vgDims[3] = (ctx->world.gridOwnsLevel0 ? 1u : 0u) | (ctx->world.gridOwnsReal() ? 2u : 0u) | (fallback ? 4u : 0u);
+    lodRadii(g);  // (after every field it reads: the levels, the grid's windows, the camera, the measurement bits)
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision

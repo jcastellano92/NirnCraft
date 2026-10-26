@@ -108,6 +108,9 @@ struct FrameGpu {
     int4 vgLevel[6];
     // the continuous level's knobs (ATLAS_LOD, measurements): threshold pattern, the grazing widening's least cos, bias
     float4 lodParams;
+    // each level's resident radius (Chebyshev, blocks; nested, each wider than the one inside it): api.cpp lodRadii, once a
+    // frame (atlas_far.slang lodResident; in every thread of five kernels it was a third of a frame's per-call cost)
+    float4 lodR[2];
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)

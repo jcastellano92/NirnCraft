@@ -9,7 +9,7 @@
  ],
  "spv": {
   "atlas_cloud": {
-   "instructions": 7663,
+   "instructions": 7671,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -19,10 +19,10 @@
    ]
   },
   "atlas_far": {
-   "instructions": 77781,
+   "instructions": 77301,
    "private": 28,
    "workgroup": 0,
-   "fnArrays": 59,
+   "fnArrays": 49,
    "structCalls": 0,
    "structCallsOk": [
     "coarseSmoothHit",
@@ -37,10 +37,10 @@
    ]
   },
   "atlas_farsplit": {
-   "instructions": 149575,
+   "instructions": 149100,
    "private": 0,
    "workgroup": 0,
-   "fnArrays": 242,
+   "fnArrays": 235,
    "structCalls": 0,
    "structCallsOk": [
     "coarseSmoothHit",
@@ -781,7 +781,7 @@
    "structCallsOk": []
   },
   "atlas_gridlight": {
-   "instructions": 1004,
+   "instructions": 1012,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 1,
@@ -813,7 +813,7 @@
    "structCallsOk": []
   },
   "atlas_lightbin": {
-   "instructions": 629,
+   "instructions": 638,
    "private": 0,
    "workgroup": 7,
    "fnArrays": 0,
@@ -821,7 +821,7 @@
    "structCallsOk": []
   },
   "atlas_lightcull": {
-   "instructions": 864,
+   "instructions": 872,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1077,10 +1077,10 @@
    "structCallsOk": []
   },
   "atlas_nearlight": {
-   "instructions": 26113,
+   "instructions": 25855,
    "private": 28,
    "workgroup": 1,
-   "fnArrays": 32,
+   "fnArrays": 30,
    "structCalls": 0,
    "structCallsOk": [
     "cumulusDensity",
@@ -1093,10 +1093,10 @@
    ]
   },
   "atlas_neartemporal": {
-   "instructions": 29382,
+   "instructions": 29126,
    "private": 28,
    "workgroup": 0,
-   "fnArrays": 32,
+   "fnArrays": 30,
    "structCalls": 0,
    "structCallsOk": [
     "cumulusDensity",
@@ -1109,10 +1109,10 @@
    ]
   },
   "atlas_nearup": {
-   "instructions": 17816,
+   "instructions": 17557,
    "private": 28,
    "workgroup": 0,
-   "fnArrays": 32,
+   "fnArrays": 30,
    "structCalls": 0,
    "structCallsOk": [
     "traceGroups",
@@ -1230,7 +1230,7 @@
    "structCallsOk": []
   },
   "atlas_sunmap": {
-   "instructions": 19140,
+   "instructions": 19148,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 31,

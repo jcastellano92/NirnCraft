@@ -81,6 +81,7 @@ struct alignas(16) FrameGpu {
     // pixel, 1 a constant 0.5, 2 per 2 x 2 pixels, 3 per 8 x 4), the grazing widening's least cos, a bias added to the
     // level; the light through leaves' gain (0: 1)
     float lodParams[4];
+    float lodR[8];  // each level's resident radius (api.cpp lodRadii; atlas_far.slang lodResident)
 };
 
 struct alignas(16) ActorGpu {
@@ -93,7 +94,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48 + 32 + 96 + 16);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16 + 16 * 8 + 32 + 64 + 48 + 32 + 96 + 16 + 32);
 
 struct Float4 {
     float v[4];
