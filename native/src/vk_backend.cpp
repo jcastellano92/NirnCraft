@@ -905,7 +905,7 @@ public:
             else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         }
         farAmortBit(frame, s);
-        abSide(frame);
+        abSide(frame, !deviceOnly);
         hostNearInputs_ = true;  // (the CPU writes the near inputs here, also when the outputs stay on the device)
         if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
@@ -3732,9 +3732,10 @@ private:
     bool abAblateSet_ = false;
     VkShaderModule leanShaderB_ = VK_NULL_HANDLE;
     VkPipeline leanPipeB_ = VK_NULL_HANDLE;
-    // every other frame side B (its ablate bits in the frame's jitter.w, as ATLAS_ABLATE's)
-    void abSide(FrameGpu& frame) {
-        abB_ = abMode_ != 0 && (abFrame_++ & 1u) != 0;
+    // every other frame side B (its ablate bits in the frame's jitter.w, as ATLAS_ABLATE's); a frame read back (the
+    // bench's image and hit distances) always side A
+    void abSide(FrameGpu& frame, bool readBack) {
+        abB_ = abMode_ != 0 && !readBack && (abFrame_++ & 1u) != 0;
         if (abB_ && abAblateSet_) std::memcpy(&frame.jitter[3], &abAblate_, 4);
     }
     VkShaderModule leanShader_ = VK_NULL_HANDLE;

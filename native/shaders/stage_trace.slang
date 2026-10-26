@@ -2,9 +2,10 @@
 // farMain. One thread a pixel: the view ray (curved with the planet, in chords), each chord walked through one level of
 // the GPU grid (level 0 blocks, coarse levels 1..6 voxels of 2^k blocks) and the hit stored in the hit buffer (farHit,
 // the record atlas_far.slang farHitStore writes: the shade side, farMain's ATLAS_FAR_PASS 2, reads it).
-// Step 6.1-6.3: every level's voxels plain cubes, material and entry axis only, except a coarse level's cube wider than the
-// pixel: its level's smooth surface, found after the walk (no bricks, shapes, water medium or grazing look: farMain's
-// ATLAS_ABLATE 2952790016 is the same picture; with 32, the cubes). farMain's choices otherwise:
+// Step 6.1-6.5: every level's voxels plain cubes, material and entry axis only, except a coarse level's cube wider than the
+// pixel: its level's smooth surface, found after the walk; a grazing hit's second look at a coarser level (no bricks,
+// shapes or water medium: farMain's ATLAS_ABLATE 805306368 is the same picture; with 32, the cubes; with 2147483648, no
+// grazing look). farMain's choices otherwise:
 // the level a chord takes (the footprint's and the residency's at the pixel's threshold, never finer along the ray, the
 // chord ending where the pick changes), a coarser level where one does not hold the point, a finer one where no
 // coarser does, past a hole where none does; the walk's exits by index (a nudge past a face is below float precision at
@@ -32,6 +33,17 @@ static const uint RAY_STEPS = 24576u;  // a ray's steps at most (farMain's)
 static const uint LOOP_CAP = 32768u;   // the loop's passes at most (steps, chord and level changes)
 
 float lodR(int k) { return frame.lodR[k >> 2][k & 3]; }
+
+// the continuous level the residency asks for at camera-relative point p (atlas_far.slang lodResident): k + 1 at level
+// k's window radius, log-linear between the radii
+float lodRes(float3 p, int lodCount) {
+    float dc = max(max(abs(p.x), abs(p.z)), 1.0);
+    if (dc <= lodR(0)) return 1.0 + log2(dc / lodR(0));
+    [loop]
+    for (int j = 0; j + 1 < lodCount && j < 7; j++)
+        if (dc <= lodR(j + 1)) return float(j + 1) + log2(dc / lodR(j)) / log2(lodR(j + 1) / lodR(j));
+    return float(lodCount);
+}
 
 // ---- the smooth surface of a coarse level (atlas_far.slang coarseSmoothHit, ATLAS-PLAN 0.2) ----
 static const float SMOOTH_COARSE_PX = 1.5;  // a voxel this many footprints wide, or more, is drawn smooth
@@ -94,12 +106,22 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     float tStart = 0.0, hitFrom = 0.0;  // (the walk's start; the start of the chord that hit)
     uint hasAlbedo = 0u;
     float3 alb = float3(0, 0, 0);
-    // (two walks at most: a smooth search that finds no crossing walks on once from a voxel and a half past the cube, its
-    // second miss keeps the cube: farMain's traceView. One walk loop: the passes run it again, never a second copy. The
+    // (6.5, the grazing look: a hit whose face's footprint wants a coarser level than its chord's walks that level
+    // once around it (atlas_far.slang traceViewBody's second look; ATLAS_ABLATE 2147483648: not). Its window [tStart,
+    // gEnd) at level gK; the finer hit kept for when that level has no surface there)
+    bool noGraze = (asuint(frame.jitter.w) & 2147483648u) != 0u;
+    bool grazing = false;
+    int gK = 0, fineAxis = 1, fineK = 0;
+    float gEnd = 0.0, fineT = -1.0, fineFrom = 0.0;
+    uint fineMat = 0u;
+    int pass = 0;
+    // (two passes at most: a smooth search that finds no crossing walks on once from a voxel and a half past the cube, its
+    // second miss keeps the cube: farMain's traceView; each pass a walk and its grazing look at most. One walk loop: the
+    // passes and the looks run it again, never a second copy. The
     // ray's set-up and the walk's state live inside a pass: set up outside, they were live across the smooth search, and
     // the driver's 72 registers and 4352 bytes of shared memory a group were 64 and 768)
     [loop]
-    for (int pass = 0; pass < 2; pass++) {
+    for (int wk = 0; wk < 4; wk++) {
         // the ray: the host's jitter as farMain's, the per-pixel threshold of the continuous level as farMain's gLodXi
         float2 ndc = float2((float(id.x) + 0.5) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y) + 0.5) / float(h) * 2.0) + frame.jitter.xy;
         float3 dir = normalize(unproject(frame, ndc));
@@ -130,28 +152,18 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             if (chord) {
                 // the next chord: from the end of this one, its level the footprint's and the residency's (never finer
                 // than the last chord's), to where that pick would change
+                if (grazing && len > 0.0) break;  // (a grazing look: its one chord)
                 t0 += len;
                 if (t0 >= tMax) break;
                 a = o + dir * t0 + float3(0, kc * t0 * t0, 0);
-                if (a.y > worldTop && dir.y + 2.0 * kc * t0 >= 0.0) break;  // (above the world, climbing)
+                if (!grazing && a.y > worldTop && dir.y + 2.0 * kc * t0 >= 0.0) break;  // (above the world, climbing)
                 hitFrom = t0;
-                float dc = max(max(abs(a.x), abs(a.z)), 1.0);
                 float lf = log2(max(t0 * pa, 1e-6)) + frame.lodParams.z;
-                float lr = float(lodCount);
-                if (dc <= lodR(0)) lr = 1.0 + log2(dc / lodR(0));
-                else {
-                    [loop]
-                    for (int j = 0; j + 1 < lodCount && j < 7; j++)
-                        if (dc <= lodR(j + 1)) {
-                            lr = float(j + 1) + log2(dc / lodR(j)) / log2(lodR(j + 1) / lodR(j));
-                            break;
-                        }
-                }
-                int want = clamp(int(floor(max(lf, lr) + xi)), 0, lodCount - 1);
-                lodC = max(lodC, want);
+                int want = grazing ? gK : clamp(int(floor(max(lf, lodRes(a, lodCount)) + xi)), 0, lodCount - 1);
+                lodC = grazing ? gK : max(lodC, want);
                 float s = float(1 << lodC);
-                float tEnd = 1e30;
-                if (lodC == want && lodC + 1 < lodCount) {
+                float tEnd = grazing ? gEnd : 1e30;
+                if (!grazing && lodC == want && lodC + 1 < lodCount) {
                     // (farMain's tEnd: the footprint, or the place, reaching lod + 1 at the threshold)
                     float target = float(lodC + 1) - xi;
                     float tF = exp2(target) / pa;
@@ -177,6 +189,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             if (level) {
                 // level k's grid (atlas_far.slang vgGrid): its window and first chunk word; the chord in its voxels
                 if (!levelOn(k)) {
+                    if (grazing) break;  // (a grazing look is its level's alone: without data, the finer hit stands)
                     // (no data at this level: coarser, else finer, else past it)
                     if (!finer && k < 6) {
                         k++;
@@ -241,6 +254,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 st = cw & 3u;
             }
             if (st == ST_UNLOADED) {
+                if (grazing) break;  // (as farMain's look: its level's walk uncovered, the finer hit stands)
                 // (outside level k's window: a finer level's window lies inside it, only a coarser one can hold the point;
                 // level 6's is the widest, and past it the grid holds nothing along this ray: the far range's misses)
                 if (!held && k >= 6) break;
@@ -323,6 +337,41 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             u = max(tn, u) + 1e-3;
             exitAxis = tt.x <= tn ? 0 : (tt.y <= tn ? 1 : 2);
             exitTo = exitAxis == 0 ? (dv.x > 0.0 ? hi.x : lo.x - 1) : exitAxis == 1 ? (dv.y > 0.0 ? hi.y : lo.y - 1) : (dv.z > 0.0 ? hi.z : lo.z - 1);
+        }
+        if (grazing) {
+            // (the grazing look done: its hit, else the finer hit as it was)
+            grazing = false;
+            if (tHit < 0.0) {
+                tHit = fineT;
+                mat = fineMat;
+                axis = fineAxis;
+                k = fineK;
+                hitFrom = fineFrom;
+                break;  // (final: it did not want its smooth surface)
+            }
+        } else if (tHit >= 0.0 && !noGraze && !finer) {
+            // the hit's own footprint (its face's cos: a grazing face's pixel covers more) and the residency there; when
+            // that wants a coarser level than the chord's, the grazing look: that level from 3 of its voxels in front of
+            // the hit to 3 past it. (Not for a coarse cube that wants its smooth surface: its cube face's cos is the
+            // staircase's, not the surface's)
+            float vh = float(1 << k);
+            bool wantSmooth = k > 0 && !noSmooth && vh >= SMOOTH_COARSE_PX * tHit * pa;
+            float cs = clamp(abs(d[axis]), clamp(frame.lodParams.y, 0.05, 1.0), 1.0);
+            float lh = max(log2(max(tHit * pa / cs, 1e-6)) + frame.lodParams.z, lodRes(o + dir * tHit + float3(0, kc * tHit * tHit, 0), lodCount));
+            int k2 = clamp(int(floor(lh + xi)), 0, lodCount - 1);
+            if (!wantSmooth && k2 > lodC) {
+                fineT = tHit;
+                fineMat = mat;
+                fineAxis = axis;
+                fineK = k;
+                fineFrom = hitFrom;
+                gK = k2;
+                float s2 = float(1 << k2);
+                gEnd = min(tHit + 3.0 * s2, tMax);
+                tStart = max(tStart, tHit - 3.0 * s2);  // (the look's start; a pass 1 sets its own)
+                grazing = true;
+                continue;
+            }
         }
         // 6.3: a coarse level's cube wider than the pixel's footprint is drawn as its level's smooth surface (its occupancy
         // a density, trilinear between voxel centres, the surface where it reaches one half: atlas_far.slang
@@ -440,6 +489,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             break;
         }
         if (pass == 1) break;  // (the cube)
+        pass = 1;
         tStart = tHit + 1.5 * vs;
         if (tStart >= tMax) {
             tHit = -1.0;

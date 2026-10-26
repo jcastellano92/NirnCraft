@@ -433,6 +433,7 @@ branch is merged only when its stage comes and a quick re-check shows it still a
 | Vanilla meshing off without mixins: the empty-model trick, the fluid model swap | `docs/SPIKES-2026-10-25.md` | 5 | Round 2: bridge "Compile Section" into the recorder, one probe |
 | Simulation level of detail, thin NeoForge fork, companion process | the plan's "Owning the loader" section | simulation phase | Round-1 estimates first |
 | Candidate techniques C, E, F, G, H | §3b | their stage | Ceiling test first |
+| Lean trace 6.6, the water medium (two traces, eye under water, WATER_SEE): no water in the bench views to check it against farMain | branch `park/lean-water` (f9f8bc91) | lean step 6, with 6.4's export scene | Hits behind water vs farMain on a scene with water; its 3328 B shared (6.5: 768) |
 | Cache lifecycle, cross-vendor exactness, low-end scaling, merge quality gates | §4 "Later, once it works here" | after it works here | — |
 | Component tooling gaps: GPU-vs-Java checks per component, seconds-long visuals for terrain, rivers and settlement placement | docs/COMPONENTS.md | when each component is worked on | — |
 | Generator column-cache statics (`g_colX/g_colZ/g_colOwn/g_colVals`) to a per-thread scratch buffer | conformance audit, blueprint §7 | next generator work | timing run on tileBiome |
