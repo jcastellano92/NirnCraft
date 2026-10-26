@@ -118,7 +118,9 @@ float unloadedExit(int j, float3 p, float3 d) {
     float cs = float(16 << j);
     int X = L.w & 255, Y = (L.w >> 8) & 255, Z = j == 0 ? int(frame.vgDims.z) : X;
     float3 q = (p + float3(frame.camInt.xyz - (j == 0 ? frame.vgOrigin.xyz * 16 : int3(L.x * (16 << j), -64, L.y * (16 << j))))) / cs;
-    int3 c = int3(floor(q));
+    // (the cell the ray is in by the walk's rule: a point exactly on a face going down lies in the cell below)
+    float3 fq = floor(q);
+    int3 c = int3(fq) - int3(d.x < 0.0 && q.x == fq.x ? 1 : 0, d.y < 0.0 && q.y == fq.y ? 1 : 0, d.z < 0.0 && q.z == fq.z ? 1 : 0);
     if (any(c < int3(0, 0, 0)) || c.x >= X || c.y >= Y || c.z >= Z) return 1e30;
     int px = (c.x + L.x) % X, pz = (c.z + L.y) % Z;
     px += px < 0 ? X : 0;
@@ -434,6 +436,10 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 }
                 if (st == ST_UNLOADED) {
                     if (grazing) break;  // (as farMain's look: its level's walk uncovered, the finer hit stands)
+                    // (below the world's floor going down, or above its top going up: nothing more along this ray; every
+                    // level's window spans the world's height. Two levels each holding the point by its floor and not by
+                    // the walk's face rule passed it back and forth here to the step cap)
+                    if (!held && ((v.y < 0 && dv.y <= 0.0) || (v.y >= Y * 16 && dv.y >= 0.0))) break;
                     // (farMain's vgCoarseRun: the grid owns level 0, and level 0's run of chunks not loaded here, or the
                     // chord's rest outside its window, is walked at the finest coarse level holding each point, then
                     // level 0 again past the run: a streaming gap, an export's columns missing, never the chord coarser)
