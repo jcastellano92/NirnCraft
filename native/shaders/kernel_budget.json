@@ -19,7 +19,7 @@
    ]
   },
   "atlas_far": {
-   "instructions": 77301,
+   "instructions": 77310,
    "private": 28,
    "workgroup": 0,
    "fnArrays": 49,
@@ -37,7 +37,7 @@
    ]
   },
   "atlas_farsplit": {
-   "instructions": 149100,
+   "instructions": 149106,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 235,

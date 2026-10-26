@@ -1822,8 +1822,13 @@ float smoothPrimaryHit(float3 o, float3 dir, float t1, float tHit) {
     float3 tg = dir + float3(0, 2.0 * kc * tHit, 0);
     float3 ro = (worldAt(o, dir, kc, tHit) - float3(g.origin - frame.camInt.xyz)) / vs;
     bool skipW = gSkipWater || (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
-    SmoothHit sh = coarseSmoothHit(g, ro, tg / vs, -min(vs, max(tHit - gHitFrom, 0.0)), min(1.5 * vs, max(t1 - tHit, 0.0)), skipW);
+    float back = -min(vs, max(tHit - gHitFrom, 0.0));
+    SmoothHit sh = coarseSmoothHit(g, ro, tg / vs, back, min(1.5 * vs, max(t1 - tHit, 0.0)), skipW);
     if (!sh.hit) return -1.0;
+    // (inside the density already where the search starts: no crossing in front of the cube was seen, the cube's entry
+    // is the surface (a neighbour without data counts as solid: above a chunk on its own the search started inside and
+    // the surface stood a voxel above the data, the coarse test's 74 for 76)
+    if (sh.t <= back + 1e-6) sh.t = 0.0;
     float3 an = abs(sh.n);
     gTr.t += sh.t;
     gTr.axis = an.x >= an.y && an.x >= an.z ? 0 : (an.y >= an.z ? 1 : 2);
