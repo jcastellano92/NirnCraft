@@ -405,6 +405,21 @@ walking through or floating on anything); the owner flies every stress scene.
 **Then, in the owner's order:** far settlements (the overlays agent's far stage), far life (R5: far players
 building in real time), multiplayer at scale, baked light, weather.
 
+## 4b. Parked work (saved, not lost; revisit at its stage)
+
+Deferred work is saved on a branch or in this list, so it never blocks the main line and is never forgotten. A parked
+branch is merged only when its stage comes and a quick re-check shows it still applies.
+
+| Item | Where | Stage | Re-check when resumed |
+|---|---|---|---|
+| Water on its fluid level, far water under trees, waterlogged blocks as full cubes (3 commits, 2026-10-21) | branch `atlas-water` | 3 (fluids) | Superseded by later water and waterlogged work? Diff against atlas-render first |
+| Far settlements (overlays far stage) | branch `atlas-overlays` (its work merged except a merge commit) | after stage 3 | The far-stage design against the one-generator rule (§0.8) |
+| Vanilla meshing off without mixins: the empty-model trick, the fluid model swap | `docs/SPIKES-2026-10-25.md` | 5 | Round 2: bridge "Compile Section" into the recorder, one probe |
+| Simulation level of detail, thin NeoForge fork, companion process | the plan's "Owning the loader" section | simulation phase | Round-1 estimates first |
+| Candidate techniques C, E, F, G, H | §3b | their stage | Ceiling test first |
+| Cache lifecycle, cross-vendor exactness, low-end scaling, merge quality gates | §4 "Later, once it works here" | after it works here | — |
+| Bridge vanilla Profiler zones (worker threads) into the flight recorder | idea (spikes) | when CPU matters | — |
+
 ## 5. How the work runs (cost)
 
 - **A few agents, each on the model its work needs** (owner, 2026-10-24): Haiku for image checks, Sonnet for coding,

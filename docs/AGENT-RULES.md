@@ -279,3 +279,7 @@ Read these first:
   * Ideas get a round-1 estimate first (minutes, from existing data); only the most valuable get real measurement.
   * New ideas get one line in the notes, not chased.
 
+* **Park, don't drop (2026-10-25).** Work that's deferred stays safe: commit it on its own branch (or a WIP commit on
+  yours), never merged into atlas-render until its stage comes, and add a row to ATLAS-PLAN §4b "Parked work" with
+  where it is and what to re-check when it's resumed.
+
