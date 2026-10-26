@@ -124,6 +124,12 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   - Same local network first: fast, with no privacy cost.
   - Internet peer-to-peer later, opt-in (IP exposure, routers, abuse limits).
   - A shared mirror for a seed's baseline coarse view covers most first joins more simply.
+- **Cooperative baking (owner, 2026-10-25: "work as a team"):** the server coordinates; the clients bake.
+  - The server keeps the index of which regions exist and who holds them.
+  - Each client contributes what it bakes anyway; idle client GPUs are asked to bake regions other players are heading
+    for. More players means a faster world for everyone.
+  - Trust without a server GPU: a region is accepted once two independent clients agree on its fingerprint, the
+    server's CPU generator spot-checks a few, and peers that send bad data are dropped.
 
 ### Frame budget (2026-10-25)
 
