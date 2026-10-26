@@ -601,32 +601,46 @@ endif()
 # the flight recorder (docs/ATLAS-PLAN.md stage 0.2): always-on CPU zones and GPU timestamps, spike dumps
 target_sources(atlas_core PRIVATE src/flight_recorder.cpp src/texturepack.cpp)
 
-# the kernels' budget after atlas_core links (spv_budget above); the backend's pipeline statistics against its "pipe" part
-# (only the modules this build embeds: every target's generated *_spv.h, listed at configure time in spv_modules.txt; a
-# stale .spv left in the build folder by an older build is not checked)
+# the kernels' budget after each target links (spv_budget above); the backend's pipeline statistics against its "pipe" part.
+# Each target checks only the modules it embeds (its generated *_spv.h, listed at configure time in
+# spv_modules_<target>.txt), so a target never waits on another target's SPIR-V (2026-10-26: atlas_core's check failed in a
+# fresh build folder on atlas_lab_gpu's atlas_lod_build_*.spv) and a stale .spv left by an older build is not checked.
+# spv_modules.txt keeps the union for tools.
 set(SPV_MODULES "")
 get_property(SPV_TARGETS DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
 foreach(t ${SPV_TARGETS})
+  set(_mods "")
   get_target_property(srcs ${t} SOURCES)
   if(srcs)
     foreach(src ${srcs})
       if(src MATCHES "([A-Za-z0-9_]+)_spv[.]h$")
-        list(APPEND SPV_MODULES "${CMAKE_MATCH_1}")
+        list(APPEND _mods "${CMAKE_MATCH_1}")
       endif()
     endforeach()
   endif()
-endforeach()
-foreach(src ${FEAT_HEADERS})  # (the decoration's kernels: a custom target's, not a library's sources)
-  if(src MATCHES "([A-Za-z0-9_]+)_spv[.]h$")
-    list(APPEND SPV_MODULES "${CMAKE_MATCH_1}")
+  if(t STREQUAL "atlas_core")
+    foreach(src ${FEAT_HEADERS})  # (the decoration's kernels: a custom target's, not a library's sources)
+      if(src MATCHES "([A-Za-z0-9_]+)_spv[.]h$")
+        list(APPEND _mods "${CMAKE_MATCH_1}")
+      endif()
+    endforeach()
+  endif()
+  if(_mods)
+    list(REMOVE_DUPLICATES _mods)
+    list(SORT _mods)
+    list(APPEND SPV_MODULES ${_mods})
+    string(REPLACE ";" "\n" _text "${_mods}")
+    file(WRITE "${GEN}/spv_modules_${t}.txt" "${_text}\n")
+    if(NOT t STREQUAL "spv_budget")
+      add_dependencies(${t} spv_budget)
+      add_custom_command(TARGET ${t} POST_BUILD
+        COMMAND spv_budget "${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json" "${GEN}" "${GEN}/spv_modules_${t}.txt"
+        COMMENT "spv_budget (${t}): its kernels' SPIR-V against shaders/kernel_budget.json")
+    endif()
   endif()
 endforeach()
 list(REMOVE_DUPLICATES SPV_MODULES)
 list(SORT SPV_MODULES)
 string(REPLACE ";" "\n" SPV_MODULES_TEXT "${SPV_MODULES}")
 file(WRITE "${GEN}/spv_modules.txt" "${SPV_MODULES_TEXT}\n")
-add_dependencies(atlas_core spv_budget)
-add_custom_command(TARGET atlas_core POST_BUILD
-  COMMAND spv_budget "${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json" "${GEN}" "${GEN}/spv_modules.txt"
-  COMMENT "spv_budget: the kernels' SPIR-V against shaders/kernel_budget.json")
 target_compile_definitions(atlas_core PRIVATE ATLAS_KERNEL_BUDGET="${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json")
