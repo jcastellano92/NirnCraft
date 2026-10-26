@@ -19,13 +19,12 @@
    ]
   },
   "atlas_far": {
-   "instructions": 77310,
+   "instructions": 77987,
    "private": 28,
    "workgroup": 0,
-   "fnArrays": 49,
+   "fnArrays": 52,
    "structCalls": 0,
    "structCallsOk": [
-    "coarseSmoothHit",
     "cumulusDensity",
     "farHitSource",
     "traceGroups",
@@ -37,13 +36,12 @@
    ]
   },
   "atlas_farsplit": {
-   "instructions": 149106,
+   "instructions": 133240,
    "private": 0,
    "workgroup": 0,
-   "fnArrays": 235,
+   "fnArrays": 153,
    "structCalls": 0,
    "structCallsOk": [
-    "coarseSmoothHit",
     "cumulusDensity",
     "farHitSource"
    ]
@@ -116,7 +114,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -159,7 +156,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -242,7 +238,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -301,7 +296,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -368,7 +362,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -421,7 +414,6 @@
     "rngNextP",
     "rockOne",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -484,7 +476,6 @@
     "rngIntBP",
     "rngNextP",
     "sinS",
-    "treeB",
     "twoProd",
     "valueNoise"
    ]
@@ -560,7 +551,6 @@
     "sinS",
     "sqrtD",
     "tier",
-    "treeB",
     "trunkDraw",
     "trunkLine",
     "twoProd",
@@ -1362,16 +1352,16 @@
    "farMain": {
     "registers": 128,
     "shared": 12544,
-    "local": 12848,
+    "local": 12176,
     "stack": 0,
-    "binary": 2126720
+    "binary": 2329472
    },
    "farMain (split frames)": {
     "registers": 168,
     "shared": 7936,
-    "local": 3536,
+    "local": 3344,
     "stack": 0,
-    "binary": 2786432
+    "binary": 2006144
    },
    "cloudMain": {
     "registers": 72,
@@ -1390,23 +1380,23 @@
    "nearLightMain": {
     "registers": 128,
     "shared": 12560,
-    "local": 5328,
+    "local": 5264,
     "stack": 0,
-    "binary": 573312
+    "binary": 570112
    },
    "nearUpsampleMain": {
     "registers": 128,
     "shared": 12544,
-    "local": 2480,
+    "local": 2416,
     "stack": 0,
-    "binary": 372480
+    "binary": 369536
    },
    "nearTemporalMain": {
     "registers": 128,
     "shared": 12544,
-    "local": 5504,
+    "local": 5440,
     "stack": 0,
-    "binary": 659968
+    "binary": 656896
    },
    "lightKernel": {
     "registers": 41,

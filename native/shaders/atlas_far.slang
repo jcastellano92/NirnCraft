@@ -749,8 +749,8 @@ struct SmoothHit {
 
 // The density's crossing along ro + d u (grid-local voxel units, u the walk's parameter) for u in [u0, u1), from the
 // cell of eight voxel centres around each sample (the last cell's corners kept: a march stays in two or three cells).
-// ([noinline]: one copy for traceView's inlined copies; it reads no thread-private static, its inputs are arguments)
-[noinline]
+// (inlined: once, after the view ray's walk, smoothPrimaryHit. As a [noinline] call its VgGrid and SmoothHit went through
+// memory: the split kernel's shared memory 7936 -> 16640 bytes a group and its far pass 25 % slower)
 SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, bool skipWater) {
     SmoothHit sh;
     sh.hit = false;
@@ -3905,16 +3905,27 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         gTr = res;
         // (under water a ray that does not reach the surface within WATER_SEE blocks sees nothing past that: no further)
         float tEye = eyeWater && !(dir.y > 1e-3 && eyeDepth / dir.y < WATER_SEE) ? WATER_SEE * 1.5 : frame.params.y;
-        tHit = traceView(o, dir, tStart, tEye, lodDither);
-        res = gTr;
-        gSkipWater = false;
-        // A water surface met from above: (PRIMARY_NEAR) in the near field the host rasters it, a primary ray goes on to
-        // what is under it (the groups' cells and the SVDAG have no near-only pass, so a second trace with water skipped);
-        // (_LIT) atlas draws it at any distance, and what lies behind it is traced on from it, WATER_SEE blocks at most
-        // (one call site for both: NVIDIA merges a [noinline] call with the same arguments, and each traceView is one more
-        // inlined copy of the walk)
-        wRes = res;
-        if (primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[res.mat].emisClass.y) == 2u) {
+        // pass 0 the view ray; pass 1, a water surface met from above: (PRIMARY_NEAR) in the near field the host rasters
+        // it, a primary ray goes on to what is under it (the groups' cells and the SVDAG have no near-only pass, so a
+        // second trace with water skipped); (_LIT) atlas draws it at any distance, and what lies behind it is traced on
+        // from it, WATER_SEE blocks at most. (One traceView call site for both: each site is one more inlined copy of
+        // the whole walk, a megabyte of the split kernel's code)
+        float ta = tStart, tb = tEye;
+        for (int pass = 0; pass < 2; pass++) {
+            float th = traceView(o, dir, ta, tb, lodDither);
+            tHit = th;
+            res = gTr;
+            gSkipWater = false;
+            if (pass == 1) {
+                // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on
+                // to what the ray met: a pool's wall it leaves by is rare)
+                if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+                break;
+            }
+            wRes = res;
+            if (!(primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) &&
+                  uint(palette[res.mat].emisClass.y) == 2u))
+                break;
             tW = unified ? tHit : -1.0;
             // a fresh result: only the pixel's dither carries over (the water hit's texel albedo tinted the bed)
             TraceResult r2;
@@ -3922,13 +3933,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             r2.albedo = float3(0, 0, 0); r2.hasAlbedo = 0u;
             gSkipWater = true;
             gTr = r2;
-            tHit = traceView(o, dir, unified ? tHit : tStart, unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y,
-                             lodDither);
-            res = gTr;
-            gSkipWater = false;
-            // (_LIT) what it met past WATER_SEE blocks of water is not seen: deep water (the water is taken to go on to
-            // what the ray met: a pool's wall it leaves by is rare)
-            if (unified && tHit >= 0.0 && tHit - tW >= WATER_SEE) tHit = -1.0;
+            ta = unified ? tHit : tStart;
+            tb = unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
         }
     }
     if (amort) farHitStore(pix, tHit, tW, res, wRes, hitStamp);
