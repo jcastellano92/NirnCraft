@@ -107,6 +107,16 @@ final class AtlasCoarseBake implements Runnable {
 
     // ---- hooks of AtlasClientGen (farStep, gridReports) ----
 
+    /** The tiles of a level the bake's thread has put into the grid (read from disk or made): its own, farStep leaves them alone. */
+    static int servedAtLevel(int level) {
+        AtlasCoarseBake b = active;
+        if (b == null) return 0;
+        int n = 0;
+        for (long k : b.served.keySet())
+            if ((int) (k >>> 56) == level) n++;
+        return n;
+    }
+
     private static long key(int level, int tx, int tz) {
         return (long) level << 56 ^ ((long) tx & 0xFFFFFFFL) << 28 ^ ((long) tz & 0xFFFFFFFL);
     }

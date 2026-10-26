@@ -1371,9 +1371,16 @@ final class AtlasClientGen implements AutoCloseable {
         AtlasCoarseBake.Progress bk = AtlasCoarseBake.progress();
         if (c.farOn && bk != null && bk.phase() > 0) {
             farTotal = 2 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1);
-            int up = 0;
-            for (long k : c.farDone)
-                if ((int) (k >>> 56) < AtlasCoarseBake.LOAD_LO) up++;
+            int up = 0, l2 = 0;
+            for (long k : c.farDone) {
+                int lv = (int) (k >>> 56);
+                if (lv < AtlasCoarseBake.LOAD_LO) up++;
+                if (lv == AtlasCoarseBake.BACKGROUND) l2++;
+            }
+            // (level 2 is the bake's own once it has it: a tile the bake read from disk or made is not in farDone, and the gate
+            // waited for it for good: a warm launch sat at "25 of 50 tiles", the other 25 being the bake's)
+            int own = Math.min((2 * FAR_TILES + 1) * (2 * FAR_TILES + 1), AtlasCoarseBake.servedAtLevel(AtlasCoarseBake.BACKGROUND));
+            up += Math.max(0, own - l2);
             farUp = Math.min(up, farTotal);
         }
         // the spawn area the loading gate waits for: the chunks within SPAWN_RADIUS of where the player joined (nearest first
