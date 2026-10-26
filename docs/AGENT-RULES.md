@@ -287,6 +287,12 @@ Read these first:
   structs through shared memory (16640 B a group instead of 7936), which takes L1 from the walk and slows every pixel,
   even with the feature switched off. Check "Shared Memory Size" with `ATLAS_PIPE_STATS=1` on any far-kernel change:
   7936 B is the good value.
+* **A new or rewritten kernel's speed counts only with result agreement (2026-10-26).** Before claiming a time, compare
+  its hits against the reference kernel on a dry, fully resident scene: the hit/miss mask and hit t, on the 3 views,
+  with the same step caps, dispatch size and amortisation. Report the mismatch % beside the ms. A kernel that misses,
+  skips or stops early is fast for the wrong reason (the lean trace stage's first cut: re-floor skips, water stops,
+  a lower step cap, gaps as sky). A read-only reviewer checks every new kernel against the reference before its time
+  is trusted.
 
 * **Adding content safely (2026-10-25).** Three layers, each with its guard:
   1. **Content** (structures, biomes, trees, settlements, new blocks) is data and generator rules. The render kernel
