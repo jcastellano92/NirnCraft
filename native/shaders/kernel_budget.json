@@ -75,8 +75,8 @@
    "structCallsOk": []
   },
   "atlas_feat_cover": {
-   "instructions": 22041,
-   "private": 3,
+   "instructions": 22118,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 10,
    "structCalls": 0,
@@ -122,8 +122,8 @@
    ]
   },
   "atlas_feat_disk": {
-   "instructions": 19711,
-   "private": 3,
+   "instructions": 19788,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -205,8 +205,8 @@
    ]
   },
   "atlas_feat_freeze": {
-   "instructions": 19709,
-   "private": 3,
+   "instructions": 19786,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -264,8 +264,8 @@
    "structCallsOk": []
   },
   "atlas_feat_lake": {
-   "instructions": 20614,
-   "private": 3,
+   "instructions": 20691,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -331,8 +331,8 @@
    ]
   },
   "atlas_feat_ore": {
-   "instructions": 21088,
-   "private": 3,
+   "instructions": 21165,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -382,8 +382,8 @@
    "structCallsOk": []
   },
   "atlas_feat_rock": {
-   "instructions": 21143,
-   "private": 3,
+   "instructions": 21221,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -447,8 +447,8 @@
    "structCallsOk": []
   },
   "atlas_feat_spring": {
-   "instructions": 19669,
-   "private": 3,
+   "instructions": 19746,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -490,8 +490,8 @@
    ]
   },
   "atlas_feat_tree": {
-   "instructions": 41798,
-   "private": 3,
+   "instructions": 41811,
+   "private": 2,
    "workgroup": 0,
    "fnArrays": 24,
    "structCalls": 0,
@@ -581,7 +581,7 @@
    ]
   },
   "atlas_gen_aquifer": {
-   "instructions": 9073,
+   "instructions": 9063,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 56,
@@ -597,7 +597,7 @@
    "structCallsOk": []
   },
   "atlas_gen_corner": {
-   "instructions": 2591,
+   "instructions": 2627,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 29,
@@ -613,7 +613,7 @@
    "structCallsOk": []
   },
   "atlas_gen_fill": {
-   "instructions": 13060,
+   "instructions": 13066,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 54,
@@ -621,7 +621,7 @@
    "structCallsOk": []
   },
   "atlas_gen_math": {
-   "instructions": 4195,
+   "instructions": 4238,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 17,
@@ -647,7 +647,7 @@
    "structCallsOk": []
   },
   "atlas_gen_pageBiomes": {
-   "instructions": 16494,
+   "instructions": 16520,
    "private": 4,
    "workgroup": 0,
    "fnArrays": 46,
@@ -664,7 +664,7 @@
    ]
   },
   "atlas_gen_pageCols": {
-   "instructions": 20212,
+   "instructions": 20242,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 48,
@@ -682,7 +682,7 @@
    ]
   },
   "atlas_gen_probe": {
-   "instructions": 20264,
+   "instructions": 20302,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 48,
@@ -700,15 +700,15 @@
    ]
   },
   "atlas_gen_secs": {
-   "instructions": 865,
-   "private": 0,
+   "instructions": 913,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 0,
    "structCalls": 0,
    "structCallsOk": []
   },
   "atlas_gen_surface": {
-   "instructions": 8703,
+   "instructions": 8711,
    "private": 4,
    "workgroup": 0,
    "fnArrays": 44,
@@ -718,7 +718,7 @@
    ]
   },
   "atlas_gen_tile": {
-   "instructions": 17789,
+   "instructions": 17817,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 45,
@@ -735,7 +735,7 @@
    ]
   },
   "atlas_gen_tileBiome": {
-   "instructions": 25532,
+   "instructions": 25550,
    "private": 5,
    "workgroup": 0,
    "fnArrays": 53,
@@ -760,7 +760,7 @@
    ]
   },
   "atlas_gen_tileSurf": {
-   "instructions": 21640,
+   "instructions": 21636,
    "private": 4,
    "workgroup": 0,
    "fnArrays": 69,
@@ -1172,8 +1172,8 @@
    "structCallsOk": []
   },
   "atlas_ovl_roads": {
-   "instructions": 38588,
-   "private": 1,
+   "instructions": 38539,
+   "private": 0,
    "workgroup": 4,
    "fnArrays": 16,
    "structCalls": 0,
@@ -1192,8 +1192,8 @@
    "structCallsOk": []
   },
   "atlas_ovl_streets": {
-   "instructions": 7510,
-   "private": 1,
+   "instructions": 7500,
+   "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
    "structCalls": 0,
@@ -1208,8 +1208,8 @@
    "structCallsOk": []
   },
   "atlas_store_storeIn": {
-   "instructions": 8997,
-   "private": 1,
+   "instructions": 8973,
+   "private": 0,
    "workgroup": 0,
    "fnArrays": 18,
    "structCalls": 0,

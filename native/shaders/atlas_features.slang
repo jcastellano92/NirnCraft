@@ -1875,11 +1875,12 @@ struct TreeB {
 // sG.base), so sB is computed where it is read; the box (and the sort's last point) are scratch words written when a tree begins
 // or its commit resumes (treeBegin). It was a mutable static written inside two [noinline] functions.
 static const uint T_BOXX = T_LAST + 4, T_BOXZ = T_LAST + 5;  // (T_LAST holds 4 words: has, x, y, z; within TREE_W: T_LAST + 8)
-void treeBegin(GBox box) {
+[noinline]
+void treeBegin(int ccx, int ccz) {
     uint t = sG.base + SCR_TREE;
     scratch[t + T_LAST] = 0u;
-    scratch[t + T_BOXX] = uint(box.ccx);
-    scratch[t + T_BOXZ] = uint(box.ccz);
+    scratch[t + T_BOXX] = uint(ccx);
+    scratch[t + T_BOXZ] = uint(ccz);
 }
 GBox treeBox() {  // (gbox's fields, from the chunk the tree's box was begun at; not gbox itself: that is a call)
     uint t = sG.base + SCR_TREE;
@@ -2407,7 +2408,7 @@ bool tCommit(int baseX, int baseY, int baseZ) {
 bool treeResume(uint budget) {
     uint h = tcAt();
     if (scratch[h + TC_MAGIC] != TREE_PENDING) return true;
-    treeBegin(gbox(int(scratch[h + TC_X]), int(scratch[h + TC_Z])));
+    treeBegin(int(scratch[h + TC_X]) >> 4, int(scratch[h + TC_Z]) >> 4);
     return tCommitStep(budget);
 }
 
@@ -3296,7 +3297,7 @@ bool placeTreeAt(uint cfg, int x, int y, int z) {
                 ((soil & 16u) != 0u && bis(ground, B_SOIL_SNOW)) ? 1u : 0u;
     if (fits == 0u) return false;
     if (y > (MAX_Y + 1) - spI(sp, S_MAXH) - 12) return false;
-    treeBegin(box);
+    treeBegin(box.ccx, box.ccz);
     fmInit(sB.leaves, 16u);
     fmInit(sB.logs, 16u);
     fmInit(sB.extras, 16u);

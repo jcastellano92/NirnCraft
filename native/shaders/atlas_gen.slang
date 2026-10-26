@@ -53,9 +53,9 @@ struct GenParams {
 // The exactness flag (atlas_exact.slang markBad): a kernel says at its start where its thread's flag goes (BAD_TO) and the
 // functions it calls store into that word (a flag is only ever 1; a probe's bits are its thread's own word). kind 0: the chunk's flag word at the end of outIds (the host reads nonzero), 1: a
 // page / tile's word of pageBad, 2: a word of outIds that keeps the bits (the probes), 3: nowhere (a kernel that reads no
-// flag). The two statics are written only by the kernel's own body; no callee writes private state.
-static uint g_badKind = 3u, g_badAt = 0u;
-#define BAD_TO(kind, at) { g_badKind = (kind); g_badAt = (at); }
+// flag). The static is written only by the kernel's own body; no callee writes private state.
+static uint g_badTo = 3u << 30;  // (kind << 30 | word)
+#define BAD_TO(kind, at) { g_badTo = ((kind) << 30) | (at); }
 #include "atlas_exact.slang"
 #include "atlas_map.slang"
 #include "atlas_page.slang"
@@ -84,10 +84,12 @@ static const uint AQ_WORDS = 513 * 5 + 4;
 static const uint COL_WORDS = 256 + 8;   // heights, then [256] skipSamplingAboveY
 static const uint BLOCK_WORDS = 16 * 16 * 640;
 static const uint OUT_WORDS = 40 * 2048;
-void markBad(uint bits) {
-    if (g_badKind == 0u) outIds[uint(params.chunks) * OUT_WORDS + g_badAt] = 1u;  // (racing threads only ever store 1)
-    else if (g_badKind == 1u) pageBad[g_badAt] = 1u;
-    else if (g_badKind == 2u) outIds[g_badAt] = outIds[g_badAt] | bits;  // (a probe kernel: the thread's own word)
+[noinline]
+void markBad(uint bits) {  // (a call: the exact math has hundreds of sites, and the flag is the rare path)
+    uint kind = g_badTo >> 30, at = g_badTo & 0x3FFFFFFFu;
+    if (kind == 0u) outIds[uint(params.chunks) * OUT_WORDS + at] = 1u;  // (racing threads only ever store 1)
+    else if (kind == 1u) pageBad[at] = 1u;
+    else if (kind == 2u) outIds[at] = outIds[at] | bits;  // (a probe kernel: the thread's own word)
 }
 // block flags (the program's block table: word 0 flags, word 1 atlas material)
 static const uint F_AIR = 1, F_FLUID = 2, F_WATER = 4, F_LAVA = 8, F_MOTION = 16, F_SOFT = 32;
