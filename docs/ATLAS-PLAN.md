@@ -414,6 +414,7 @@ branch is merged only when its stage comes and a quick re-check shows it still a
 | Item | Where | Stage | Re-check when resumed |
 |---|---|---|---|
 | Water on its fluid level, far water under trees, waterlogged blocks as full cubes (3 commits, 2026-10-21) | branch `atlas-water` | 3 (fluids) | Superseded by later water and waterlogged work? Diff against atlas-render first |
+| Half-resolution far range (one ray per far 2x2 quad): ceiling only -7 / -11 ms, its quarter rays incoherent | branch `atlas-farquad` (58b3f45e) | revisit after the amortised field | Re-ceiling on top of amortisation |
 | Far settlements (overlays far stage) | branch `atlas-overlays` (its work merged except a merge commit) | after stage 3 | The far-stage design against the one-generator rule (§0.8) |
 | Vanilla meshing off without mixins: the empty-model trick, the fluid model swap | `docs/SPIKES-2026-10-25.md` | 5 | Round 2: bridge "Compile Section" into the recorder, one probe |
 | Simulation level of detail, thin NeoForge fork, companion process | the plan's "Owning the loader" section | simulation phase | Round-1 estimates first |
