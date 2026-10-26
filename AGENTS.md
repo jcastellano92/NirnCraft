@@ -41,6 +41,8 @@ and require the branch's checks and evidence before merging. Keep current owners
   `check-kernel-budget`. Queue these commands through `agent_job.py`. Re-bake worldgen changes before installing.
 * Run `harness.py gate --base <explicit base>` before integrating. An offline gate is not a live stage gate.
   Use `--dry` to see its scope. Do not weaken or conceal failures, missing checks or unreviewed pictures.
+  `harness.py run` can exit zero with failed items: inspect result counts and per-test receipts; only the gate's
+  exit status represents its verdict. A scheduler `rc=0` alone never means a native suite passed.
 * Give visual evidence to an independent reviewer following `docs/agents/visual-reviewer.md`. Name exact compared
   images and metrics. The fixer cannot confirm its own visual fix. Codex/Claude availability is not a visual verdict.
 * Preserve GPU kernel budgets, bounded dispatches, no-private-static rules, and result agreement before speed claims.

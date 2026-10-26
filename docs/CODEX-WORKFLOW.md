@@ -16,6 +16,8 @@ The role/config format and instruction discovery follow the official OpenAI docu
 [subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents) and
 [AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
 The installed CLI's `codex exec --help` is checked before changing its invocation.
+The installed CLI also accepted the project setup under `codex exec --strict-config` and returned `CONFIG_OK`
+in a real read-only Terra session (`.work/codex/config-check.txt`).
 
 Workers receive stage/gate, branch/worktree, owned files, question, expected evidence and stop conditions. They
 commit small tested steps only on their assigned branches. The orchestrator reviews and integrates. Read-only
@@ -103,3 +105,9 @@ review/queue/watcher regressions). Real Terra image review accepted a visible bl
 red claim (`.work/codex/reviewer-smoke/receipt.json`). The broader offline gate passed 8/10 checks; its blockers
 were stale packaged Windows/Linux natives (orchestrator owns rebuild) and an existing data lint failure
 (merchant tag paths and the unskinned crafter menu). These are recorded, not waived as renderer stage evidence.
+
+Follow-up tool checks: worktrees outside the old `.claude/worktrees` naming convention now get isolated Java
+outputs and locks instead of sharing main's Gradle output. The focused `check-build-wrapper` runs five affected
+build/output/lock regressions, all passing. The broader pre-existing process-guard module timed out in live-action
+coverage during exploration; it is not claimed green. The merchant lint now reads the platform's singular
+`tags/item` path; fourteen false failures are resolved and the genuine crafter menu coverage failure remains.

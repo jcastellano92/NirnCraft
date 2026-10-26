@@ -53,6 +53,24 @@ live = load("live_world")
 
 
 class ProcessGuardTest(unittest.TestCase):
+    def test_build_outputs_are_isolated_for_worktrees_with_any_parent_name(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            scratch = root / "scratch"
+            main = root / "main"
+            main.mkdir()
+            (main / ".git").mkdir()
+            self.assertEqual(scratch, build.checkout_output(main, scratch))
+            trees = [root / "new-agents" / "one" / "render", root / "other-agents" / "render"]
+            for tree in trees:
+                tree.mkdir(parents=True)
+                (tree / ".git").write_text("gitdir: fixture")
+            outputs = [build.checkout_output(tree, scratch) for tree in trees]
+            self.assertEqual(2, len(set(outputs)), "same-named worktrees must not share build outputs")
+            self.assertTrue(all(out.parent == scratch / "wt" for out in outputs))
+            legacy = root / ".claude" / "worktrees" / "previous-agent"
+            self.assertEqual(scratch / "wt" / "previous-agent", build.checkout_output(legacy, scratch))
+
     def contender(self, lock, owner="contender"):
         return subprocess.run([sys.executable, "-I", "-c", WORKER, str(TOOLS), str(lock), owner, "try"],
                               capture_output=True, text=True, timeout=5)

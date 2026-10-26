@@ -10,6 +10,15 @@
   },
   "scenes": [
     {
+      "id": "check-build-wrapper",
+      "title": "Build wrapper, real build-lock contention and worktree output isolation regressions",
+      "tags": ["check:build-wrapper", "suite:harness", "check:tools"],
+      "run": ["py", "-3", "-u", "-m", "unittest", "discover", "-v", "-s", "tools/dev", "-p", "test_process_guard.py", "-k", "build"],
+      "inputs": ["tools/dev/build_263.py", "tools/dev/build_263.ps1", "tools/dev/process_guard.py", "tools/dev/test_process_guard.py"],
+      "metrics": {"tests": "Ran (\\d+) tests?"},
+      "timeout": 120
+    },
+    {
       "id": "check-agent-review",
       "title": "Independent Codex/Claude reviewer protocols and shared-queue adapter",
       "tags": ["check:agent-review", "suite:harness", "check:tools"],

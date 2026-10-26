@@ -189,7 +189,7 @@ def check_shops():
     cats = set(re.search(r"public enum ItemCategory \{\s*([A-Z_, ]+);", cats_src).group(1).replace(" ", "").split(","))
     gear_keys = set(re.findall(r'"([a-z_]+)"', re.search(r"GEAR_KEYS = List\.of\(([^)]*)\)",
                                                           open(os.path.join(eco, "ShopStock.java"), encoding="utf-8").read(), re.S).group(1)))
-    tags = os.path.join(RES, "data", "nirncraft", "tags", "items")
+    tags = os.path.join(RES, "data", "nirncraft", "tags", "item")
 
     def values(rel):
         f = os.path.join(tags, rel + ".json")

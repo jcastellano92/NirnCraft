@@ -1,9 +1,18 @@
 """Run the exact26.3 build with isolated Java25, Gradle and output directories."""
 from pathlib import Path
-import argparse,os,subprocess,sys
+import argparse,hashlib,os,subprocess,sys
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools'))
 from dev.process_guard import GuardBusy,process_guard
+def checkout_output(root,scratch):
+    # Preserve existing agent caches, and isolate worktrees regardless of their directory naming convention.
+    if root.parent.name=='worktrees':
+        return scratch/'wt'/root.name
+    if (root/'.git').is_file():
+        key=hashlib.sha256(os.path.normcase(str(root.resolve())).encode()).hexdigest()[:10]
+        return scratch/'wt'/(root.name+'-'+key)
+    return scratch
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--log',type=Path)
@@ -20,7 +29,7 @@ def main():
     # A git worktree (.claude/worktrees/<name>) builds into its own directory, so agents' builds never recompile over
     # each other or wait on one machine-wide lock; the Gradle home (dependency cache) stays shared. A new directory is
     # seeded with the shared one's Minecraft artifacts (moddev, minecraft-junit) instead of regenerating them.
-    out=scratch/'wt'/ROOT.name if ROOT.parent.name=='worktrees' else scratch
+    out=checkout_output(ROOT,scratch)
     if out!=scratch and not (out/'build'/'moddev').exists():
         import shutil
         for d in ('moddev','minecraft-junit'):
