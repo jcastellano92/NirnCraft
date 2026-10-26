@@ -225,9 +225,16 @@ GenCache::Region& GenCache::region(std::unique_lock<std::mutex>& l, uint64_t rk)
 void GenCache::scanFile(const std::string& path, Region& r) {
     FILE* f = std::fopen(path.c_str(), "rb");
     if (!f) return;
+    std::error_code ec;
+    uint64_t bytes = std::filesystem::file_size(path, ec);
+    if (ec) {
+        std::fclose(f);
+        return;
+    }
     uint64_t at = 0;
     uint32_t h[HEAD];
     while (std::fread(h, 4, HEAD, f) == HEAD && h[0] == MAGIC && h[5] <= MAX_PAYLOAD) {
+        if (at + HEAD * 4 + pad4(h[5]) > bytes) break;  // (a torn payload is not an indexed record)
         Loc loc{at + HEAD * 4, h[5]};
         uint32_t type = h[1] & 0xFFu;
         if (type == 0) {
@@ -256,6 +263,9 @@ void GenCache::scanFile(const std::string& path, Region& r) {
     }
     r.fileBytes = at;
     std::fclose(f);
+    // The next append must start at the last whole record. Keeping a torn tail would hide every later record from
+    // subsequent scans (and make its recorded offset differ from where append actually wrote it).
+    if (at < bytes) std::filesystem::resize_file(path, at, ec);
 }
 
 void GenCache::eraseFarTile(Region& r, int lod, int tx, int tz) {
@@ -350,22 +360,28 @@ void GenCache::writerLoop() {
         st_.encodeMs += ms;
         // One record appended to a region's file with mu_ let go (this thread alone appends; the index follows once it is
         // down, under the lock again): the open, the writes and the close are the disk's and the virus scanner's time.
-        auto append = [&](const std::string& path, const uint32_t* h, const std::vector<uint8_t>& pl) {
+        auto append = [&](const std::string& path, const uint32_t* h, const std::vector<uint8_t>& pl, uint64_t expected) {
             l.unlock();
-            FILE* f = std::fopen(path.c_str(), "ab");
+            std::error_code ec;
+            bool exists = std::filesystem::exists(path, ec);
+            uint64_t bytes = exists ? std::filesystem::file_size(path, ec) : 0;
+            // A failed tail repair or previous short write must not shift every later record's indexed offset.
+            FILE* f = !ec && bytes == expected ? std::fopen(path.c_str(), "ab") : nullptr;
             static const uint8_t zero[4] = {0, 0, 0, 0};
             uint32_t padN = pad4(uint32_t(pl.size())) - uint32_t(pl.size());
             bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD && (pl.empty() || std::fwrite(pl.data(), 1, pl.size(), f) == pl.size()) &&
                       std::fwrite(zero, 1, padN, f) == padN;
-            if (f) std::fclose(f);
+            if (f && std::fclose(f) != 0) ok = false;
             l.lock();
             return ok;
         };
         if (on && dir == dir_ && on_ && j.type == 4) {
             uint64_t rk = regionOf(j.k.x, j.k.z);
             Region& r = region(l, rk);
+            r.chunks.erase(chunkKey(j.k.x, j.k.z));
+            for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, j.k.x, s - 4, j.k.z});
             uint32_t h[HEAD] = {MAGIC, 4u, uint32_t(j.k.x), 0u, uint32_t(j.k.z), 0u};
-            bool ok = append(regionPath(rk), h, payload);
+            bool ok = append(regionPath(rk), h, payload, r.fileBytes);
             if (ok) {
                 r.fileBytes += uint64_t(HEAD) * 4;
                 st_.fileBytes += uint64_t(HEAD) * 4;
@@ -375,7 +391,7 @@ void GenCache::writerLoop() {
             Region& r = region(l, rk);
             eraseFarTile(r, j.k.lod, j.k.x, j.k.z);
             uint32_t h[HEAD] = {MAGIC, 5u, uint32_t(j.k.x), uint32_t(j.k.lod), uint32_t(j.k.z), 0u};
-            bool ok = append(regionPath(rk), h, payload);
+            bool ok = append(regionPath(rk), h, payload, r.fileBytes);
             if (ok) {
                 r.fileBytes += uint64_t(HEAD) * 4;
                 st_.fileBytes += uint64_t(HEAD) * 4;
@@ -401,7 +417,7 @@ void GenCache::writerLoop() {
                 uint32_t h[HEAD] = {MAGIC, uint32_t(j.type) | (j.type == 2 ? mixed << 8 | tru : 0u), uint32_t(j.k.x),
                                     j.type == 2 ? uint32_t(j.k.lod) : uint32_t(j.k.y) | uint32_t(j.k.lod) << 16 | tru, uint32_t(j.k.z),
                                     uint32_t(payload.size())};
-                bool ok = append(regionPath(rk), h, payload);
+                bool ok = append(regionPath(rk), h, payload, r.fileBytes);
                 if (ok) {
                     dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
@@ -429,7 +445,7 @@ void GenCache::writerLoop() {
                         if (j.info[4 + s * 4 + 2] == KIND_BLOCKS) mask |= uint64_t(1) << s;
                 uint32_t h[HEAD] = {MAGIC, j.isChunk ? uint32_t(mask >> 32) << 8 : 1u, uint32_t(j.k.x),
                                     j.isChunk ? uint32_t(mask) : uint32_t(j.k.y), uint32_t(j.k.z), uint32_t(payload.size())};
-                bool ok = append(regionPath(rk), h, payload);
+                bool ok = append(regionPath(rk), h, payload, r.fileBytes);
                 if (ok) {
                     dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
@@ -544,6 +560,45 @@ bool GenCache::complete(int cx, int cz) {
     return true;
 }
 
+void GenCache::invalidateChunk(const Key3& k, const Loc& failed, bool header) {
+    {
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, regionOf(k.x, k.z));
+        Loc current;
+        if (header) {
+            auto it = r.chunks.find(chunkKey(k.x, k.z));
+            if (it == r.chunks.end()) return;
+            current = it->second.loc;
+        } else {
+            auto it = r.secs.find(k);
+            if (it == r.secs.end()) return;
+            current = it->second;
+        }
+        if (current.offset != failed.offset || current.bytes != failed.bytes) return;  // (another reader already repaired it)
+        r.chunks.erase(chunkKey(k.x, k.z));
+        for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, k.x, s - 4, k.z});
+        fresh_.erase(chunkKey(k.x, k.z));
+        Job j;
+        j.type = 4;
+        j.k = Key3{0, k.x, 0, k.z};
+        queue_.push_back(std::move(j));
+        st_.queued = queue_.size();
+    }
+    cv_.notify_one();
+}
+
+bool GenCache::readSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>>& words) {
+    words.reset();
+    if (!on() || k.lod != 0 || k.y < -4 || k.y >= 36) return false;
+    uint32_t info[INFO_WORDS];
+    if (!chunk(k.x, k.z, info)) return false;
+    uint32_t kind = info[4 + (k.y + 4) * 4 + 2];
+    if (kind == KIND_AIR) return true;
+    if (kind != KIND_BLOCKS) return false;
+    words = section(k);
+    return words != nullptr;
+}
+
 bool GenCache::chunk(int cx, int cz, uint32_t* info) {
     if (!on()) return false;
     uint64_t rk = regionOf(cx, cz);
@@ -559,7 +614,10 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
         loc = it->second.loc;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b) || !decodeHeader(b, info)) return false;
+    if (!readBytes(rk, loc, b) || !decodeHeader(b, info)) {
+        invalidateChunk(Key3{0, cx, 0, cz}, loc, true);
+        return false;
+    }
     std::unique_lock<std::mutex> l(mu_);
     Region& r = region(l, rk);
     for (int s = 0; s < 40; s++)
@@ -584,12 +642,18 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
         loc = it->second;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b)) return nullptr;
+    if (!readBytes(rk, loc, b)) {
+        invalidateChunk(k, loc);
+        return nullptr;
+    }
     auto t0 = std::chrono::steady_clock::now();
     uint16_t ids[4096];
     if (!decodeChecked(b, ids)) {
-        std::unique_lock<std::mutex> l(mu_);
-        st_.hashErrors++;
+        {
+            std::unique_lock<std::mutex> l(mu_);
+            st_.hashErrors++;
+        }
+        invalidateChunk(k, loc);
         return nullptr;
     }
     auto w = std::make_shared<const std::vector<uint32_t>>(packSection(ids));

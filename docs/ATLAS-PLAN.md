@@ -110,6 +110,10 @@ quality/fallback regressions pass. The defined GPU scale floor is now consistent
 0.33 override (about 47% more pixels at the floor, not yet timed live). This is correctness evidence, not a stage
 gate: route/gallery/relaunch, seam metrics and frame budgets remain to be demonstrated. Cache corruption recovery and
 the unfinished seam work are separate lanes; Vulkan's last parity run is red and is not ready to merge.
+Cache recovery integration now passes the full native suite and kernel-budget check (2026-10-26): failed BLOCKS
+reads cannot publish AIR; failed masks retry; persistent invalidation and torn-tail repair survive relaunch. The
+shaderless disk test covers a real checksum bit flip, eight concurrent readers, regeneration and torn records.
+This does not yet establish the live route/revisit gate; the scene-level cache relaunch check remains required.
 
 ## 1. The bar (what "done" means, measurable)
 

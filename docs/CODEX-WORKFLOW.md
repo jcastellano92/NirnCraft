@@ -91,8 +91,11 @@ Annotated recovery tag: `before-codex-atlas-render-2026-10-26` points to that or
 Confirmed review findings to address first: corrupt BLOCKS cache records are ingested as AIR; unified terrain can
 disappear when tier-2 fallback stops atlas; `AtlasQuality.scale()` bypasses the controller's smooth output at tier 1.
 Work ownership: orchestrator owns workflow/reviewer portability and Java quality/fallback integration;
-`codex-cache-recovery` in `E:/NirnCraft-scratch/codex-worktrees/cache-recovery` owns the cache corruption fix and
-regression. Parked branches stay parked. Update this section as each step lands; record test receipts and remaining
+`codex-cache-recovery` in `E:/NirnCraft-scratch/codex-worktrees/cache-recovery` supplied the cache corruption fix and
+regression; integrated native suite and kernel-budget checks are green. The orchestrator corrected the ingest
+header-batching compile error before accepting the suite. `codex-seam-recovery` in
+`E:/NirnCraft-scratch/codex-worktrees/seam` owns recovered seam source and controlled evidence; it remains unverified.
+Parked branches stay parked. Update this section as each step lands; record test receipts and remaining
 stage gaps in the renderer review report under `.work/`.
 
 Workflow validation: the four `suite:harness` check-tier items passed on 2026-10-26 (including ten portable

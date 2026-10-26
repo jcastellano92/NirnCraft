@@ -30,6 +30,8 @@ if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
     py -3 -I (Join-Path $here 'tools\export_cloud_noise.py') $repo | Out-Host
 }
 if (-not $NoTest) {
+    & (Join-Path $build "$Config\atlas_cache_test.exe")
+    if ($LASTEXITCODE) { throw 'cache recovery tests failed' }
     if ($Validate) {
         $env:VK_ADD_LAYER_PATH = Join-Path $env:VULKAN_SDK 'Bin'
         $env:ATLAS_VK_VALIDATION = '1'

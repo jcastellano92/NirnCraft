@@ -62,6 +62,9 @@ public:
     bool forget(int cx, int cz);
     // a section's packed words from disk (null: none)
     std::shared_ptr<const std::vector<uint32_t>> section(const Key3& k);
+    // A requested section from a complete chunk: true + null words only for known air. Failed reads/checksums are
+    // misses, never air; the corrupt chunk is invalidated so the generator can replace its records.
+    bool readSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>>& words);
     // The far terrain (the grid's coarse levels, atlas_gen_far_ingest): a level-lod tile's chunk kinds (16 x 16 columns x
     // rows, as atlas_gen_far's: 0 mixed, 1 air, 2 | material << 8 one id) and its mixed chunks (packed on the GPU,
     // Key3{lod, cx, cy, cz}); a tile is known when its kinds and every mixed chunk are on disk. In f<lod>.<rx>.<rz>.gch,
@@ -151,6 +154,7 @@ private:
     std::vector<std::filesystem::path> oldSets_;  // (other sets in the root: deleted at this one's first write)
     void dropOldSets();  // (caller holds mu_)
     void eraseFarTile(Region& r, int lod, int tx, int tz);  // (caller holds mu_)
+    void invalidateChunk(const Key3& k, const Loc& failed, bool header = false);
     std::string regionPath(uint64_t rk) const;
     // (caller holds l on mu_) the region, its file's index read on first use: l is let go while the file is read, so
     // anything may have changed on return; the reference stays (nodes of regions_ do not move; configure waits for scans)
