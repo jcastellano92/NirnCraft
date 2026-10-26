@@ -1060,7 +1060,13 @@ final class AtlasClientGen implements AutoCloseable {
             for (int dx = -RADIUS; dx <= RADIUS; dx++) {
                 if (dx * dx + dz * dz > RADIUS * RADIUS) continue;
                 long k = ChunkPos.pack(jumpCx + dx, jumpCz + dz);
-                if (!upSinceJump.contains(k) && done.remove(k)) lost++;
+                if (!upSinceJump.contains(k) && done.remove(k)) {
+                    lost++;
+                    // (its sections were claimed as uploaded, and the grid does not hold them (it refilled after the claim): asked
+                    // again without this, the claim said "the core has these blocks" and the chunk never came up: 151 of 441,
+                    // the loading gate waiting for good)
+                    for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(jumpCx + dx, sec - 4, jumpCz + dz));
+                }
             }
         if (lost > 0) com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: {} chunks of the spawn window were not up after the near work went idle: asked again", lost);
     }
