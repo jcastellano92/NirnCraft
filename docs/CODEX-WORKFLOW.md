@@ -81,6 +81,10 @@ image-review acceptance test: exercise a real headless review after changing the
 The user's handoff ends at `a938b173`. The main checkout was clean. Existing worktrees were inspected without
 modification; dirty work is not included by merging its branch tip.
 Annotated recovery tag: `before-codex-atlas-render-2026-10-26` points to that original commit.
+The local tag is protected by an exact negative `remote.origin.fetch` refspec. VS Code's installed Git Tag Release
+Tracker explicitly fetches with `--prune-tags`, which otherwise deletes tags absent from the remote. A disposable
+Git fixture reproduced deletion and protection; the protected tag then survived a real automatic fetch. A separate
+local `recovery/before-codex-atlas-render-2026-10-26` branch also retains the baseline. Neither reference was pushed.
 
 | Lane | Commits ahead of initial base | Recovery state |
 |---|---:|---|
@@ -127,3 +131,19 @@ crafter-screen coverage failure remained known, with no missing or newly failing
 `.work/harness/gate/latest.json` (2026-10-26 18:16). Git command errors now fail the gate instead of looking like
 zero changes. Gate execution pins the planned IDs so additive tier filters cannot expand the run. Both cases have
 runner regressions. An earlier expanded run was stopped; its extra audits are not claimed as passing evidence.
+
+Live continuation evidence: the loading watchdog reached readiness with 441/441 spawn chunks and 263/263 coarse
+tiles after 66.97 seconds in-world on a partially populated cache. This is startup completion, not the <2-second
+revisit gate. The stationary probe now waits for fresh `ready{ok}` and active metrics before its measurement window,
+keeps shutdown outside that window, and reports later asynchronous staging separately from missing renderer data.
+The first 180-second post-ready trace has 91 active samples, one transient grid-pending sample. Independent Sol
+review and explicit replay preserve the unchanged flatness failure: post-settle median 9.11 ms, range 5.22–33.69 ms,
+zero tier changes, reach 168–201. The original stricter unverified receipt is retained alongside the reanalysis in
+`E:/NirnCraft-scratch/codex-main-evidence`. It is not a route/frame-budget acceptance result.
+
+Seam lane: a controlled general-path pair preserves all hit geometry fields and improves sampled L0/1 matched
+linear-albedo delta-E 4.660→0.172, but lower-side matching covers only 26.65%; higher levels remain unobserved.
+The original feature adds 16 bytes/thread local memory and 16,640 bytes driver binary versus its reference. A
+smaller helper interface preserved exact colors but increased those costs further and was rejected. Both variants
+remain isolated. The next paired experiment ports face means into the lean stage, whose smooth blend still used
+palette colors; no shader feature from these experiments is integrated into main.

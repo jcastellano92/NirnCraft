@@ -919,6 +919,7 @@
       "inputs": [
         "tools/harness/harness.py",
         "tools/harness/review.py",
+        "tools/harness/atlas_static.py",
         "tools/dev/live_world.py",
         "tools/harness/audits/runner_selftest.py"
       ],

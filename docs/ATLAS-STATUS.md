@@ -98,8 +98,9 @@ Weather and biome work stay paused until the owner says.
 - **The shipped pack does not run the new renderer**: `pack/mods` still carries Sodium and Iris, and AtlasNearPass
   turns itself off when Sodium is loaded, so players get the shader-pack path. The near pass and the unified field run
   only in the dev instance (Sodium and Iris removed by hand). Shipping it means removing them from the pack (step 3).
-- **Linux natives are behind**: the shipped libatlas_core.so (3440faae) lacks the 0.16 / 0.17 entry points (air, GPU
-  generator, sky glow); Windows is 0.17. Rebuild with `py -3 tools/dev/build_linux_wsl.py` before shipping.
+- **Packaged natives refreshed (2026-10-26):** Windows and Linux now pass `check-natives` at ABI 0.17 with 166 exports
+  and matching source hashes. Linux was rebuilt with `tools/dev/build_linux_wsl.py` and loads in WSL; this is build/load
+  evidence, not cross-vendor rendering acceptance. See ATLAS-PLAN's continuation checkpoint.
 
 ## In flight (branches, worktrees, work in progress)
 

@@ -421,6 +421,22 @@ with _tf.TemporaryDirectory() as _td:
 # A slow check's output is evidence even when it times out; the complete log is not truncated to its tail.
 import subprocess as _subprocess
 from unittest.mock import patch as _patch
+import atlas_static as _static
+_steady = 'frame{atlasMs=8.25 unified=true} quality{LIVE tier 1} ready{ok} core={"reach":1103,"ready":{"pipelinesBuilding":0}}'
+expect(_static.ready_sample(_steady), "static quality probe requires a ready renderer with real metrics")
+expect(not _static.ready_sample(_steady.replace("ready{ok}", "ready{pending: spawn area 113 of 441 chunks}")),
+       "loading cannot be mistaken for stationary quality stability")
+expect(not _static.ready_sample(_steady.replace("atlasMs=8.25", "atlasMs=-1")), "missing GPU timings are unverified")
+expect(not _static.ready_sample(_steady.replace("quality{LIVE tier 1}", "")), "missing controller metrics are unverified")
+_queued = _steady.replace("ready{ok}", "ready{pending: grid pending 21}")
+expect(_static.active_sample(_queued) and not _static.ready_sample(_queued),
+       "asynchronous staging is valid timing after startup but cannot establish initial readiness")
+expect(not _static.active_sample(_steady.replace('"pipelinesBuilding":0', '"pipelinesBuilding":1')),
+       "compiling pipelines do not produce valid stationary measurements")
+with _tf.TemporaryDirectory() as _td:
+    _profile = Path(_td) / "profile.log"
+    _profile.write_text(_steady + "\n" + _steady, encoding="utf-8")
+    expect(_static.profile_lines(_profile, 0) == [_steady], "partial profile writes do not count as complete samples")
 from types import SimpleNamespace as _NS
 _chosen = {"id": "chosen", "tier": "check", "group": "-", "tags": ["check:chosen"]}
 _other = {"id": "unrelated", "tier": "check", "group": "-", "tags": ["check:other"]}
