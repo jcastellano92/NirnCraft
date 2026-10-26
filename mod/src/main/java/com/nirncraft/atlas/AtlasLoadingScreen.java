@@ -185,8 +185,8 @@ final class AtlasLoadingScreen extends Screen {
         if (now - stallSinceNs < STALL_LOG_NS || now - stallLogNs < STALL_LOG_NS) return;
         stallLogNs = now;
         String gen = AtlasClientGen.stallReport(), bake = AtlasCoarseBake.line();
-        com.nirncraft.NirnCraft.LOGGER.warn("atlas loading phase: {} s, no progress for {} s on \"{}\": {}{}", String.format("%.1f", s),
-                (now - stallSinceNs) / 1_000_000_000L, pending, gen == null ? "no generator" : gen, bake == null ? "" : "; " + bake);
+        com.nirncraft.NirnCraft.LOGGER.warn("atlas loading phase: {} s, no progress for {} s on \"{}\": {}{}; {}", String.format("%.1f", s),
+                (now - stallSinceNs) / 1_000_000_000L, pending, gen == null ? "no generator" : gen, bake == null ? "" : "; " + bake, AtlasReady.gridLine());
     }
 
     /** Re-reads the readiness (atlas_info is read: a few times a second at most). */

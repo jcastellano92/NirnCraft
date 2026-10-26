@@ -92,14 +92,64 @@ public final class AtlasReady {
             if (AtlasNearPass.unified() || AtlasClientGen.ON) return "grid not started";
             return "";
         }
+        return gridPending(v);
+    }
+
+    /** The grid's part of {@link #pending}: atlas_info's voxgrid block; "" when nothing there holds readiness. */
+    static String gridPending(JsonObject v) {
         if (v.has("settled") && !v.get("settled").getAsBoolean()) return "grid not settled since its last move";
-        for (String k : new String[]{"pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections"})
-            if (v.has(k) && v.get(k).getAsLong() > 0) return "grid " + k + " " + v.get(k).getAsLong();
+        // The grid's queues. Level 0's waiting sections (waiting: the host's, gpuWaiting: the generator's) count only when
+        // level 0 would take one now: the nearest of them within its reach and its pool's cut-off. The others are past the
+        // reach (where a pixel covers more than level 0's voxels: 152 blocks from a camera held at y 522, the whole ground)
+        // or past a full pool's cut-off; the coarse levels draw them, and they wait for the camera to come near, never for
+        // time: readiness waited on "gpuWaiting 10280" for good while the outer rings' sections came in.
+        long nm = v.has("nearestMissing") ? v.get("nearestMissing").getAsLong() : -1;
+        double cut = v.has("cutoff") ? v.get("cutoff").getAsDouble() : Double.MAX_VALUE;
+        boolean l0Takes = nm != 0 && nm <= cut;  // (0: none of them in the reach; -1: an older library, as before)
+        for (String k : new String[]{"pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections"}) {
+            long n = v.has(k) ? v.get(k).getAsLong() : 0;
+            if (n <= 0 || (!l0Takes && (k.equals("waiting") || k.equals("gpuWaiting")))) continue;
+            String what = "grid " + k + " " + n + (k.endsWith("aiting") && nm > 0 ? " (the nearest " + nm + " blocks away)" : "");
+            if (waitOn(k, n, what)) return what;  // (released: it did not drain for 30 s; logged once why, readiness goes on)
+        }
         if (v.has("levels") && v.get("levels").isJsonArray())
-            for (var e : v.getAsJsonArray("levels"))
-                if (e.getAsJsonObject().get("pending").getAsLong() > 0)
-                    return "level " + e.getAsJsonObject().get("level").getAsInt() + " pending " + e.getAsJsonObject().get("pending").getAsLong();
+            for (var e : v.getAsJsonArray("levels")) {
+                long n = e.getAsJsonObject().get("pending").getAsLong();
+                String what = "level " + e.getAsJsonObject().get("level").getAsInt() + " pending " + n;
+                if (n > 0 && waitOn("level " + e.getAsJsonObject().get("level").getAsInt(), n, what)) return what;
+            }
         return "";
+    }
+
+    // (each grid queue's drain guard: a queue that does not fall for 30 s while readiness waits on it no longer holds it)
+    private static final java.util.Map<String, AtlasWaitGuard> GUARDS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Whether readiness still waits on grid queue {@code k} at {@code n} (false once its guard released it: logged once). */
+    private static boolean waitOn(String k, long n, String what) {
+        int r = GUARDS.computeIfAbsent(k, x -> new AtlasWaitGuard()).blocks(n, System.nanoTime());
+        if (r < 0) com.nirncraft.NirnCraft.LOGGER.warn("atlas readiness: no longer waits on {}: it did not drain for {} s; {}",
+                what, AtlasWaitGuard.STALL_NS / 1_000_000_000L, gridLine());
+        return r > 0;
+    }
+
+    /** The grid's residency in a line (the watchdog's and the stall guard's log): what level 0 holds, what waits and why. */
+    static String gridLine() {
+        String core = AtlasClient.coreInfoJson();
+        if (core == null) return "grid: atlas_info not read";
+        try {
+            JsonObject info = JsonParser.parseReader(new JsonReader(new StringReader(core))).getAsJsonObject();
+            if (!info.has("voxgrid") || !info.get("voxgrid").isJsonObject()) return "grid: none";
+            JsonObject v = info.getAsJsonObject("voxgrid");
+            StringBuilder b = new StringBuilder("grid:");
+            for (String k : new String[]{"settled", "resident", "slotsTotal", "pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections",
+                    "nearestMissing", "cutoff", "reach"})
+                if (v.has(k)) b.append(' ').append(k).append(' ').append(v.get(k).getAsString());
+            long nm = v.has("nearestMissing") ? v.get("nearestMissing").getAsLong() : -1;
+            if (nm == 0) b.append(" (level 0's waiting sections are past its reach or a full pool's cut-off: the coarse levels draw them)");
+            return b.toString();
+        } catch (RuntimeException e) {
+            return "grid: atlas_info unreadable";
+        }
     }
 
     /** The profiler block: {@code ready{ok}} or {@code ready{pending: what}}. */
