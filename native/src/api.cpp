@@ -447,7 +447,11 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             ATLAS_ZONE_MIN("wait:ctxLock (info)", 100);
             lock.lock();
         }
-        ctx->info = ctx->backend->info();
+        // (each part zoned: a frame held seconds inside api:info in game, while the generator stored chunks)
+        {
+            ATLAS_ZONE_MIN("api:info.backend", 100);
+            ctx->info = ctx->backend->info();
+        }
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
         if (!ctx->info.empty() && ctx->info.back() == '}') {
@@ -497,8 +501,15 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
             // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
-            Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
+            Backend::VoxGridTimes t = [&] {
+                ATLAS_ZONE_MIN("api:info.voxgridTimes", 100);
+                return ctx->backend->voxgridTimes();
+            }();
             const VoxGrid& v = ctx->voxgrid;
+            std::string phases = v.phaseInfo(), refine = [&] {
+                ATLAS_ZONE_MIN("api:info.refineCoverage", 100);
+                return v.refineInfo();
+            }();
             uint64_t bytes = uint64_t(v.chunkWords()) * 4 + uint64_t(v.totalSlots()) * (64 * 12 + VG_SECTION_WORDS * 4);
             char b[4096];
             std::snprintf(b, sizeof b,
@@ -509,11 +520,12 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
                           (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), v.bakeQueued(), v.phaseInfo().c_str(), v.refineInfo().c_str());
+                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), v.bakeQueued(), phases.c_str(), refine.c_str());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
             {
+                ATLAS_ZONE_MIN("api:info.residency", 100);
                 VoxGrid::Residency rs = v.residency();
                 char r[1024];
                 std::snprintf(r, sizeof r,
@@ -528,6 +540,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // cold, on disk; what left warm (dropped: the client makes it again; spilled: to disk; lost: neither)
             std::string tiers;
             {
+                ATLAS_ZONE_MIN("api:info.tiers", 100);
                 SectionStore::Stats ts;
                 World::StoreStats ws = ctx->world.storeStats(&ts);
                 VoxGrid::Residency rs = v.residency();
@@ -556,7 +569,10 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             }
             // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
             // full gave back, and how many frames its content took to be complete after its last move
-            VoxGrid::Stats st = v.stats();
+            VoxGrid::Stats st = [&] {
+                ATLAS_ZONE_MIN("api:info.gridStats", 100);
+                return v.stats();
+            }();
             char c[2048];
             std::snprintf(c, sizeof c,
                           "\"origin\":[%d,%d],\"cameraSection\":[%d,%d],\"jumps\":%llu,\"shifts\":%llu,\"refills\":%llu,"
@@ -569,7 +585,10 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // the coarse levels: window (chunks of 16 << k blocks), slots, sections taken in, waiting, given up
             std::string coarse = ",\"levels\":[";
             for (int k = 1; k < v.levels(); k++) {
-                VoxGrid::LevelInfo li = v.levelInfo(k);
+                VoxGrid::LevelInfo li = [&] {
+                    ATLAS_ZONE_MIN("api:info.levelInfo", 100);
+                    return v.levelInfo(k);
+                }();
                 char q[1024];
                 std::snprintf(q, sizeof q,
                               "%s{\"level\":%d,\"window\":[%d,%d,%d],\"origin\":[%d,%d],\"slots\":%u,\"slotCap\":%u,"
@@ -585,6 +604,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // written, and what this session read from it (a relaunch: hits > 0 and few generated)
             std::string genCache = "\"genCache\":{\"on\":false},";
             if (GenCache* gc = ctx->world.genCache()) {
+                ATLAS_ZONE_MIN("api:info.genCache", 100);
                 GenCache::Stats gs = gc->stats();
                 char g[512];
                 std::snprintf(g, sizeof g,
