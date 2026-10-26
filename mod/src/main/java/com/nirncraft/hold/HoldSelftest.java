@@ -185,6 +185,8 @@ final class HoldSelftest {
         double hop = PlayerHold.JUMP_BLOCKS / 2;
         p.setPos(home.x + hop, home.y, home.z);              // a short move: not an arrival
         if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a " + (int) hop + " block move held the player");
+        p.setPos(home.x + hop + PlayerHold.JUMP_BLOCKS + 14, home.y, home.z);  // fast flight, a lagging tick: a big move, no teleport
+        if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a big move without a teleport (flight) held the player");
         Vec3 far = new Vec3(home.x + hop + PlayerHold.JUMP_BLOCKS + 400, home.y - 20, home.z + 250);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(p, p.level(), far.x, far.y, far.z));
         p.setPos(far.x, far.y, far.z);                       // a teleport command: far

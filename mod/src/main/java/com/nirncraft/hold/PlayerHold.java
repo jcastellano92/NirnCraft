@@ -119,6 +119,8 @@ public final class PlayerHold {
     private static final Map<UUID, Held> HELD = new ConcurrentHashMap<>();
     /** Where each player was on the previous tick, for the jump check. */
     private static final Map<UUID, Vec3> LAST = new ConcurrentHashMap<>();
+    /** The teleports sent to each player (HoldTeleports) as of the previous tick. */
+    private static final Map<UUID, Long> SEEN = new ConcurrentHashMap<>();
     /** Why the teleport that is about to be seen as a jump happened (from EntityTeleportEvent), for the log and the screen. */
     private static final Map<UUID, String> WHY = new ConcurrentHashMap<>();
     private static final AtomicLong TOKENS = new AtomicLong(System.currentTimeMillis() & 0xFFFFFFFFL);
@@ -318,6 +320,7 @@ public final class PlayerHold {
     /** A player who joins while others are held must not see them in the tab list. */
     @SubscribeEvent
     public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && !(p instanceof FakePlayer) && p.connection != null) HoldTeleports.install(p);
         if (HELD.isEmpty() || !(event.getEntity() instanceof ServerPlayer joiner) || joiner.connection == null) return;
         List<UUID> ids = new ArrayList<>();
         for (UUID id : HELD.keySet()) if (!id.equals(joiner.getUUID())) ids.add(id);
@@ -329,6 +332,8 @@ public final class PlayerHold {
     public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         LAST.remove(p.getUUID());
+        SEEN.remove(p.getUUID());
+        HoldTeleports.forget(p.getUUID());
         Held h = HELD.remove(p.getUUID());
         if (h == null) return;
         try {
@@ -371,21 +376,28 @@ public final class PlayerHold {
 
     /**
      * The jump check: a player who moved more than {@link #JUMP_BLOCKS} since the previous tick, in the same dimension,
-     * has been teleported (a command, a pearl, a mod's travel ...) and is held at the destination. Package-private with
-     * {@code eligible} so the selftest can drive it with stand-ins.
+     * AND was teleported meanwhile (the server sent them a position: HoldTeleports; or a teleport event named it: a
+     * command, a pearl, chorus fruit) is held at the destination. A move alone is never one: flight, however fast, and a
+     * lagging server's long ticks (78 blocks of flight in one tick held the owner on 10-26, again and again) are play.
+     * Package-private with {@code eligible} so the selftest can drive it with stand-ins.
      */
     static boolean watchJump(ServerPlayer p, boolean eligible) {
         Vec3 pos = p.position();
         Vec3 last = LAST.put(p.getUUID(), pos);
+        long tp = HoldTeleports.count(p.getUUID());
+        Long seen = SEEN.put(p.getUUID(), tp);
+        boolean teleported = seen != null && seen != tp;
         if (last == null || !eligible || isHeld(p) || !ARRIVAL) return false;
         double d2 = last.distanceToSqr(pos);
-        if (d2 <= JUMP_BLOCKS * JUMP_BLOCKS) {
-            WHY.remove(p.getUUID());
-            return false;
-        }
         String why = WHY.remove(p.getUUID());
-        String reason = (why == null ? "jump" : why) + " " + (int) Math.sqrt(d2) + " blocks";
+        if (!isJump(d2, teleported, why != null)) return false;
+        String reason = (why == null ? "teleport" : why) + " " + (int) Math.sqrt(d2) + " blocks";
         return p instanceof FakePlayer ? arriveForTests(p, reason) : arrive(p, reason);
+    }
+
+    /** A jump is a discontinuity: a move of more than {@link #JUMP_BLOCKS} with a teleport (sent, or a teleport event) behind it. */
+    static boolean isJump(double moveSq, boolean teleportSent, boolean teleportEvent) {
+        return moveSq > JUMP_BLOCKS * JUMP_BLOCKS && (teleportSent || teleportEvent);
     }
 
     /** The kind of teleport, remembered for the hold the jump check is about to make. */
