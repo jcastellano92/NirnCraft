@@ -5,7 +5,7 @@
 // Step 6.1-6.5: every level's voxels plain cubes, material and entry axis only, except a coarse level's cube wider than the
 // pixel: its level's smooth surface, found after the walk; a grazing hit's second look at a coarser level (no bricks,
 // shapes or water medium: farMain's ATLAS_ABLATE 805306368 is the same picture; with 32, the cubes; with 2147483648, no
-// grazing look). farMain's choices otherwise:
+// grazing look); 6.7 the amortised far field's taken hits (FRAME_FAR_AMORT). farMain's choices otherwise:
 // the level a chord takes (the footprint's and the residency's at the pixel's threshold, never finer along the ray, the
 // chord ending where the pick changes), a coarser level where one does not hold the point, a finer one where no
 // coarser does, past a hole where none does; the walk's exits by index (a nudge past a face is below float precision at
@@ -26,7 +26,9 @@
 [[vk::binding(30, 0)]] StructuredBuffer<uint> vgBlocks;
 [[vk::binding(31, 0)]] StructuredBuffer<uint64_t> vgBits;
 [[vk::binding(32, 0)]] StructuredBuffer<uint> vgPool;
+[[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;  // (the last frame's surface distance per pixel)
 [[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
+[[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
 
 static const uint ST_EMPTY = 0u, ST_UNLOADED = 2u, ST_UNIFORM = 3u;  // (voxgrid.hpp VG_*; 1 mixed)
 static const uint RAY_STEPS = 24576u;  // a ray's steps at most (farMain's)
@@ -48,6 +50,17 @@ float lodRes(float3 p, int lodCount) {
 // ---- the smooth surface of a coarse level (atlas_far.slang coarseSmoothHit, ATLAS-PLAN 0.2) ----
 static const float SMOOTH_COARSE_PX = 1.5;  // a voxel this many footprints wide, or more, is drawn smooth
 static const uint HIT_SMOOTH_N = 2u;        // (the record's albedo flags: bit 0 its own albedo, bit 1 a smooth normal)
+static const uint FAR_AMORT_N = 4u;         // (atlas_far.slang's: a hit is taken while younger than this many frames)
+
+// (atlas_groups.slang's)
+uint hashU(uint x) {
+    x ^= x >> 16;
+    x *= 0x7feb352dU;
+    x ^= x >> 15;
+    x *= 0x846ca68bU;
+    x ^= x >> 16;
+    return x;
+}
 
 // the material of grid-local voxel v of a level's grid (its window and first chunk word): 0 air, 0xFFFFFFFF no data
 uint matAt(int3 v, int gx, int gz, int X, int Y, int Z, uint base) {
@@ -94,6 +107,59 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     uint pix = id.y * w + id.x;
 #if ATLAS_LEAN_CLOCK
     uint64_t clk0 = clockARB();
+#endif
+    // 6.7, the amortised far field (FRAME_FAR_AMORT; atlas_far.slang farHitSource): unless this 8 x 8 tile is traced
+    // whole this frame (one in FAR_AMORT_N, staggered by a hash of the tile: a warp's rays traced together or not at
+    // all), the pixel takes the last frame's hit at its reprojected point, while that point agrees about the surface
+    // (the last camera's distance to it) and the hit is younger than FAR_AMORT_N frames; a far one only (its block no
+    // wider than the pixel), or the sky. (Not the clock build: no shade after it writes the surface it reprojects by.
+    // With the water medium: not with the eye under water, as farMain. Under ATLAS_AB both sides take the other's
+    // records: a valid pair when both amortise, biased when one side does not)
+#if !ATLAS_LEAN_CLOCK
+    if ((frame.dims.z & FRAME_FAR_AMORT) != 0u) {
+        uint2 tile = id.xy / 8u;
+        uint n = w * h, cnt, strd, cnt2;
+        prevFarHit.GetDimensions(cnt, strd);
+        prevSurface.GetDimensions(cnt2, strd);
+        float ds = cnt2 >= n ? prevSurface[pix] : 0.0;
+        bool sky = !(ds < 1e29);
+        float pa = frame.params.w * frame.params.z;
+        if (((hashU(tile.x * 73856093u ^ (tile.y * 19349663u)) + frame.temporal.x) % FAR_AMORT_N) != 0u && cnt >= 2u * n &&
+            cnt2 >= n && (sky || ds * pa >= 1.0)) {
+            // the point the last frame's surface along this ray stood at (its distance here: the camera moves little
+            // against a far one), reprojected into the last frame
+            float2 ndc = float2((float(id.x) + 0.5) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y) + 0.5) / float(h) * 2.0) + frame.jitter.xy;
+            float3 dir = normalize(unproject(frame, ndc));
+            float R = frame.camFrac.w;
+            float kc = R > 0 && !sky ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;  // (the sky: a direction)
+            float tq0 = sky ? 1e7 : ds;
+            float3 Xp = frame.camFrac.xyz + dir * tq0 + float3(0, kc * tq0 * tq0, 0) - frame.prevCam.xyz;
+            float4 clip = frame.prevViewProj[0] * Xp.x + frame.prevViewProj[1] * Xp.y + frame.prevViewProj[2] * Xp.z + frame.prevViewProj[3];
+            float2 pn = clip.xy / max(clip.w, 1e-4) - frame.farLight.zw;  // (the last frame's jitter taken off)
+            int2 q = int2(floor(float2((pn.x * 0.5 + 0.5) * float(w), (0.5 - pn.y * 0.5) * float(h))));
+            if (clip.w > 1e-4 && all(q >= int2(0, 0)) && q.x < int(w) && q.y < int(h)) {
+                uint i = (uint(q.y) * w + uint(q.x)) * 2u;
+                uint4 a = prevFarHit[i], b = prevFarHit[i + 1u];
+                float tq = asfloat(a.x), wq = asfloat(a.y);
+                float tf = tq >= 0.0 ? tq : wq;  // (what prevSurface holds: the bed under water, the surface over deep water)
+                float lx = length(Xp);
+                bool young = ((frame.temporal.x - (b.w >> 16)) & 0xFFFFu) < FAR_AMORT_N;
+                // (the sky here and there; else the same surface: the last camera's distance to the point agrees with
+                // what its ray there met)
+                bool same = sky ? !(tf >= 0.0) : tf >= 0.0 && tf * pa >= 1.0 && abs(lx - tf) <= 0.02 * tf + 1.0;
+                if (young && same) {
+                    float hd = sky ? -1.0 : ds + (tf - lx);  // (first order: the point the hit was, along this ray)
+                    float th = tq < 0.0 || hd < 0.0 ? -1.0 : hd + (tq - tf);
+                    float tw = wq < 0.0 || hd < 0.0 ? -1.0 : hd + (wq - tf);
+                    uint i2 = pix * 2u;
+                    farHit[i2] = uint4(asuint(th), asuint(tw), a.z, a.w);
+                    farHit[i2 + 1u] = uint4(b.x & 0x3FFu, b.y, b.z, b.w);  // (no steps: not walked; its frame kept)
+                    counters[pix] = 0u;
+                    return;
+                }
+            }
+        }
+    }
 #endif
     int k = 0;
     float tHit = -1.0;
@@ -497,12 +563,11 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
         }
     }
     // the hit record (atlas_far.slang farHitStore's layout: tHit, tW, material, albedo flags; axis, level, water's level,
-    // steps; the water's material; the albedo as halves, the frame: stamped stale, so farMain's amortisation never takes
-    // a lean record after a switch)
+    // steps; the water's material; the albedo as halves, the frame it was traced: the amortisation's age)
     uint i2 = pix * 2u;
     farHit[i2] = uint4(asuint(tHit), asuint(-1.0), mat, hasAlbedo);
     farHit[i2 + 1u] = uint4(uint(axis + 1) | (uint(k) << 2) | (min(steps, 0x3FFFFFu) << 10), 0u,
-                            f32tof16(alb.x) | (f32tof16(alb.y) << 16), f32tof16(alb.z) | (((frame.temporal.x - 0x8000u) & 0xFFFFu) << 16));
+                            f32tof16(alb.x) | (f32tof16(alb.y) << 16), f32tof16(alb.z) | ((frame.temporal.x & 0xFFFFu) << 16));
 #if ATLAS_LEAN_CLOCK
     counters[pix] = uint((clockARB() - clk0) >> 4);
 #else
