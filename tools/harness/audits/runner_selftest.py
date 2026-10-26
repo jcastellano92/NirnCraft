@@ -400,9 +400,11 @@ with _tf.TemporaryDirectory() as _td:
     _f = Path(_td) / "flags.properties"
     _game.write_flags_file({"nirncraft.atlas.backend": "cpu", "nirncraft.x": "a\\b"}, _f)
     _lines = _f.read_text().splitlines()
-    expect(_lines == ["nirncraft.atlas.backend=cpu", "nirncraft.x=a/b"], f"the flags file holds the group's flags ({_lines})")
+    expect(_lines == ["nirncraft.atlas.backend=cpu", "nirncraft.harness.authoritative=true", "nirncraft.x=a/b"],
+           f"the flags file holds the group's flags and authoritative marker ({_lines})")
     _game.write_flags_file({}, _f)
-    expect(not _f.exists(), "no flags: no file (a run without flags gets none from the last one)")
+    expect(_f.read_text().splitlines() == ["nirncraft.harness.authoritative=true"],
+           "no group flags: authoritative empty file clears stale launch flags")
 
 # --- dev shaders in the instance shadow the core's kernels: moved aside before a live run (2026-10-25) --------------
 with _tf.TemporaryDirectory() as _td:

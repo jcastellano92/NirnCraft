@@ -2,6 +2,11 @@
  "description": "Changed files -> the tests they can affect (tags, prefix match) and the hot reload they need. First matching rule wins unless it says \"final\": false. Used by `harness.py run --changed [REF]`, `harness.py gate` (merge / push) and watch mode.",
  "rules": [
   {
+   "paths": ["tools/dev/agent_review.py", "tools/dev/agent_job.py", "tools/dev/agent_watch.py", "tools/dev/test_agent_review.py", "docs/agents/*"],
+   "tags": ["check:agent-review"],
+   "reload": null
+  },
+  {
    "paths": [
     "native/tools/atlas_truth*"
    ],

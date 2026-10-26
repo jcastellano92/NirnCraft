@@ -1,0 +1,3 @@
+# Keep the machine's original small-team workflow. Models and effort inherit the owner's session settings.
+[agents]
+max_concurrent_threads_per_session = 1

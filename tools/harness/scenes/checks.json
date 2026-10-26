@@ -10,6 +10,15 @@
   },
   "scenes": [
     {
+      "id": "check-agent-review",
+      "title": "Independent Codex/Claude reviewer protocols and shared-queue adapter",
+      "tags": ["check:agent-review", "suite:harness", "check:tools"],
+      "run": ["py", "-3", "-m", "unittest", "discover", "-s", "tools/dev", "-p", "test_agent_review.py"],
+      "inputs": ["tools/dev/agent_review.py", "tools/dev/agent_job.py", "tools/dev/agent_watch.py", "tools/dev/test_agent_review.py", "tools/harness/review.py", "docs/agents/visual-reviewer.md"],
+      "metrics": {"tests": "Ran (\\d+) tests?"},
+      "timeout": 120
+    },
+    {
       "id": "check-shaderpack-compile",
       "title": "Infinite ATLAS pack builds and every program stage compiles (glslang)",
       "tags": [

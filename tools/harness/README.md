@@ -3,6 +3,10 @@
 One entry point for every visual and non-visual test of NirnCraft and Infinite ATLAS, for people and agents:
 `py -3 tools/harness/harness.py <command>`. Results land in `.work/harness` (never in git).
 
+Codex and Claude share the same harness, queue and evidence gates. Independent review supports either CLI;
+setup, provider/model settings and worktree recovery are in [CODEX-WORKFLOW.md](../../docs/CODEX-WORKFLOW.md).
+Queue heavy jobs through `py -3 tools/dev/agent_job.py "<agent>: <job>" -- <command>`.
+
 ## Tiers (fastest first; the harness runs each test at its own tier)
 
 | tier | what runs | typical cost | examples |

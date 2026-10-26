@@ -1,5 +1,8 @@
 # NirnCraft documentation map
 
+Codex continuation and the shared agent workflow: [CODEX-WORKFLOW.md](CODEX-WORKFLOW.md), with repository
+instructions in [AGENTS.md](../AGENTS.md). The renderer's current plan remains [ATLAS-PLAN.md](ATLAS-PLAN.md).
+
 **NirnCraft** turns Minecraft into The Elder Scrolls V: Skyrim and keeps going to the edge of Nirn: one custom mod,
 NirnCraft Core (`mod/`, mod id `nirncraft`, Java package `com.nirncraft`), builds the whole of Tamriel with its own
 terrain, towns, people, quests, magic, music and UI. The pack (`pack/`) adds only performance and library mods.

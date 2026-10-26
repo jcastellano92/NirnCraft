@@ -1930,19 +1930,19 @@ def cmd_gate(a):
     index = agent_dir / "index.txt"
     if not a.ai_review:
         say("gate: independent visual review: off (--no-ai-review): the pictures are UNVERIFIED")
-    elif not index.exists():
+    elif not index.exists() or not index.read_text(encoding="utf-8").strip():
         # nothing worth a look is a result too: say it, so a skipped review never reads like a passed one
         review_state = "nothing to review"
-        say(f"gate: independent visual review: no captures worth a look ({index} absent)")
+        say(f"gate: independent visual review: no captures worth a look ({index} absent or empty)")
     else:
         import review
         captures = [l for l in index.read_text(encoding="utf-8").splitlines() if l.strip()]
         pages_n = len({l.split(" row ")[0] for l in captures})
         if not review.available():
-            review_state = "unverified (no claude CLI)"
-            say(f"gate: independent visual review: no claude CLI: {len(captures)} capture(s) NOT reviewed (UNVERIFIED)")
+            review_state = "unverified (review CLI unavailable)"
+            say(f"gate: independent visual review: {review.identity()} CLI unavailable: {len(captures)} capture(s) NOT reviewed (UNVERIFIED)")
         else:
-            say(f"gate: independent visual review ({a.model}): {len(captures)} capture(s) on {pages_n} page(s) ...")
+            say(f"gate: independent visual review ({review.identity(a.model)}): {len(captures)} capture(s) on {pages_n} page(s) ...")
             before_open = {k for k, e in load_issues().items() if e.get("state") in ACTIVE}
             gated = {key(s, v) for s, v in items}
             try:
@@ -2399,7 +2399,7 @@ def cmd_wait(a):
 
 
 # ================================================================================================ independent review
-def review_claims(keys=None, model="haiku"):
+def review_claims(keys=None, model=None):
     """Hand every needs-review issue (or the given keys) to the independent reviewer; its verdicts move the issues:
     pass -> fixed (confirmed by the reviewer, the evidence kept), fail -> open again, unsure -> stays for the owner."""
     import review
@@ -2430,11 +2430,11 @@ def review_claims(keys=None, model="haiku"):
     if not items:
         say("review: nothing to review")
         return {}
-    say(f"review: {len(items)} claim(s) to the independent reviewer ({model})")
+    say(f"review: {len(items)} claim(s) to the independent reviewer ({review.identity(model)})")
     verdicts = review.claims(items, model)
     led = load_issues()
     now = time.strftime("%Y-%m-%d %H:%M")
-    by = f"ai-reviewer:{model}"
+    by = f"ai-reviewer:{review.identity(model)}"
     for it in items:
         k, vd = it["key"], verdicts.get(it["key"], {})
         e = led.get(k)
@@ -2457,7 +2457,7 @@ def review_claims(keys=None, model="haiku"):
     return verdicts
 
 
-def review_pages(agent_dir, context="", model="haiku"):
+def review_pages(agent_dir, context="", model=None):
     """The independent visual pass over a run's agent pages: BROKEN / REGRESSION become tracked issues."""
     import review
     found = review.pages(agent_dir, model, context)
@@ -2491,7 +2491,7 @@ def review_pages(agent_dir, context="", model="haiku"):
         e = led.get(k) if led.get(k, {}).get("state") in ACTIVE else None
         e = e or {"test": k, "area": "review", "opened": now, "count": 0, "state": "open", "visual": True,
                   "status": "review", "history": led.get(k, {}).get("history", [])}
-        e.update(lastSeen=now, count=e["count"] + 1, why=f"{kind}: {what}"[:300], reportedBy=f"ai-reviewer:{model}")
+        e.update(lastSeen=now, count=e["count"] + 1, why=f"{kind}: {what}"[:300], reportedBy=f"ai-reviewer:{review.identity(model)}")
         led[k] = e
     save_issues(led)
     return found
@@ -2501,7 +2501,7 @@ def cmd_review(a):
     """The independent reviewer by hand: claims (default: every needs-review issue) or --pages DIR."""
     import review
     if not review.available():
-        say("review: the claude CLI is not on PATH")
+        say(f"review: {review.identity(a.model)} CLI is not on PATH")
         return 1
     if a.pages:
         found = review_pages(a.pages, a.note or "", a.model)
@@ -2817,7 +2817,7 @@ def main():
     p.add_argument("--no-live", dest="live", action="store_false", help="checks + lab only (fast; live unverified)")
     p.add_argument("--no-ai-review", dest="ai_review", action="store_false", default=True,
                    help="skip the independent reviewer's pass over the pictures")
-    p.add_argument("--model", default="haiku", help="the independent reviewer's model")
+    p.add_argument("--model", help="the independent reviewer's model (provider default when omitted)")
     p.add_argument("--dry", action="store_true")
     p.add_argument("--install-hook", action="store_true")
     p.add_argument("--keep", action="store_true")
@@ -2871,12 +2871,12 @@ def main():
     p.add_argument("ids", nargs="*", help="issues to review (default: every needs-review issue)")
     p.add_argument("--pages", help="review a run's agent folder instead (BROKEN / REGRESSION become issues)")
     p.add_argument("--note", help="pages: what changed")
-    p.add_argument("--model", default="haiku")
+    p.add_argument("--model", help="the independent reviewer's model (provider default when omitted)")
     p = selection(sub.add_parser("auto"))
     p.add_argument("--once", action="store_true", help="one cycle (a scheduled task)")
     p.add_argument("--every", type=int, default=120, help="minutes between cycles")
     p.add_argument("--budget", default="30m")
-    p.add_argument("--model", default="haiku")
+    p.add_argument("--model", help="the independent reviewer's model (provider default when omitted)")
     p.add_argument("--keep", action="store_true")
     p.add_argument("--rebuild", action="store_true")
     p.add_argument("--force", action="store_true")
