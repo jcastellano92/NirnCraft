@@ -1355,12 +1355,20 @@ public final class AtlasNative {
          * ("zero-copy (win32 handles)", "zero-copy (opaque fds)" or "host-copy" with interopReason and its cost).
          */
         public String info() {
-            try {
-                return ((MemorySegment) info.invokeExact(ptr)).reinterpret(1 << 16).getString(0);
-            } catch (Throwable t) {
-                throw rethrow(t);
+            // (one caller at a time: the core answers from a string of the context's that the next call rewrites; and
+            // none inside a close, the info thread reads while the renderer may be torn down)
+            synchronized (infoLock) {
+                if (infoClosed) return "{}";
+                try {
+                    return ((MemorySegment) info.invokeExact(ptr)).reinterpret(1 << 16).getString(0);
+                } catch (Throwable t) {
+                    throw rethrow(t);
+                }
             }
         }
+
+        private final Object infoLock = new Object();
+        private boolean infoClosed;
 
         // ---- offline harness only ----
 
@@ -1390,6 +1398,9 @@ public final class AtlasNative {
 
         @Override
         public void close() {
+            synchronized (infoLock) {
+                infoClosed = true;
+            }
             try {
                 destroy.invokeExact(ptr);
             } catch (Throwable t) {

@@ -197,11 +197,18 @@ public final class AtlasTileServer {
         // two minutes in and every ten minutes after (the in-game check of the far field's material rules)
         int tc = t.server.getTickCount();
         if (tc == 2400 || tc % 12000 == 0 && tc > 0) {
-            try {
-                AtlasSurface.selfCheck(t.server, t.columns, 400);
-            } catch (RuntimeException ex) {
-                com.nirncraft.NirnCraft.LOGGER.warn("atlas surface check failed: {}", ex.toString());
-            }
+            // (a thread of its own: 400 columns of the exact generator on the server thread were 2 s of "Can't keep up";
+            // it only reads, and a read that races a chunk's change is a lost sample)
+            Thread check = new Thread(() -> {
+                try {
+                    AtlasSurface.selfCheck(t.server, t.columns, 400);
+                } catch (RuntimeException ex) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas surface check failed: {}", ex.toString());
+                }
+            }, "nirncraft-atlas-surface-check");
+            check.setDaemon(true);
+            check.setPriority(Thread.NORM_PRIORITY - 1);
+            check.start();
         }
         int every = com.nirncraft.render.quality.HostLoad.pregenIntervalTicks(mspt);
         if (every > 0 && t.server.getTickCount() % every == 0) t.pregenerate();

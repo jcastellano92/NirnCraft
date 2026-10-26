@@ -292,30 +292,46 @@ public final class AtlasSections {
 
     /** Writes the tiles whose sections changed (every minute and at stop). */
     static void save() {
-        if (dir == null) return;
-        for (Long tk : new ArrayList<>(DIRTY_TILES)) {
-            DIRTY_TILES.remove(tk);
-            TileSections t = TILES.get(tk);
-            if (t == null) continue;
-            try {
-                Files.createDirectories(dir);
-                Path tmp = file(tk).resolveSibling(file(tk).getFileName() + ".tmp");
-                try (DataOutputStream out = new DataOutputStream(new DeflaterOutputStream(Files.newOutputStream(tmp)))) {
-                    synchronized (t) {
-                        out.writeInt(t.chunks.size());
-                        for (Map.Entry<Long, Entry> e : t.chunks.entrySet()) {
-                            out.writeLong(e.getKey());
-                            out.writeInt(e.getValue().blob().length);
-                            out.write(e.getValue().blob());
-                        }
+        synchronized (SAVE_LOCK) {  // (the background save and the stop's: one at a time)
+            if (dir == null) return;
+            for (Long tk : new ArrayList<>(DIRTY_TILES)) {
+                DIRTY_TILES.remove(tk);
+                TileSections t = TILES.get(tk);
+                if (t == null) continue;
+                // (the tile's lock only for the copy of its entries: the compression and the file write ran inside it, and
+                // the server thread's record() waited for them)
+                long[] keys;
+                byte[][] blobs;
+                synchronized (t) {
+                    int n = t.chunks.size(), i = 0;
+                    keys = new long[n];
+                    blobs = new byte[n][];
+                    for (Map.Entry<Long, Entry> e : t.chunks.entrySet()) {
+                        keys[i] = e.getKey();
+                        blobs[i++] = e.getValue().blob();
                     }
                 }
-                Files.move(tmp, file(tk), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                com.nirncraft.NirnCraft.LOGGER.warn("atlas: far sections of tile {} not saved ({})", tk, e.toString());
+                try {
+                    Files.createDirectories(dir);
+                    Path tmp = file(tk).resolveSibling(file(tk).getFileName() + ".tmp");
+                    try (DataOutputStream out = new DataOutputStream(new DeflaterOutputStream(Files.newOutputStream(tmp)))) {
+                        out.writeInt(keys.length);
+                        for (int i = 0; i < keys.length; i++) {
+                            out.writeLong(keys[i]);
+                            out.writeInt(blobs[i].length);
+                            out.write(blobs[i]);
+                        }
+                    }
+                    Files.move(tmp, file(tk), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    DIRTY_TILES.add(tk);  // (tried again at the next save)
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: far sections of tile {} not saved ({})", tk, e.toString());
+                }
             }
         }
     }
+
+    private static final Object SAVE_LOCK = new Object();
 
     static void stop() {
         save();

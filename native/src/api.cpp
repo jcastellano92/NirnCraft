@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstddef>
 #include <chrono>
@@ -182,6 +183,12 @@ struct AtlasContext {
     AtlasStats stats{};
     std::string error;
     std::string info;  // atlas_info's last answer
+    // atlas_info's reads of the world's tiers and groups, kept for a call that finds the world's lock busy (World::tryInfo)
+    World::StoreStats infoStore;
+    SectionStore::Stats infoTiers;
+    size_t infoSkipped = 0;
+    World::GroupStats infoGroups;
+    World::CoarseStats infoCoarse;
     std::mutex mu;
     uint64_t stagedRevision = UINT64_MAX;
     // the last frame, for temporal cloud reprojection
@@ -447,6 +454,16 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             ATLAS_ZONE_MIN("wait:ctxLock (info)", 100);
             lock.lock();
         }
+        // Nothing below waits for a lock the generator's or the store's threads hold (frames of 1 to 4.6 s sat inside this
+        // call in game, on the render thread, while the generator stored chunks): the world's, the grid's and the gen
+        // cache's numbers are read with try-locks and come back as of the last call that got in. The mod reads this on
+        // a thread of its own besides (AtlasInfo), and its per-tick callers read that copy.
+        {
+            ATLAS_ZONE_MIN("api:info.world", 100);
+            bool wantGroups = ctx->world.groupsWanted.load();
+            if (ctx->voxgrid.active() || wantGroups)
+                ctx->world.tryInfo(ctx->infoStore, &ctx->infoTiers, ctx->infoSkipped, wantGroups, ctx->infoGroups, ctx->infoCoarse);
+        }
         ctx->info = ctx->backend->info();
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
@@ -460,7 +477,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         }
         if (ctx->world.groupsWanted.load() && !ctx->info.empty() && ctx->info.back() == '}') {
             // (abi 0.14) the content-shaped groups: regions with a tree, their memory, the last update's builds
-            World::GroupStats g = ctx->world.groupStats();
+            World::GroupStats g = ctx->infoGroups;
             char b[512];
             std::snprintf(b, sizeof b,
                           ",\"groups\":{\"regions\":%u,\"refused\":%u,\"bytes\":%llu,\"maxRegionBytes\":%llu,\"prims\":%llu,"
@@ -471,7 +488,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           g.maxBuildMs, g.built, g.lastUpdateMs, ctx->world.groupLods, g.maxDepth);
             ctx->info.insert(ctx->info.size() - 1, b);
             // the coarse levels of real content (CoarseCube): memory, cubes per level, the last update's digest
-            World::CoarseStats c = ctx->world.coarseStats();
+            World::CoarseStats c = ctx->infoCoarse;
             std::snprintf(b, sizeof b,
                           ",\"coarse\":{\"bytes\":%llu,\"budget\":%llu,\"entries\":%u,\"cubes\":[%u,%u,%u,%u,%u,%u,%u],"
                           "\"levelBytes\":[%llu,%llu,%llu,%llu,%llu],\"digested\":%u,\"evicted\":%u,\"digestMs\":%.1f}",
@@ -499,7 +516,10 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
             Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
             const VoxGrid& v = ctx->voxgrid;
-            uint64_t bytes = uint64_t(v.chunkWords()) * 4 + uint64_t(v.totalSlots()) * (64 * 12 + VG_SECTION_WORDS * 4);
+            ATLAS_ZONE_MIN("api:info.voxgrid", 100);
+            VoxGrid::InfoSnap snap = v.infoSnap();
+            std::string refine = VoxGrid::refineJson(snap);
+            uint64_t bytes = snap.chunkWords * 4 + snap.totalSlots * (64 * 12 + VG_SECTION_WORDS * 4);
             char b[4096];
             std::snprintf(b, sizeof b,
                           ",\"voxgrid\":{\"window\":[%d,%d,%d],\"slots\":%u,\"slotCap\":%u,\"gpuBytes\":%llu,\"built\":%llu,"
@@ -507,14 +527,14 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           "\"lastRegrow\":%s,\"totalGpuMs\":%.2f,\"ownsLevel0\":%s,\"level0Skipped\":%zu,"
                           "\"stageCpuMs\":%.3f,\"stageCpuMaxMs\":%.3f,\"stageCpuRecentMs\":%.3f,\"takeMs\":%.3f,\"takeMaxMs\":%.3f,\"stageScale\":%.2f,\"baking\":%zu,%s%s",
                           v.D, v.H, v.D, v.slotsUsed(), v.slotCap, (unsigned long long)bytes, (unsigned long long)v.sectionsBuilt,
-                          (unsigned long long)v.batches, v.pending(), t.lastMs, t.lastSections, t.lastJobs,
+                          (unsigned long long)v.batches, snap.pending, t.lastMs, t.lastSections, t.lastJobs,
                           t.lastStates ? "true" : "false", t.totalMs, ctx->world.gridOwnsLevel0.load() ? "true" : "false",
-                          ctx->world.gridSkippedCount(), t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), v.bakeQueued(), v.phaseInfo().c_str(), v.refineInfo().c_str());
+                          ctx->infoSkipped, t.stageCpuMs, t.stageCpuMaxMs, t.stageCpuRecentMs, t.takeMs, t.takeMaxMs, double(v.budgetScale), snap.bakeQueued, v.phaseInfo().c_str(), refine.c_str());
             // residency: slots used / of the pool, uniform cells (no slot), the waiting (CPU ids kept, GPU ones to ask
             // for), given up for nearer ones, could not be taken, the GPU's uniform finds, the priority cut-off of a
             // full pool, level 0's footprint reach and the nearest known section not resident (blocks; 0: none)
             {
-                VoxGrid::Residency rs = v.residency();
+                const VoxGrid::Residency& rs = snap.res;
                 char r[1024];
                 std::snprintf(r, sizeof r,
                               "\"resident\":%u,\"slotsTotal\":%u,\"uniform\":%u,\"waiting\":%zu,\"gpuWaiting\":%zu,\"coarseWaiting\":%zu,"
@@ -528,9 +548,9 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // cold, on disk; what left warm (dropped: the client makes it again; spilled: to disk; lost: neither)
             std::string tiers;
             {
-                SectionStore::Stats ts;
-                World::StoreStats ws = ctx->world.storeStats(&ts);
-                VoxGrid::Residency rs = v.residency();
+                const SectionStore::Stats& ts = ctx->infoTiers;
+                const World::StoreStats& ws = ctx->infoStore;
+                const VoxGrid::Residency& rs = snap.res;
                 char t[4096];
                 std::snprintf(t, sizeof t,
                               "\"tiers\":{\"hot\":{\"slots\":%u,\"uniform\":%u,\"mb\":%.1f},\"raw\":{\"sections\":%zu,\"mb\":%.1f,"
@@ -556,7 +576,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             }
             // where the window is against the camera (sections), how it moved, what it still waits for, what the pool
             // full gave back, and how many frames its content took to be complete after its last move
-            VoxGrid::Stats st = v.stats();
+            const VoxGrid::Stats& st = snap.st;
             char c[2048];
             std::snprintf(c, sizeof c,
                           "\"origin\":[%d,%d],\"cameraSection\":[%d,%d],\"jumps\":%llu,\"shifts\":%llu,\"refills\":%llu,"
@@ -568,8 +588,8 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           (unsigned long long)st.lastSettleFrames, st.settledFrame >= st.lastShiftFrame ? "true" : "false");
             // the coarse levels: window (chunks of 16 << k blocks), slots, sections taken in, waiting, given up
             std::string coarse = ",\"levels\":[";
-            for (int k = 1; k < v.levels(); k++) {
-                VoxGrid::LevelInfo li = v.levelInfo(k);
+            for (int k = 1; k < snap.levels; k++) {
+                const VoxGrid::LevelInfo& li = snap.lv[k];
                 char q[1024];
                 std::snprintf(q, sizeof q,
                               "%s{\"level\":%d,\"window\":[%d,%d,%d],\"origin\":[%d,%d],\"slots\":%u,\"slotCap\":%u,"
@@ -607,6 +627,28 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
 }
 
 ATLAS_API uint64_t atlas_build_hash(void) { return atlas::buildHash(); }
+
+// (tests, not in atlas.h) Holds the locks the generator's and the store's threads hold for long, as they do: the gen cache's
+// (a record's write), the grid's (an ingest, a take) and the world's (an update's commit). Returns once all three are held; they
+// are let go after holdMs. The call that must not wait for them: atlas_info (the mod's per-tick caller reads its copy).
+ATLAS_API AtlasStatus atlas_debug_hold_locks(AtlasContext* ctx, uint32_t holdMs) {
+    if (!ctx) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    auto release = std::make_shared<std::atomic<bool>>(false);
+    auto held = std::make_shared<std::array<std::atomic<bool>, 3>>();
+    for (auto& h : *held) h.store(false);
+    GenCache* gc = ctx->world.genCache();
+    std::thread([=] { if (gc) gc->holdLockForTest(*release, (*held)[0]); else (*held)[0].store(true); }).detach();
+    std::thread([=] { ctx->voxgrid.holdLockForTest(*release, (*held)[1]); }).detach();
+    std::thread([=] { ctx->world.holdLockForTest(*release, (*held)[2]); }).detach();
+    std::thread([=] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(holdMs));
+        release->store(true);
+    }).detach();
+    while (!((*held)[0].load() && (*held)[1].load() && (*held)[2].load())) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
 
 ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path) {
     atlas::setPipelineCachePath(path ? path : "");

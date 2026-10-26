@@ -88,7 +88,7 @@ GenCache::GenCache() { writer_ = std::thread([this] { writerLoop(); }); }
 GenCache::~GenCache() {
     flush();
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         stop_ = true;
     }
     cv_.notify_all();
@@ -141,10 +141,11 @@ bool decodeKinds(const std::vector<uint8_t>& in, std::vector<uint32_t>& k) {
 
 void GenCache::configure(const std::string& root, uint64_t fingerprint) {
     flush();
-    std::lock_guard<std::mutex> l(mu_);
+    std::unique_lock<std::mutex> l(mu_);
     if (!root.empty() && fingerprint && root + "#" + std::to_string(fingerprint) == dir_ + "#" + std::to_string(fp_) &&
         on_.load())
         return;
+    scanCv_.wait(l, [&] { return scanning_ == 0; });  // (a reader still holds a reference into a region)
     regions_.clear();
     dataBytes_ = 0;
     on_ = false;
@@ -196,12 +197,34 @@ void GenCache::dropOldSets() {
     }).detach();
 }
 
-GenCache::Region& GenCache::region(uint64_t rk) {
-    Region& r = regions_[rk];
-    if (r.scanned) return r;
-    r.scanned = true;
-    FILE* f = std::fopen(regionPath(rk).c_str(), "rb");
-    if (!f) return r;
+GenCache::Region& GenCache::region(std::unique_lock<std::mutex>& l, uint64_t rk) {
+    for (;;) {
+        Region& r = regions_[rk];
+        if (r.scanning) {  // (another thread reads the file: wait for it, then look again)
+            scanCv_.wait(l);
+            continue;
+        }
+        if (r.scanned) return r;
+        r.scanning = true;
+        scanning_++;
+        std::string path = regionPath(rk);
+        l.unlock();
+        Region tmp;
+        scanFile(path, tmp);  // (the file read and parsed with the lock let go: a big region took seconds, and mu_ with it)
+        l.lock();
+        tmp.scanned = true;
+        r = std::move(tmp);
+        st_.chunks += r.chunks.size();
+        st_.sections += r.secs.size();
+        scanning_--;
+        scanCv_.notify_all();
+        return r;
+    }
+}
+
+void GenCache::scanFile(const std::string& path, Region& r) {
+    FILE* f = std::fopen(path.c_str(), "rb");
+    if (!f) return;
     uint64_t at = 0;
     uint32_t h[HEAD];
     while (std::fread(h, 4, HEAD, f) == HEAD && h[0] == MAGIC && h[5] <= MAX_PAYLOAD) {
@@ -233,9 +256,6 @@ GenCache::Region& GenCache::region(uint64_t rk) {
     }
     r.fileBytes = at;
     std::fclose(f);
-    st_.chunks += r.chunks.size();
-    st_.sections += r.secs.size();
-    return r;
 }
 
 void GenCache::eraseFarTile(Region& r, int lod, int tx, int tz) {
@@ -257,8 +277,8 @@ void GenCache::forgetFarTile(int lod, int tx, int tz) {
     j.type = 5;
     j.k = Key3{lod, tx, 0, tz};
     {
-        std::lock_guard<std::mutex> l(mu_);
-        eraseFarTile(region(farRegionOf(lod, tx, tz)), lod, tx, tz);  // (known no more at once; the tombstone follows in the queue)
+        std::unique_lock<std::mutex> l(mu_);
+        eraseFarTile(region(l, farRegionOf(lod, tx, tz)), lod, tx, tz);  // (known no more at once; the tombstone follows in the queue)
         queue_.push_back(std::move(j));
     }
     cv_.notify_one();
@@ -271,7 +291,7 @@ void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
     j.k = Key3{0, cx, 0, cz};
     j.info.assign(info, info + INFO_WORDS);
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         fresh_.insert(chunkKey(cx, cz));
         queue_.push_back(std::move(j));
         st_.queued = queue_.size();
@@ -286,7 +306,7 @@ void GenCache::putSection(const Key3& k, std::shared_ptr<const std::vector<uint3
     j.words = std::move(words);
     j.hash = hash;
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         queue_.push_back(std::move(j));
         st_.queued = queue_.size();
     }
@@ -328,25 +348,34 @@ void GenCache::writerLoop() {
         double ms = msSince(t0);
         l.lock();
         st_.encodeMs += ms;
+        // One record appended to a region's file with mu_ let go (this thread alone appends; the index follows once it is
+        // down, under the lock again): the open, the writes and the close are the disk's and the virus scanner's time.
+        auto append = [&](const std::string& path, const uint32_t* h, const std::vector<uint8_t>& pl) {
+            l.unlock();
+            FILE* f = std::fopen(path.c_str(), "ab");
+            static const uint8_t zero[4] = {0, 0, 0, 0};
+            uint32_t padN = pad4(uint32_t(pl.size())) - uint32_t(pl.size());
+            bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD && (pl.empty() || std::fwrite(pl.data(), 1, pl.size(), f) == pl.size()) &&
+                      std::fwrite(zero, 1, padN, f) == padN;
+            if (f) std::fclose(f);
+            l.lock();
+            return ok;
+        };
         if (on && dir == dir_ && on_ && j.type == 4) {
             uint64_t rk = regionOf(j.k.x, j.k.z);
-            Region& r = region(rk);
+            Region& r = region(l, rk);
             uint32_t h[HEAD] = {MAGIC, 4u, uint32_t(j.k.x), 0u, uint32_t(j.k.z), 0u};
-            FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
-            bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD;
-            if (f) std::fclose(f);
+            bool ok = append(regionPath(rk), h, payload);
             if (ok) {
                 r.fileBytes += uint64_t(HEAD) * 4;
                 st_.fileBytes += uint64_t(HEAD) * 4;
             }
         } else if (on && dir == dir_ && on_ && j.type == 5) {
             uint64_t rk = farRegionOf(j.k.lod, j.k.x, j.k.z);
-            Region& r = region(rk);
+            Region& r = region(l, rk);
             eraseFarTile(r, j.k.lod, j.k.x, j.k.z);
             uint32_t h[HEAD] = {MAGIC, 5u, uint32_t(j.k.x), uint32_t(j.k.lod), uint32_t(j.k.z), 0u};
-            FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
-            bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD;
-            if (f) std::fclose(f);
+            bool ok = append(regionPath(rk), h, payload);
             if (ok) {
                 r.fileBytes += uint64_t(HEAD) * 4;
                 st_.fileBytes += uint64_t(HEAD) * 4;
@@ -355,7 +384,7 @@ void GenCache::writerLoop() {
             // (the far terrain's: a tile's kinds, a coarse chunk)
             int tx = j.type == 2 ? j.k.x : tdiv(j.k.x), tz = j.type == 2 ? j.k.z : tdiv(j.k.z);
             uint64_t rk = farRegionOf(j.k.lod, tx, tz);
-            Region& r = region(rk);
+            Region& r = region(l, rk);
             // (a record is written unless one is there; true data also over a stand-in's)
             bool have;
             if (j.type == 2) {
@@ -372,12 +401,7 @@ void GenCache::writerLoop() {
                 uint32_t h[HEAD] = {MAGIC, uint32_t(j.type) | (j.type == 2 ? mixed << 8 | tru : 0u), uint32_t(j.k.x),
                                     j.type == 2 ? uint32_t(j.k.lod) : uint32_t(j.k.y) | uint32_t(j.k.lod) << 16 | tru, uint32_t(j.k.z),
                                     uint32_t(payload.size())};
-                FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
-                static const uint8_t zero[4] = {0, 0, 0, 0};
-                uint32_t padN = pad4(uint32_t(payload.size())) - uint32_t(payload.size());
-                bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD && std::fwrite(payload.data(), 1, payload.size(), f) == payload.size() &&
-                          std::fwrite(zero, 1, padN, f) == padN;
-                if (f) std::fclose(f);
+                bool ok = append(regionPath(rk), h, payload);
                 if (ok) {
                     dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
@@ -396,7 +420,7 @@ void GenCache::writerLoop() {
         } else if (on && dir == dir_ && on_) {
             int cx = j.isChunk ? j.k.x : fdiv(j.k.x, 1), cz = j.k.z;
             uint64_t rk = regionOf(cx, cz);
-            Region& r = region(rk);
+            Region& r = region(l, rk);
             bool have = j.isChunk ? r.chunks.count(chunkKey(cx, cz)) != 0 : r.secs.count(j.k) != 0;
             if (!have) {
                 uint64_t mask = 0;
@@ -405,12 +429,7 @@ void GenCache::writerLoop() {
                         if (j.info[4 + s * 4 + 2] == KIND_BLOCKS) mask |= uint64_t(1) << s;
                 uint32_t h[HEAD] = {MAGIC, j.isChunk ? uint32_t(mask >> 32) << 8 : 1u, uint32_t(j.k.x),
                                     j.isChunk ? uint32_t(mask) : uint32_t(j.k.y), uint32_t(j.k.z), uint32_t(payload.size())};
-                FILE* f = std::fopen(regionPath(rk).c_str(), "ab");
-                static const uint8_t zero[4] = {0, 0, 0, 0};
-                uint32_t padN = pad4(uint32_t(payload.size())) - uint32_t(payload.size());
-                bool ok = f && std::fwrite(h, 4, HEAD, f) == HEAD && std::fwrite(payload.data(), 1, payload.size(), f) == payload.size() &&
-                          std::fwrite(zero, 1, padN, f) == padN;
-                if (f) std::fclose(f);
+                bool ok = append(regionPath(rk), h, payload);
                 if (ok) {
                     dropOldSets();
                     Loc loc{r.fileBytes + HEAD * 4, uint32_t(payload.size())};
@@ -434,22 +453,36 @@ void GenCache::flush() {
 
 bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out) {
     // (a region's file read whole on its first read: one open a region, not one a record; a record written since lies
-    // past that copy: read alone. The copies within a budget, the least recently read dropped)
+    // past that copy: read alone. The copies within a budget, the least recently read dropped. The file is read with mu_
+    // let go; two threads that read it at once keep one of the copies)
     std::shared_ptr<std::vector<uint8_t>> data;
+    std::string path;
+    bool load = false;
     {
-        std::lock_guard<std::mutex> l(mu_);
-        Region& r = region(rk);
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, rk);
+        path = regionPath(rk);
+        if (r.data) {
+            r.dataUse = ++dataClock_;
+            data = r.data;
+        } else {
+            load = true;
+        }
+    }
+    if (load) {
+        auto d = std::make_shared<std::vector<uint8_t>>();
+        FILE* f = std::fopen(path.c_str(), "rb");
+        if (!f) return false;
+        std::fseek(f, 0, SEEK_END);
+        long n = std::ftell(f);
+        std::fseek(f, 0, SEEK_SET);
+        d->resize(size_t(std::max(n, 0L)));
+        size_t got = d->empty() ? 0 : std::fread(d->data(), 1, d->size(), f);
+        std::fclose(f);
+        d->resize(got);
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, rk);
         if (!r.data) {
-            auto d = std::make_shared<std::vector<uint8_t>>();
-            FILE* f = std::fopen(regionPath(rk).c_str(), "rb");
-            if (!f) return false;
-            std::fseek(f, 0, SEEK_END);
-            long n = std::ftell(f);
-            std::fseek(f, 0, SEEK_SET);
-            d->resize(size_t(std::max(n, 0L)));
-            size_t got = d->empty() ? 0 : std::fread(d->data(), 1, d->size(), f);
-            std::fclose(f);
-            d->resize(got);
             r.data = d;
             dataBytes_ += got;
             while (dataBytes_ > DATA_BUDGET) {
@@ -468,7 +501,7 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
         out.assign(data->begin() + ptrdiff_t(loc.offset), data->begin() + ptrdiff_t(loc.offset + loc.bytes));
         return true;
     }
-    FILE* f = std::fopen(regionPath(rk).c_str(), "rb");
+    FILE* f = std::fopen(path.c_str(), "rb");
     if (!f) return false;
     out.resize(loc.bytes);
     bool ok = std::fseek(f, long(loc.offset), SEEK_SET) == 0 && std::fread(out.data(), 1, out.size(), f) == out.size();
@@ -478,16 +511,16 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
 
 bool GenCache::hasChunk(int cx, int cz) {
     if (!on()) return false;
-    std::lock_guard<std::mutex> l(mu_);
-    return region(regionOf(cx, cz)).chunks.count(chunkKey(cx, cz)) != 0;
+    std::unique_lock<std::mutex> l(mu_);
+    return region(l, regionOf(cx, cz)).chunks.count(chunkKey(cx, cz)) != 0;
 }
 
 bool GenCache::forget(int cx, int cz) {
     if (!on()) return false;
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         if (!fresh_.erase(chunkKey(cx, cz))) return false;  // (from disk, or never: kept)
-        Region& r = region(regionOf(cx, cz));
+        Region& r = region(l, regionOf(cx, cz));
         r.chunks.erase(chunkKey(cx, cz));
         for (int s = 0; s < 40; s++) r.secs.erase(Key3{0, cx, s - 4, cz});
         Job j;
@@ -502,8 +535,8 @@ bool GenCache::forget(int cx, int cz) {
 
 bool GenCache::complete(int cx, int cz) {
     if (!on()) return false;
-    std::lock_guard<std::mutex> l(mu_);
-    Region& r = region(regionOf(cx, cz));
+    std::unique_lock<std::mutex> l(mu_);
+    Region& r = region(l, regionOf(cx, cz));
     auto it = r.chunks.find(chunkKey(cx, cz));
     if (it == r.chunks.end()) return false;
     for (int s = 0; s < 40; s++)
@@ -516,8 +549,8 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
     uint64_t rk = regionOf(cx, cz);
     Loc loc;
     {
-        std::lock_guard<std::mutex> l(mu_);
-        Region& r = region(rk);
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, rk);
         auto it = r.chunks.find(chunkKey(cx, cz));
         if (it == r.chunks.end()) {
             st_.chunkMisses++;
@@ -527,8 +560,8 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
     }
     std::vector<uint8_t> b;
     if (!readBytes(rk, loc, b) || !decodeHeader(b, info)) return false;
-    std::lock_guard<std::mutex> l(mu_);
-    Region& r = region(rk);
+    std::unique_lock<std::mutex> l(mu_);
+    Region& r = region(l, rk);
     for (int s = 0; s < 40; s++)
         if (info[4 + s * 4 + 2] == KIND_BLOCKS && !r.secs.count(Key3{0, cx, s - 4, cz})) {
             st_.chunkMisses++;
@@ -544,8 +577,8 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     uint64_t rk = regionOf(k.x, k.z);
     Loc loc;
     {
-        std::lock_guard<std::mutex> l(mu_);
-        Region& r = region(rk);
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, rk);
         auto it = r.secs.find(k);
         if (it == r.secs.end()) return nullptr;
         loc = it->second;
@@ -555,13 +588,13 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     auto t0 = std::chrono::steady_clock::now();
     uint16_t ids[4096];
     if (!decodeChecked(b, ids)) {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         st_.hashErrors++;
         return nullptr;
     }
     auto w = std::make_shared<const std::vector<uint32_t>>(packSection(ids));
     double ms = msSince(t0);
-    std::lock_guard<std::mutex> l(mu_);
+    std::unique_lock<std::mutex> l(mu_);
     st_.decodeMs += ms;
     st_.sectionReads++;
     return w;
@@ -575,7 +608,7 @@ void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& 
     j.k = Key3{lod, tx, 0, tz};
     j.info = kinds;
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         queue_.push_back(std::move(j));
     }
     cv_.notify_one();
@@ -590,7 +623,7 @@ void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32
     j.words = std::move(words);
     j.hash = hash;
     {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         queue_.push_back(std::move(j));
     }
     cv_.notify_one();
@@ -598,8 +631,8 @@ void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32
 
 bool GenCache::farKnown(int lod, int tx, int tz) {
     if (!on()) return false;
-    std::lock_guard<std::mutex> l(mu_);
-    Region& r = region(farRegionOf(lod, tx, tz));
+    std::unique_lock<std::mutex> l(mu_);
+    Region& r = region(l, farRegionOf(lod, tx, tz));
     auto it = r.tiles.find(tileKey(tx, tz));
     if (it == r.tiles.end()) return false;
     auto b = r.baked.find(tileKey(tx, tz));
@@ -608,25 +641,25 @@ bool GenCache::farKnown(int lod, int tx, int tz) {
 
 bool GenCache::farStandIn(int lod, int tx, int tz) {
     if (!farKnown(lod, tx, tz)) return false;
-    std::lock_guard<std::mutex> l(mu_);
-    return !region(farRegionOf(lod, tx, tz)).tiles[tileKey(tx, tz)].trueData;
+    std::unique_lock<std::mutex> l(mu_);
+    return !region(l, farRegionOf(lod, tx, tz)).tiles[tileKey(tx, tz)].trueData;
 }
 
 bool GenCache::farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds) {
     if (!farKnown(lod, tx, tz)) {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         st_.farMisses++;
         return false;
     }
     uint64_t rk = farRegionOf(lod, tx, tz);
     Loc loc;
     {
-        std::lock_guard<std::mutex> l(mu_);
-        loc = region(rk).tiles[tileKey(tx, tz)].loc;
+        std::unique_lock<std::mutex> l(mu_);
+        loc = region(l, rk).tiles[tileKey(tx, tz)].loc;
     }
     std::vector<uint8_t> b;
     if (!readBytes(rk, loc, b) || !decodeKinds(b, kinds)) return false;
-    std::lock_guard<std::mutex> l(mu_);
+    std::unique_lock<std::mutex> l(mu_);
     st_.farHits++;
     return true;
 }
@@ -636,8 +669,8 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::coarse(const Key3& k) {
     uint64_t rk = farRegionOf(k.lod, tdiv(k.x), tdiv(k.z));
     Loc loc;
     {
-        std::lock_guard<std::mutex> l(mu_);
-        Region& r = region(rk);
+        std::unique_lock<std::mutex> l(mu_);
+        Region& r = region(l, rk);
         auto it = r.coarse.find(k);
         if (it == r.coarse.end()) return nullptr;
         loc = it->second;
@@ -646,7 +679,7 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::coarse(const Key3& k) {
     if (!readBytes(rk, loc, b)) return nullptr;
     uint16_t ids[4096];
     if (!decodeChecked(b, ids)) {
-        std::lock_guard<std::mutex> l(mu_);
+        std::unique_lock<std::mutex> l(mu_);
         st_.hashErrors++;
         return nullptr;
     }
@@ -654,12 +687,25 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::coarse(const Key3& k) {
 }
 
 GenCache::Stats GenCache::stats() {
+    std::unique_lock<std::mutex> l(mu_, std::try_to_lock);
+    if (l.owns_lock()) {
+        Stats s = st_;
+        s.on = on_;
+        s.fingerprint = fp_;
+        s.queued = queue_.size();
+        l.unlock();
+        std::lock_guard<std::mutex> g(snapMu_);
+        snap_ = s;
+        return s;
+    }
+    std::lock_guard<std::mutex> g(snapMu_);  // (the lock is busy: the last numbers, never a wait)
+    return snap_;
+}
+
+void GenCache::holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held) {
     std::lock_guard<std::mutex> l(mu_);
-    Stats s = st_;
-    s.on = on_;
-    s.fingerprint = fp_;
-    s.queued = queue_.size();
-    return s;
+    held.store(true);
+    while (!release.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 }  // namespace atlas

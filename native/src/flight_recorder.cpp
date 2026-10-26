@@ -197,6 +197,7 @@ struct State {
     std::atomic<uint64_t> gapNs{10'000'000'000ull};
     // the request (guarded by mu)
     bool pending = false;
+    bool manualRequest = false;  // a manual dump asked for (atlas_fr_dump_async): written by the watcher, one dump at a time
     uint64_t fs = 0, fe = 0;
     uint64_t lastRequest = 0;
     bool watcherStarted = false;
@@ -218,24 +219,35 @@ std::string dumpNow(uint64_t fs, uint64_t fe, bool manual, uint64_t to, std::str
 
 void watcherMain() {
     State& S = st();
+#ifdef _WIN32
+    // (a dump is 1 to 2 s of copying and formatting: it yields to the game's threads)
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+#endif
     for (;;) {
-        uint64_t fs, fe;
+        uint64_t fs = 0, fe = 0;
+        bool manual = false;
         {
             std::unique_lock<std::mutex> lk(S.mu);
-            S.cv.wait(lk, [&] { return S.pending; });
-            fs = S.fs;
-            fe = S.fe;
+            S.cv.wait(lk, [&] { return S.pending || S.manualRequest; });
+            if (S.pending) {
+                fs = S.fs;
+                fe = S.fe;
+            } else {
+                manual = true;
+            }
         }
-        // the frames after the spike belong in the trace
-        uint64_t until = fe + uint64_t(POST_SECONDS * 1e9);
-        for (;;) {
-            uint64_t now = nowNs();
-            if (now >= until) break;
-            std::this_thread::sleep_for(std::chrono::milliseconds(std::min<uint64_t>((until - now) / 1000000 + 1, 100)));
+        if (!manual) {
+            // the frames after the spike belong in the trace
+            uint64_t until = fe + uint64_t(POST_SECONDS * 1e9);
+            for (;;) {
+                uint64_t now = nowNs();
+                if (now >= until) break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(std::min<uint64_t>((until - now) / 1000000 + 1, 100)));
+            }
         }
         std::string err;
         try {
-            std::string dir = dumpNow(fs, fe, false, nowNs(), err);
+            std::string dir = dumpNow(fs, fe, manual, nowNs(), err);
             if (dir.empty()) {
                 std::lock_guard<std::mutex> lk(S.mu);
                 S.lastError = err;
@@ -245,7 +257,8 @@ void watcherMain() {
             S.lastError = e.what();
         }
         std::lock_guard<std::mutex> lk(S.mu);
-        S.pending = false;
+        if (manual) S.manualRequest = false;
+        else S.pending = false;
     }
 }
 
@@ -999,6 +1012,34 @@ ATLAS_API const char* atlas_fr_dump(const char* reason) {
     std::string err;
     std::string dir = dumpNow(0, 0, true, nowNs(), err);
     out = dir.empty() ? "error: " + err : dir;
+    return out.c_str();
+}
+
+// A manual dump written by the recorder's own thread (the one spikes use): returns at once, "queued" or "busy: ..." when a
+// dump is being written or waits. The dump's directory shows in atlas_fr_last_dump when atlas_fr_dump_count moves. One at a
+// time, never on the calling thread (the render thread's command: the dump took 1 to 2 s).
+ATLAS_API const char* atlas_fr_dump_async(const char* reason) {
+    (void)reason;
+    static thread_local std::string out;
+    State& S = st();
+    if (!enabled()) {
+        out = "error: the recorder is off (-Dnirncraft.atlas.recorder=true)";
+        return out.c_str();
+    }
+    std::lock_guard<std::mutex> lk(S.mu);
+    if (S.dir.empty()) {
+        out = "error: no trace directory configured";
+    } else if (S.pending || S.manualRequest) {
+        out = "busy: a dump is being written";
+    } else {
+        S.manualRequest = true;
+        if (!S.watcherStarted) {
+            S.watcherStarted = true;
+            std::thread(watcherMain).detach();
+        }
+        S.cv.notify_one();
+        out = "queued";
+    }
     return out.c_str();
 }
 

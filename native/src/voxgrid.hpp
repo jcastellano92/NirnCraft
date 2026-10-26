@@ -28,6 +28,8 @@
 // what it was given while its window holds it: what the camera saw stays at the coarser levels as it moves on.
 #pragma once
 #include <array>
+#include <atomic>
+#include <thread>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -403,6 +405,33 @@ public:
         size_t pending = 0;
     };
     LevelInfo levelInfo(int k) const;
+    // Everything atlas_info reads of the grid, taken in one hold of mu_ and published: the render thread's per-tick caller
+    // must not wait for a lock the generator's ingest or the frame's take holds (frames of 1 to 4.6 s inside atlas_info).
+    // When the lock is busy the last snapshot comes back (valid is false until there is one); the coverage scan
+    // (every window's cells) is redone at most every 1.5 s. Any thread; never blocks.
+    struct InfoSnap {
+        bool valid = false;
+        Residency res;
+        Stats st;
+        size_t pending = 0, bakeQueued = 0;
+        uint64_t chunkWords = 0, totalSlots = 0;
+        int levels = 1;
+        LevelInfo lv[VG_LEVELS];
+        size_t coarseLost = 0, coarseGiven = 0;
+        uint64_t wantedAgain = 0, wantedHeld = 0;
+        Coverage cov;
+        uint32_t slotsUsed[VG_LEVELS] = {}, slotCap[VG_LEVELS] = {};  // level 0 and the coarse pools
+        std::chrono::steady_clock::time_point covAt{};
+    };
+    InfoSnap infoSnap() const;
+    // (tests) holds mu_ until release is set, as the generator's ingest or a frame's take does for a while
+    void holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held) const {
+        std::lock_guard<std::mutex> lock(mu_);
+        held.store(true);
+        while (!release.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    // the snapshot's "coarseLost" .. "coverage" fields as atlas_info writes them (ending in a comma)
+    static std::string refineJson(const InfoSnap& s);
     int levels() const { return 1 + activeCoarse_; }  // level 0 and the coarse ones
     size_t chunkWords() const;    // all levels' chunk words
     uint32_t totalSlots() const;  // all levels' slots
@@ -442,6 +471,14 @@ private:
         }
     };
     mutable std::mutex mu_;
+    // (caller holds mu_) the pieces of infoSnap
+    Residency residencyLocked() const;
+    Stats statsLocked() const;
+    size_t pendingLocked() const;
+    LevelInfo levelInfoLocked(int k) const;
+    Coverage coverageLocked() const;
+    mutable InfoSnap infoCache_;
+    mutable std::mutex infoMu_;  // (infoCache_ only; taken alone or inside mu_, never the other way round)
     bool centred_ = false;
     int ox_ = 0, oz_ = 0;  // window origin in sections (x, z); y is VG_MIN_SY
     // sections waiting for a batch: the world's own (shared, never copied) or an upload's copy

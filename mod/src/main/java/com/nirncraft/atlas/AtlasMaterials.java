@@ -366,8 +366,12 @@ final class AtlasMaterials {
         return m;
     }
 
-    /** The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. */
-    synchronized String state() {
+    /**
+     * The exact ids for atlas-info: used of the range, biome tints in use, lookups past a full range. Not synchronized: the
+     * monitor is held by the workers that bake models and upload materials (seconds), and the profiler line waited for it on
+     * the render thread; a count read a moment late is all this line is.
+     */
+    String state() {
         return "exactIds{used=" + (nextExact - EXACT_FIRST) + " bricks=" + exactBricks + "/" + (EXACT_LAST - EXACT_FIRST + 1) + " tints=" + tintPalette.size()
                 + " fullLookups=" + exactFull + " palette=" + (next - FIRST) + "/" + (LAST - FIRST + 1) + " paletteFull=" + paletteFull + "}";
     }

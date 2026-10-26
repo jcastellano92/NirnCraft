@@ -269,6 +269,7 @@ public:
         uint64_t rawBytes = 0, packed = 0;
     };
     StoreStats storeStats(void* tiers) const;  // (tiers: a SectionStore::Stats to fill, or null)
+    StoreStats storeStatsLocked(void* tiers) const;  // (caller holds mu_)
     // The GPU's level-0 grid (voxgrid.hpp) owns level 0 (ATLAS_VOXGRID_LEVEL0=1): a section it holds (inside its window)
     // no longer rebuilds its level-0 region on the CPU (the grid is rebuilt on the GPU; the region stays as it was, the
     // fallback past the grid). setGridWindow (the grid's window moved: x, z origin and size in sections) rebuilds the
@@ -354,6 +355,7 @@ public:
         double lastUpdateMs = 0;             // what the last update spent building trees (summed over threads)
     };
     GroupStats groupStats() const;
+    GroupStats groupStatsLocked() const;  // (caller holds mu_)
 
     // ---- coarse levels of real content (CoarseCube)
     // their memory budget (ATLAS_COARSE_BUDGET_MB): over it the cubes farthest from the camera for their level's size
@@ -367,6 +369,13 @@ public:
         double digestMs = 0;                 // what that cost (summed over threads)
     };
     CoarseStats coarseStats() const;
+    CoarseStats coarseStatsLocked() const;  // (caller holds mu_)
+    // atlas_info's reads of the world in one hold of mu_ (the store's tiers, the grid-skipped regions, with `groups` the
+    // groups' and the coarse levels' numbers): false, nothing written, when the lock is busy. Never waits: the per-tick
+    // caller on the render thread must not sit behind an update's commit or a spill slice.
+    bool tryInfo(StoreStats& ws, void* tiers, size_t& skipped, bool groups, GroupStats& g, CoarseStats& c) const;
+    // (tests) holds mu_ until release is set, as an update's commit or a spill slice does for a while
+    void holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held) const;
 
     using CubeMap = std::unordered_map<Key3, std::shared_ptr<const CoarseCube>, Key3Hash>;
 

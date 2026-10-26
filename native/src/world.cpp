@@ -871,6 +871,10 @@ void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVe
 
 World::StoreStats World::storeStats(void* tiers) const {
     fr::LockZone lock(mu_, "wait:world.mu(storeStats#1)", "hold:world.mu(storeStats#1)");
+    return storeStatsLocked(tiers);
+}
+
+World::StoreStats World::storeStatsLocked(void* tiers) const {
     StoreStats s;
     s.raw = sections_.size();
     s.rawBytes = uint64_t(sections_.size()) * sizeof(Section);
@@ -915,6 +919,24 @@ void World::gridWindowMoved() {
 size_t World::gridSkippedCount() const {
     fr::LockZone lock(mu_, "wait:world.mu(gridSkippedCount#1)", "hold:world.mu(gridSkippedCount#1)");
     return gridSkipped_.size();
+}
+
+void World::holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    held.store(true);
+    while (!release.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+bool World::tryInfo(StoreStats& ws, void* tiers, size_t& skipped, bool groups, GroupStats& g, CoarseStats& c) const {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;  // (an update's commit, a spill slice, packedDone: the caller keeps its last numbers)
+    ws = storeStatsLocked(tiers);
+    skipped = gridSkipped_.size();
+    if (groups) {
+        g = groupStatsLocked();
+        c = coarseStatsLocked();
+    }
+    return true;
 }
 
 void World::markSectionDirty(int sx, int sy, int sz) {
@@ -1420,6 +1442,10 @@ void World::digest(const int centreRegion[MAX_LODS][2], double budgetMs) {
 
 World::CoarseStats World::coarseStats() const {
     fr::LockZone lock(mu_, "wait:world.mu(coarseStats#1)", "hold:world.mu(coarseStats#1)");
+    return coarseStatsLocked();
+}
+
+World::CoarseStats World::coarseStatsLocked() const {
     CoarseStats st;
     st.bytes = coarseBytes_;
     for (auto& [key, c] : coarse_) {
@@ -2442,6 +2468,10 @@ void World::setCards(std::shared_ptr<const CardSet> cards) {
 
 World::GroupStats World::groupStats() const {
     fr::LockZone lock(mu_, "wait:world.mu(groupStats#1)", "hold:world.mu(groupStats#1)");
+    return groupStatsLocked();
+}
+
+World::GroupStats World::groupStatsLocked() const {
     GroupStats st;
     for (auto& [k, r] : regions_) {
         if (!r->groups) continue;

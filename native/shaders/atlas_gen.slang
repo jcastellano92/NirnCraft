@@ -23,8 +23,13 @@ struct GenParams {
     int chunks;      // chunks in this batch
     int pageMinCx, pageMinCz, pageW, pageH;  // the page grid (pageIndex) the batch reads
     uint outMode;    // 0: generator block ids, 1: atlas material ids; debug: 2 before the surface, 3 / 4 density bits
-    int pad0, pad1;
+    int pad0, pad1;  // the page kernels: debug columns, the first tile of a submission; surfaceMain: its band, below
 };
+// surfaceMain in bands of y (a submission each: one thread walks a column's rules for 10 to 50 ms, more than the 4 ms rule):
+// pad0 blocks of y a band (0: the whole column at once), band pad1 counted down from the top of the stack. (The two pad words,
+// not new members: every gen kernel reads the push constants, and a member more grew each by its access.)
+#define BAND_SIZE params.pad0
+#define BAND_INDEX params.pad1
 [[vk::push_constant]] ConstantBuffer<GenParams> params;
 [[vk::binding(0, 0)]] StructuredBuffer<uint> prog;
 [[vk::binding(1, 0)]] RWStructuredBuffer<uint> pages;  // written by the page passes (atlas_page.slang)
@@ -81,7 +86,8 @@ static const int MIN_Y = -64, NOISE_H = 640, SECTIONS = 40, QY = 176;  // quarts
 static const uint CORNERS = 2025;        // 5 x 81 x 5
 static const uint AQ_CELLS = 513;        // 3 x 57 x 3
 static const uint AQ_WORDS = 513 * 5 + 4;
-static const uint COL_WORDS = 256 + 8;   // heights, then [256] skipSamplingAboveY
+static const uint COL_STATE = 256 + 8;   // heights, then [256] skipSamplingAboveY
+static const uint COL_WORDS = COL_STATE + 256 * 4;   // then per column the surface pass's state between bands: stone above, water height, next ceiling
 static const uint BLOCK_WORDS = 16 * 16 * 640;
 static const uint OUT_WORDS = 40 * 2048;
 [noinline]
@@ -1138,6 +1144,23 @@ void surfaceMain(uint3 id : SV_DispatchThreadID) {
     c.x = cx * 16 + lx;
     c.z = cz * 16 + lz;
     int top = colInfo[cb + col];
+    int height = top + 1;
+    // The column's y range of this dispatch: all of it, or a band (params.bandSize): from where the column starts or the band's
+    // top, down to the band's bottom. A column starts at its own top; the state of the walk (stone above, the water height, the
+    // next ceiling) waits in colInfo between bands. Everything else the walk uses is a function of the column (and of blocks below
+    // the walk, untouched until it gets there), so the bands give the blocks the single pass gives.
+    int yFrom = height, yTo = MIN_Y;
+    bool started = true, finished = true;
+    uint sb = cb + COL_STATE + col * 4u;
+    if (BAND_SIZE > 0) {
+        int bandHi = MIN_Y + NOISE_H - BAND_INDEX * BAND_SIZE;
+        int bandLo = bandHi - BAND_SIZE + 1 > MIN_Y ? bandHi - BAND_SIZE + 1 : MIN_Y;  // (no min / max: SPIR-V's integer ones are not in spv_exact's list)
+        finished = bandLo == MIN_Y;
+        if (height < bandLo) return;   // (starts in a lower band)
+        started = height <= bandHi;    // (starts in this band; else it went on from the one above)
+        yFrom = height < bandHi ? height : bandHi;
+        yTo = bandLo;
+    }
     c.gradX = colInfo[cb + uint(lz * 16 + (lx + 1 > 15 ? 15 : lx + 1))] - colInfo[cb + uint(lz * 16 + (lx - 1 < 0 ? 0 : lx - 1))];
     c.gradZ = colInfo[cb + uint((lz + 1 > 15 ? 15 : lz + 1) * 16 + lx)] - colInfo[cb + uint((lz - 1 < 0 ? 0 : lz - 1) * 16 + lx)];
     c.surfaceDepth = surfaceDepthAt(c.x, c.z);
@@ -1148,8 +1171,12 @@ void surfaceMain(uint3 id : SV_DispatchThreadID) {
     int stoneAbove = 0;
     int waterHeight = int(0x80000000u);
     int nextCeiling = 2147483647;
-    int height = top + 1;
-    for (int y = height; y >= MIN_Y; y--) {
+    if (!started) {
+        stoneAbove = colInfo[sb];
+        waterHeight = colInfo[sb + 1];
+        nextCeiling = colInfo[sb + 2];
+    }
+    for (int y = yFrom; y >= yTo; y--) {
         uint old = y >= MIN_Y + NOISE_H ? 0u : blocks[bb + blockIndex(lx, y - MIN_Y, lz)];
         uint f = blockFlags(old);
         if ((f & F_AIR) != 0u) {
@@ -1174,6 +1201,12 @@ void surfaceMain(uint3 id : SV_DispatchThreadID) {
             int st = runRules(c);
             if (st >= 0) blocks[bb + blockIndex(lx, y - MIN_Y, lz)] = uint(st);
         }
+    }
+    if (!finished) {
+        colInfo[sb] = stoneAbove;
+        colInfo[sb + 1] = waterHeight;
+        colInfo[sb + 2] = nextCeiling;
+        return;
     }
     // map water (MapWaterFeature, the lakes step): this column only
     uint ww = waterWord(c.x, c.z);

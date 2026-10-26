@@ -113,6 +113,47 @@ int main(int argc, char** argv) {
         atlas_gen_destroy(g);
         return r;
     }
+    if (std::string(argv[2]) == "band") {
+        // gen_probe <dir> band <cx0> <cz0> <side> [per=32]: the near passes over a side x side square of chunks, per chunks a batch,
+        // as the game's batches run them: a checksum of every id and flag (identical whatever the surface pass's slicing:
+        // ATLAS_GEN_SURFACE_BAND=0 against the default), the passes' device ms (pass 4: the surface rule) and the submissions by
+        // phase (the longest of each: a pass under the 4 ms rule)
+        int cx0 = argc > 3 ? std::atoi(argv[3]) : 0, cz0 = argc > 4 ? std::atoi(argv[4]) : 0, side = argc > 5 ? std::atoi(argv[5]) : 8;
+        int per = argc > 6 ? std::atoi(argv[6]) : 32;
+        std::vector<int32_t> xz;
+        for (int dz = 0; dz < side; dz++)
+            for (int dx = 0; dx < side; dx++) {
+                xz.push_back(cx0 + dx);
+                xz.push_back(cz0 + dz);
+            }
+        uint64_t h = 1469598103934665603ull;
+        double passSum[6] = {}, passMax[6] = {};
+        uint32_t flagged = 0, batches = 0;
+        std::vector<uint32_t> ids(size_t(64) * 40 * 2048), fl(64);
+        for (size_t i = 0; i < xz.size() / 2; i += size_t(per)) {
+            uint32_t n = uint32_t(std::min<size_t>(size_t(per), xz.size() / 2 - i));
+            AtlasGenTimes t{};
+            AtlasStatus s = atlas_gen_chunks(g, xz.data() + i * 2, n, 0, ids.data(), fl.data(), &t);
+            if (s != ATLAS_OK) {
+                std::fprintf(stderr, "chunks: %s\n", atlas_gen_last_error(g));
+                return 1;
+            }
+            const uint8_t* b = reinterpret_cast<const uint8_t*>(ids.data());
+            for (size_t k = 0; k < size_t(n) * 40 * 2048 * 4; k++) h = (h ^ b[k]) * 1099511628211ull;
+            for (uint32_t k = 0; k < n; k++) h = (h ^ fl[k]) * 1099511628211ull, flagged += fl[k] != 0;
+            for (int p = 0; p < 6; p++) passSum[p] += t.passMs[p], passMax[p] = std::max(passMax[p], t.passMs[p]);
+            batches++;
+        }
+        std::printf("band check: %zu chunks in %u batches of %d, flagged %u, checksum %016llx\n", xz.size() / 2, batches, per, flagged,
+                    (unsigned long long)h);
+        std::printf("  pass ms (sum over batches / longest batch): ");
+        for (int p = 0; p < 6; p++) std::printf("%d: %.1f / %.1f  ", p, passSum[p], passMax[p]);
+        char subs[6000] = {};
+        atlas_gen_sub_stats(g, subs, sizeof subs, 0);
+        std::printf("\n  %s\n", subs);
+        atlas_gen_destroy(g);
+        return 0;
+    }
     const uint32_t cols = 65536;
     std::vector<float> surf(cols), water(cols);
     std::vector<uint32_t> blocks(cols), biomes(cols), flags(1);

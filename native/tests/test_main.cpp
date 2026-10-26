@@ -2420,6 +2420,100 @@ static void testEdits() {
     fs::remove_all(dir, ec);
 }
 
+// ---- the render thread's per-tick reads never wait for the generator's or the store's locks (docs/ATLAS-STATUS.md, stalls) ----
+// In game a frame sat 1 to 4.6 s inside atlas_info while the generator stored chunks: the call took the gen cache's, the grid's
+// and the world's locks, and the writer thread held the first through a file append. atlas_debug_hold_locks (api.cpp) holds all
+// three for a while from other threads, as those threads do; atlas_info must answer at once, with the numbers of its last
+// look. The recorder's manual dump is written by the recorder's own thread: the call returns at once.
+extern "C" {
+ATLAS_API AtlasStatus atlas_debug_hold_locks(AtlasContext* ctx, uint32_t holdMs);
+ATLAS_API const char* atlas_fr_dump_async(const char* reason);
+ATLAS_API uint64_t atlas_fr_dump_count(void);
+ATLAS_API void atlas_fr_configure(int enable, const char* dir, double spikeMs, double windowSec, double minGapSec);
+}
+
+static void testStalls() {
+    std::printf("stalls\n");
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dir = fs::temp_directory_path(ec) / "atlas-stalls-test";
+    fs::remove_all(dir, ec);
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
+        std::printf("  SKIP: no Vulkan device\n");
+        return;
+    }
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+    for (int tz = -1; tz <= 1; tz++)
+        for (int tx = -1; tx <= 1; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    std::vector<AtlasMaterial> m(64, AtlasMaterial{{0.4f, 0.4f, 0.4f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+    atlas_set_materials(ctx, 1, m.data(), uint32_t(m.size()));
+    CHECK(atlas_set_cache(ctx, dir.string().c_str(), 5, 1, 0, 0) == ATLAS_OK);
+    std::vector<uint16_t> sec(4096, 1);
+    for (int s = 0; s < 3; s++) CHECK(atlas_upload_section(ctx, s, 6, 0, sec.data()) == ATLAS_OK);
+    double centre[3] = {24.0, 300.0, 8.0};
+    atlas_update(ctx, centre, 0);
+    AtlasFrame f{};
+    f.cameraPos[0] = 24.0;
+    f.cameraPos[1] = 300.0;
+    f.cameraPos[2] = 8.0;
+    float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> d1(64 * 64);
+    AtlasFrameOutput o1{nullptr, nullptr, d1.data()};
+    for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);
+    std::string before = atlas_info(ctx);
+    CHECK(before.find("\"voxgrid\"") != std::string::npos);
+    CHECK(before.find("\"genCache\":{") != std::string::npos);  // (off here: no generator names a fingerprint; its lock is held all the same)
+    const double HOLD_MS = 2500.0;
+    CHECK(atlas_debug_hold_locks(ctx, uint32_t(HOLD_MS)) == ATLAS_OK);
+    auto t0 = std::chrono::steady_clock::now();
+    std::vector<double> ms;
+    std::string during;
+    for (int i = 0; i < 25; i++) {
+        auto a = std::chrono::steady_clock::now();
+        during = atlas_info(ctx);
+        ms.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count());
+    }
+    std::sort(ms.begin(), ms.end());
+    std::printf("TRACE done stalls:atlas_info under the generator's and store's locks: median %.3f ms, max %.3f ms (locks held %.0f ms)\n",
+                ms[ms.size() / 2], ms.back(), HOLD_MS);
+    double callsMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    CHECK(callsMs < HOLD_MS * 0.5);  // (all 25 calls done while the locks are still held)
+    CHECK(ms[ms.size() / 2] < 1.0);
+    CHECK(ms.back() < 100.0);
+    // (the numbers are the last look's, not empty: the same blocks are there)
+    CHECK(during.find("\"voxgrid\"") != std::string::npos && during.find("\"tiers\"") != std::string::npos);
+    std::this_thread::sleep_for(std::chrono::milliseconds(int(HOLD_MS) + 200));  // (the hold ends)
+    CHECK(std::string(atlas_info(ctx)).find("\"voxgrid\"") != std::string::npos);
+
+    // the recorder's manual dump: queued at once, written by its own thread
+    fs::path trace = dir / "trace";
+    atlas_fr_configure(1, trace.string().c_str(), 50.0, 30.0, 0.0);
+    uint64_t dumps = atlas_fr_dump_count();
+    auto a = std::chrono::steady_clock::now();
+    std::string r = atlas_fr_dump_async("test");
+    double callMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count();
+    std::printf("TRACE done stalls:atlas_fr_dump_async returned '%s' in %.3f ms\n", r.c_str(), callMs);
+    CHECK(r == "queued" && callMs < 5.0);
+    std::string busy = atlas_fr_dump_async("again");  // (one at a time)
+    CHECK(busy == "queued" || busy.rfind("busy", 0) == 0);
+    for (int i = 0; i < 200 && atlas_fr_dump_count() == dumps; i++) std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    CHECK(atlas_fr_dump_count() > dumps);
+    atlas_fr_configure(0, nullptr, 0, 0, -1);
+    atlas_destroy(ctx);
+    fs::remove_all(dir, ec);
+}
+
 int main(int argc, char** argv) {
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // (each line as it comes: a suite stopped part way still shows where)
     // atlas_tests [raster] [only=a,b,..]: the suites named alone (svdag, caves, ..., parity); each prints
@@ -2442,6 +2536,7 @@ int main(int argc, char** argv) {
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
         {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"tiers", testTiers}, {"edits", testEdits},
+        {"stalls", testStalls},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;

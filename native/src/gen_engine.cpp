@@ -89,7 +89,7 @@ namespace {
 
 constexpr uint32_t GROUP = 64;
 constexpr uint32_t MAX_CHUNKS = 64;     // per submission
-constexpr uint32_t CORNERS = 2025, AQ_WORDS = 513 * 5 + 4, BLOCK_WORDS = 16 * 16 * 640, COL_WORDS = 256 + 8;
+constexpr uint32_t CORNERS = 2025, AQ_WORDS = 513 * 5 + 4, BLOCK_WORDS = 16 * 16 * 640, COL_STATE = 256 + 8, COL_WORDS = COL_STATE + 256 * 4;  // (atlas_gen.slang: heights, skipSamplingAboveY, then the surface pass's state between bands)
 constexpr uint32_t OUT_WORDS = 40 * 2048;
 constexpr uint32_t INFO_WORDS = 4 + 40 * 4;  // atlas_gen.slang secInfo
 constexpr uint32_t PASSES = 6;               // the terrain's; then INGEST_PASSES (cols, secs, mats), then the math check
@@ -131,7 +131,7 @@ struct CpuBuf {
 struct GenParams {
     int32_t chunks, pageMinCx, pageMinCz, pageW, pageH;
     uint32_t outMode;
-    int32_t pad0, pad1;
+    int32_t pad0, pad1;  // (the page kernels' debug columns and first tile; surfaceMain: its band's size in blocks, 0: the whole column, and index)
 };
 // Must list the globals of atlas_gen.slang in declaration order.
 struct GenGlobals {
@@ -1450,6 +1450,36 @@ public:
             // (the GPU budget) a long pass in slices of chunks, one submission each, so that no submission is longer than a
             // few ms when the frames are over their target (the chunks of a pass are independent: a row of workgroups
             // each); the slice from the pass's measured time a chunk
+            if (p == SURFACE_PASS && surfaceBand() != 0) {
+                // The surface rule in bands of y: one thread walks its column's rules (a noise a block, in doubles), 10 to 50 ms
+                // whatever the chunks beside it (slicing by chunks left the pass's time as it was: every slice "latency"). A band is a
+                // submission of about ATLAS_GEN_PART_MS; its state waits in colInfo (atlas_gen.slang).
+                uint32_t B = bandBlocks(), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
+                uint32_t bands = (uint32_t(NOISE_H_BLOCKS) + B) / B;  // (y from the stack's top, NOISE_H + 1 values, B a band)
+                for (uint32_t k = 0; k < bands; k++) {
+                    GenParams pb = b.params;
+                    pb.pad0 = int32_t(B);  // (atlas_gen.slang BAND_SIZE, BAND_INDEX)
+                    pb.pad1 = int32_t(k);
+                    vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &pb);
+                    vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
+                    vkCmdDispatch(cmd_, gx, n, 1);
+                    ring_[cur_].sliceKind = BAND_KIND;
+                    ring_[cur_].sliceUnits = B;
+                    if (k + 1 < bands) {
+                        barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+                                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                        if (!submit(err, false)) return false;
+                        begin();
+                        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                    }
+                }
+                vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
+                barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT,
+                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
+                if (timestamps_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queries_, 2u * p + 1u);
+                if (p + 1 < pEnd && !cut(int(p))) return false;
+                continue;
+            }
             uint32_t slice = sliceOf(p, n), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
             for (uint32_t c0 = 0; c0 < n; c0 += slice) {
                 uint32_t m = std::min(slice, n - c0);
@@ -2206,7 +2236,8 @@ private:
         auto low = [](double was, double v) { return was <= 0.0 ? v : (v < was ? was * 0.5 + v * 0.5 : was * 0.95 + v * 0.05); };
         subEma_ = low(subEma_, gpu);
         if (s.refine && s.perUnit && s.units > 0.0) *s.perUnit = low(*s.perUnit, gpu / s.units);
-        if (s.sliceKind >= 0 && s.sliceUnits > 0) sliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
+        if (s.sliceKind == BAND_KIND) bandSeen(s.sliceUnits, gpu);
+        else if (s.sliceKind >= 0 && s.sliceUnits > 0) sliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
         if (s.sliceKind >= 100 && s.sliceKind <= 103 && s.sliceUnits > 0) farSliceSeen(uint32_t(s.sliceKind), s.sliceUnits, gpu);
         if (s.part >= 0 && size_t(s.part) < partUs_.size()) {
             partUs_[size_t(s.part)] = uint32_t(std::min(gpu * 1000.0, 4e9));
@@ -2411,6 +2442,7 @@ private:
         // "far stage, tile 0, part 9" -> "far stage"; "store stage 1000, 48 chunks, part 675" -> "store stage 1000"; "pass 12" -> "pass #"
         size_t c = phase.find(',');
         if (c != std::string::npos) return phase.substr(0, c);
+        if (phase.rfind("pass ", 0) == 0) return phase;  // ("pass 4" apart from "pass 2": the passes differ by 10x, one row hid which was long)
         std::string r;
         for (size_t i = 0; i < phase.size(); i++) {
             if (phase[i] >= '0' && phase[i] <= '9') {
@@ -2610,6 +2642,32 @@ private:
         } else {
             f.lastMs = f.lastMs * 0.7 + ms * 0.3;
         }
+    }
+    // ---- the surface pass in bands of y (kind BAND_KIND): the band's size in blocks from the slowest block a band took lately
+    static constexpr int BAND_KIND = 40;
+    static constexpr int NOISE_H_BLOCKS = 640;  // (atlas_gen.slang NOISE_H: the stack's height; y from its top, NOISE_H + 1 values)
+    static constexpr uint32_t SURFACE_PASS = 4;
+    double bandPerBlock_ = 0.0;  // ms a block of the slowest column, worst of the last bands (decays: 0.5 % a band, so a dense column is remembered for a few batches)
+    static int surfaceBand() {  // ATLAS_GEN_SURFACE_BAND: blocks a band; 0 whole pass; -1 (default) sized from the time
+        static const int v = [] {
+            const char* e = std::getenv("ATLAS_GEN_SURFACE_BAND");
+            const char* on = std::getenv("ATLAS_GEN_PACE");
+            if (on && std::atoi(on) == 0) return 0;
+            return e ? std::atoi(e) : -1;
+        }();
+        return v;
+    }
+    uint32_t bandBlocks() {
+        int fixed = surfaceBand();
+        if (fixed > 0) return uint32_t(std::min(fixed, NOISE_H_BLOCKS + 1));
+        static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
+        if (bandPerBlock_ <= 0.0) return 8;  // (not measured yet: a few blocks, never the whole pass of 50 ms the first call took)
+        return uint32_t(std::clamp(partMs * 0.35 / bandPerBlock_, 2.0, 64.0));
+    }
+    void bandSeen(uint32_t blocks, double ms) {
+        if (blocks == 0) return;
+        double per = ms / double(blocks);
+        bandPerBlock_ = std::max(bandPerBlock_ * 0.995, per);
     }
     uint32_t sliceOf(uint32_t kind, uint32_t n) {
         static const bool on = [] {
