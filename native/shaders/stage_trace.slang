@@ -490,6 +490,10 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             int mode = int(frame.lodParams.x);
             uint2 cell = mode == 2 ? id.xy / 2u : (mode == 3 ? uint2(id.x / 8u, id.y / 4u) : id.xy);
             float xi = mode == 1 ? 0.5 : frac(pixelDither(cell, 11u) + (frame.jitter.z > 0.5 ? 0.618034 * float(frame.temporal.x & 255u) : 0.0));
+            // (where a chord starts inside level 1's resident radius the threshold is the pixel's own, not rotated with the
+            // TAA: there a rotating one flipped pixels between level 0 and level 1 every frame, the near shimmer)
+            float xiFix = mode == 1 ? 0.5 : frac(pixelDither(cell, 11u));
+            float xiC = xi;  // (this chord's)
             float R = frame.camFrac.w;
             float kc = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;  // (the parabola: y + kc t^2)
             float pa = frame.params.w * frame.params.z;                // (blocks a pixel covers per block of distance)
@@ -526,13 +530,14 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                     if (!grazing && a.y > worldTop && dir.y + 2.0 * kc * t0 >= 0.0) break;  // (above the world, climbing)
                     hitFrom = t0;
                     float lf = log2(max(t0 * pa, 1e-6)) + frame.lodParams.z;
-                    int want = grazing ? gK : clamp(int(floor(max(lf, lodRes(a, lodCount)) + xi)), 0, lodCount - 1);
+                    xiC = max(abs(a.x), abs(a.z)) < lodR(1) ? xiFix : xi;
+                    int want = grazing ? gK : clamp(int(floor(max(lf, lodRes(a, lodCount)) + xiC)), 0, lodCount - 1);
                     lodC = grazing ? gK : max(lodC, want);
                     float s = float(1 << lodC);
                     float tEnd = grazing ? gEnd : 1e30;
                     if (!grazing && lodC == want && lodC + 1 < lodCount) {
                         // (farMain's tEnd: the footprint, or the place, reaching lod + 1 at the threshold)
-                        float target = float(lodC + 1) - xi;
+                        float target = float(lodC + 1) - xiC;
                         float tF = exp2(target) / pa;
                         float rd;
                         if (target <= 1.0) rd = lodR(0) * exp2(target - 1.0);
@@ -959,10 +964,10 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 // the hit to 3 past it. (Not for a coarse cube that wants its smooth surface: its cube face's cos is the
                 // staircase's, not the surface's)
                 float vh = float(1 << k);
-                bool wantSmooth = k > 0 && !noSmooth && vh >= SMOOTH_COARSE_PX * tHit * pa;
+                bool wantSmooth = k > 1 && !noSmooth && vh >= SMOOTH_COARSE_PX * tHit * pa;
                 float cs = clamp(abs(d[axis]), clamp(frame.lodParams.y, 0.05, 1.0), 1.0);
                 float lh = max(log2(max(tHit * pa / cs, 1e-6)) + frame.lodParams.z, lodRes(o + dir * tHit + float3(0, kc * tHit * tHit, 0), lodCount));
-                int k2 = clamp(int(floor(lh + xi)), 0, lodCount - 1);
+                int k2 = clamp(int(floor(lh + xiC)), 0, lodCount - 1);
                 if (!wantSmooth && k2 > lodC) {
                     fineT = tHit;
                     fineMat = mat;
@@ -983,7 +988,8 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             // entry (never before the chord that hit) to a voxel and a half past it. Once a ray, after its walk: not inside
             // the walk's divergent loop
             float vs = float(1 << k);
-            if (tHit < 0.0 || k == 0 || noSmooth || vs < SMOOTH_COARSE_PX * tHit * pa) break;
+            // (not level 1: near the camera its smooth surface and level 0's cubes alternated, blobs among blocks)
+            if (tHit < 0.0 || k <= 1 || noSmooth || vs < SMOOTH_COARSE_PX * tHit * pa) break;
             float3 rs = (o + dir * tHit + float3(0, kc * tHit * tHit, 0) - float3(gOrigin - frame.camInt.xyz)) / vs;
             float3 ds = (dir + float3(0, 2.0 * kc * tHit, 0)) / vs;
             float back = -min(vs, max(tHit - hitFrom, 0.0));
