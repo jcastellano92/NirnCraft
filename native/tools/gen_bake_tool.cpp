@@ -146,8 +146,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         auto say = [&](const char* what, size_t done, size_t all) {
             if (nowMs() - lastSaid < 30000.0) return;
             lastSaid = nowMs();
-            std::fprintf(stderr, "TRACE progress view %d %s %zu / %zu
-", vi, what, done, all);
+            std::fprintf(stderr, "TRACE progress view %d %s %zu / %zu\n", vi, what, done, all);
         };
         for (int k = 6; k >= 1; k--) {
             int span = 256 << k;
