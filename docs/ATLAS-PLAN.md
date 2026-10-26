@@ -28,6 +28,17 @@ Scope: everything NirnCraft adds (NPCs, creatures, battles, fluids, weather) can
 Replacing vanilla's own tick may use the narrow mixin exception (AGENT-RULES, owner, 2026-10-25), case by case. It starts after
 the renderer milestone, with a read-only design study first.
 
+**Owning the loader (owner, 2026-10-25).** Owner's note: "we could just create our own NeoForge if need be"; a
+conversion layer would make it a win-win.
+- **(A) First choice:** a thin NeoForge fork that only adds events and hooks (skip chunk meshing, tick scheduling and
+  rate limits, simulation level of detail, our chunk loading) and changes nothing, so every NeoForge mod runs as is with
+  no conversion layer. A small rebase per update; offer the hooks upstream.
+- **(B) Only if needed:** a real fork plus a compatibility layer translating NeoForge mod calls (precedent: Sinytra
+  Connector).
+- **(C) Our own engine or server:** only if the game outgrows Minecraft.
+- **Terms:** NeoForge is LGPL-2.1, so our changes stay open under it; ship patches, never Minecraft's code.
+- **Timing:** decided when the simulation phase starts.
+
 **How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
 experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
 gate, and a new one replaces a slower one. The process itself keeps improving, autonomously, for hours at a time.
