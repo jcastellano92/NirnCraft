@@ -365,6 +365,11 @@ scene (hundreds of entities) within the frame bar; an owner test at night with f
 ### Stage 5: one world: vanilla chunks off, collisions ours, and scale
 
 - Vanilla's chunk meshing and its chunk sending off; vanilla simulates only a small radius.
+  - Without mixins (ATLAS-RENDER-INVENTORY §3, 2026-10-25): the draws are already dropped (the visibleSections swap
+    in AtlasNearPass). Next, empty models while sections mesh (DelegateBlockStateModel in
+    `ModelEvent.ModifyBakingResult`, adding nothing for `RenderSectionRegion`); sections still compile, so entity
+    visibility, block entities and culling stay correct. Check whether NeoForge's custom fluid renderer covers
+    vanilla water and lava. Mixins only for what's left, under the narrow exception.
 - **Collisions and physical interactions from our voxel world** on the client: the player's and entities'
   collision shapes, raycasts (block targeting) and fluids read the same store the renderer draws, so they always
   agree. The server checks the key pieces only.
