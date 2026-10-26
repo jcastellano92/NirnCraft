@@ -2682,10 +2682,11 @@ private:
             pace_.lastSubAt = std::chrono::steady_clock::now();
         }
         double& bucket = pace_.cls == 1 ? pace_.tokensFar : pace_.tokens;
-        // (the far path: also not while the frames are over their target (a duty the pacer has cut); a part every 300 ms at most
-        // then, so that a tile begun finishes)
-        while ((((bucket < need) || (pace_.cls == 1 && pace_.periodMs > 0.0 && pace_.duty < 0.4)) && waited < 300.0) ||
-               (pace_.probing && waited < 1300.0)) {
+        // (the far path waits for its tokens 40 ms a submission at most: a tile holds the generator's locks (the render thread's
+        // info call among them) for all its waits, and 300 ms a submission, with a duty gate the tile itself pulled down, held the
+        // frame thread 1.4 s, twice 10 s. Whether a background tile starts at all is the Java side's (AtlasClientGen.backgroundRoom).)
+        const double cap = pace_.cls == 1 ? 40.0 : 300.0;
+        while ((bucket < need && waited < cap) || (pace_.probing && waited < 1300.0)) {
             if (pace_.probing && !pace_.probeDrained) {
                 // (the probe times the frames alone: ours in flight done first, then from the next frame)
                 std::string e;
