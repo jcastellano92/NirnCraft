@@ -36,6 +36,12 @@ conversion layer would make it a win-win.
 - **(B) Only if needed:** a real fork plus a compatibility layer translating NeoForge mod calls (precedent: Sinytra
   Connector).
 - **(C) Our own engine or server:** only if the game outgrows Minecraft.
+- **Default direction: host plus our engine (2026-10-25).** Minecraft and NeoForge stay the host: vanilla rules,
+  inventory and the mod ecosystem. Our native engine, as Infinite ATLAS already is for rendering and generation,
+  also runs NirnCraft's simulation (NPCs, creatures, battles, fluids, weather, crowd pathing), data-oriented, on the GPU
+  where it fits. Our network layer runs over custom payloads (deltas, bakes, cooperative baking, far players). On
+  servers the engine can run as a companion process beside the Minecraft server over a fast local link. Hooks into
+  vanilla's depths only through (A) or the narrow mixin exception.
 - **Terms:** NeoForge is LGPL-2.1, so our changes stay open under it; ship patches, never Minecraft's code.
 - **Timing:** decided when the simulation phase starts.
 
