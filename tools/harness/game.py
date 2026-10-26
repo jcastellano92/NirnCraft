@@ -241,6 +241,19 @@ def launch(group, groups, limit=900, attempt=1):
 def _launch(group, groups, limit=900):
     tr.step("launch", group=group)
     _iris_enable()
+    # a test run never starts in Infinite ATLAS safe mode: an earlier run that was killed or crashed while the far field
+    # was starting leaves the guard marker, and the next run would test with the far field off (2026-10-26). The crash
+    # is reported, the marker cleared.
+    guard = GAME / "config" / "nirncraft-atlas-guard.properties"
+    if guard.exists():
+        try:
+            note = "; ".join(guard.read_text(encoding="utf-8", errors="replace").split())[:300]
+        except OSError:
+            note = "?"
+        log(f"  WARNING: the previous session ended while the far field was starting ({note}); guard cleared so this "
+            "run tests the far field")
+        tr.step("atlas_guard_cleared", note=note)
+        guard.unlink(missing_ok=True)
     cfg = groups.get(group, {})
     jvm = dict(cfg.get("jvm", {}))
     # NIRNCRAFT_HARNESS_JVM="k=v,k=v": flags for this run only (an A/B of one flag, a private world or cache folder that
@@ -260,6 +273,17 @@ def _launch(group, groups, limit=900):
     t0, gone = time.monotonic(), 0
     while time.monotonic() - t0 < limit:
         if ready():
+            # a client that came up with Infinite ATLAS stopped (safe mode, a failed start) is not a test of ATLAS:
+            # fail at once instead of sitting on the loading screen's error (2026-10-26)
+            try:
+                tail = (GAME / "logs" / "latest.log").read_text(encoding="utf-8", errors="replace")[-200000:]
+            except OSError:
+                tail = ""
+            m = re.search(r"Infinite ATLAS (stopped|far field off)[^\n]{0,240}", tail)
+            if m:
+                tr.step("atlas_not_running", line=m.group(0)[:240])
+                close()
+                raise RuntimeError("Infinite ATLAS is not running in this client (" + m.group(0)[:240] + ")")
             STATE.parent.mkdir(parents=True, exist_ok=True)
             STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
                                          "shaders": True, "since": time.time()}), encoding="utf-8")
