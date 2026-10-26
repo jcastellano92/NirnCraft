@@ -63,7 +63,7 @@ public final class AtlasRecorder {
     static final Zone CLIENT_TICK = zone("mc:clientTick"), RENDER_FRAME = zone("mc:renderFrame (vanilla + every mod)");
 
     private static volatile boolean on;
-    private static MethodHandle zoneH, zoneIdH, trackIdH, nameH, nowH, configureH, dumpH, statusH, countH, lastH;
+    private static MethodHandle zoneH, zoneIdH, trackIdH, nameH, nowH, configureH, dumpH, dumpAsyncH, statusH, countH, lastH;
     private static long offset;  // native clock - System.nanoTime()
     private static int gcTrack, gcConcurrentTrack;
     private static long tickT0, renderT0;
@@ -158,6 +158,9 @@ public final class AtlasRecorder {
                     Linker.Option.critical(false));
             nameH = bind(l, lib, "atlas_fr_thread_name", FunctionDescriptor.ofVoid(ADDRESS));
             dumpH = bind(l, lib, "atlas_fr_dump", FunctionDescriptor.of(ADDRESS, ADDRESS));
+            // (a core from before the async dump has none: the command then dumps on its own thread, as it did)
+            dumpAsyncH = lib.find("atlas_fr_dump_async").isPresent()
+                    ? bind(l, lib, "atlas_fr_dump_async", FunctionDescriptor.of(ADDRESS, ADDRESS)) : null;
             statusH = bind(l, lib, "atlas_fr_status", FunctionDescriptor.of(ADDRESS));
             countH = bind(l, lib, "atlas_fr_dump_count", FunctionDescriptor.of(JAVA_LONG));
             lastH = bind(l, lib, "atlas_fr_last_dump", FunctionDescriptor.of(ADDRESS));
@@ -265,14 +268,25 @@ public final class AtlasRecorder {
             if (n == seenDumps) return;
             seenDumps = n;
             String dir = ((MemorySegment) lastH.invokeExact()).reinterpret(4096).getString(0);
-            String verdict = verdictOf(dir);
-            com.nirncraft.NirnCraft.LOGGER.warn("atlas recorder: frame spike dumped to {}: {}", dir, verdict);
-            var mc = Minecraft.getInstance();
-            if (mc.player != null) mc.player.sendSystemMessage(Component.literal("atlas trace: " + dir + " - " + verdict));
+            // (the summary is read and the line made off the tick: a file read behind a virus scan is not a tick's business)
+            NOTES.execute(() -> {
+                String verdict = verdictOf(dir);
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas recorder: frame spike dumped to {}: {}", dir, verdict);
+                var mc = Minecraft.getInstance();
+                mc.execute(() -> {
+                    if (mc.player != null) mc.player.sendSystemMessage(Component.literal("atlas trace: " + dir + " - " + verdict));
+                });
+            });
         } catch (Throwable t) {
             // ignore
         }
     }
+
+    private static final java.util.concurrent.ExecutorService NOTES = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "nirncraft-atlas-recorder-notes");
+        t.setDaemon(true);
+        return t;
+    });
 
     private static String verdictOf(String dir) {
         try {
@@ -295,10 +309,15 @@ public final class AtlasRecorder {
         }
     }
 
-    /** A dump of the last window now: the directory, or "error: ...". */
+    /**
+     * A dump of the last window, written by the recorder's own thread, one at a time (it is 1 to 2 s of copying and formatting,
+     * never the calling thread's): "queued" (tick announces it when it is down), "busy: ..." or "error: ...". Against a core
+     * without the async call it dumps here, as before (the directory).
+     */
     public static String dumpNow(String reason) {
         if (!on) return "error: the recorder is off (-Dnirncraft.atlas.recorder=true, and the atlas must have started)";
         try (Arena a = Arena.ofConfined()) {
+            if (dumpAsyncH != null) return ((MemorySegment) dumpAsyncH.invokeExact(a.allocateFrom(reason))).reinterpret(4096).getString(0);
             String dir = ((MemorySegment) dumpH.invokeExact(a.allocateFrom(reason))).reinterpret(4096).getString(0);
             seenDumps = (long) countH.invokeExact();  // (a manual dump is not announced again by tick)
             return dir;
@@ -310,7 +329,8 @@ public final class AtlasRecorder {
     static void onCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("nirncraft-atlas-trace").executes(ctx -> {
             String dir = dumpNow("manual");
-            String msg = dir.startsWith("error") ? "atlas trace: " + dir
+            String msg = dir.startsWith("error") || dir.startsWith("busy") ? "atlas trace: " + dir
+                    : dir.equals("queued") ? "atlas trace: writing it now (the chat says where when it is down)"
                     : "atlas trace: " + dir + " (summary.txt, trace.json) - " + verdictOf(dir);
             ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
             return Command.SINGLE_SUCCESS;
