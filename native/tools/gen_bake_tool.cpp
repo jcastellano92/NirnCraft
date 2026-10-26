@@ -29,6 +29,7 @@
 #include "atlas/atlas.h"
 #include "../src/camera.hpp"
 #include "../src/png.hpp"
+#include "atlas_export.hpp"
 
 static std::vector<uint32_t> load(const std::string& path) {
     std::ifstream f(path, std::ios::binary | std::ios::ate);
@@ -92,7 +93,12 @@ static int infoInt(const std::string& inf, const char* key) {
 // 3 % over 8 frames with the streaming queues empty (settle=<cap> frames at most, 150): the levels still fill in after
 // nothing is pending, and a bench timed then measured the fill, not the kernel (the horizon's far pass +-20 %).
 // stableFrames on the line; farTraceMs / farShadeMs the timed frames' medians, farTraceP10 / farShadeP10 their tenth
-// percentiles: the GPU's clocks step between blocks of frames, the median moves with the mix of blocks. Neither the
+// percentiles: the GPU's clocks step between blocks of frames, the median moves with the mix of blocks.
+// blocks=<dir>/blocks.bin volume=<dir>/<x>.als|.als2|.alv: an in-game export as the scene (atlas_render's keep=near:
+// every block with a model, a non-cube one's micro-voxel brick from quads.bin / sprites.bin beside blocks.bin, the 16 x
+// 16 face textures; bricks=0 / textures=0 leave them out), uploaded once before the views; a view's ground is the
+// export's where it has one (its above= from there). With an export, tiles=0 near=0 keep the generator out of it (its
+// terrain is not the export's world; gen=0, the default with one, leaves it out). Neither the
 // steady phase nor the timed frames read the outputs back (a G-buffer written across the bus costs the far kernel
 // ~8 ms: the game keeps them on the device). ATLAS_AB (vk_backend.cpp): every other frame side B; its ms as bTraceMs ...,
 // and abRatio, side B's far work over side A's frame by frame (median; abRatioP10 / P90 its spread over abPairs):
@@ -135,10 +141,81 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         }
     }
     std::string outPrefix = arg(argc, argv, "out", "views"), list = arg(argc, argv, "views", "0,0,60,90,-6");
+    // (the export: once, before the views)
+    exportdata::Ground exGround;
+    bool haveExport = false;
+    if (std::string vol = arg(argc, argv, "volume", ""); !vol.empty()) {
+        double l0 = nowMs();
+        std::string bp = arg(argc, argv, "blocks", "");
+        std::vector<exportdata::State> lib;
+        std::vector<exportdata::Section> secs;
+        if (!exportdata::loadBlocks(bp, lib) || !exportdata::loadVolume(vol, secs)) {
+            std::fprintf(stderr, "export: no block library at '%s' (blocks=) or no volume at '%s'\n", bp.c_str(), vol.c_str());
+            return 2;
+        }
+        std::string side = vol.substr(0, vol.rfind('.')) + ".json";
+        uint32_t grass = exportdata::jsonColour(side, "grass", 0x91BD59), foliage = exportdata::jsonColour(side, "foliage", 0x77AB2F),
+                 water = exportdata::jsonColour(side, "water", 0x3F76E4);
+        exportdata::ModelLib ml;
+        auto sl = bp.find_last_of("/\\");
+        if (!exportdata::loadModels(sl == std::string::npos ? std::string() : bp.substr(0, sl + 1), ml)) {
+            std::fprintf(stderr, "export: no quads.bin / sprites.bin beside blocks=\n");
+            return 2;
+        }
+        std::vector<uint8_t> modelled(ml.states.size(), 0);
+        for (size_t i = 0; i < ml.states.size(); i++)
+            modelled[i] = exportdata::brickWorthy(ml, uint32_t(i)) ? 1 : exportdata::holedCube(ml, uint32_t(i)) ? 2 : 0;
+        exportdata::Loaded ex;
+        std::string why;
+        if (!exportdata::upload(ctx, lib, secs, false, grass, foliage, water, 64, ex, why, nullptr, true, false, &modelled, false)) {
+            std::fprintf(stderr, "export: %s\n", why.c_str());
+            return 2;
+        }
+        size_t bricked = 0;
+        if (std::atoi(arg(argc, argv, "textures", "1").c_str()) > 0 &&
+            !exportdata::uploadTextures(ctx, ml, ex.firstMat, ex.matState, grass, foliage, why)) {
+            std::fprintf(stderr, "textures: %s\n", why.c_str());
+            return 2;
+        }
+        if (std::atoi(arg(argc, argv, "bricks", "1").c_str()) > 0 &&
+            !exportdata::uploadBricks(ctx, ml, ex.firstMat, ex.matState, grass, foliage, bricked, why, false)) {
+            std::fprintf(stderr, "bricks: %s\n", why.c_str());
+            return 2;
+        }
+        exGround = exportdata::ground(secs, lib, ex);
+        haveExport = true;
+        // (its water: blocks of the water class and their columns' bounds, where a view finds it)
+        size_t wat = 0;
+        std::map<std::pair<int, int>, size_t> wcell;
+        int wx0 = 1 << 30, wx1 = -(1 << 30), wz0 = 1 << 30, wz1 = -(1 << 30);
+        for (const exportdata::Section& sc : secs)
+            for (int i = 0; i < 4096; i++) {
+                uint32_t id = sc.at(i);
+                if (id >= lib.size() || lib[id].cls != 2) continue;
+                wat++;
+                int bx = sc.cx * 16 + (i & 15), bz = sc.cz * 16 + ((i >> 4) & 15);
+                wx0 = std::min(wx0, bx), wx1 = std::max(wx1, bx), wz0 = std::min(wz0, bz), wz1 = std::max(wz1, bz);
+                wcell[{int(std::floor(bx / 64.0)), int(std::floor(bz / 64.0))}]++;
+            }
+        {
+            // (the 64-block cells with the most water, where a view of it goes)
+            std::vector<std::pair<size_t, std::pair<int, int>>> top;
+            for (auto& [c, n] : wcell) top.push_back({n, c});
+            std::sort(top.rbegin(), top.rend());
+            for (size_t i = 0; i < std::min<size_t>(top.size(), 5); i++)
+                std::printf("{\"waterCell\":[%d,%d],\"blocks\":%zu}\n", top[i].second.first * 64 + 32, top[i].second.second * 64 + 32, top[i].first);
+        }
+        std::printf("{\"exportWater\":%zu,\"x\":[%d,%d],\"z\":[%d,%d]}\n", wat, wx0, wx1, wz0, wz1);
+        std::printf("{\"export\":\"%s\",\"sections\":%zu,\"materials\":%zu,\"shaped\":%zu,\"bricked\":%zu,\"x\":[%d,%d],\"z\":[%d,%d],\"ms\":%.0f}\n",
+                    vol.c_str(), ex.sections, ex.states, ex.shaped, bricked, ex.x0, ex.x1, ex.z0, ex.z1, nowMs() - l0);
+        std::fflush(stdout);
+    }
     const uint32_t INFO = 164;
     std::vector<uint32_t> color(size_t(W) * H), normal(size_t(W) * H);
     std::vector<float> depth(size_t(W) * H), linear(size_t(W) * H * 4), nearLight(size_t(W) * H * 4);
     AtlasFrameOutput out{color.data(), normal.data(), depth.data(), linear.data(), nearLight.data()};
+    // (gen=0, an export's default: the generator's tiles and chunks left out, the scene the export's alone)
+    const bool useGen = std::atoi(arg(argc, argv, "gen", haveExport ? "0" : "1").c_str()) > 0;
     int vi = 0;
     size_t s0 = 0;
     while (s0 < list.size()) {
@@ -155,6 +232,12 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             // (the info row: 4 words, then per section 4 words, the third its kind: 1 mixed, 2 solid; section 0 at y -64)
             for (int s = 39; s >= 0; s--)
                 if (info[4 + s * 4 + 2] != 0) { ground = -64 + 16.0 * (s + 1); break; }
+        }
+        {
+            // (an export's ground where it has one)
+            float t;
+            uint16_t m, u;
+            if (haveExport && exGround.at(int(std::floor(vx)), int(std::floor(vz)), t, m, u)) ground = t;
         }
         AtlasFrame f{};
         f.cameraPos[0] = vx;
@@ -182,7 +265,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
             lastSaid = nowMs();
             std::fprintf(stderr, "TRACE progress view %d %s %zu / %zu\n", vi, what, done, all);
         };
-        for (int k = 6; k >= 1; k--) {
+        for (int k = 6; k >= 1 && useGen; k--) {
             int span = 256 << k;
             int tx0 = int(std::floor(vx / span)), tz0 = int(std::floor(vz / span));
             uint32_t rows = (44u + (1u << k) - 1u) >> k;
@@ -215,7 +298,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         std::vector<std::pair<int, int>> todo;
         for (int dz = -nearR; dz <= nearR; dz++)
             for (int dx = -nearR; dx <= nearR; dx++)
-                if (dx * dx + dz * dz <= nearR * nearR) todo.push_back({c0[0] + dx, c0[1] + dz});
+                if (useGen && dx * dx + dz * dz <= nearR * nearR) todo.push_back({c0[0] + dx, c0[1] + dz});
         std::sort(todo.begin(), todo.end(), [&](auto& a, auto& b) {
             return (a.first - c0[0]) * (a.first - c0[0]) + (a.second - c0[1]) * (a.second - c0[1]) <
                    (b.first - c0[0]) * (b.first - c0[0]) + (b.second - c0[1]) * (b.second - c0[1]);
