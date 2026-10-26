@@ -1,4 +1,5 @@
 #include "voxgrid.hpp"
+#include "vgask.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -1191,10 +1192,19 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
             }
             ids = src.raw ? VgSrc{VgIds(src.raw, &src.raw->mats), nullptr} : VgSrc{nullptr, src.packed};
         } else {
-            // a GPU section level 0 gave up or did not take: asked for again (once) when it would be taken now
+            // a GPU section level 0 gave up or did not take: asked for again when it would be taken now, and again
+            // after WANT_AGAIN batches if the answer never came (vgask)
             auto it = gpuStandby_.find(k);
-            if (it == gpuStandby_.end() || it->second || !canTake(cand.p)) continue;
+            if (it == gpuStandby_.end() || !canTake(cand.p)) continue;
+            auto w = wantedAt_.find(k);
+            if (it->second && w == wantedAt_.end()) {
+                wantedAt_[k] = batches;  // (asked elsewhere: its clock starts)
+                continue;
+            }
+            if (it->second && !vgask::due(true, w->second, batches, WANT_AGAIN)) continue;
+            if (it->second) reasked_++;
             it->second = 1;
+            wantedAt_[k] = batches;
             reportWanted({0, k.x, k.y, k.z});
             continue;
         }
@@ -1474,17 +1484,23 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         worldOf(c, sx, sy, sz);
         Key k{sx, sy, sz};
         if (auto g = gpuStandby_.find(k); g != gpuStandby_.end()) {
-            if (!g->second) {
-                auto w = wantedAt_.find(k);
-                if (w != wantedAt_.end() && batches - w->second < WANT_AGAIN) {
-                    wantedHeld_++;  // (asked lately and not taken: not again yet, else the generator remakes it each batch)
-                    continue;
-                }
-                g->second = 1;
-                wantedAt_[k] = batches;
-                wantedAgain_++;
-                reportWanted({0, sx, sy, sz});
+            auto w = wantedAt_.find(k);
+            bool ever = w != wantedAt_.end();
+            if (g->second && !ever) {
+                wantedAt_[k] = batches;  // (asked elsewhere, an edit's base: its clock starts)
+                continue;
             }
+            // never asked; or asked lately and not taken: not again yet, else the generator remakes it each batch; or
+            // asked and never answered (a lost answer kept the hole for good): again after WANT_AGAIN batches
+            if (!vgask::due(ever, ever ? w->second : 0, batches, WANT_AGAIN)) {
+                wantedHeld_++;
+                continue;
+            }
+            if (g->second) reasked_++;
+            g->second = 1;
+            wantedAt_[k] = batches;
+            wantedAgain_++;
+            reportWanted({0, sx, sy, sz});
             continue;
         }
         auto it = standby_.find(k);
