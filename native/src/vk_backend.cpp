@@ -604,6 +604,22 @@ public:
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = farLean_ == 2 ? stage_trace_clock_spv_size : stage_trace_spv_size;
             smci.pCode = farLean_ == 2 ? stage_trace_clock_spv : stage_trace_spv;
+            // (ATLAS_LEAN_SPV: a .spv file in its place, a variant measured without a rebuild)
+            std::vector<uint32_t> leanFile;
+            if (const char* f = std::getenv("ATLAS_LEAN_SPV"); f && *f) {
+                if (FILE* fp = std::fopen(f, "rb")) {
+                    std::fseek(fp, 0, SEEK_END);
+                    long n = std::ftell(fp);
+                    std::fseek(fp, 0, SEEK_SET);
+                    leanFile.resize(size_t(n > 0 ? n : 0) / 4);
+                    if (n > 0 && std::fread(leanFile.data(), 4, leanFile.size(), fp) == leanFile.size()) {
+                        smci.codeSize = leanFile.size() * 4;
+                        smci.pCode = leanFile.data();
+                        std::fprintf(stderr, "[atlas] lean trace stage from %s (%ld bytes)\n", f, n);
+                    }
+                    std::fclose(fp);
+                }
+            }
             if (vkCreateShaderModule(dev_, &smci, nullptr, &leanShader_) == VK_SUCCESS) {
                 VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
                 cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
