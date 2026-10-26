@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <thread>
 #include <cstdlib>
 #include <stdexcept>
 #include <cmath>
@@ -2141,6 +2142,20 @@ static void testCoarseGiven() {
 // jump away and back: the grid takes them from the warm tier, expanded on the GPU) the same as from the uploads; over
 // the warm budget the sections go to the cold tier on disk (the regenerable one dropped) and come back from it, in this
 // context and in a new one (a reload, no stream).
+// the warm tier's spills are a spiller thread's (World::spiller, in half-millisecond slices: 83fe24ac): wait until it has
+// dropped and spilled at least this many (atlas_info's tiers "dropped" / "spilled"), at most 5 s
+static void waitSpills(AtlasContext* ctx, unsigned long long dropped, unsigned long long spilled) {
+    auto num = [](const std::string& inf, const char* key) {
+        size_t at = inf.find(key);
+        return at == std::string::npos ? 0ull : std::strtoull(inf.c_str() + at + std::strlen(key), nullptr, 10);
+    };
+    for (int i = 0; i < 500; i++) {
+        std::string inf = atlas_info(ctx);
+        if (num(inf, "\"dropped\":") >= dropped && num(inf, "\"spilled\":") >= spilled) return;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
 static void testTiers() {
     std::printf("tiers\n");
     namespace fs = std::filesystem;
@@ -2213,6 +2228,7 @@ static void testTiers() {
     double away[3] = {56.0 + 20000.0, 300.0, 8.0};
     atlas_update(ctx, away, 0);
     for (int i = 0; i < 3; i++) atlas_render(ctx, &f, &o2);
+    waitSpills(ctx, 1, 6);  // (the six to disk, the regenerable one dropped: the spiller's, not this thread's)
     int awayTier = 0;
     for (int s = 0; s < 7; s++) {
         uint32_t tier = 0;
@@ -2236,6 +2252,7 @@ static void testTiers() {
     // over the warm budget: out of warm (on disk already; the regenerable one dropped), and back from the cold tier
     CHECK(atlas_set_cache(ctx, dir.string().c_str(), 7, 1, 1, 0) == ATLAS_OK);
     atlas_update(ctx, centre, 0);
+    waitSpills(ctx, 2, 0);  // (the regenerable one dropped again; the others on disk already)
     int cold = 0, gone = 0;
     for (int s = 0; s < 7; s++) {
         uint32_t tier = 0;
