@@ -85,7 +85,8 @@ public final class PlayerHold {
         final long sinceTick;
         final long sinceMs = System.currentTimeMillis();
         final ResourceKey<Level> dim;
-        Vec3 pos;
+        Vec3 pos;           // (where the player is pinned: their place, or below it where they will land: HoldLanding)
+        final Vec3 origin;  // (where the hold began: the release puts them back there)
         final GameType prevMode;
         final boolean prevNoGravity, prevInvisible, prevMayfly, prevFlying, prevMayBuild, prevInvulnerable, prevInstabuild;
         @Nullable Runnable onRelease;
@@ -98,6 +99,7 @@ public final class PlayerHold {
             this.sinceTick = p.level().getGameTime();
             this.dim = p.level().dimension();
             this.pos = p.position();
+            this.origin = pos;
             this.prevMode = prevMode;
             this.prevNoGravity = noGravity;
             this.prevInvisible = invisible;
@@ -144,8 +146,8 @@ public final class PlayerHold {
     public static String describe(ServerPlayer p) {
         Held h = HELD.get(p.getUUID());
         if (h == null) return p.getGameProfile().name() + ": not held";
-        return String.format("%s: held %d ticks at %.1f %.1f %.1f (real mode %s, pinned %d times, token %d)", p.getGameProfile().name(),
-                p.level().getGameTime() - h.sinceTick, h.pos.x, h.pos.y, h.pos.z, h.prevMode.getName(), h.pins, h.token);
+        return String.format("%s: held %d ticks at %.1f %.1f %.1f%s (real mode %s, pinned %d times, token %d)", p.getGameProfile().name(),
+                p.level().getGameTime() - h.sinceTick, h.origin.x, h.origin.y, h.origin.z, landing(h), h.prevMode.getName(), h.pins, h.token);
     }
 
     // ------------------------------------------------------------------ begin
@@ -208,14 +210,22 @@ public final class PlayerHold {
             p.getPersistentData().put(TAG, t);
         }
         Held h = new Held(TOKENS.incrementAndGet(), reason, p, mode, noGravity, invisible, onRelease);
+        // (in the air, about to fall once released: the camera waits where they will land, so that the loading there is
+        // what the client waits for; the release puts them back here)
+        Vec3 land = HoldLanding.of(p, mode, h.prevMayfly, h.prevFlying, noGravity);
+        if (land != null) h.pos = land;
         HELD.put(p.getUUID(), h);
         apply(p);
+        if (land != null) {
+            p.setPos(land.x, land.y, land.z);
+            if (p.connection != null) p.connection.teleport(land.x, land.y, land.z, p.getYRot(), p.getXRot());
+        }
         // not in the tab list of anyone, and not in the world of anyone
         hideFromOthers(p);
         send(p, new HoldPackets.Held(true, h.token, reason));
         LAST.put(p.getUUID(), h.pos);
-        NirnCraft.LOGGER.info("hold: {} is held at {} {} {} until their client reports its loading complete (real mode {}) [{}]",
-                p.getGameProfile().name(), fmt(h.pos.x), fmt(h.pos.y), fmt(h.pos.z), mode.getName(), reason);
+        NirnCraft.LOGGER.info("hold: {} is held at {} {} {}{} until their client reports its loading complete (real mode {}) [{}]",
+                p.getGameProfile().name(), fmt(h.origin.x), fmt(h.origin.y), fmt(h.origin.z), landing(h), mode.getName(), reason);
     }
 
     /** The hold's state on the player: everything but the tracking and the tab list. Idempotent; also the per-login re-apply. */
@@ -261,9 +271,10 @@ public final class PlayerHold {
     public static boolean release(ServerPlayer p, String why) {
         Held h = HELD.remove(p.getUUID());
         if (h == null) return false;
-        if (p.level().dimension() == h.dim && p.position().distanceToSqr(h.pos) > 1.0E-4) {  // (back exactly where the hold began: the pin runs every other tick)
-            p.setPos(h.pos.x, h.pos.y, h.pos.z);
-            if (p.connection != null) p.connection.teleport(h.pos.x, h.pos.y, h.pos.z, p.getYRot(), p.getXRot());
+        if (p.level().dimension() == h.dim && p.position().distanceToSqr(h.origin) > 1.0E-4) {  // (back exactly where the hold began: the pin runs every other tick; above the landing)
+            p.setPos(h.origin.x, h.origin.y, h.origin.z);
+            if (p.connection != null) p.connection.teleport(h.origin.x, h.origin.y, h.origin.z, p.getYRot(), p.getXRot());
+            LAST.put(p.getUUID(), h.origin);  // (back up from the landing: not a jump)
         }
         restore(p, h);
         p.getPersistentData().remove(TAG);
@@ -491,6 +502,11 @@ public final class PlayerHold {
         } catch (RuntimeException e) {
             // (a stand-in without a listener)
         }
+    }
+
+    /** ", the camera at the landing (y ...)" when the hold waits below where it began; else "". */
+    private static String landing(Held h) {
+        return h.pos.distanceToSqr(h.origin) > 1.0E-4 ? ", the camera at the landing (y " + fmt(h.pos.y) + ")" : "";
     }
 
     private static String fmt(double v) {
