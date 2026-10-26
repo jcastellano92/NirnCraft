@@ -56,6 +56,11 @@ Weather and biome work stay paused until the owner says.
   <command>` (3 build slots, `--exclusive` for GPU-heavy jobs, 16 GB cap per job, a timestamped log and a ledger of
   wait / run / phases per job; the orchestrator runs `locks/watch.py` under a Monitor for stalls). Every test prints
   `TRACE` phase lines (AGENT-RULES.md).
+- **Nothing on the render or server thread waits for the generator's or the store's locks or disk (2026-10-26, atlas-stalls).**
+  Per-tick callers read copies: `AtlasInfo.latest()` (a thread of its own reads atlas_info), `GenCache::stats` / `VoxGrid::infoSnap` /
+  `World::tryInfo` (try-locks, the last numbers when busy). No file I/O under `GenCache::mu_`. Periodic saves (the far journal, the
+  sections' tiles, the surface check) run off the server tick. Generator submissions stay at about 4 ms: pass 4 in bands of y
+  (`ATLAS_GEN_SURFACE_BAND`); passes 0 and 2 are the next ones over (18 and 30 ms seen in game). Guard: `atlas_tests only=stalls`.
 - Close the dev client after each test batch; never run the autotest action queue while the owner plays (it holds the
   player: use the passive profiler instead).
 - The project's pre-rename name never in the tree (a case-insensitive `git grep` for it stays empty); never Bethesda
