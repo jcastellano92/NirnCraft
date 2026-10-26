@@ -44,6 +44,10 @@ conversion layer would make it a win-win.
   vanilla's depths only through (A) or the narrow mixin exception.
 - **Terms:** NeoForge is LGPL-2.1, so our changes stay open under it; ship patches, never Minecraft's code.
 - **Timing:** decided when the simulation phase starts.
+- **Deferred quick spikes for that phase (2026-10-25)**, each a round-1 estimate first:
+  - simulation level of detail: server tick saved with distant mobs ticked less often;
+  - thin-fork cost: patch size and rebase effort of one added hook;
+  - companion-process throughput: chunks/s over shared memory.
 
 **How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
 experiment (the three loops); use tokens well. Tests don't balloon: a test exists only to answer a decision or guard a
