@@ -324,6 +324,10 @@ final class AtlasRoute {
         double step = ph.get("speed").getAsDouble() / 20.0;
         double dir = Math.toRadians(heading);
         double dx = -Math.sin(dir) * step, dz = Math.cos(dir) * step;
+        if (phaseTick == 0 && ph.has("jump")) {  // (a discontinuity: the phase starts this far away, as a teleport; the ground follows once loaded)
+            x += ph.getAsJsonArray("jump").get(0).getAsDouble();
+            z += ph.getAsJsonArray("jump").get(1).getAsDouble();
+        }
         x += dx;
         z += dz;
         int bx = (int) Math.floor(x), bz = (int) Math.floor(z);
