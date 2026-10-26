@@ -273,6 +273,17 @@ def _launch(group, groups, limit=900):
     t0, gone = time.monotonic(), 0
     while time.monotonic() - t0 < limit:
         if ready():
+            # a client that came up with Infinite ATLAS stopped (safe mode, a failed start) is not a test of ATLAS:
+            # fail at once instead of sitting on the loading screen's error (2026-10-26)
+            try:
+                tail = (GAME / "logs" / "latest.log").read_text(encoding="utf-8", errors="replace")[-200000:]
+            except OSError:
+                tail = ""
+            m = re.search(r"Infinite ATLAS (stopped|far field off)[^\n]{0,240}", tail)
+            if m:
+                tr.step("atlas_not_running", line=m.group(0)[:240])
+                close()
+                raise RuntimeError("Infinite ATLAS is not running in this client (" + m.group(0)[:240] + ")")
             STATE.parent.mkdir(parents=True, exist_ok=True)
             STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
                                          "shaders": True, "since": time.time()}), encoding="utf-8")
