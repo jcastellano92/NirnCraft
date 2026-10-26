@@ -119,6 +119,7 @@ the reserved slices stay free for what comes later:
 | Entities and effects (far movers as points, emitters in the light list) | 1-2 ms |
 | **Reserved:** clouds and weather (volumetric, amortised, same trace) | ~2 ms |
 | Post-processing | ~1 ms |
+| World generation during play (near-first; background bake only on idle GPU) | up to ~3 ms moving, ~0 idle |
 
 Far edits re-ingest only the changed sections and their coarse levels (microseconds to a ms each). Far fires and
 lightning go in the light layer; far battles are points or silhouettes. In game the renderer was 25-29 ms on
