@@ -119,6 +119,11 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   - Downloads share one server upload budget; when it's busy, clients generate locally instead of waiting.
   - The remaining limit is vanilla's simulation around players, reduced by the server view cap and the GPU-fed
     server chunks.
+- **Players sharing bakes (2026-10-25):** every received region is checked against the server's region fingerprint and
+  discarded on a mismatch, so no peer needs to be trusted.
+  - Same local network first: fast, with no privacy cost.
+  - Internet peer-to-peer later, opt-in (IP exposure, routers, abuse limits).
+  - A shared mirror for a seed's baseline coarse view covers most first joins more simply.
 
 ### Frame budget (2026-10-25)
 
