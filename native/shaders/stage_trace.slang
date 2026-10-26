@@ -18,6 +18,12 @@
 #ifndef ATLAS_LEAN_CLOCK
 #define ATLAS_LEAN_CLOCK 0
 #endif
+// ATLAS_LEAN_PASS 0: the primary walk (a water surface met from above: its pixel listed in leanList); 1: the water pass
+// over that compacted list, the trace on behind each surface (the blueprint's work lists: each pass its own small
+// state; the water trace inside the primary walk spilled its registers to shared memory, 1280 -> 6912 B a group)
+#ifndef ATLAS_LEAN_PASS
+#define ATLAS_LEAN_PASS 0
+#endif
 
 [[vk::binding(0, 0)]] ConstantBuffer<FrameGpu> frame;
 [[vk::binding(7, 0)]] StructuredBuffer<MaterialGpu> palette;
@@ -29,6 +35,8 @@
 [[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;  // (the last frame's surface distance per pixel)
 [[vk::binding(41, 0)]] RWStructuredBuffer<uint4> farHit;
 [[vk::binding(42, 0)]] StructuredBuffer<uint4> prevFarHit;
+// the water pass's work list: [0] the pixels listed, [1..3] its indirect dispatch (groups of 64, 1, 1), [4..] the pixels
+[[vk::binding(43, 0)]] RWStructuredBuffer<uint> leanList;
 
 static const uint ST_EMPTY = 0u, ST_UNLOADED = 2u, ST_UNIFORM = 3u;  // (voxgrid.hpp VG_*; 1 mixed)
 static const uint RAY_STEPS = 24576u;  // a ray's steps at most (farMain's)
@@ -124,11 +132,20 @@ float unloadedExit(int j, float3 p, float3 d) {
 }
 
 [shader("compute")]
+#if ATLAS_LEAN_PASS == 1
+[numthreads(64, 1, 1)]
+void traceMain(uint3 gid : SV_DispatchThreadID) {
+    uint w = frame.dims.x, h = frame.dims.y;
+    if (gid.x >= leanList[0]) return;
+    uint pix = leanList[4u + gid.x];
+    uint3 id = uint3(pix % w, pix / w, 0u);
+#else
 [numthreads(8, 8, 1)]
 void traceMain(uint3 id : SV_DispatchThreadID) {
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
+#endif
 #if ATLAS_LEAN_CLOCK
     uint64_t clk0 = clockARB();
 #endif
@@ -141,7 +158,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     bool nearRaster = (frame.dims.z & (FRAME_PRIMARY_NEAR | FRAME_PRIMARY_NEAR_LIT)) == FRAME_PRIMARY_NEAR;
     bool seeThrough = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0u;
     float eyeDepth = -1.0;  // (farMain's eyeWaterDepth: the water above the eye, blocks; -1 not in water)
-    if (unified && levelOn(0)) {
+    if (ATLAS_LEAN_PASS == 0 && unified && levelOn(0)) {
         int3 g0 = frame.vgOrigin.xyz * 16;
         int3 ve = int3(floor(frame.camFrac.xyz + float3(frame.camInt.xyz - g0)));
         int X0 = int(frame.vgDims.x), Y0 = int(frame.vgDims.y), Z0 = int(frame.vgDims.z);
@@ -167,7 +184,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     // wider than the pixel), or the sky. (Not the clock build: no shade after it writes the surface it reprojects by.
     // Not with the eye under water, as farMain. Under ATLAS_AB both sides take the other's
     // records: a valid pair when both amortise, biased when one side does not)
-#if !ATLAS_LEAN_CLOCK
+#if !ATLAS_LEAN_CLOCK && ATLAS_LEAN_PASS == 0
     if ((frame.dims.z & FRAME_FAR_AMORT) != 0u && !eyeWater) {
         uint2 tile = id.xy / 8u;
         uint n = w * h, cnt, strd, cnt2;
@@ -224,6 +241,17 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     int wK = 0;
     float tStart = primaryNear ? 0.0 : frame.params.x, hitFrom = 0.0;  // (the walk's start; the start of the chord that hit)
     float tStart0 = tStart;
+#if ATLAS_LEAN_PASS == 1
+    // (the water pass: the surface the primary walk met, from its record: the trace on from it, water passed)
+    uint4 wa0 = farHit[pix * 2u], wb0 = farHit[pix * 2u + 1u];
+    tW = asfloat(wa0.y);
+    wMat = wb0.y;
+    wK = int((wb0.x >> 6) & 15u);
+    steps = wb0.x >> 10;
+    skipWater = true;
+    tStart = unified ? tW : tStart0;
+    tB = unified ? min(tW + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
+#endif
     uint hasAlbedo = 0u;
     float3 alb = float3(0, 0, 0);
     // (6.5, the grazing look: a hit whose face's footprint wants a coarser level than its chord's walks that level
@@ -241,7 +269,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
     // ray's set-up and the walk's state live inside a pass: set up outside, they were live across the smooth search, and
     // the driver's 72 registers and 4352 bytes of shared memory a group were 64 and 768)
     [loop]
-    for (int ph = 0; ph < 2; ph++) {
+    for (int ph = ATLAS_LEAN_PASS; ph < 2; ph++) {
         // (ph 0 the view ray, ph 1 on behind a water surface: each a full trace, its passes and grazing looks)
         pass = 0;
         grazing = false;
@@ -732,9 +760,21 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
         wK = k;
         if (!(primaryNear && !eyeWater && tHit >= 0.0 && (unified || tHit < frame.params.x) && uint(palette[mat].emisClass.y) == 2u)) break;
         tW = unified ? tHit : -1.0;
+#if ATLAS_LEAN_PASS == 0
+        // (a water surface: the trace behind it is the water pass's, its pixel listed; the record holds the surface,
+        // tW, for it: in the unified field its own hit, else the near raster's: the water pass starts where this did)
+        {
+            uint at;
+            InterlockedAdd(leanList[0], 1u, at);
+            if ((at & 63u) == 0u) InterlockedAdd(leanList[1], 1u);
+            leanList[4u + at] = pix;
+        }
+        break;
+#else
         tStart = unified ? tHit : tStart0;
         tB = unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
         skipWater = true;
+#endif
     }
     // the hit record (atlas_far.slang farHitStore's layout: tHit, tW, material, albedo flags; axis, level, water's level,
     // steps; the water's material; the albedo as halves, the frame it was traced: the amortisation's age)

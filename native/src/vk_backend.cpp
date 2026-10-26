@@ -51,6 +51,7 @@
 #include "atlas_farsplit_spv.h" // generated: farMain for the unified field's split frames (ATLAS_FAR_SPLIT)
 #include "stage_trace_spv.h"       // generated: the lean trace stage (stage_trace.slang)
 #include "stage_trace_clock_spv.h" // generated: its clock build (ATLAS_LEAN_CLOCK)
+#include "stage_trace_water_spv.h" // generated: its water pass (ATLAS_LEAN_PASS 1)
 #include "atlas_farshade_spv.h"    // generated: farMain drawing from the hit buffer (ATLAS_FAR_PASS 2)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
@@ -219,7 +220,7 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 43;
+constexpr uint32_t BINDINGS = 44;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
@@ -238,7 +239,9 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
                    // (abi 0.18) the micro-voxel bricks (bricks.hpp BrickStore::pack; atlas_bricks.slang)
                    B_BRICKS = 40,
                    // (FRAME_FAR_AMORT_BIT) each pixel's primary hit, this frame's and the last's (atlas_far.slang farHit)
-                   B_FAR_HIT = 41, B_PREV_FAR_HIT = 42;
+                   B_FAR_HIT = 41, B_PREV_FAR_HIT = 42,
+                   // (ATLAS_FAR_LEAN) the lean stage's water pass's work list: count, indirect dispatch, pixels
+                   B_LEAN_LIST = 43;
 // lightList's words before the tiles' (counters, the score histogram) and a tile's (count + 64 indices)
 constexpr uint32_t LIGHT_LIST_HEAD = 260, LIGHT_TILE_WORDS = 65;
 // gridLightMain (atlas_bricks.slang): its threads (GRID_LIGHT_THREADS: 4 x 4 x 4 blocks each of 192 x 96 x 192) and the
@@ -271,7 +274,7 @@ bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE ||
            b == B_NEAR_INFO || b == B_NEAR_LIGHT || b == B_LIGHT_CAND || b == B_LIGHT_LIST || b == B_NEAR_AGE || b == B_WATER_ADD ||
-           b == B_FAR_HIT;
+           b == B_FAR_HIT || b == B_LEAN_LIST;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -491,6 +494,8 @@ public:
             if (leanPipe_) vkDestroyPipeline(dev_, leanPipe_, nullptr);
             if (leanShader_) vkDestroyShaderModule(dev_, leanShader_, nullptr);
             if (leanPipeB_) vkDestroyPipeline(dev_, leanPipeB_, nullptr);
+            if (waterPipe_) vkDestroyPipeline(dev_, waterPipe_, nullptr);
+            if (waterShader_) vkDestroyShaderModule(dev_, waterShader_, nullptr);
             if (leanShaderB_) vkDestroyShaderModule(dev_, leanShaderB_, nullptr);
             if (shadePipe_) vkDestroyPipeline(dev_, shadePipe_, nullptr);
             if (shadeShader_) vkDestroyShaderModule(dev_, shadeShader_, nullptr);
@@ -661,6 +666,13 @@ public:
         if (leanPipe_ || leanPipeB_) {
             // (and the shade side drawing from the lean hits: farMain, ATLAS_FAR_PASS 2)
             makeLean(atlas_farshade_spv, atlas_farshade_spv_size, shadeShader_, shadePipe_, "farMain (shade)");
+            // (the water pass over the primary walk's list: the trace behind each water surface; ATLAS_LEAN_WATER_SPV
+            // a variant's)
+            std::vector<uint32_t> wFile;
+            if (readSpv(std::getenv("ATLAS_LEAN_WATER_SPV"), wFile))
+                makeLean(wFile.data(), wFile.size() * 4, waterShader_, waterPipe_, "traceMain (lean water)");
+            else
+                makeLean(stage_trace_water_spv, stage_trace_water_spv_size, waterShader_, waterPipe_, "traceMain (lean water)");
         }
         // the split frames' far kernel (the game's unified field: atlas_far.slang ATLAS_FAR_SPLIT, every trace inlined, its
         // state in registers: about half the far pass's time). Its driver compile takes a minute or two the first time (the
@@ -2335,7 +2347,8 @@ private:
             VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
             ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
                  ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err) &&
-                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) || farLean_ || abMode_ == 1 ? px * 32 : 32, false, Mem::DeviceOnly, err);
+                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) || farLean_ || abMode_ == 1 ? px * 32 : 32, false, Mem::DeviceOnly, err) &&
+                 ensure(s.bufs[B_LEAN_LIST], farLean_ || abMode_ == 1 ? (px + 4) * 4 : 16, false, Mem::DeviceOnly, err);
             // filled with "no surface" and "no samples" in record
             if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
             if (ok && s.bufs[B_FAR_HIT].buf != hitBefore) s.hitFresh = true;
@@ -3014,12 +3027,30 @@ private:
         bool splitKernel = nearSplit && lit && !farReloaded_ && farSplitReady_.load(std::memory_order_acquire);
         // (ATLAS_AB: this frame's side; B a lean variant, or farMain's split kernel)
         VkPipeline lean = abB_ ? (abMode_ == 1 ? leanPipeB_ : VK_NULL_HANDLE) : (farLean_ == 1 ? leanPipe_ : VK_NULL_HANDLE);
+        if (splitKernel && (farLean_ || abMode_ == 1) && s.bufs[B_LEAN_LIST].size >= 16) {
+            // (the water pass's list emptied: no pixels, its indirect dispatch 0 x 1 x 1)
+            vkCmdFillBuffer(s.cmd, s.bufs[B_LEAN_LIST].buf, 0, 8, 0u);
+            vkCmdFillBuffer(s.cmd, s.bufs[B_LEAN_LIST].buf, 8, 8, 1u);
+            transferToCompute(s.cmd);
+        }
         if (splitKernel && lean && shadePipe_) {  // (ATLAS_FAR_LEAN 2, the clock build: its counters, no shade)
             // (ATLAS_FAR_LEAN) the lean trace stage writes the hits, the shade side draws from them
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lean);
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
             s.gt.mark(s.cmd, abB_ ? "farTrace B" : "farTrace");
             computeBarrier(s.cmd);
+            if (waterPipe_) {
+                // the water pass: the trace behind each water surface the walk listed, an indirect dispatch of its count
+                VkMemoryBarrier ib{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+                ib.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                ib.dstAccessMask = VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+                vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT, 0, 1, &ib, 0,
+                                     nullptr, 0, nullptr);
+                vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, waterPipe_);
+                vkCmdDispatchIndirect(s.cmd, s.bufs[B_LEAN_LIST].buf, 4);
+                s.gt.mark(s.cmd, abB_ ? "farWater B" : "farWater");
+                computeBarrier(s.cmd);
+            }
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, shadePipe_);
         } else {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -3749,6 +3780,8 @@ private:
     bool abAblateSet_ = false;
     VkShaderModule leanShaderB_ = VK_NULL_HANDLE;
     VkPipeline leanPipeB_ = VK_NULL_HANDLE;
+    VkShaderModule waterShader_ = VK_NULL_HANDLE;  // (the lean stage's water pass)
+    VkPipeline waterPipe_ = VK_NULL_HANDLE;
     // every other frame side B (its ablate bits in the frame's jitter.w, as ATLAS_ABLATE's); a frame read back (the
     // bench's image and hit distances) always side A
     void abSide(FrameGpu& frame, bool readBack) {
