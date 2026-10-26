@@ -18,6 +18,11 @@
 #ifndef ATLAS_FAR_SPLIT
 #define ATLAS_FAR_SPLIT 0
 #endif
+// (ATLAS_FAR_PASS 2: farMain drawing from the hit buffer the lean trace stage, stage_trace.slang, wrote: no walk of its
+// own. By the preprocessor only: the one kernel's code stays as it was, byte for byte, its registers' tip with it)
+#ifndef ATLAS_FAR_PASS
+#define ATLAS_FAR_PASS 0
+#endif
 static const bool FAR_SPLIT = ATLAS_FAR_SPLIT != 0;
 // (the trace's walks and cores: real calls in the general kernels, so a cold driver compile stays at a minute or two;
 // inlined into one function in the split frames' farMain, which is built in the background)
@@ -3713,7 +3718,12 @@ static const uint FAR_AMORT_N = 4u;
 void farHitStore(uint pix, float tHit, float tW, TraceResult res, TraceResult wRes, uint stamp) {
     uint i = pix * 2u;
     farHit[i] = uint4(asuint(tHit), asuint(tW), res.mat, res.hasAlbedo);
+#if ATLAS_FAR_PASS
+    uint packed = uint(res.axis + 1) | (uint(clamp(res.lod, 0, 15)) << 2) | (uint(clamp(wRes.lod, 0, 15)) << 6) |
+                  (min(res.steps, 0x3FFFFFu) << 10);
+#else
     uint packed = uint(res.axis + 1) | (uint(clamp(res.lod, 0, 15)) << 2) | (uint(clamp(wRes.lod, 0, 15)) << 6);
+#endif
     farHit[i + 1u] = uint4(packed, wRes.mat, f32tof16(res.albedo.x) | (f32tof16(res.albedo.y) << 16),
                            f32tof16(res.albedo.z) | ((stamp & 0xFFFFu) << 16));
 }
@@ -3878,9 +3888,29 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     bool amort = (frame.dims.z & FRAME_FAR_AMORT) != 0u && !eyeWater;
     uint hitStamp = frame.temporal.x;
     float hitD = -1.0;
+#if ATLAS_FAR_PASS == 2
+    // (the shade: the hit the lean trace stage stored for this pixel this frame; res keeps its own dither)
+    uint4 ha = farHit[pix * 2u], hb = farHit[pix * 2u + 1u];
+    tHit = asfloat(ha.x);
+    tW = asfloat(ha.y);
+    res.mat = ha.z;
+    res.hasAlbedo = ha.w;
+    res.axis = int(hb.x & 3u) - 1;
+    res.lod = int((hb.x >> 2) & 15u);
+    res.albedo = float3(f16tof32(hb.z & 0xFFFFu), f16tof32(hb.z >> 16), f16tof32(hb.w & 0xFFFFu));
+    res.steps = hb.x >> 10;
+    res.t = 0.0;
+    wRes = res;
+    wRes.mat = hb.y;
+    wRes.lod = int((hb.x >> 6) & 15u);
+    uint hitSrc = 0u;
+    bool taken = true;  // (no walk here)
+    if (false) {
+#else
     uint hitSrc = amort ? farHitSource(id.xy, dir, hitD) : 0xFFFFFFFFu;
     bool taken = hitSrc != 0xFFFFFFFFu;
     if (taken) {
+#endif
         // (the record, farHitStore's: res keeps this pixel's own dither)
         uint4 ha = prevFarHit[hitSrc], hb = prevFarHit[hitSrc + 1u];
         float tq = asfloat(ha.x), wq = asfloat(ha.y);
@@ -3937,7 +3967,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             tb = unified ? min(tHit + WATER_SEE * 1.5, frame.params.y) : frame.params.y;
         }
     }
+#if ATLAS_FAR_PASS != 2
     if (amort) farHitStore(pix, tHit, tW, res, wRes, hitStamp);
+#endif
     gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
     gSecAblate = gAblate;
     gSecMode = (gAblate >> 23) & 7u;

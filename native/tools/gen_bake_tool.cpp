@@ -293,6 +293,29 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         std::sort(sorted.begin(), sorted.end());
         std::string png = outPrefix + "_" + std::to_string(vi) + ".png";
         atlas::writePng(png, color.data(), W, H);
+        {
+            // (the hit distance per pixel, float32, -1 the sky: <out>_<i>.dist, for hit masks and distance agreement
+            // between two passes; the host depth unprojected through the frame's inverse view-projection)
+            std::vector<float> dist(size_t(W) * H, -1.0f);
+            const float* m = f.invViewProj;
+            for (uint32_t y = 0; y < H; y++)
+                for (uint32_t x = 0; x < W; x++) {
+                    float z = depth[size_t(y) * W + x];
+                    if (z < 0.0f) {
+                        dist[size_t(y) * W + x] = z <= -1e7f ? -1.0f : -z;  // (past the far plane: minus its distance)
+                        continue;
+                    }
+                    float nx = (x + 0.5f) / W * 2 - 1, ny = 1 - (y + 0.5f) / H * 2;
+                    float p[4];
+                    for (int i = 0; i < 4; i++) p[i] = m[i] * nx + m[4 + i] * ny + m[8 + i] * z + m[12 + i];
+                    if (std::fabs(p[3]) < 1e-20f) continue;
+                    dist[size_t(y) * W + x] = std::sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]) / std::fabs(p[3]);
+                }
+            if (FILE* df = std::fopen((outPrefix + "_" + std::to_string(vi) + ".dist").c_str(), "wb")) {
+                std::fwrite(dist.data(), 4, dist.size(), df);
+                std::fclose(df);
+            }
+        }
         {  // the grid's coverage after the settle (atlas_info voxgrid.coverage: holes and partial columns per level)
             std::this_thread::sleep_for(std::chrono::milliseconds(1700));  // (cached 1.5 s: a fresh one)
             std::string inf = atlas_info(ctx);
