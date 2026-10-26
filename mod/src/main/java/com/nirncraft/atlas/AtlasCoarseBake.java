@@ -145,6 +145,14 @@ final class AtlasCoarseBake implements Runnable {
         return b != null && b.owned(level, tx, tz, win);
     }
 
+    /** (farStep's gate count) The bake's thread has put this tile into the level's window as placed now (`win`'s jumps). */
+    static boolean servedNow(int level, int tx, int tz, int[] win) {
+        AtlasCoarseBake b = active;
+        if (b == null) return false;
+        long[] sv = b.served.get(key(level, tx, tz));
+        return sv != null && sv[2] == win[4];
+    }
+
     private boolean owned(int level, int tx, int tz, int[] win) {
         if (phase <= 0 || level < BACKGROUND || level > LOAD_HI) return false;
         long k = key(level, tx, tz);

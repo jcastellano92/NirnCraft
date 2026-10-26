@@ -1350,6 +1350,29 @@ final class AtlasClientGen implements AutoCloseable {
         boolean near = c.nearIdle && c.deferred.isEmpty() && System.nanoTime() - c.nearWorkNs > 1_000_000_000L;
         return new boolean[]{near, c.farIdle || !c.farOn};
     }
+
+    /** (the loading phase's watchdog) Why the far count and the deferred chunks stand where they are; null without a generator. */
+    static String stallReport() {
+        AtlasClientGen c = active;
+        return c == null ? null : "far gate " + (c.farOn ? c.farGate.why() : "off") + "; " + c.stallLine();
+    }
+
+    /** The worker's state behind a stall: farStep's calls, the deferred chunks and what they wait for. */
+    private String stallLine() {
+        String why;
+        if (deferred.isEmpty()) {
+            why = "none";
+        } else if (AtlasLoadingScreen.holding() && windowUpNs == 0) {
+            AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
+            why = b != null && b.phase() > 0 && !b.loaded() ? "the outer rings wait for the coarse bake (outerRingsWait)"
+                    : farGate.known() && farGate.seen() < farGate.total() && !farGate.released()
+                    ? "the outer rings wait for the far gate (outerRingsWait)" : "flushed when the window's plan is empty";
+        } else {
+            why = "flushed when the window's plan is empty";
+        }
+        return String.format("farStep calls %d, none to ask %d, busy %d, partial %d, made %d (%d from the cache); deferred %d (%s), near idle %s, window up %s, camera set %s",
+                farCalls, farNone, farBusy, farPartial.size(), farTiles - farCached, farCached, deferred.size(), why, nearIdle, windowUpNs != 0, camSet);
+    }
     private volatile long generatedChunks;  // (chunks that went through the generator: not served by the cache)
 
     /** The loading phase's view of the generator (AtlasLoadingScreen). */
@@ -1365,29 +1388,35 @@ final class AtlasClientGen implements AutoCloseable {
     static Progress progress() {
         AtlasClientGen c = active;
         if (c == null) return null;
-        int farTotal = c.farOn ? 6 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1) : 0, farUp = Math.min(c.farDone.size(), farTotal);
-        // the tiles of levels 3-6 are the coarse bake's (AtlasCoarseBake: its own gate, `loaded`): farStep only counts the finer
-        // levels' tiles it makes, so the far gate is those, of their share (it waited for 150 when 50 could ever be done)
+        // the far gate: the tiles of the levels the coarse bake does not gate (levels 3-6 are its own: `loaded`), counted by
+        // farStep's scan of the very windows it serves (AtlasFarGate). It was a fixed 5 x 5 a level (50), which a window on
+        // the tile grid never has (4 x 4): a spawn near the origin held at "32 of 50 tiles" for good, farStep with none to
+        // ask and the outer rings' 961 chunks deferred behind the gate (outerRingsWait).
         AtlasCoarseBake.Progress bk = AtlasCoarseBake.progress();
-        if (c.farOn && bk != null && bk.phase() > 0) {
-            farTotal = 2 * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1);
-            int up = 0, l2 = 0;
-            for (long k : c.farDone) {
-                int lv = (int) (k >>> 56);
-                if (lv < AtlasCoarseBake.LOAD_LO) up++;
-                if (lv == AtlasCoarseBake.BACKGROUND) l2++;
+        int farTotal = 0, farUp = 0;
+        if (c.farOn) {
+            if (c.farGate.known()) {
+                farTotal = c.farGate.total();
+            } else {  // (not scanned yet: the nominal 5 x 5 a gate level, none up)
+                farTotal = (bk != null && bk.phase() > 0 ? AtlasCoarseBake.LOAD_LO - 1 : 6) * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1);
             }
-            // (level 2 is the bake's own once it has it: a tile the bake read from disk or made is not in farDone, and the gate
-            // waited for it for good: a warm launch sat at "25 of 50 tiles", the other 25 being the bake's)
-            int own = Math.min((2 * FAR_TILES + 1) * (2 * FAR_TILES + 1), AtlasCoarseBake.servedAtLevel(AtlasCoarseBake.BACKGROUND));
-            up += Math.max(0, own - l2);
-            farUp = Math.min(up, farTotal);
         }
         // the spawn area the loading gate waits for: the chunks within SPAWN_RADIUS of where the player joined (nearest first
         // the generator makes them); the rest of the window goes on while the player plays
         int spawnTotal = windowChunks(SPAWN_RADIUS), spawnUp = c.jumpNs == 0 ? 0 : c.countUp(SPAWN_RADIUS);
-        return new Progress(camSet, spawnUp, spawnTotal, c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal), farUp, farTotal,
-                c.cachedChunks, c.farCached, c.chunks);
+        boolean nearDone = c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal);
+        if (c.farOn && c.farGate.known()) {
+            // (the stall guard: when the gate is what readiness waits on, the spawn area in and the bake loaded, and neither
+            // its count nor its set moved for 30 s, it is released: a wait that cannot progress never holds the player)
+            boolean blocking = nearDone && (bk == null || bk.phase() <= 0 || bk.loaded());
+            farUp = c.farGate.up(blocking, System.nanoTime());
+            if (farUp < 0) {
+                farUp = -1 - farUp;
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas far gate: released, no progress for {} s: {}; {}",
+                        AtlasFarGate.STALL_NS / 1_000_000_000L, c.farGate.why(), c.stallLine());
+            }
+        }
+        return new Progress(camSet, spawnUp, spawnTotal, nearDone, farUp, farTotal, c.cachedChunks, c.farCached, c.chunks);
     }
 
     /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
@@ -1558,6 +1587,8 @@ final class AtlasClientGen implements AutoCloseable {
     private long farRetryNs, farRetried, farTidyNs;
     private long farCalls, farNoWin, farNone, farLogNs;  // (dev: farStep's calls, levels it found unplaced, calls with no tile)
     private final Map<Long, int[]> farWin = new HashMap<>();  // (a tile: the window's origin and jumps when it was made)
+    /** The finer levels' horizon gate: counted by farStep's own scan of the windows (the set it serves), with its stall guard. */
+    private final AtlasFarGate farGate = new AtlasFarGate();
 
     /** The columns of tile (tx, tz) (16 x 16 chunks of its level) inside the window at (ox, oz) of `side` chunks. */
     private static int tileCover(int tx, int tz, int ox, int oz, int side) {
@@ -1623,12 +1654,21 @@ final class AtlasClientGen implements AutoCloseable {
         int[] bestWin = null;
         boolean tidy = nowNs - farTidyNs > 1_000_000_000L;
         if (tidy) farTidyNs = nowNs;
+        // (the horizon gate's count, from this very scan: the levels the coarse bake does not gate (levels 1-2 while it
+        // runs, all without it), their windows' tiles. The gate waited for a fixed 5 x 5 a level, which a window on the
+        // tile grid never has (4 x 4: a spawn near the origin): "32 of 50" for good, the outer rings deferred behind it)
+        AtlasCoarseBake.Progress bkp = AtlasCoarseBake.progress();
+        int gateHi = bkp != null && bkp.phase() > 0 ? AtlasCoarseBake.LOAD_LO - 1 : 6;
+        int gTotal = 0, gUp = 0, gAsk = 0, gBake = 0, gUnplaced = 0;
+        long gSig = 0;
         for (int k = 1; k <= 6; k++) {
             int[] win = gen.coarseWindow(k);
             if (win == null || win[3] == 0) {
                 farNoWin++;
+                if (k <= gateHi && (win == null || win[2] != 0)) gUnplaced++;  // (side 0: the level is not active, nothing to wait for)
                 continue;
             }
+            if (k <= gateHi) gSig = gSig * 31 + k * 1_000_003L + win[4];
             int span = 256 << k, ox = win[0], oz = win[1], side = win[2];
             if (tidy) {
                 final int lk = k;
@@ -1649,9 +1689,23 @@ final class AtlasClientGen implements AutoCloseable {
                 for (int tx = Math.floorDiv(ox, 16); tx <= Math.floorDiv(ox + side - 1, 16); tx++) {
                     long key = farKey(k, tx, tz);
                     int now = tileCover(tx, tz, ox, oz, side);
-                    if (now == 0 || AtlasCoarseBake.owns(k, tx, tz, win)) continue;  // (the bake's tiles: baked, loaded by its thread)
+                    if (now == 0) continue;
                     int[] sw = farWin.get(key);
-                    if (farDone.contains(key) && sw != null && sw[2] == win[4] && now - tileCover(tx, tz, sw[0], sw[1], side) < 16) continue;
+                    boolean made = farDone.contains(key) && sw != null && sw[2] == win[4];
+                    boolean gate = k <= gateHi;
+                    if (gate) gTotal++;
+                    if (AtlasCoarseBake.owns(k, tx, tz, win)) {  // (the bake's tiles: baked, loaded by its thread)
+                        if (gate) {
+                            if (made || AtlasCoarseBake.servedNow(k, tx, tz, win)) gUp++;
+                            else gBake++;
+                        }
+                        continue;
+                    }
+                    if (gate) {
+                        if (made) gUp++;
+                        else gAsk++;
+                    }
+                    if (made && now - tileCover(tx, tz, sw[0], sw[1], side) < 16) continue;
                     double cx = (tx + 0.5) * span - x, cz = (tz + 0.5) * span - z;
                     double d = Math.sqrt(cx * cx + cz * cz) / span + k * 0.01;
                     if (d < bestD) {
@@ -1663,6 +1717,7 @@ final class AtlasClientGen implements AutoCloseable {
                     }
                 }
         }
+        farGate.scanned(gTotal + gUnplaced * (2 * FAR_TILES + 1) * (2 * FAR_TILES + 1), gUp, gAsk, gBake, gUnplaced, gSig, nowNs);
         if (best < 0) {
             farNone++;
             return false;
