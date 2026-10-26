@@ -135,6 +135,8 @@ final class HoldSelftest {
 
         // frozen: moved, they are put back; a hold with nobody reporting stays a hold
         Vec3 pinned = held.position();
+        // (home is 20 blocks under the build limit: a survival player there will fall, so the hold waits at the landing)
+        if (pinned.y > home.y - HoldLanding.MIN_DROP) problems.add("a survival player held in the air waits there, not where they will land: " + pinned);
         held.setPos(pinned.x + 40, pinned.y - 30, pinned.z);
         held.setDeltaMovement(0, -2, 0);
         held.fallDistance = 12;
@@ -162,7 +164,7 @@ final class HoldSelftest {
         if (a.invulnerable || a.mayfly || !a.mayBuild) problems.add("abilities not restored: invulnerable " + a.invulnerable + " mayfly " + a.mayfly + " mayBuild " + a.mayBuild);
         if (held.isNoGravity() || held.isInvisible()) problems.add("gravity or visibility not restored");
         if (!held.broadcastToPlayer(viewer)) problems.add("a released player is still hidden from the viewer");
-        if (held.position().distanceToSqr(pinned) > 0.01) problems.add("the released player is not where the hold left them");
+        if (held.position().distanceToSqr(home) > 0.01) problems.add("the released player is not where the hold began: " + held.position());
         zombie.setTarget(held);
         if (zombie.getTarget() != held) problems.add("a released player cannot be targeted again");
         if (damageCancelled(held, level.damageSources().mobAttack(zombie))) problems.add("a released player's damage is still cancelled");
@@ -183,6 +185,8 @@ final class HoldSelftest {
         double hop = PlayerHold.JUMP_BLOCKS / 2;
         p.setPos(home.x + hop, home.y, home.z);              // a short move: not an arrival
         if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a " + (int) hop + " block move held the player");
+        p.setPos(home.x + hop + PlayerHold.JUMP_BLOCKS + 14, home.y, home.z);  // fast flight, a lagging tick: a big move, no teleport
+        if (PlayerHold.watchJump(p, true) || PlayerHold.isHeld(p)) problems.add("a big move without a teleport (flight) held the player");
         Vec3 far = new Vec3(home.x + hop + PlayerHold.JUMP_BLOCKS + 400, home.y - 20, home.z + 250);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityTeleportEvent.TeleportCommand(p, p.level(), far.x, far.y, far.z));
         p.setPos(far.x, far.y, far.z);                       // a teleport command: far

@@ -133,7 +133,7 @@ final class AtlasRoute {
             seenSeq = sampleSeq;
             JsonObject s = lastSample;
             if (settleStart == null) settleStart = s;
-            boolean busy = AtlasProbe.d(s, "pending") > 0 || AtlasProbe.d(s, "waiting") > 0 || AtlasProbe.d(s, "gpuWaiting") > 0
+            boolean busy = AtlasProbe.d(s, "pending") > 0 || levelZeroWaits(s)
                     || AtlasProbe.d(s, "coarseWaiting") > 0 || AtlasProbe.d(s, "pendingSections") > 0 || AtlasProbe.d(s, "coarsePending") > 0
                     || s.has("readyPending") || AtlasProbe.d(s, "pipelinesBuilding") > 0;  // (atlas's own readiness: AtlasReady)
             String sig = (long) AtlasProbe.d(s, "genChunks") + "/" + (long) AtlasProbe.d(s, "farTiles") + "/" + (long) AtlasProbe.d(s, "cachedChunks")
@@ -154,6 +154,14 @@ final class AtlasRoute {
                     + "+" + (long) AtlasProbe.d(s, "gpuWaiting") + "+" + (long) AtlasProbe.d(s, "coarseWaiting")) + ", holes "
                     + (s == null ? "?" : String.valueOf(s.get("holes"))) + ", gen " + prevSig);
         }
+    }
+
+    /**
+     * Level 0's waiting sections (waiting, gpuWaiting) keep a settle busy only when level 0 would take one now (AtlasReady's
+     * test: the nearest within its reach and its pool's cut-off); those past the reach wait for the camera, never for time.
+     */
+    static boolean levelZeroWaits(JsonObject s) {
+        return (AtlasProbe.d(s, "waiting") > 0 || AtlasProbe.d(s, "gpuWaiting") > 0) && com.nirncraft.atlas.AtlasReady.levelZeroTakes(s);
     }
 
     private static void finishSettle(boolean ok, JsonObject s, String why) {

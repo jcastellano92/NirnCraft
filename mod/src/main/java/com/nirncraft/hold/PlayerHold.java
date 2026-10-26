@@ -85,7 +85,8 @@ public final class PlayerHold {
         final long sinceTick;
         final long sinceMs = System.currentTimeMillis();
         final ResourceKey<Level> dim;
-        Vec3 pos;
+        Vec3 pos;           // (where the player is pinned: their place, or below it where they will land: HoldLanding)
+        final Vec3 origin;  // (where the hold began: the release puts them back there)
         final GameType prevMode;
         final boolean prevNoGravity, prevInvisible, prevMayfly, prevFlying, prevMayBuild, prevInvulnerable, prevInstabuild;
         @Nullable Runnable onRelease;
@@ -98,6 +99,7 @@ public final class PlayerHold {
             this.sinceTick = p.level().getGameTime();
             this.dim = p.level().dimension();
             this.pos = p.position();
+            this.origin = pos;
             this.prevMode = prevMode;
             this.prevNoGravity = noGravity;
             this.prevInvisible = invisible;
@@ -117,6 +119,8 @@ public final class PlayerHold {
     private static final Map<UUID, Held> HELD = new ConcurrentHashMap<>();
     /** Where each player was on the previous tick, for the jump check. */
     private static final Map<UUID, Vec3> LAST = new ConcurrentHashMap<>();
+    /** The teleports sent to each player (HoldTeleports) as of the previous tick. */
+    private static final Map<UUID, Long> SEEN = new ConcurrentHashMap<>();
     /** Why the teleport that is about to be seen as a jump happened (from EntityTeleportEvent), for the log and the screen. */
     private static final Map<UUID, String> WHY = new ConcurrentHashMap<>();
     private static final AtomicLong TOKENS = new AtomicLong(System.currentTimeMillis() & 0xFFFFFFFFL);
@@ -144,8 +148,8 @@ public final class PlayerHold {
     public static String describe(ServerPlayer p) {
         Held h = HELD.get(p.getUUID());
         if (h == null) return p.getGameProfile().name() + ": not held";
-        return String.format("%s: held %d ticks at %.1f %.1f %.1f (real mode %s, pinned %d times, token %d)", p.getGameProfile().name(),
-                p.level().getGameTime() - h.sinceTick, h.pos.x, h.pos.y, h.pos.z, h.prevMode.getName(), h.pins, h.token);
+        return String.format("%s: held %d ticks at %.1f %.1f %.1f%s (real mode %s, pinned %d times, token %d)", p.getGameProfile().name(),
+                p.level().getGameTime() - h.sinceTick, h.origin.x, h.origin.y, h.origin.z, landing(h), h.prevMode.getName(), h.pins, h.token);
     }
 
     // ------------------------------------------------------------------ begin
@@ -208,14 +212,22 @@ public final class PlayerHold {
             p.getPersistentData().put(TAG, t);
         }
         Held h = new Held(TOKENS.incrementAndGet(), reason, p, mode, noGravity, invisible, onRelease);
+        // (in the air, about to fall once released: the camera waits where they will land, so that the loading there is
+        // what the client waits for; the release puts them back here)
+        Vec3 land = HoldLanding.of(p, mode, h.prevMayfly, h.prevFlying, noGravity);
+        if (land != null) h.pos = land;
         HELD.put(p.getUUID(), h);
         apply(p);
+        if (land != null) {
+            p.setPos(land.x, land.y, land.z);
+            if (p.connection != null) p.connection.teleport(land.x, land.y, land.z, p.getYRot(), p.getXRot());
+        }
         // not in the tab list of anyone, and not in the world of anyone
         hideFromOthers(p);
         send(p, new HoldPackets.Held(true, h.token, reason));
         LAST.put(p.getUUID(), h.pos);
-        NirnCraft.LOGGER.info("hold: {} is held at {} {} {} until their client reports its loading complete (real mode {}) [{}]",
-                p.getGameProfile().name(), fmt(h.pos.x), fmt(h.pos.y), fmt(h.pos.z), mode.getName(), reason);
+        NirnCraft.LOGGER.info("hold: {} is held at {} {} {}{} until their client reports its loading complete (real mode {}) [{}]",
+                p.getGameProfile().name(), fmt(h.origin.x), fmt(h.origin.y), fmt(h.origin.z), landing(h), mode.getName(), reason);
     }
 
     /** The hold's state on the player: everything but the tracking and the tab list. Idempotent; also the per-login re-apply. */
@@ -261,9 +273,10 @@ public final class PlayerHold {
     public static boolean release(ServerPlayer p, String why) {
         Held h = HELD.remove(p.getUUID());
         if (h == null) return false;
-        if (p.level().dimension() == h.dim && p.position().distanceToSqr(h.pos) > 1.0E-4) {  // (back exactly where the hold began: the pin runs every other tick)
-            p.setPos(h.pos.x, h.pos.y, h.pos.z);
-            if (p.connection != null) p.connection.teleport(h.pos.x, h.pos.y, h.pos.z, p.getYRot(), p.getXRot());
+        if (p.level().dimension() == h.dim && p.position().distanceToSqr(h.origin) > 1.0E-4) {  // (back exactly where the hold began: the pin runs every other tick; above the landing)
+            p.setPos(h.origin.x, h.origin.y, h.origin.z);
+            if (p.connection != null) p.connection.teleport(h.origin.x, h.origin.y, h.origin.z, p.getYRot(), p.getXRot());
+            LAST.put(p.getUUID(), h.origin);  // (back up from the landing: not a jump)
         }
         restore(p, h);
         p.getPersistentData().remove(TAG);
@@ -307,6 +320,7 @@ public final class PlayerHold {
     /** A player who joins while others are held must not see them in the tab list. */
     @SubscribeEvent
     public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && !(p instanceof FakePlayer) && p.connection != null) HoldTeleports.install(p);
         if (HELD.isEmpty() || !(event.getEntity() instanceof ServerPlayer joiner) || joiner.connection == null) return;
         List<UUID> ids = new ArrayList<>();
         for (UUID id : HELD.keySet()) if (!id.equals(joiner.getUUID())) ids.add(id);
@@ -318,6 +332,8 @@ public final class PlayerHold {
     public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         LAST.remove(p.getUUID());
+        SEEN.remove(p.getUUID());
+        HoldTeleports.forget(p.getUUID());
         Held h = HELD.remove(p.getUUID());
         if (h == null) return;
         try {
@@ -360,21 +376,28 @@ public final class PlayerHold {
 
     /**
      * The jump check: a player who moved more than {@link #JUMP_BLOCKS} since the previous tick, in the same dimension,
-     * has been teleported (a command, a pearl, a mod's travel ...) and is held at the destination. Package-private with
-     * {@code eligible} so the selftest can drive it with stand-ins.
+     * AND was teleported meanwhile (the server sent them a position: HoldTeleports; or a teleport event named it: a
+     * command, a pearl, chorus fruit) is held at the destination. A move alone is never one: flight, however fast, and a
+     * lagging server's long ticks (78 blocks of flight in one tick held the owner on 10-26, again and again) are play.
+     * Package-private with {@code eligible} so the selftest can drive it with stand-ins.
      */
     static boolean watchJump(ServerPlayer p, boolean eligible) {
         Vec3 pos = p.position();
         Vec3 last = LAST.put(p.getUUID(), pos);
+        long tp = HoldTeleports.count(p.getUUID());
+        Long seen = SEEN.put(p.getUUID(), tp);
+        boolean teleported = seen != null && seen != tp;
         if (last == null || !eligible || isHeld(p) || !ARRIVAL) return false;
         double d2 = last.distanceToSqr(pos);
-        if (d2 <= JUMP_BLOCKS * JUMP_BLOCKS) {
-            WHY.remove(p.getUUID());
-            return false;
-        }
         String why = WHY.remove(p.getUUID());
-        String reason = (why == null ? "jump" : why) + " " + (int) Math.sqrt(d2) + " blocks";
+        if (!isJump(d2, teleported, why != null)) return false;
+        String reason = (why == null ? "teleport" : why) + " " + (int) Math.sqrt(d2) + " blocks";
         return p instanceof FakePlayer ? arriveForTests(p, reason) : arrive(p, reason);
+    }
+
+    /** A jump is a discontinuity: a move of more than {@link #JUMP_BLOCKS} with a teleport (sent, or a teleport event) behind it. */
+    static boolean isJump(double moveSq, boolean teleportSent, boolean teleportEvent) {
+        return moveSq > JUMP_BLOCKS * JUMP_BLOCKS && (teleportSent || teleportEvent);
     }
 
     /** The kind of teleport, remembered for the hold the jump check is about to make. */
@@ -491,6 +514,11 @@ public final class PlayerHold {
         } catch (RuntimeException e) {
             // (a stand-in without a listener)
         }
+    }
+
+    /** ", the camera at the landing (y ...)" when the hold waits below where it began; else "". */
+    private static String landing(Held h) {
+        return h.pos.distanceToSqr(h.origin) > 1.0E-4 ? ", the camera at the landing (y " + fmt(h.pos.y) + ")" : "";
     }
 
     private static String fmt(double v) {
