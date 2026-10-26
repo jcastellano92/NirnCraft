@@ -20,12 +20,12 @@ public enum Knob {
     // ---- the shader pack (lib/quality.glsl texel, channel)
     /** Soft-shadow taps (1 .. SHADOW_TAPS) and penumbra width; fewer far away. Floor: one tap (shadows stay). */
     SHADOW_TAPS(Owner.PACK, 1.5, 3.0, 0.05, 0.0, 1, 0, true),
-    /** SSAO samples; fewer far away; off at 0. */
-    SSAO(Owner.PACK, 1.0, 2.5, 0.0, 0.2, 2, 0, true),
+    /** SSAO samples; fewer far away. Floor: its fewest samples (lighting is never switched off: the owner, 10-26). */
+    SSAO(Owner.PACK, 1.0, 2.5, 0.2, 0.2, 2, 0, true),
     /** Screen-space reflection steps (water); beyond the march the far field / sky mirror. */
     SSR(Owner.PACK, 1.5, 4.0, 0.0, 0.2, 3, 0, true),
     /** Light-shaft samples over the same path. */
-    LIGHT_SHAFTS(Owner.PACK, 0.6, 7.0, 0.0, 0.15, 4, 0, false),
+    LIGHT_SHAFTS(Owner.PACK, 0.6, 7.0, 0.15, 0.15, 4, 0, false),
     /** Waves drawn (4 .. WAVE_COUNT, shortest first) and their LOD distance. */
     WAVES(Owner.PACK, 1.9, 0.3, 0.0, 0.0, 5, 0, false),
     /** Caustics and falls spray (on above 0.5). */
@@ -54,8 +54,11 @@ public enum Knob {
     ATLAS_LOD(Owner.ATLAS, 1.0, 3.0, 0.0, 0.0, -1, 0, false),
     /** atlas's cloud pass at half (1) or quarter (0) resolution. Discrete. */
     ATLAS_CLOUDS(Owner.ATLAS, 0.8, 1.0, 0.0, 0.5, -1, 0, false),
-    /** atlas's far-terrain sun shadows and the sun map's size: off, 256, 512, 1024. Discrete. */
-    ATLAS_SHADOWS(Owner.ATLAS, 2.5, 2.0, 0.0, 0.3, -1, 0, false);
+    /**
+     * atlas's far-terrain sun shadows and the sun map's size: 256, 512, 1024. Discrete; never off (a tier at its floor
+     * drew the far field flat and shadowless: the owner, 10-26), its floor is the 256 map.
+     */
+    ATLAS_SHADOWS(Owner.ATLAS, 2.5, 2.0, 0.34, 0.3, -1, 0, false);
 
     public enum Owner { PACK, ATLAS }
 
@@ -129,9 +132,9 @@ public enum Knob {
         return 1 + 2 * (1 - clamp01(q));
     }
 
-    /** The sun map's size for ATLAS_SHADOWS q: 0 (off), 256, 512 or 1024. */
+    /** The sun map's size for ATLAS_SHADOWS q: 256, 512 or 1024 (never 0: far shadows stay on at the floor). */
     public static int atlasSunMap(double q) {
-        return q >= 0.995 ? 1024 : q >= 0.67 ? 512 : q >= 0.3 ? 256 : 0;
+        return q >= 0.995 ? 1024 : q >= 0.67 ? 512 : 256;
     }
 
     /** The pack's falloff: the far fraction for FAR_DETAIL q (counts far away / near). */

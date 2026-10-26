@@ -117,18 +117,18 @@ final class AtlasQuality {
         return cpu && cpuLightLow;
     }
 
-    /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds; 0 without a pack). */
+    /** The sun map's size (256 at the shadows' floor: far shadows stay on; 0 without a pack). */
     int sunMapSize() {
         if (fallbackMode) return 0;
         int s = Knob.atlasSunMap(q[Knob.ATLAS_SHADOWS.ordinal()]);
-        return Math.min(s == 0 ? 256 : s, memory.maxSunMap());
+        return Math.min(s, memory.maxSunMap());
     }
 
     int flags(int base) {
         int f = base;
         if (Knob.ATLAS_CLOUDS.snap(q[Knob.ATLAS_CLOUDS.ordinal()]) < 1 || memory.quarterClouds())
             f |= AtlasNative.FRAME_CLOUDS_QUARTER;
-        if (Knob.atlasSunMap(q[Knob.ATLAS_SHADOWS.ordinal()]) == 0) f &= ~AtlasNative.FRAME_SHADOWS;
+        // (the far shadows are never switched off by quality: their floor is the 256 sun map, the owner, 10-26)
         if (fallbackMode) f &= ~(AtlasNative.FRAME_CLOUDS | AtlasNative.FRAME_CLOUDS_QUARTER);
         return f;
     }
