@@ -1777,6 +1777,11 @@ final class AtlasClientGen implements AutoCloseable {
                     // the chunk is made again; only this section's claim goes, so only it is sent again
                     AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(x, list[i + 2], z));
                     done.remove(ChunkPos.pack(x, z));
+                    // a loaded chunk is never made again (fromCache leaves a real chunk's blocks alone): its section is
+                    // read again from the chunk. Without this level 0's ask was lost for good (its "asked" flag stays):
+                    // a hole in the near field drawn by the coarse levels a few blocks from the player (10-26: 11 blocks
+                    // away for 38 s, a house blurry until the player stood in it)
+                    if (wanted) AtlasClientSections.reread(x, list[i + 2], z);
                 } else {
                     farPartial.add(farKey(level, Math.floorDiv(x, 16), Math.floorDiv(z, 16)));
                     AtlasCoarseBake.dropped(level, Math.floorDiv(x, 16), Math.floorDiv(z, 16));  // (the bake's thread puts it again)
