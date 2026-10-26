@@ -319,6 +319,12 @@ final class AtlasClientSections {
     /** Sections read again for level 0 (reread), for the profile. */
     static volatile long rereads;
 
+    /** Whether this chunk's blocks are up in atlas from any source: generated, from the cache, or the loaded chunk's own. */
+    static boolean isUp(int cx, int cz) {
+        long k = ChunkPos.pack(cx, cz);
+        return UP.contains(k) || REAL.contains(k);
+    }
+
     /** Whether the loaded chunk's own blocks are up (then generated ones must not replace them). */
     static boolean isReal(int cx, int cz) {
         return REAL.contains(ChunkPos.pack(cx, cz));

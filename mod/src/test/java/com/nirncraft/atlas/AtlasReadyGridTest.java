@@ -54,6 +54,16 @@ class AtlasReadyGridTest {
     }
 
     @Test
+    void aGuardWithItsOwnStall() {  // (the near field's boost: released after 10 s without a chunk coming up)
+        AtlasWaitGuard g = new AtlasWaitGuard(10 * S);
+        long t = 1000 * S;
+        assertEquals(1, g.blocks(40, t));
+        for (long s = 1; s < 10; s++) assertEquals(1, g.blocks(40, t + s * S));
+        assertEquals(-1, g.blocks(40, t + 10 * S));
+        assertTrue(AtlasClientGen.nearCircle(3, 4, 0, 0, 5) && !AtlasClientGen.nearCircle(4, 4, 0, 0, 5));
+    }
+
+    @Test
     void guardClockRunsOnlyWhileWaitedOn() {
         AtlasWaitGuard g = new AtlasWaitGuard();
         long t = 1000 * S;
