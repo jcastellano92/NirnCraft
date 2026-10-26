@@ -1017,6 +1017,9 @@ public:
                 rs.sum += pms;
                 rs.n++;
                 if (pms > 8.0) rs.over++;
+                if (pms > 16.0)
+                    std::fprintf(stderr, "TRACE feat long round: record %u type %u%s%u round %u budget %u origins %u: %.1f ms\n", partRoundRec_,
+                                 types_[partRoundRec_], ph ? " vein pass " : "", ph ? ph - 1 : 0u, partRound_, bud, n, pms);
                 rs.minBud = std::min(rs.minBud, bud);
             }
             if (ptrace) {
@@ -1065,8 +1068,15 @@ public:
                 }
             }
             if (ms > 0.0) {
+                // The round's time says what a unit of budget costs only when the round used its budget (origins left: it was
+                // cut short by it). A round that finished under it (a tree whose plan ended in a few operations, a feature of
+                // two placements) says nothing about the next, and growing on it by 4 sent a commit of 73 ms after a round
+                // of 1 (budget 65536 -> a part of 74 ms; 262144 -> 45): it keeps its budget, and a budget grows by 2 a round
+                // at most. A round over the target cuts it at once, by up to 8.
+                bool cut = left_.map && *static_cast<const uint32_t*>(left_.map) > 0u;
                 double want = double(bud) * partMs / ms;
-                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 4.0), double(bud) * 4.0));
+                double hi = ms > partMs ? double(bud) : cut ? double(bud) * 2.0 : double(bud);
+                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 8.0), hi));
                 bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
             }
             partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;

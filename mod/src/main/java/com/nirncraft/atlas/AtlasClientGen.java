@@ -935,7 +935,7 @@ final class AtlasClientGen implements AutoCloseable {
                     pruneDirect(camCx, camCz);
                     AtlasRecorder.end(Z_PRUNE, rz, 50_000);
                     rz = AtlasRecorder.begin();
-                    if (farOn && (chunks / BATCH) % 4 == 3) farStep();  // the far terrain between near batches too
+                    if (farOn && (chunks / BATCH) % 4 == 3 && farTurnOk()) farStep();  // the far terrain between near batches too, when the near window leaves the budget room
                     AtlasRecorder.end(Z_FAR, rz, 50_000);
                     chunks += n;
                     pagesMade += miss.length / 3;
@@ -1505,6 +1505,20 @@ final class AtlasClientGen implements AutoCloseable {
         return ovx * ovz;
     }
     private final Map<Long, long[]> farRetry = new HashMap<>();  // (a partial tile: tries, next try (ns), chunks refused)
+
+    /**
+     * A far tile between two near batches: the near window comes first. The far path is the budget's overflow (the pacer's far
+     * bucket is what the near bucket could not hold), and a far tile's submissions wait for it on this thread, so a tile taken
+     * while the near bucket is low would hold the next near batch behind it for seconds. It goes when the near bucket is nearly
+     * full, the loading screen holds the player (nothing is paced then) or no frames set a budget. While the near window keeps
+     * the bucket low (a flight) the far path waits for its leftovers: the turn after the near window is idle (it runs
+     * unconditionally there) is the horizon's.
+     */
+    private boolean farTurnOk() {
+        if (AtlasLoadingScreen.holding()) return true;
+        double tok = gen.nearTokensMs();
+        return tok < 0.0 || tok >= 20.0;
+    }
 
     private boolean farStep() {
         double x = camX, z = camZ;

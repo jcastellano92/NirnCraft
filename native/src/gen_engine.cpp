@@ -2618,7 +2618,8 @@ private:
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
         if (!on || n <= 1) return std::max(1u, n);
         auto it = sliceFit_.find(kind);
-        if (it == sliceFit_.end() || it->second.latency || it->second.msPerUnit <= 0.0) return n;
+        if (it == sliceFit_.end() || it->second.msPerUnit <= 0.0) return std::min(n, 8u);  // (not measured yet: a few chunks, never the whole pass of 84 ms the first call took)
+        if (it->second.latency) return n;
         return uint32_t(std::clamp(partMs / it->second.msPerUnit, 1.0, double(n)));
     }
     // The far passes (tile, tileBiome, tileSurf, farChunk: kinds 100 to 103). A thread of these walks a column's noise in

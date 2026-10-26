@@ -397,6 +397,21 @@ final class AtlasGenNative {
             }
         }
 
+        /**
+         * The near window's share of the GPU budget not yet spent, ms (atlas_gen_pace_stats tokensMs: the near bucket, 30 when
+         * the near window leaves it full), or -1 when there is no budget to read (an older library, or no frames to share with).
+         */
+        double nearTokensMs() {
+            if (paceStats == null) return -1.0;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(8L * 8 + 48 + 16 + 48);
+                check((int) paceStats.invokeExact(ptr, s), "atlas_gen_pace_stats");
+                return s.get(JAVA_DOUBLE, 0) <= 0.0 ? -1.0 : s.get(JAVA_DOUBLE, 16);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** The GPU budget's numbers (atlas_gen_pace_stats) as a profile line; null with an older library. */
         String paceLine() {
             if (paceStats == null) return null;
