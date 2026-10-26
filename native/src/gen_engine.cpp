@@ -267,6 +267,7 @@ public:
     // the loading phase (a screen holds the player: no frame to keep): every submission of the generator unpaced, the near
     // window's too (any thread)
     virtual void setBoost(bool on) { (void)on; }
+    virtual void setNearBoost(bool on) { (void)on; }
     struct PaceStats {
         double periodMs = 0, duty = 1, tokensMs = 0, usedMs = 0, waitedMs = 0, farWaitedMs = 0, maxSubMs = 0;
         uint64_t submissions = 0;
@@ -2437,6 +2438,11 @@ private:
     void paceClass(int c) override { pace_.cls = c; }
     std::atomic<bool> boost_{false};
     void setBoost(bool on) override { boost_ = on; }
+    // (the near field empty, in play: the near window's bucket fills at ATLAS_GEN_NEAR_BOOST_MS (8) of GPU a frame period
+    // at least, held to that much, still behind the frames' gaps and the work-in-flight limit: unpaced, a boosted
+    // arrival's frames reached 288 ms)
+    std::atomic<bool> nearBoost_{false};
+    void setNearBoost(bool on) override { nearBoost_ = on; }
     // ---- the submissions by phase class (the recorder's GPU lane, kept as counters: the loading and route gates)
     struct SubRow {
         uint64_t n = 0, over4 = 0, over8 = 0, over16 = 0;
@@ -2618,8 +2624,11 @@ private:
             }
         }
         // near first: the duty, or the floor of 4 ms a frame period when the frames are slow (the share of a period 4 ms is)
-        double nearFloor = pace_.periodMs > 0.0 ? std::clamp(4.0 / pace_.periodMs, 0.1, 0.5) : 0.0;
+        static const double boostMs = envMs("ATLAS_GEN_NEAR_BOOST_MS", 8.0);
+        bool nb = nearBoost_.load(std::memory_order_relaxed);
+        double nearFloor = pace_.periodMs > 0.0 ? std::clamp((nb ? boostMs : 4.0) / pace_.periodMs, 0.1, nb ? 0.6 : 0.5) : 0.0;
         pace_.tokens += dt * std::max(pace_.duty, nearFloor);
+        if (nb) pace_.tokens = std::min(pace_.tokens, boostMs);  // (a frame period's ceiling: no burst of a full bucket)
         if (pace_.tokens > 30.0) {  // (the near bucket is full: the far path has the rest, but at most 3 ms of GPU a frame period)
             double farRate = pace_.periodMs > 0.0 ? 3.0 / pace_.periodMs : 0.1;
             pace_.tokensFar = std::min(30.0, pace_.tokensFar + std::min(pace_.tokens - 30.0, dt * farRate));
@@ -4352,8 +4361,12 @@ ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out) {
 // (gen_bake.cpp) the bake of the loading phase: the far field's submissions are not paced while a loading screen holds the player
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on) {
     if (!h) return ATLAS_ERR_ARG;
-    h->paceBoost = on != 0;
-    if (h->engine) h->engine->setBoost(on != 0);
+    // (1: the loading phase, unpaced; 2: the near field empty in play, the near window's floor raised and held to it)
+    h->paceBoost = on == 1;
+    if (h->engine) {
+        h->engine->setBoost(on == 1);
+        h->engine->setNearBoost(on == 2);
+    }
     return ATLAS_OK;
 }
 

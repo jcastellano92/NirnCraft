@@ -1098,8 +1098,9 @@ final class AtlasClientGen implements AutoCloseable {
 
     /**
      * The near field empty (chunks within NEAR_BOOST_R of the camera not up: generated, served from the cache or the loaded
-     * chunk's own blocks): the generator's submissions go unpaced until it is whole (atlas_gen_pace_boost; the loading
-     * screen's boost is another reason, the bake's). A teleport's arrival or a fast flight waited for the pacer: one patch
+     * chunk's own blocks): the near work's budget is raised to ATLAS_GEN_NEAR_BOOST_MS (8) of GPU a frame period and held
+     * to it until the field is whole (atlas_gen_pace_boost 2; the loading screen's unpaced boost is another reason, the bake's;
+     * unpaced, a boosted arrival's frames reached 288 ms). A teleport's arrival or a fast flight waited for the pacer: one patch
      * of 64 chunks in 6.5 s, the 96-block field empty for 12 s after a jump (10-26).
      */
     private void nearBoost() {

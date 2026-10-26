@@ -104,6 +104,10 @@ def main():
     bad = [at.get("l0Near6", 0) for at in fly if (at.get("l0Near6") or 0) > 0]
     print(f"VERDICT after the teleport: l0Near6 0 {t_near} s after the jump, nearestMissing 0 {t_all} s after (targets 2 s, 5 s)")
     print(f"VERDICT flight at {a.speed} b/s: {len(bad)} of {len(fly)} s with level-0 columns empty within 96 blocks, worst {max(bad, default=0)}")
+    for ph in ("arrive", "fly"):
+        p99 = sorted(r.get("frame", {}).get("p99") or 0 for r in secs if r.get("phase") == ph)
+        if p99:
+            print(f"VERDICT frames in {ph}: per-second p99 median {p99[len(p99) // 2]:.1f} ms, worst {p99[-1]:.1f} ms")
     print("subs", data.get("subs", "")[:600])
     return 0
 
