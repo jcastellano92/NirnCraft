@@ -82,7 +82,16 @@ repository root.
   Third-party mod jars are cached in `dist\.cache\` (read-only).
 
 ## Code rules
-* No mixins, no access transformers. NeoForge events and public API; screens replaced via `ScreenEvent.Opening`.
+* No mixins or access transformers by default: NeoForge events and public API; screens replaced via
+  `ScreenEvent.Opening`.
+  * **Narrow exception (owner, 2026-10-25).** A mixin (or an access transformer) is allowed only when all of these hold:
+    1. no public NeoForge route exists;
+    2. the win is large and on the north-star path (e.g. turning vanilla's chunk meshing and drawing off for stage 5,
+       or later simulation hooks; see ATLAS-RENDER-INVENTORY.md §4);
+    3. it's small and targeted (one stable method), isolated in one package (`com.nirncraft.mixin`);
+    4. it has a switch that turns it off, with a fallback to the public path;
+    5. it's re-checked on every Minecraft update.
+  * Never for convenience. Propose each one in your report with its win and risk; the orchestrator approves it.
 * NEVER reference client classes (`Minecraft`, `Screen` and subclasses, `KeyMapping`, renderers, `LocalPlayer`)
   from common code, not even behind an `isClientSide` check: the bytecode verifier loads them and the dedicated
   server crashes. Hand off via `Sides.runOn(Dist.CLIENT, () -> () -> SomeClientClass.method(...))`

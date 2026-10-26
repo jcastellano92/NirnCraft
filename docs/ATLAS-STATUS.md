@@ -59,7 +59,7 @@ Weather and biome work stay paused until the owner says.
 - Close the dev client after each test batch; never run the autotest action queue while the owner plays (it holds the
   player: use the passive profiler instead).
 - The project's pre-rename name never in the tree (a case-insensitive `git grep` for it stays empty); never Bethesda
-  assets; no mixins / access transformers; push only when asked.
+  assets; no mixins / access transformers except the narrow exception in AGENT-RULES (owner, 2026-10-25); push only when asked.
 
 ## What works (atlas-render, 5ffc5489)
 

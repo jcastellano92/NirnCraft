@@ -25,7 +25,7 @@ hardware.
 - Cosmetic simulation on clients; interest-managed sync.
 
 Scope: everything NirnCraft adds (NPCs, creatures, battles, fluids, weather) can be ours within the no-mixins rule.
-Replacing vanilla's own tick needs that rule relaxed or our own server, which is the owner's decision. It starts after
+Replacing vanilla's own tick may use the narrow mixin exception (AGENT-RULES, owner, 2026-10-25), case by case. It starts after
 the renderer milestone, with a read-only design study first.
 
 **How we get there:** start with what we have; take targeted, focused steps with one agent each; iterate fast and
