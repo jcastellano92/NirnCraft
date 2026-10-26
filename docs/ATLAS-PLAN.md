@@ -112,6 +112,13 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   - level-0 detail: adaptive per region. A client asks for data only where downloading is faster than its own GPU
     would generate it (it measures its own generation rate against its bandwidth), so strong GPUs generate and weak
     ones download. No fixed rule, the same spirit as pixels-drive-everything.
+- **Many players (2026-10-25):** the per-player cost on the server stays small and bounded.
+  - The server never renders or bakes for players.
+  - Updates are interest-managed: changes and entity state by nearness and visibility, with far players and mobs as
+    rarer position-only updates.
+  - Downloads share one server upload budget; when it's busy, clients generate locally instead of waiting.
+  - The remaining limit is vanilla's simulation around players, reduced by the server view cap and the GPU-fed
+    server chunks.
 
 ### Frame budget (2026-10-25)
 
