@@ -1071,7 +1071,10 @@ final class AtlasClientGen implements AutoCloseable {
         Progress p = progress();
         if (p == null || !p.nearDone()) return false;
         AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
-        return b != null && b.phase() > 0 && !b.loaded();
+        if (b != null && b.phase() > 0 && !b.loaded()) return true;
+        // (the bake is in: the finer levels' tiles around the spawn are what the gate waits for now, not the outer rings, which
+        // took the thread's turns (a far tile every fourth batch) and held a warm launch at "17 of 50 tiles" for minutes)
+        return p.farTotal() > 0 && p.far() < p.farTotal();
     }
 
     /**

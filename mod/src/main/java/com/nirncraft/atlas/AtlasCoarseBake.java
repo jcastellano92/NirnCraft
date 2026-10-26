@@ -267,7 +267,8 @@ final class AtlasCoarseBake implements Runnable {
             yieldToNear();
             step(1, true);
         }
-        if (boost) gen.paceBoost(false);
+        // (the boost stays while the screen holds the player: the near window's outer rings and the finer levels' tiles are the load
+        // too, and paced by hidden frames they took minutes: the loop below ends it when the player has control)
         if (!running) return;
         loadedNs = System.nanoTime();
         phase = 2;
@@ -284,6 +285,8 @@ final class AtlasCoarseBake implements Runnable {
         long lastStepNs = 0;
         while (running) {
             servePass(8);
+            boolean hold3 = BOOST || AtlasLoadingScreen.holding();
+            if (hold3 != boost) gen.paceBoost(boost = hold3);
             if (!whole && !AtlasLoadingScreen.holding()) {
                 boolean[] idle = AtlasClientGen.idle();
                 long now = System.nanoTime();
