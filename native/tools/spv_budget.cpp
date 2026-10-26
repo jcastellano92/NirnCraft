@@ -169,10 +169,29 @@ uint64_t total(const std::map<std::string, uint64_t>& m, const std::set<std::str
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        std::fprintf(stderr, "usage: spv_budget <kernel_budget.json> <dir with .spv files> [--write]\n");
+        std::fprintf(stderr, "usage: spv_budget <kernel_budget.json> <dir with .spv files> [modules.txt] [--write]\n");
         return 2;
     }
-    const bool write = argc > 3 && std::string(argv[3]) == "--write";
+    // modules.txt: the modules this build makes, one stem a line (CMake writes it): only those are checked, so a stale
+    // .spv an older build left in the folder is not; --write: print today's numbers as budget JSON
+    bool write = false;
+    std::string modulesFile;
+    for (int a = 3; a < argc; a++) {
+        if (std::string(argv[a]) == "--write") write = true;
+        else modulesFile = argv[a];
+    }
+    std::set<std::string> modules;  // (empty: every .spv in the folder)
+    if (!modulesFile.empty()) {
+        std::FILE* mf = std::fopen(modulesFile.c_str(), "rb");
+        if (!mf) return std::fprintf(stderr, "spv_budget: cannot read %s\n", modulesFile.c_str()), 1;
+        char line[512];
+        while (std::fgets(line, sizeof line, mf)) {
+            std::string m(line);
+            while (!m.empty() && (m.back() == '\n' || m.back() == '\r' || m.back() == ' ')) m.pop_back();
+            if (!m.empty()) modules.insert(m);
+        }
+        std::fclose(mf);
+    }
     std::string text;
     if (std::FILE* f = std::fopen(argv[1], "rb")) {
         char buf[4096];
@@ -190,12 +209,23 @@ int main(int argc, char** argv) {
     }
     const J* spv = root.get("spv");
     std::vector<fs::path> files;
+    size_t skipped = 0;
     for (auto& e : fs::directory_iterator(argv[2])) {
         std::string s = e.path().filename().string();
-        if (e.path().extension() == ".spv" && s.find("_raw.spv") == std::string::npos) files.push_back(e.path());
+        if (e.path().extension() != ".spv" || s.find("_raw.spv") != std::string::npos) continue;
+        if (!modules.empty() && !modules.count(e.path().stem().string())) {
+            skipped++;  // (not this build's: an older build's file)
+            continue;
+        }
+        files.push_back(e.path());
     }
     std::sort(files.begin(), files.end());
     int fails = 0;
+    for (const std::string& m : modules)
+        if (!fs::exists(fs::path(argv[2]) / (m + ".spv"))) {
+            std::fprintf(stderr, "spv_budget: FAIL %s.spv is not in %s (the build lists it)\n", m.c_str(), argv[2]);
+            fails++;
+        }
     if (write) std::printf("  \"spv\": {\n");
     for (size_t fi = 0; fi < files.size(); fi++) {
         std::vector<uint32_t> w;
@@ -250,6 +280,6 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (fails) std::fprintf(stderr, "spv_budget: %d over budget (%s; the budget changes only in a deliberate commit)\n", fails, argv[1]);
-    else std::printf("spv_budget: %zu modules within budget\n", files.size());
+    else std::printf("spv_budget: %zu modules within budget (%zu .spv files not this build's, not checked)\n", files.size(), skipped);
     return fails ? 1 : 0;
 }

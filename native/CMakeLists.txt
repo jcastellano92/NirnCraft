@@ -572,8 +572,31 @@ endif()
 target_sources(atlas_core PRIVATE src/flight_recorder.cpp src/texturepack.cpp)
 
 # the kernels' budget after atlas_core links (spv_budget above); the backend's pipeline statistics against its "pipe" part
+# (only the modules this build embeds: every target's generated *_spv.h, listed at configure time in spv_modules.txt; a
+# stale .spv left in the build folder by an older build is not checked)
+set(SPV_MODULES "")
+get_property(SPV_TARGETS DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(t ${SPV_TARGETS})
+  get_target_property(srcs ${t} SOURCES)
+  if(srcs)
+    foreach(src ${srcs})
+      if(src MATCHES "([A-Za-z0-9_]+)_spv[.]h$")
+        list(APPEND SPV_MODULES "${CMAKE_MATCH_1}")
+      endif()
+    endforeach()
+  endif()
+endforeach()
+foreach(src ${FEAT_HEADERS})  # (the decoration's kernels: a custom target's, not a library's sources)
+  if(src MATCHES "([A-Za-z0-9_]+)_spv[.]h$")
+    list(APPEND SPV_MODULES "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+list(REMOVE_DUPLICATES SPV_MODULES)
+list(SORT SPV_MODULES)
+string(REPLACE ";" "\n" SPV_MODULES_TEXT "${SPV_MODULES}")
+file(WRITE "${GEN}/spv_modules.txt" "${SPV_MODULES_TEXT}\n")
 add_dependencies(atlas_core spv_budget)
 add_custom_command(TARGET atlas_core POST_BUILD
-  COMMAND spv_budget "${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json" "${GEN}"
+  COMMAND spv_budget "${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json" "${GEN}" "${GEN}/spv_modules.txt"
   COMMENT "spv_budget: the kernels' SPIR-V against shaders/kernel_budget.json")
 target_compile_definitions(atlas_core PRIVATE ATLAS_KERNEL_BUDGET="${CMAKE_SOURCE_DIR}/shaders/kernel_budget.json")
