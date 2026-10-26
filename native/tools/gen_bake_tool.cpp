@@ -385,12 +385,24 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         // stable: the far work's time steady and the streaming idle (recorder on; else as before)
         int stableFrames = 0;
         bool idle = false;
+        const bool jitterOn = std::atoi(arg(argc, argv, "jitter", "0").c_str()) > 0;
+        uint32_t jk = 1;
+        auto halton = [](uint32_t i, uint32_t b) {
+            float f = 1.0f, r = 0.0f;
+            while (i > 0) {
+                f /= float(b);
+                r += f * float(i % b);
+                i /= b;
+            }
+            return r;
+        };
         FarSide sa{"farTrace", "far", "farWater", "farRefine"}, sb{"farTrace B", "far B", "farWater B", "farRefine B"};
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");  // (no read back from here: the timed frames' conditions)
         if (std::getenv("ATLAS_RECORDER")) {
             int cap = std::atoi(arg(argc, argv, "settle", "150").c_str());
             std::vector<double> win;
             for (; stableFrames < cap; stableFrames++) {
+                if (jitterOn) atlas_set_jitter(ctx, halton(jk, 2) - 0.5f, halton(jk, 3) - 0.5f), jk++;
                 atlas_render(ctx, &f, &out);
                 atlas_fr_frame();
                 size_t had = sa.faMs.size();
@@ -413,6 +425,7 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         std::vector<double> ms;
         uint64_t steps = 0;
         for (int i = 0; i < frames; i++) {
+            if (jitterOn) atlas_set_jitter(ctx, halton(jk, 2) - 0.5f, halton(jk, 3) - 0.5f), jk++;
             atlas_render(ctx, &f, &out);
             atlas_fr_frame();
             AtlasStats st{};
@@ -442,7 +455,15 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         };
         _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
         _putenv_s("ATLAS_FARHIT_DUMP_NOW", "1");  // (ATLAS_FARHIT_DUMP: this frame's hit records)
-        atlas_render(ctx, &f, &out);
+        {
+            // (dumps=N: N read-back frames, each dumped: a still camera's frame-to-frame changes, the level flips;
+            // jitter=1: the host's TAA sub-pixel jitter on, Halton 2/3, from the steady phase on)
+            int nd = std::max(1, std::atoi(arg(argc, argv, "dumps", "1").c_str()));
+            for (int r = 0; r < nd; r++) {
+                if (jitterOn) atlas_set_jitter(ctx, halton(jk, 2) - 0.5f, halton(jk, 3) - 0.5f), jk++;
+                atlas_render(ctx, &f, &out);
+            }
+        }
         _putenv_s("ATLAS_FARHIT_DUMP_NOW", "");
         AtlasStats st{};
         atlas_get_stats(ctx, &st);
@@ -503,6 +524,8 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
         {  // the grid's coverage after the settle (atlas_info voxgrid.coverage: holes and partial columns per level)
             std::this_thread::sleep_for(std::chrono::milliseconds(1700));  // (cached 1.5 s: a fresh one)
             std::string inf = atlas_info(ctx);
+            size_t lr = inf.find("\"lodR\":");  // (each level's resident radius: the level picks' residency rule)
+            if (lr != std::string::npos) std::printf("{\"view\":%d,%s}%s", vi, inf.substr(lr, inf.find(']', lr) + 1 - lr).c_str(), bytes_nl);
             size_t p = inf.find("\"coverage\":");
             if (p != std::string::npos)
                 std::printf("{\"view\":%d,%s}%s", vi, inf.substr(p, inf.find("]}", inf.find("\"slotCap\"", p)) + 2 - p).c_str(), bytes_nl);

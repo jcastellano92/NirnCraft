@@ -141,6 +141,7 @@ void cachedAir(const AtlasAir* a, air::Coeffs& c, air::MsLut& lut) {
 }  // namespace
 
 struct AtlasContext {
+    float lodR[8] = {};  // (the last frame's resident radius of each level, FrameGpu.lodR: atlas_info's "lodR")
     double glInputsMs = 0;  // (atlas_info glRender: building the frame's inputs, eased)
     double inSnapMs = 0, inSkyMs = 0, inLightsMs = 0, inGridMs = 0, inTexMs = 0;  // (its parts)
     std::unique_ptr<Backend> backend;
@@ -509,7 +510,9 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
                           ctx->inGridMs, ctx->inTexMs);
             ctx->info.insert(ctx->info.size() - 1, b);
             // readiness (the harness gates wait on it): pipelines still being built off the render thread
-            std::snprintf(b, sizeof b, ",\"ready\":{\"pipelinesBuilding\":%d}", ctx->backend->pipelinesBuilding());
+            std::snprintf(b, sizeof b, ",\"ready\":{\"pipelinesBuilding\":%d},\"lodR\":[%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f]",
+                          ctx->backend->pipelinesBuilding(), ctx->lodR[0], ctx->lodR[1], ctx->lodR[2], ctx->lodR[3], ctx->lodR[4],
+                          ctx->lodR[5], ctx->lodR[6], ctx->lodR[7]);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
@@ -1629,6 +1632,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     }();
     g.vgDims[3] = (ctx->world.gridOwnsLevel0 ? 1u : 0u) | (ctx->world.gridOwnsReal() ? 2u : 0u) | (fallback ? 4u : 0u);
     lodRadii(g);  // (after every field it reads: the levels, the grid's windows, the camera, the measurement bits)
+    std::memcpy(ctx->lodR, g.lodR, sizeof ctx->lodR);
     in.voxgrid = &ctx->voxgrid;
     {
         // the near field's textures (atlas_set_material_textures), packed for the kernels once each revision
