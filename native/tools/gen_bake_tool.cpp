@@ -332,6 +332,29 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "no Vulkan context\n");
         return 1;
     }
+    // mode=pipes (the inner loop's prewarm, beside a running bench): the context's pipelines built (ATLAS_SHADER_DIR's
+    // reloaded kernels too, with ATLAS_SHADER_WAIT=1) into the pipeline cache (pipes=) and the driver's own, then out:
+    // the next bench's context loads them at once. CPU work (the driver's compile), no frame drawn
+    if (mode == "pipes") {
+        // (a frame of the views' kind, tiny: a shader folder's kernels are reloaded on the first frame, not at create)
+        AtlasFrame f{};
+        f.cameraPos[1] = 200;
+        atlas::cameraMatrix(90, -3, 70, 1.0, f.invViewProj);
+        f.width = f.height = 16;
+        f.maxDistance = 1000;
+        f.sunDir[1] = 1;
+        f.lodBias = 1;
+        f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS | ATLAS_FRAME_SKY | ATLAS_FRAME_NEAR_LIGHT | ATLAS_FRAME_PRIMARY_NEAR_LIT;
+        std::vector<uint32_t> c(256), n(256);
+        std::vector<float> dp(256), lin(256 * 4), nl(256 * 4);
+        AtlasFrameOutput o{c.data(), n.data(), dp.data(), lin.data(), nl.data()};
+        double cam[3] = {0, 200, 0};
+        atlas_update(ctx, cam, 0);
+        for (int i = 0; i < 2; i++) atlas_render(ctx, &f, &o);
+        std::printf("{\"pipes\":true,\"ms\":%.0f}\n", nowMs() - t0);
+        atlas_destroy(ctx);
+        return 0;
+    }
     std::vector<AtlasMaterial> mats(256, AtlasMaterial{{0.5f, 0.5f, 0.5f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
     if (mode == "views")  // (the stand-in ids told apart: earthy colours of their own)
         for (size_t i = 1; i < mats.size(); i++) {
