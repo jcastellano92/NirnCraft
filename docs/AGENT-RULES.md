@@ -272,3 +272,10 @@ Read these first:
     ETA) or escalates it.
   * The orchestrator only sees what Haiku can't resolve.
 
+* **Measure the ceiling before building (owner, 2026-10-25).** Before building any optimisation, switch off the work it
+  would remove (an ablation on the saved scene or a bench: minutes) and measure the time saved. That is the most it can
+  ever gain.
+  * Build only if the ceiling is worth it; order the steps by ceiling.
+  * Ideas get a round-1 estimate first (minutes, from existing data); only the most valuable get real measurement.
+  * New ideas get one line in the notes, not chased.
+
