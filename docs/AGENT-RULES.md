@@ -320,6 +320,10 @@ Read these first:
   - **`harness.py run --changed`** runs exactness, dispatch timing and the gallery for what changed (impact.json).
   - **docs/COMPONENTS.md** lists, per generator or world component, the fast check, the visual tool and the one command. Run only those for what you touched. Fill a gap there only when you work on that component.
 
+* **GPU jobs stay short: ≤ 5 min each (2026-10-26).** Several agents share one GPU through heavy.py's queue, so one long
+  GPU job makes everyone wait (a 13-min batch of reference renders left 56 min of waiting against 17 of work). Split long
+  GPU work into jobs of ≤ 5 min (one view, one variant, one reference render per job), each printing progress, so the
+  queue interleaves. Builds and CPU work aren't limited.
 * **Merges into atlas-render keep the native suite green (2026-10-26).** After each merge, the orchestrator runs the
   native suite (`harness.py run check-native`, or native/build.ps1) and the kernel-budget check. A failing check
   blocks further merges until it's fixed or listed below with a reason and an owner.
