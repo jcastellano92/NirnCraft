@@ -141,6 +141,12 @@ public final class QualityClient {
         return controller == null ? "quality: not started" : controller.describe();
     }
 
+    /** The controller's block for the profile line ("" before it starts). */
+    public static String profileLine() {
+        QualityController c = controller;
+        return c == null ? "" : c.profileLine();
+    }
+
     // ------------------------------------------------------------------ frames
 
     private static void beginFrame(RenderFrameEvent.Pre e) {

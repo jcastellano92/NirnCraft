@@ -1194,7 +1194,7 @@ public final class AtlasClient {
             // (the render thread's part: the position, the frame line, a few reads of the client; the rest is composed and written
             // on a thread of its own: the core's report, the feeds' states and the file append took 0.2 to 4.2 s of a tick)
             String when = java.time.LocalTime.now() + String.format(java.util.Locale.ROOT, " pos=%.1f,%.1f,%.1f ",
-                    mc.player.getX(), mc.player.getY(), mc.player.getZ());
+                    mc.player.getX(), mc.player.getY(), mc.player.getZ()) + com.nirncraft.render.quality.QualityClient.profileLine() + " ";
             String frame = frameLine(ctx);
             java.nio.file.Path file = mc.gameDirectory.toPath().resolve("atlas-profile.log");
             PROFILE_WRITER.execute(() -> {

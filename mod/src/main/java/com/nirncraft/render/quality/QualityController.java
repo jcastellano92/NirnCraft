@@ -501,6 +501,14 @@ public final class QualityController {
     }
 
     /** One line for the log and the debug overlay. */
+    /** One block for the profile line: the tier, the budget, the frame and atlas measured, atlas's knobs drawn and aimed at. */
+    public String profileLine() {
+        int s = Knob.ATLAS_SCALE.ordinal(), l = Knob.ATLAS_LOD.ordinal();
+        return String.format(Locale.ROOT, "quality{%s tier %d budget %.1f gpu %.1f atlas %.1f scale %.2f->%.2f lod %.2f->%.2f out %.2f %.2f%s}",
+                phase, fallback, budgetMs(), gpuEma, atlasEma, applied[s], target[s], applied[l], target[l], out[s], out[l],
+                cpuLimited ? " cpu-bound" : "");
+    }
+
     public String describe() {
         StringBuilder b = new StringBuilder(String.format(Locale.ROOT,
                 "quality %s %s x%.2f target %.0f fps (budget %.1f ms) gpu %.1f ms atlas %.1f ms level %.2f%s%s tier %d model %d samples, %d rejected:",
