@@ -571,7 +571,7 @@ final class AtlasGenNative {
         }
 
         /** Why the generator runs unpaced: the loading screen holds the player (the bake's thread), the near field is empty (the worker's). */
-        static final int BOOST_HOLD = 1, BOOST_NEAR = 2;
+        static final int BOOST_HOLD = 1, BOOST_NEAR = 2, BOOST_BURST = 4;
         private int boostReasons;
 
         /**
@@ -591,7 +591,7 @@ final class AtlasGenNative {
         }
 
         private static int boostMode(int reasons) {
-            return (reasons & BOOST_HOLD) != 0 ? 1 : (reasons & BOOST_NEAR) != 0 ? 2 : 0;
+            return (reasons & (BOOST_HOLD | BOOST_BURST)) != 0 ? 1 : (reasons & BOOST_NEAR) != 0 ? 2 : 0;
         }
 
         /** Whether this library has the whole-map coarse bake (atlas_gen_bake_*). */
