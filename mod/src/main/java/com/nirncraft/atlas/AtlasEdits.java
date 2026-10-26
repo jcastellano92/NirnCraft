@@ -101,7 +101,7 @@ public final class AtlasEdits {
     private static final int RESECTION_EVERY = 40;  // ticks
     private static final Map<UUID, Map<Long, Long>> SENT = new ConcurrentHashMap<>();
     private static Path file;
-    private static boolean changedSinceSave;
+    private static volatile boolean changedSinceSave;
 
     static long tileKey(int tx, int tz) {
         return (long) tx << 32 | (tz & 0xFFFFFFFFL);
@@ -164,10 +164,32 @@ public final class AtlasEdits {
             push(server, level);
             AtlasSections.push(server, level);
         }
-        if (server.getTickCount() % 1200 == 0) {
-            if (changedSinceSave) save();
-            AtlasSections.save();
-        }
+        if (server.getTickCount() % 1200 == 0) saveInBackground();
+    }
+
+    // The minute's save (the journal, the sections' tiles) on a thread of its own, one at a time: it ran on the server thread
+    // (the whole journal packed and gzipped, every dirty tile deflated), 2 to 3 s a minute, "Can't keep up" about every 62 s.
+    private static final java.util.concurrent.atomic.AtomicBoolean SAVING = new java.util.concurrent.atomic.AtomicBoolean();
+    private static final Object SAVE_LOCK = new Object();
+    private static final java.util.concurrent.ExecutorService SAVER = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "nirncraft-atlas-journal-save");
+        t.setDaemon(true);
+        t.setPriority(Thread.NORM_PRIORITY - 1);
+        return t;
+    });
+
+    private static void saveInBackground() {
+        if (!SAVING.compareAndSet(false, true)) return;  // (the last one is still writing)
+        SAVER.execute(() -> {
+            try {
+                if (changedSinceSave) save();
+                AtlasSections.save();
+            } catch (Throwable t) {
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas: far change journal not saved: {}", t.toString());
+            } finally {
+                SAVING.set(false);
+            }
+        });
     }
 
     private static void scanChunks(ServerLevel level) {
@@ -446,7 +468,15 @@ public final class AtlasEdits {
 
     /** Writes the journal (server stopping, and every minute while it changes). */
     static void save() {
+        synchronized (SAVE_LOCK) {
+            saveLocked();
+        }
+    }
+
+    private static void saveLocked() {
+        Path file = AtlasEdits.file;
         if (file == null) return;
+        changedSinceSave = false;  // (before the copy: a change while it is written marks the next save)
         ListTag tiles = new ListTag();
         for (Map.Entry<Long, TileJournal> e : JOURNAL.entrySet()) {
             TileJournal j = e.getValue();
@@ -483,8 +513,8 @@ public final class AtlasEdits {
         try {
             Files.createDirectories(file.getParent());
             net.minecraft.nbt.NbtIo.writeCompressed(root, file);
-            changedSinceSave = false;
         } catch (IOException e) {
+            changedSinceSave = true;
             com.nirncraft.NirnCraft.LOGGER.warn("atlas: far change journal not saved: {}", e.toString());
         }
     }
