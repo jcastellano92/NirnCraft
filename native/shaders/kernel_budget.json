@@ -1345,6 +1345,22 @@
    "fnArrays": 0,
    "structCalls": 0,
    "structCallsOk": []
+  },
+  "stage_trace": {
+   "instructions": 1165,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
+  },
+  "stage_trace_clock": {
+   "instructions": 1172,
+   "private": 0,
+   "workgroup": 0,
+   "fnArrays": 0,
+   "structCalls": 0,
+   "structCallsOk": []
   }
  },
  "pipe": {
@@ -1432,6 +1448,20 @@
     "local": 0,
     "stack": 0,
     "binary": 74880
+   },
+   "traceMain (lean)": {
+    "registers": 53,
+    "shared": 0,
+    "local": 0,
+    "stack": 0,
+    "binary": 9984
+   },
+   "traceMain (lean, clock)": {
+    "registers": 54,
+    "shared": 0,
+    "local": 0,
+    "stack": 0,
+    "binary": 10240
    }
   }
  }

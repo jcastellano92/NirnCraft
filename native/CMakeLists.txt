@@ -67,6 +67,23 @@ add_custom_command(
   COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_farsplit.spv -DOUT=${GEN}/atlas_farsplit_spv.h -DNAME=atlas_farsplit_spv
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
   DEPENDS "${GEN}/atlas_farsplit.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+# the lean trace stage (shaders/stage_trace.slang, docs/ATLAS-RENDER-BLUEPRINT.md step 6), and its clock build
+set(STAGE_TRACE_SRC "${CMAKE_SOURCE_DIR}/shaders/stage_trace.slang")
+foreach(lp "stage_trace:0" "stage_trace_clock:1")
+  string(REPLACE ":" ";" lpl "${lp}")
+  list(GET lpl 0 lname)
+  list(GET lpl 1 lclock)
+  add_custom_command(
+    OUTPUT "${GEN}/${lname}.spv"
+    COMMAND "${SLANGC}" "${STAGE_TRACE_SRC}" -target spirv -entry traceMain -stage compute -O3 -DATLAS_LEAN_CLOCK=${lclock}
+            -o "${GEN}/${lname}.spv"
+    DEPENDS "${STAGE_TRACE_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_shared.slang" COMMENT "slangc ${lname} -> SPIR-V")
+  add_custom_command(
+    OUTPUT "${GEN}/${lname}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/${lname}.spv -DOUT=${GEN}/${lname}_spv.h -DNAME=${lname}_spv
+            -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/${lname}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_cloud.spv"
   COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry cloudMain -stage compute -O3 -o "${GEN}/atlas_cloud.spv"
@@ -181,7 +198,7 @@ add_custom_target(atlas_build_hash ALL
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
   src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp src/bricks.cpp
-  "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_farsplit_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
+  "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_farsplit_spv.h" "${GEN}/stage_trace_spv.h" "${GEN}/stage_trace_clock_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")

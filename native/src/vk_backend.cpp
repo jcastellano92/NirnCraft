@@ -49,6 +49,8 @@
 #include "atlas_gridlight_spv.h"
 #include "atlas_far_spv.h"      // generated: atlas_far_spv[], atlas_far_spv_size (bytes)
 #include "atlas_farsplit_spv.h" // generated: farMain for the unified field's split frames (ATLAS_FAR_SPLIT)
+#include "stage_trace_spv.h"       // generated: the lean trace stage (stage_trace.slang)
+#include "stage_trace_clock_spv.h" // generated: its clock build (ATLAS_LEAN_CLOCK)
 #include "atlas_ingest_spv.h"   // generated
 #include "atlas_publish_spv.h"  // generated
 #include "atlas_vg_section_spv.h"  // generated: the level-0 grid's build kernels (atlas_voxgrid.slang)
@@ -485,6 +487,8 @@ public:
             if (farSplitThread_.joinable()) farSplitThread_.join();  // (the split frames' far kernel still building)
             if (farSplitPipe_) vkDestroyPipeline(dev_, farSplitPipe_, nullptr);
             if (farSplitShader_) vkDestroyShaderModule(dev_, farSplitShader_, nullptr);
+            if (leanPipe_) vkDestroyPipeline(dev_, leanPipe_, nullptr);
+            if (leanShader_) vkDestroyShaderModule(dev_, leanShader_, nullptr);
             for (int i = 0; i < RELOAD_KERNELS; i++) {  // (built and never swapped in)
                 if (reloadPipe_[i]) vkDestroyPipeline(dev_, reloadPipe_[i], nullptr);
                 if (reloadMod_[i]) vkDestroyShaderModule(dev_, reloadMod_[i], nullptr);
@@ -590,6 +594,24 @@ public:
         if (!createPipe(atlas_far_spv, atlas_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err,
                         "farMain"))
             return false;
+        // (dev: ATLAS_FAR_LEAN=1, the lean trace stage in place of the split frames' far pass, its steps in the counters;
+        // 2 its clock build, the counters its cycles / 16. Step 6 of docs/ATLAS-RENDER-BLUEPRINT.md: measured, not drawn)
+        if (const char* e = std::getenv("ATLAS_FAR_LEAN"); e && (*e == '1' || *e == '2')) {
+            farLean_ = *e - '0';
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = farLean_ == 2 ? stage_trace_clock_spv_size : stage_trace_spv_size;
+            smci.pCode = farLean_ == 2 ? stage_trace_clock_spv : stage_trace_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &leanShader_) == VK_SUCCESS) {
+                VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+                cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+                cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+                cp.stage.module = leanShader_;
+                cp.stage.pName = "main";
+                cp.layout = farLayout_;
+                if (makePipeline(cp, &leanPipe_, farLean_ == 2 ? "traceMain (lean, clock)" : "traceMain (lean)") != VK_SUCCESS)
+                    leanPipe_ = VK_NULL_HANDLE;
+            }
+        }
         // the split frames' far kernel (the game's unified field: atlas_far.slang ATLAS_FAR_SPLIT, every trace inlined, its
         // state in registers: about half the far pass's time). Its driver compile takes a minute or two the first time (the
         // pipeline cache keeps it), so it is built on a thread and the general far kernel draws until it is ready;
@@ -2245,7 +2267,7 @@ private:
             VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
             ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err) &&
                  ensure(s.bufs[B_NEAR_AGE], px * 4, false, Mem::DeviceOnly, err) &&
-                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) ? px * 32 : 32, false, Mem::DeviceOnly, err);
+                 ensure(s.bufs[B_FAR_HIT], (frame.dims[2] & FRAME_FAR_AMORT_BIT) || farLean_ ? px * 32 : 32, false, Mem::DeviceOnly, err);
             // filled with "no surface" and "no samples" in record
             if (ok && (s.bufs[B_SURFACE].buf != before || s.bufs[B_NEAR_AGE].buf != ageBefore)) s.surfaceFresh = true;
             if (ok && s.bufs[B_FAR_HIT].buf != hitBefore) s.hitFresh = true;
@@ -2922,8 +2944,16 @@ private:
         // (the split frames of the unified field: their own far kernel once built; never once a shader folder reloaded the
         // far kernel, the dev loop's edits are drawn with)
         bool splitKernel = nearSplit && lit && !farReloaded_ && farSplitReady_.load(std::memory_order_acquire);
-        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, splitKernel ? farSplitPipe_ : farPipe_);
-        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, splitKernel && leanPipe_ ? leanPipe_ : splitKernel ? farSplitPipe_ : farPipe_);
+        // (dev: ATLAS_FAR_GROUP=WxH, the far kernel's workgroup when a shader folder's farMain was built with another
+        // numthreads: measurements of the group size; 8x8 the kernels' own)
+        static uint32_t farGx = 0, farGy = 0;
+        if (!farGx) {
+            farGx = 8, farGy = 8;
+            if (const char* e = std::getenv("ATLAS_FAR_GROUP")) std::sscanf(e, "%ux%u", &farGx, &farGy);
+            farGx = std::max(farGx, 1u), farGy = std::max(farGy, 1u);
+        }
+        vkCmdDispatch(s.cmd, (w + farGx - 1) / farGx, (h + farGy - 1) / farGy, 1);
         s.gt.mark(s.cmd, "far");
         if (nearSplit) {
             // the near light: one pixel of each 2 x 2 traced, then the other three filled (both after the far pass:
@@ -3629,6 +3659,9 @@ private:
     // (the split frames' far kernel: built on its thread, used once ready; farReloaded_: a shader folder's far kernel)
     VkShaderModule farSplitShader_ = VK_NULL_HANDLE;
     VkPipeline farSplitPipe_ = VK_NULL_HANDLE;
+    int farLean_ = 0;  // (ATLAS_FAR_LEAN) the lean trace stage in the split frames' far pass's place
+    VkShaderModule leanShader_ = VK_NULL_HANDLE;
+    VkPipeline leanPipe_ = VK_NULL_HANDLE;
     std::thread farSplitThread_;
     std::atomic<bool> farSplitReady_{false};
     bool farReloaded_ = false;
