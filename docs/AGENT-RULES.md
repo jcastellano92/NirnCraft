@@ -287,6 +287,9 @@ Read these first:
   structs through shared memory (16640 B a group instead of 7936), which takes L1 from the walk and slows every pixel,
   even with the feature switched off. Check "Shared Memory Size" with `ATLAS_PIPE_STATS=1` on any far-kernel change:
   7936 B is the good value.
+  A kernel change that moves its numbers on purpose updates its rows in native/shaders/kernel_budget.json in the same
+  commit with `py -3 native/tools/budget_set.py <module>...` (spv) or `--pipe <log> "<pipeline>"` (driver stats),
+  and says why in the message: the budget is a ratchet, never edited by hand.
 * **A new or rewritten kernel's speed counts only with result agreement (2026-10-26).** Before claiming a time, compare
   its hits against the reference kernel on a dry, fully resident scene: the hit/miss mask and hit t, on the 3 views,
   with the same step caps, dispatch size and amortisation. Report the mismatch % beside the ms. A kernel that misses,
