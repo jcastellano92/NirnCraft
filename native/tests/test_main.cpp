@@ -2473,7 +2473,8 @@ static void testStalls() {
     std::sort(ms.begin(), ms.end());
     std::printf("TRACE done stalls:atlas_info under the generator's and store's locks: median %.3f ms, max %.3f ms (locks held %.0f ms)\n",
                 ms[ms.size() / 2], ms.back(), HOLD_MS);
-    CHECK(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() < HOLD_MS * 0.5);  // (still held)
+    double callsMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    CHECK(callsMs < HOLD_MS * 0.5);  // (all 25 calls done while the locks are still held)
     CHECK(ms[ms.size() / 2] < 1.0);
     CHECK(ms.back() < 100.0);
     // (the numbers are the last look's, not empty: the same blocks are there)
