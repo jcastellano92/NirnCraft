@@ -190,6 +190,23 @@ fingerprints (step 7) plug in here:** `refreshFingerprint` (gen_engine.cpp) fold
 key; step 7 replaces that one hash by one per stage (the stage's kernel files and its data), stored as the directory entry's
 buildId, so a changed stage marks only the regions it touches.
 
+**Near first (atlas-bake2, 2026-10-25).** The pacer has two buckets: the near window's (a floor of 4 ms of GPU a frame period,
+or the duty when that is more: slow frames do not starve it) and the far path's, which is only what the near bucket could not
+hold. The generator thread is one thread, and a far tile's submissions wait for tokens on it, so `farStep` between near batches
+runs only when the near bucket is nearly full (`AtlasGenNative.nearTokensMs`, `AtlasClientGen.farTurnOk`; while the loading screen
+holds the player nothing is paced and the old rule stands); when the near window is idle it runs as before. The route reports
+`l0Near6` (level-0 columns within 6 chunks of the camera that hold no data, a second) and fails on any while walking or sprinting
+and on holes still there 2 s after the flight (`atlas_tools.summarize`).
+**Why a store stage reaches 95 ms in game.** Two causes. (1) Contention: the same stage measured offline (`gen_cache_bench
+store=1 feat=1`, the game's decoration program) has 25 of 14.6k submissions over 8 ms and none past 34 ms with small frames
+beside it; with 2560x1440 frames of 550 ms beside it the same submissions stretch to 500 ms. A submission's GPU time includes
+whatever the frames run at the same time; the frames' size, not the generator's, is what the game's 60 to 100 ms submissions
+measure (hidden frames under the loading screen are a renderer matter). (2) Real long units: a feature's budget grew by 4 after a
+round that had finished under it, so a tree commit of 74 ms followed a round of 1 ms; it now grows only after a round the budget
+cut short, by 2 at most, and falls by up to 8 (73.6 to 34.3 ms, over 8 ms 46 to 25). A pass kind not yet measured is cut in
+chunks of 8 (the first call was one 84 ms submission). What stays is one placement's serial work on one lane: an ore's first round
+17 to 31 ms, a tree's plan 19 to 34 ms, whatever the budget; only a kernel change splits them.
+
 **Near.** The self-baking cache plus an **idle baker**: the RequestRing's tail along the predicted path, then a
 spiral, run only from the pacer's idle tokens in bake-only mode. A full level-0 Tamriel is ~5.3 GB and ~40 GPU-min once
 trees are fixed: optional.
