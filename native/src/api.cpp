@@ -514,7 +514,10 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         }
         if (ctx->voxgrid.active() && !ctx->info.empty() && ctx->info.back() == '}') {
             // the level-0 grid: slots in use, sections built, what is waiting, the GPU's last build and all of them
-            Backend::VoxGridTimes t = ctx->backend->voxgridTimes();
+            Backend::VoxGridTimes t = [&] {
+                ATLAS_ZONE_MIN("api:info.voxgridTimes", 100);
+                return ctx->backend->voxgridTimes();
+            }();
             const VoxGrid& v = ctx->voxgrid;
             ATLAS_ZONE_MIN("api:info.voxgrid", 100);
             VoxGrid::InfoSnap snap = v.infoSnap();
@@ -605,6 +608,7 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             // written, and what this session read from it (a relaunch: hits > 0 and few generated)
             std::string genCache = "\"genCache\":{\"on\":false},";
             if (GenCache* gc = ctx->world.genCache()) {
+                ATLAS_ZONE_MIN("api:info.genCache", 100);
                 GenCache::Stats gs = gc->stats();
                 char g[512];
                 std::snprintf(g, sizeof g,

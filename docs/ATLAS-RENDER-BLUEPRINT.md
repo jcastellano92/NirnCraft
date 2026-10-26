@@ -116,6 +116,7 @@ Also in FrameGpu:
 ### Adding a feature inside a stage
 
 - Compile the stage with and without the feature (`#if`), and check its stats against its own budget. If registers rise, it is not a branch: it becomes its own stage on its own work list.
+- Split a feature into its own pass only when inline it spills the walk (water: yes, 1.7x -> 1.3x); a cheap post-walk step stays inline (smooth: the split was +7-17%).
 - Uniform decisions (whether the feature is on this frame, its tables) go in FrameGpu.
 - Heavy work found in a loop (a brick, a micro-shape, a texel) is recorded as a candidate and done once after the loop; on a miss the loop resumes from where it was. This is the pattern `smoothPrimaryHit` / `traceView` already use.
 
