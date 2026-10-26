@@ -709,15 +709,31 @@ float smoothOcc(uint m, bool skipWater) {
     return skipWater && uint(palette[m].emisClass.y) == 2u ? 0.0 : 1.0;
 }
 
-// the level's density at q (grid-local voxel units): its eight voxel centres around q, trilinear
-float vgDensityG(VgGrid g, float3 q, bool skipWater) {
+// the density (trilinear over the eight voxel centres around a point) as central differences over a voxel either side of q
+// from the 32 voxel centres they share, not 48: the 2 x 2 x 2 around q and a 4-voxel arm each side of it on each axis
+float3 vgDensityGrad(VgGrid g, float3 q, bool skipWater) {
     q -= 0.5;
     int3 b = int3(floor(q));
     float3 w = q - float3(b);
-    float o[8];
+    float c[8];  // (x + 2 y + 4 z, as vgDensityG's)
     [unroll]
-    for (int k = 0; k < 8; k++) o[k] = smoothOcc(vgMatG(g, b + int3(k & 1, (k >> 1) & 1, (k >> 2) & 1)), skipWater);
-    return lerp(lerp(lerp(o[0], o[1], w.x), lerp(o[2], o[3], w.x), w.y), lerp(lerp(o[4], o[5], w.x), lerp(o[6], o[7], w.x), w.y), w.z);
+    for (int n = 0; n < 8; n++) c[n] = smoothOcc(vgMatG(g, b + int3(n & 1, (n >> 1) & 1, (n >> 2) & 1)), skipWater);
+    float3 gr = float3(0, 0, 0);
+    [unroll]
+    for (int n = 0; n < 4; n++) {
+        int a = n & 1, e = (n >> 1) & 1;
+        float xl = smoothOcc(vgMatG(g, b + int3(-1, a, e)), skipWater), xh = smoothOcc(vgMatG(g, b + int3(2, a, e)), skipWater);
+        float yl = smoothOcc(vgMatG(g, b + int3(a, -1, e)), skipWater), yh = smoothOcc(vgMatG(g, b + int3(a, 2, e)), skipWater);
+        float zl = smoothOcc(vgMatG(g, b + int3(a, e, -1)), skipWater), zh = smoothOcc(vgMatG(g, b + int3(a, e, 2)), skipWater);
+        // (x: the pair (y, z) = (a, e); y: (x, z) = (a, e); z: (x, y) = (a, e))
+        float wx = (a != 0 ? w.y : 1.0 - w.y) * (e != 0 ? w.z : 1.0 - w.z);
+        float wy = (a != 0 ? w.x : 1.0 - w.x) * (e != 0 ? w.z : 1.0 - w.z);
+        float wz = (a != 0 ? w.x : 1.0 - w.x) * (e != 0 ? w.y : 1.0 - w.y);
+        gr.x += wx * (lerp(c[1 + 2 * a + 4 * e], xh, w.x) - lerp(xl, c[2 * a + 4 * e], w.x));
+        gr.y += wy * (lerp(c[a + 2 + 4 * e], yh, w.y) - lerp(yl, c[a + 4 * e], w.y));
+        gr.z += wz * (lerp(c[a + 2 * e + 4], zh, w.z) - lerp(zl, c[a + 2 * e], w.z));
+    }
+    return gr;
 }
 
 struct SmoothHit {
@@ -794,9 +810,7 @@ SmoothHit coarseSmoothHit(VgGrid g, float3 ro, float3 d, float u0, float u1, boo
     // the normal: minus the density's gradient over a voxel either side of the crossing (central differences: a terrace's
     // one-voxel ramp and its flat top share their light across the step, a slope reads as a slope)
     float3 qh = ro + d * sh.t;
-    float3 gr = float3(vgDensityG(g, qh + float3(1, 0, 0), skipWater) - vgDensityG(g, qh - float3(1, 0, 0), skipWater),
-                       vgDensityG(g, qh + float3(0, 1, 0), skipWater) - vgDensityG(g, qh - float3(0, 1, 0), skipWater),
-                       vgDensityG(g, qh + float3(0, 0, 1), skipWater) - vgDensityG(g, qh - float3(0, 0, 1), skipWater));
+    float3 gr = vgDensityGrad(g, qh, skipWater);
     if (dot(gr, gr) < 1e-8) {  // (flat over the stencil: the crossing's own cell)
         gr.x = lerp(lerp(occ[1] - occ[0], occ[3] - occ[2], w3.y), lerp(occ[5] - occ[4], occ[7] - occ[6], w3.y), w3.z);
         gr.y = lerp(lerp(occ[2] - occ[0], occ[3] - occ[1], w3.x), lerp(occ[6] - occ[4], occ[7] - occ[5], w3.x), w3.z);
