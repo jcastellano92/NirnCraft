@@ -163,6 +163,20 @@ a moving-capture check per temporal change, a gallery no-drop rule on merges, an
   - Trust without a server GPU: a region is accepted once two independent clients agree on its fingerprint, the
     server's CPU generator spot-checks a few, and peers that send bad data are dropped.
 
+### The render blueprint (2026-10-26)
+
+[ATLAS-RENDER-BLUEPRINT.md](ATLAS-RENDER-BLUEPRINT.md) is the standard the renderer follows:
+- stages with fixed interfaces (the hit buffer HIT_V1, per-stage work lists, shared resource classes, FrameGpu);
+- a building-block template (a stage file, a `Stage` record, a `kernel_budget.json` entry, a ceiling test, an off
+  switch, a quality knob);
+- the rules learned the hard way;
+- where the later features plug in;
+- a migration order that keeps the image identical at each step;
+- a conformance audit of every existing kernel.
+
+New render features are new stages or budgeted branches, never growth of a shared kernel. The build enforces the
+budget automatically (a ratchet).
+
 ### Frame budget (2026-10-25)
 
 At 60 fps and 2560×1440 on the RTX 3090, the frame is 16.7 ms. Every renderer step is measured against its slice, and
