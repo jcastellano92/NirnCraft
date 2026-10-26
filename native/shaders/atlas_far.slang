@@ -3911,6 +3911,32 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     wRes = res;
     wRes.mat = hb.y;
     wRes.lod = int((hb.x >> 6) & 15u);
+    if (tHit >= 0.0 && res.lod == 0 && res.hasAlbedo == 0u && res.axis >= 0) {
+        // (a plain level-0 cube of the lean stage: its material's 16 x 16 texel on the face entered, over the pixel's
+        // footprint, as farMain's walk takes it, vgTexel; the lean stage's own refined hits carry their colour)
+        uint at = vgTexture(res.mat);
+        if (at != 0u) {
+            float Rt = frame.camFrac.w;
+            float kt = Rt > 0 ? dot(dir.xz, dir.xz) / (2.0 * Rt) : 0.0;
+            float3 hp = worldAt(o, dir, kt, tHit) + dir * 1e-3;  // (just inside the voxel entered)
+            float3 lq = clamp(hp - floor(hp), float3(0, 0, 0), float3(0.9999, 0.9999, 0.9999));
+            int ax = res.axis;
+            // (G_FACE_LOW / G_FACE_HIGH and texSample's mip table, without their arrays: no local-memory arrays here)
+            int f = dir[ax] > 0.0 ? (ax == 0 ? 4 : (ax == 1 ? 0 : 2)) : (ax == 0 ? 5 : (ax == 1 ? 1 : 3));
+            float2 uv = clamp(f <= 1 ? lq.xz : (f <= 3 ? float2(lq.x, 1.0 - lq.y) : float2(lq.z, 1.0 - lq.y)), float2(0, 0), float2(0.9999, 0.9999));
+            float fp = tHit * frame.params.w * frame.params.z / max(abs(dir[ax]), 0.2);
+            float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
+            int l0 = int(lv), l1 = min(4, l0 + 1);
+            int n0 = 16 >> l0, n1 = 16 >> l1;
+            uint m0 = l0 == 0 ? 0u : (l0 == 1 ? 256u : (l0 == 2 ? 320u : (l0 == 3 ? 336u : 340u)));
+            uint m1 = l1 == 0 ? 0u : (l1 == 1 ? 256u : (l1 == 2 ? 320u : (l1 == 3 ? 336u : 340u)));
+            uint tb = at + uint(f) * 341u;
+            uint c0 = texData[tb + m0 + uint(min(int(uv.x * float(n0)), n0 - 1) + n0 * min(int(uv.y * float(n0)), n0 - 1))];
+            uint c1 = texData[tb + m1 + uint(min(int(uv.x * float(n1)), n1 - 1) + n1 * min(int(uv.y * float(n1)), n1 - 1))];
+            res.albedo = lerp(srgbLinear(c0), srgbLinear(c1), lv - float(l0));
+            res.hasAlbedo = 1u;
+        }
+    }
     uint hitSrc = 0u;
     bool taken = true;  // (no walk here)
     if (false) {
