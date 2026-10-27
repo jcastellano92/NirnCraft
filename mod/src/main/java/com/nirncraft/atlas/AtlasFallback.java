@@ -62,7 +62,8 @@ final class AtlasFallback {
         if (!info.isZZeroToOne()) return "the GL context has no [0,1] clip depth (glClipControl), so the far plane is not at depth 0";
         String backend = info.backendName();
         if (backend != null && !backend.toLowerCase(java.util.Locale.ROOT).contains("gl"))
-            return "the renderer backend is " + backend + " (atlas shares images with OpenGL only)";
+            return "the renderer backend is " + backend + " (the compositor draws inside Minecraft's main pass, where its "
+                    + "Vulkan encoder takes no copies: atlas reaches the frame through the near pass there)";
         return null;
     }
 

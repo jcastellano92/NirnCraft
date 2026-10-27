@@ -18,6 +18,8 @@ class AtlasStatusLineTest {
         assertEquals("NVIDIA GeForce RTX 3090", AtlasStatusLine.device(INFO));
         assertEquals("zero-copy", AtlasStatusLine.interop(INFO));
         assertEquals("host-copy", AtlasStatusLine.interop("{\"interop\":\"host-copy\",\"interopReason\":\"x\"}"));
+        assertEquals("Vulkan shared-device", AtlasStatusLine.interop("{\"interop\":\"vulkan shared device (zero-copy)\"}"));
+        assertEquals("Vulkan host-copy", AtlasStatusLine.interop("{\"interop\":\"vulkan host-copy (own device)\"}"));
         assertNull(AtlasStatusLine.interop("{\"interop\":\"not attached\"}"));
         assertEquals("AMD \"Custom\" GPU", AtlasStatusLine.device("{\"device\":\"AMD \\\"Custom\\\" GPU\"}"));
         assertNull(AtlasStatusLine.device(null));
@@ -31,6 +33,10 @@ class AtlasStatusLineTest {
         assertEquals("NirnCraft: Infinite ATLAS far field on (host-copy, no shader pack: fallback compositor) on AMD Radeon 780M, "
                         + "quality IGPU",
                 AtlasStatusLine.on("{\"device\":\"AMD Radeon 780M\",\"interop\":\"host-copy\"}", true, "IGPU"));
+        assertEquals("NirnCraft: Infinite ATLAS far field on (Vulkan shared-device) on GPU, quality HIGH",
+                AtlasStatusLine.on("{\"device\":\"GPU\",\"interop\":\"vulkan shared device (zero-copy)\"}", false, "HIGH"));
+        assertEquals("NirnCraft: Infinite ATLAS far field on (Vulkan host-copy) on GPU",
+                AtlasStatusLine.on("{\"device\":\"GPU\",\"interop\":\"vulkan host-copy (own device)\"}", false, null));
         assertEquals("NirnCraft: Infinite ATLAS far field off: no macOS build", AtlasStatusLine.off("no macOS build"));
         assertEquals("NirnCraft: Infinite ATLAS far field off: unknown reason", AtlasStatusLine.off(null));
     }
@@ -70,7 +76,7 @@ class AtlasStatusLineTest {
         assertFalse(e.outOfMemory());
         assertEquals("device lost", AtlasNative.AtlasException.statusName(AtlasNative.ERR_DEVICE_LOST));
         assertEquals("status -42", AtlasNative.AtlasException.statusName(-42));
-        assertEquals("0.17.0", AtlasNative.abiString(AtlasNative.ABI_VERSION));
+        assertEquals("0.19.0", AtlasNative.abiString(AtlasNative.ABI_VERSION));
         assertEquals("0.11.0", AtlasNative.abiString(AtlasNative.ABI_MIN));
         assertTrue(AtlasNative.enableNativeAccessArg().startsWith("--enable-native-access="));
     }

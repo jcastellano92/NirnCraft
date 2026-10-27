@@ -38,8 +38,9 @@ extern "C" {
    nearInfoTex / dstNearLight; every new field is read only when the frame sets the flag, so a 0.14 caller's smaller
    structs stay valid); 0.16 the air (AtlasAir, atlas_set_air, atlas_air_*: a physical sky, sun and haze) and the
    near field's textures (atlas_set_material_textures); 0.17 the near field from atlas's own primary rays
-   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid, and the sky's own light (atlas_set_sky_glow). */
-#define ATLAS_ABI_VERSION 0x001100
+   (ATLAS_FRAME_PRIMARY_NEAR / _LIT) over the GPU-built level-0 grid, and the sky's own light (atlas_set_sky_glow);
+   0.18 additive shared-Vulkan retirement; 0.19 terminal checked Vulkan close/admission. */
+#define ATLAS_ABI_VERSION 0x001300
 
 typedef struct AtlasContext AtlasContext;
 
@@ -406,7 +407,86 @@ typedef struct AtlasGlFrameIO {
     uint32_t nearInfoTex, dstNearLight; /* (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) */
 } AtlasGlFrameIO;
 ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io);
+/* Legacy void detach and atlas_destroy refuse to release an attached shared-Vulkan context with an unresolved splice;
+ * the context remains valid and must instead be detached with atlas_vk_detach_retired. */
 ATLAS_API void atlas_gl_detach(AtlasContext* ctx);
+
+/*
+ * (additive, optional: the host binds them if present) Minecraft's Vulkan backend (docs/ATLAS-VULKAN-BACKEND.md), no
+ * OpenGL anywhere. Stage S1, atlas on its own Vulkan device: atlas_vk_attach makes the frame's images (as
+ * atlas_gl_attach, without GL textures); atlas_vk_render renders a frame like atlas_gl_render_io and hands it over in
+ * host memory, in the GL path's layouts (rows bottom-up, the order Minecraft's Vulkan render targets keep too): the
+ * caller uploads it into its own textures (Minecraft's CommandEncoder.writeToTexture) before the next call. The CPU
+ * waits for the frame's GPU work in the call (as the GL path's host copies). `io` carries the GL path's options; its
+ * texture names are only flags here: a non-zero dstNearLight asks for the near light (only with
+ * ATLAS_FRAME_PRIMARY_NEAR*: there is no near depth or info to read without GL). All out pointers null: no frame
+ * yet. atlas_gl_detach detaches.
+ */
+typedef struct AtlasVkHostFrame {
+    const void* color;     /* RGBA16F, width x height */
+    const void* normal;    /* RGBA8 */
+    const void* depth;     /* R32F, view distance in blocks */
+    const void* nearLight; /* RGBA16F, or null (no near light this frame) */
+    const void* sunMap;    /* RG32F, sunSize x (sunSize + 1), or null */
+    uint32_t width, height, sunSize, reserved;
+} AtlasVkHostFrame;
+ATLAS_API AtlasStatus atlas_vk_attach(AtlasContext* ctx, uint32_t width, uint32_t height);
+ATLAS_API AtlasStatus atlas_vk_render(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io,
+                                      AtlasVkHostFrame* out);
+
+/*
+ * (additive, optional) Stage S3: atlas on Minecraft's own VkDevice, which Minecraft created with atlas's features
+ * (shaderInt64; float64 when offered) and queues (NirnCraft's device-sharing mixin). atlas_create_on_vulkan makes a
+ * Vulkan context that adopts the device (it never creates, waits idle on or destroys it, and submits only to its own
+ * queues); attach with atlas_vk_attach as for S1. Each atlas_vk_render_shared traces the frame on atlas's frame queue
+ * (no CPU wait) and returns a splice for the caller's frame, recorded outside any render pass: wait on waitSemaphore
+ * (a timeline) for waitValue at the transfer stage, execute commandBuffer (it copies the frame into `targets`:
+ * Minecraft's images in GENERAL layout, used on graphicsFamily only, the same formats and size as the attach; the sun
+ * map RG32F sunSize x sunSize + 1), then signal signalSemaphore = signalValue. Every splice must reach the caller's
+ * queue: the next frame waits for its signal before overwriting atlas's images. commandBuffer null: no frame.
+ */
+typedef struct AtlasVkDevice {
+    void* instance;        /* VkInstance */
+    void* physicalDevice;  /* VkPhysicalDevice */
+    void* device;          /* VkDevice */
+    uint32_t frameFamily, frameIndex;  /* atlas's frame queue (a compute-only family where there is one: async) */
+    uint32_t genFamily, genIndex;      /* the client generator's queue; genFamily UINT32_MAX: none */
+    uint32_t flags;                    /* ATLAS_VK_DEVICE_* */
+    uint32_t graphicsFamily;           /* Minecraft's graphics queue's family (it executes the splices) */
+} AtlasVkDevice;
+#define ATLAS_VK_DEVICE_FLOAT64 1u        /* shaderFloat64 enabled */
+#define ATLAS_VK_DEVICE_MEMORY_BUDGET 2u  /* VK_EXT_memory_budget enabled */
+#define ATLAS_VK_DEVICE_CALIBRATED 4u     /* VK_EXT_calibrated_timestamps enabled */
+typedef struct AtlasVkTargets {
+    uint64_t color, depth, nearLight, sunMap; /* VkImage handles, 0 = none */
+} AtlasVkTargets;
+typedef struct AtlasVkSplice {
+    uint64_t waitSemaphore, waitValue;
+    void* commandBuffer; /* VkCommandBuffer */
+    uint64_t signalSemaphore, signalValue;
+} AtlasVkSplice;
+ATLAS_API AtlasStatus atlas_create_on_vulkan(const AtlasVkDevice* device, AtlasContext** out);
+ATLAS_API AtlasStatus atlas_vk_render_shared(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io,
+                                             const AtlasVkTargets* targets, AtlasVkSplice* out);
+
+/* Synchronous S3 handoff: at most one splice may be outstanding. A busy render returns ATLAS_OK with a zero splice
+ * and does not advance the frame. value=0 queries/waits for the latest outstanding copy. Ordinary wait timeout returns
+ * ATLAS_ERR_TIMEOUT without faulting the context. Cancel is valid only for the exact latest outstanding signal value,
+ * and only when the caller guarantees its command buffer was never recorded or submitted. */
+ATLAS_API AtlasStatus atlas_vk_copy_complete(AtlasContext* ctx, uint64_t value, uint32_t* ready);
+ATLAS_API AtlasStatus atlas_vk_wait_copy(AtlasContext* ctx, uint64_t value, uint64_t timeoutNs);
+ATLAS_API AtlasStatus atlas_vk_cancel_splice(AtlasContext* ctx, uint64_t signalValue);
+/* Detach transfers all S3 interop objects to a context-independent token after atlas's native frames drain. Release
+ * only after the caller proves Minecraft's queue retired every command referencing the token. NULL is a no-op;
+ * each non-NULL token has one owner and must be released exactly once before the VkDevice is destroyed. */
+typedef struct AtlasVkRetirement AtlasVkRetirement;
+/* ABI 0.19: terminal, irreversible GPU admission seal and checked native queue drain (one total 5 s budget).
+   Close all generator owners first. Failure retains a SEALED context; legacy destroy refuses to free it.
+   Success is idempotent and permits detach_retired/final destruction, but rejects all new rendering/uploads.
+   Ordinary detach_retired without this operation remains reusable. Never waits Minecraft's graphics queue. */
+ATLAS_API AtlasStatus atlas_vk_prepare_close(AtlasContext* ctx);
+ATLAS_API AtlasStatus atlas_vk_detach_retired(AtlasContext* ctx, AtlasVkRetirement** out);
+ATLAS_API AtlasStatus atlas_vk_release_retired(AtlasVkRetirement* retired);
 
 /*
  * (abi 0.8) What this context runs on, as one line of JSON for logs: backend, device name and type, vendor id,
@@ -758,6 +838,10 @@ ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount);
 #define ATLAS_FAULT_DEVICE_LOST 1
 #define ATLAS_FAULT_OUT_OF_MEMORY 2
 #define ATLAS_FAULT_TIMEOUT 3
+/* One-shot checked-close test refusals (afterFrames ignored). Producer refusal retains its owner permanently;
+ * consumer refusal follows a real queue tail submission and allows retry. Neither reports completed GPU work. */
+#define ATLAS_FAULT_CLOSE_PRODUCER 4
+#define ATLAS_FAULT_CLOSE_CONSUMER 5
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames);
 
 /*

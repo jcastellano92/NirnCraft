@@ -168,9 +168,11 @@ run() {
 run "$BUILD/atlas_pipeline_cache_io_test"
 run bash "$HERE/tests/run_cache_lifetime.sh" "$(realpath "$BUILD/atlas_cache_lifetime_test")"
 run "$BUILD/atlas_tests" "$RASTER"
+run "$BUILD/atlas_close_admission_test"
 # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit (a device
 # without shaderFloat64 + RTE / SignedZeroInfNanPreserve float controls reports the CPU fallback and passes)
 run "$BUILD/atlas_height_test"
+run "$BUILD/atlas_vk_test" "$HERE/data"
 # the GL bridge on two contexts: a 4.5 core one, then an OpenGL 3.3 core forward-compatible profile like Minecraft's
 # (zero-copy where the interop extensions exist, host-copy otherwise; the 3.3 one must land on the same path)
 run "$BUILD/atlas_gl_test" "$HERE/data" --context=both

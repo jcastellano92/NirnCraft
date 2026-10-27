@@ -54,6 +54,7 @@ neoForge {
         }
         client {
             client()
+            programArguments.addAll '--graphicsBackend', (project.findProperty('nirncraftGraphicsBackend') ?: 'vulkan')
         }
         server {
             server()

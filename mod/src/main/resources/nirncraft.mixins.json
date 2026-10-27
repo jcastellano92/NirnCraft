@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.nirncraft.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "VkDeviceCreate"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

@@ -78,11 +78,13 @@ public final class AtlasClient {
     private static final java.util.List<ReleaseTicket> releases = new java.util.ArrayList<>(); // render thread only
     private static boolean retirementRequested;
     private static ContextReaders retiringReaders;
+    private static java.util.concurrent.CompletableFuture<Void> retirementCopy;
     private static java.util.concurrent.CompletableFuture<Void> previousRelease = java.util.concurrent.CompletableFuture.completedFuture(null);
 
     /** One context generation owns its workers and its interop resources until both sides have retired. */
     static final class ReleaseTicket {
         final AtlasNative.Context context;
+        final AtlasVulkan.Path path;
         final Thread starter;
         final java.util.concurrent.atomic.AtomicReference<Throwable> startFailure;
         final AtlasClientGen generator;
@@ -93,9 +95,11 @@ public final class AtlasClient {
         final java.util.function.Consumer<java.util.function.Consumer<Throwable>> closeFar;
         final Runnable drainGenerator;
         final Runnable renderDetach;
+        final java.util.function.Supplier<AtlasNative.RetiredVulkan> detach;
         final Runnable closeContext;
         final java.util.concurrent.CompletableFuture<Void> done = new java.util.concurrent.CompletableFuture<>();
         final java.util.concurrent.CompletableFuture<Void> renderDone = new java.util.concurrent.CompletableFuture<>();
+        volatile AtlasNative.RetiredVulkan token;
         volatile boolean ready;
         volatile Throwable failure;
 
@@ -103,11 +107,22 @@ public final class AtlasClient {
                       java.util.concurrent.atomic.AtomicReference<Throwable> startFailure, AtlasClientGen generator,
                       AtlasFarField far, java.util.concurrent.CompletableFuture<Void> farExited,
                       java.util.concurrent.CompletableFuture<Object[]> build, AtlasReleaseGate readers) {
-            this.context = context; this.starter = starter; this.startFailure = startFailure;
+            this(context, AtlasVulkan.Path.GL, starter, startFailure, generator, far, farExited, build, readers);
+        }
+
+        ReleaseTicket(AtlasNative.Context context, AtlasVulkan.Path path, Thread starter,
+                      java.util.concurrent.atomic.AtomicReference<Throwable> startFailure, AtlasClientGen generator,
+                      AtlasFarField far, java.util.concurrent.CompletableFuture<Void> farExited,
+                      java.util.concurrent.CompletableFuture<Object[]> build, AtlasReleaseGate readers) {
+            this.context = context; this.path = path; this.starter = starter; this.startFailure = startFailure;
             this.generator = generator; this.far = far; this.farExited = farExited; this.build = build; this.readers = readers;
             this.closeFar = far == null ? callback -> callback.accept(null) : far::closeTracked;
             this.drainGenerator = generator == null ? () -> {} : generator::awaitStop;
-            this.renderDetach = context == null ? () -> {} : context::glDetach;
+            this.renderDetach = context == null || path == AtlasVulkan.Path.VK_SHARED ? () -> {} : context::glDetach;
+            this.detach = context != null && path == AtlasVulkan.Path.VK_SHARED ? () -> {
+                context.vkPrepareClose();
+                return AtlasVulkan.detachRetired(context);
+            } : () -> null;
             this.closeContext = context == null ? () -> {} : context::close;
         }
 
@@ -116,20 +131,26 @@ public final class AtlasClient {
                       java.util.function.Consumer<java.util.function.Consumer<Throwable>> closeFar,
                       Runnable drainGenerator, Runnable renderDetach,
                       Runnable closeContext) {
-            this.context = null; this.starter = starter; this.startFailure = null;
+            this.context = null; this.path = AtlasVulkan.Path.GL; this.starter = starter; this.startFailure = null;
             this.generator = null; this.far = null; this.farExited = farExited; this.build = null; this.readers = readers;
             this.closeFar = closeFar; this.drainGenerator = drainGenerator; this.renderDetach = renderDetach; this.closeContext = closeContext;
+            this.detach = () -> null;
         }
 
         void pumpRender() {
+            pumpRender(AtlasVulkan::enqueueRetired);
+        }
+
+        void pumpRender(java.util.function.Consumer<AtlasNative.RetiredVulkan> enqueue) {
             if (!ready || renderDone.isDone() || failure != null) return;
             try {
-                renderDetach.run();
+                if (path == AtlasVulkan.Path.VK_SHARED) enqueue.accept(token);
+                else renderDetach.run(); // Preserve the GL candidate's render-thread detach and failure retention.
                 renderDone.complete(null);
             } catch (Throwable t) {
                 failure = t;
                 done.completeExceptionally(t);
-                com.nirncraft.NirnCraft.LOGGER.error("atlas: GL detach failed; context ownership retained", t);
+                com.nirncraft.NirnCraft.LOGGER.error("atlas: interop detach failed; context ownership retained", t);
             }
         }
 
@@ -156,8 +177,14 @@ public final class AtlasClient {
                         Object[] made;
                         try { made = build.join(); }
                         catch (java.util.concurrent.CompletionException failedBuild) { made = null; }
-                        if (made != null && made[0] != null) ((AtlasNative.Context) made[0]).close();
+                        if (made != null && made[0] != null) {
+                            var pending = (AtlasNative.Context) made[0];
+                            // A still-building adopted context has not yet selected AtlasVulkan.path or attached.
+                            if (made.length > 2 && Boolean.TRUE.equals(made[2])) pending.vkPrepareClose();
+                            pending.close();
+                        }
                     }
+                    token = detach.get();
                     ready = true;
                     renderDone.join();
                     closeContext.run();
@@ -177,8 +204,16 @@ public final class AtlasClient {
 
     /** Called on the owning render thread; a failed ticket remains visible to shutdown. */
     private static void pumpReleases() {
-        for (ReleaseTicket ticket : releases) ticket.pumpRender();
-        releases.removeIf(ticket -> ticket.done.isDone() && !ticket.done.isCompletedExceptionally());
+        pumpReleases(releases, AtlasVulkan::enqueueRetired);
+    }
+
+    static void pumpReleases(java.util.List<ReleaseTicket> tickets, java.util.function.Consumer<AtlasNative.RetiredVulkan> enqueue) {
+        for (ReleaseTicket ticket : tickets) ticket.pumpRender(enqueue);
+        tickets.removeIf(ticket -> ticket.done.isDone() && !ticket.done.isCompletedExceptionally());
+    }
+
+    static boolean releaseBarrierSatisfied(boolean stopped, java.util.List<ReleaseTicket> tickets) {
+        return stopped && tickets.isEmpty();
     }
 
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
@@ -188,12 +223,14 @@ public final class AtlasClient {
     private static long cpuLogAt;       // nanoTime of the next CPU-path log line
     private static AtlasTargets targets;
     private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
+    private static long deliveredFrames, skippedFrames, lastDeliveredNs;
+    private static volatile boolean outputReady;
     private static boolean nearLitThisFrame;  // and lit the near pass's pixels (ATLAS_FRAME_NEAR_LIGHT)
     private static AtlasFarField farField;
     private static java.util.concurrent.CompletableFuture<Void> farGenerationExited;
-    private static Object startedModels;
-    private static final java.util.concurrent.atomic.AtomicBoolean modelsReloaded = new java.util.concurrent.atomic.AtomicBoolean();
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
+    private static Object startedModels;  // aliases and ingest belong to this block-model set
+    private static final java.util.concurrent.atomic.AtomicBoolean modelsReloaded = new java.util.concurrent.atomic.AtomicBoolean();
     private static final WeatherFeed WEATHER = new AtlasWeatherFeed();
     private static final AtlasQuality quality = new AtlasQuality();
     private static Supplier<WeatherFeed> weather = () -> WEATHER;
@@ -263,6 +300,7 @@ public final class AtlasClient {
             e.addDependency(net.neoforged.neoforge.client.resources.VanillaClientListeners.LAST, id);
         });
         AtlasRecorder.init();  // the flight recorder: client tick zone, /nirncraft-atlas-trace
+        AtlasVkProbe.init();  // (-Dnirncraft.atlas.vkProbe=true: the Vulkan-backend probe, docs/ATLAS-VULKAN-BACKEND.md)
         AtlasNearPass.init(modBus);
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.register(e)));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent e) ->
@@ -290,7 +328,7 @@ public final class AtlasClient {
             catch (Throwable t) { com.nirncraft.NirnCraft.LOGGER.warn("atlas: could not record clean shutdown", t); }
             boolean interrupted = false, stopped = false;
             long nextLog = 0;
-            while (!stopped || !releases.isEmpty()) {
+            while (!releaseBarrierSatisfied(stopped, releases)) {
                 try {
                     if (!stopped) { stop(); stopped = !retirementRequested; }
                     pumpReleases();
@@ -301,7 +339,7 @@ public final class AtlasClient {
                         nextLog = now + 5_000_000_000L;
                     }
                 }
-                if (!stopped || !releases.isEmpty()) {
+                if (!releaseBarrierSatisfied(stopped, releases)) {
                     long now = System.nanoTime();
                     if (now >= nextLog) {
                         com.nirncraft.NirnCraft.LOGGER.warn("atlas: waiting for {} context releases before device shutdown", releases.size());
@@ -448,15 +486,20 @@ public final class AtlasClient {
     private static void renderFarBody(LevelRenderState state, com.mojang.renderpearl.api.commands.RenderPass pass) {
         farThisFrame = false;
         nearLitThisFrame = false;
-        if (retirementRequested || failed) return;
+        com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
+        if (retirementRequested) return;
+        if (failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null) return;
+            if (ctx != null && !copyReady(() -> AtlasVulkan.finishPending(ctx))) return;
             if (modelsReloaded.getAndSet(false) || (ctx != null && startedModels != null && startedModels != mc.getModelManager().getBlockStateModelSet())) {
                 AtlasClientSections.resetLooks();
-                if (ctx != null || ctxBuild != null) stop();
+                if (ctx != null || ctxBuild != null) stop(); // Preserve pending-build model reload cancellation.
+                if (retirementRequested) return;
             }
             if (suspended) {  // nothing far this frame (a pack composites the targets: they are cleared)
+                outputReady = false;
                 if (targets != null) targets.clear();
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
                 return;
@@ -468,11 +511,13 @@ public final class AtlasClient {
                 lastPack = pack;
                 quality.setFallbackMode(!pack);
                 if (targets != null) {  // the sun map and the clouds follow the mode: new targets next
+                    outputReady = false;
                     targets.close();
                     targets = null;
                 }
             }
-            idleByConfig = !pack && !fallbackUsable();
+            // (Minecraft's Vulkan backend: the near pass composites atlas itself; the fallback compositor cannot run there)
+            idleByConfig = !pack && !fallbackUsable() && !(AtlasVulkan.vulkan() && AtlasNearPass.capable(mc));
             if (idleByConfig) {
                 // nobody would see the far field: do not draw it (it comes back when a pack is switched on)
                 status(AtlasStatusLine.off("no shader pack is active and the fallback compositor "
@@ -482,7 +527,9 @@ public final class AtlasClient {
             }
             // a new world (or server): new tiles, maybe another column source
             if (ctx != null && startedFor != mc.level && mc.level.dimension() == Level.OVERWORLD) stop();
+            if (retirementRequested) return;
             if (ctx == null && !start(mc)) return;
+            if (!copyReady(() -> AtlasVulkan.finishPending(ctx))) return;
             if (farField != null && farField.workerError() != null) throw farField.workerError();
             quality.begin();
             if (!quality.enabled(AtlasNearPass.unified())) {
@@ -490,6 +537,7 @@ public final class AtlasClient {
                 // and cloud deck take over); the context and its tiles stay for when it comes back. In unified mode
                 // vanilla's terrain is suppressed, so atlas must keep drawing its minimum-quality world instead.
                 if (targets != null) {
+                    outputReady = false;
                     targets.close();
                     targets = null;
                 }
@@ -500,6 +548,7 @@ public final class AtlasClient {
             int w = quality.width(mc.getWindow().getWidth()), h = quality.height(mc.getWindow().getHeight());
             int sunMap = quality.sunMapSize();
             if (targets == null || targets.width() != w || targets.height() != h || targets.sunSize() != sunMap) {
+                outputReady = false;
                 if (targets != null) targets.close();
                 targets = null;
                 ctx.setSunMap(sunMap, AtlasQuality.SUN_HALF_EXTENT);
@@ -512,6 +561,7 @@ public final class AtlasClient {
                 }
             }
             if (mc.level.dimension() != Level.OVERWORLD) {
+                outputReady = false;
                 targets.clear();  // the far field is the overworld's; elsewhere the near field stands alone
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
                 return;
@@ -525,6 +575,7 @@ public final class AtlasClient {
             // the client generator follows the camera this frame (not the far field's pass: seconds after a jump)
             if (clientGen != null) AtlasClientGen.follow(p.x, p.z, mc.player != null ? mc.player.getYRot() : 0f);
             if (!farField.updated()) {
+                outputReady = false;
                 targets.clear();  // the worker has not staged the first window yet: nothing far this frame
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
                 return;
@@ -640,7 +691,9 @@ public final class AtlasClient {
             io.nearDepthTex = nearOwned ? AtlasNearPass.depthGlId() : 0xFFFFFFFF;
             // our terrain, a core that lights it: one light near and far (the far field's realistic light: sun and
             // traced shadow, traced sky, haze), the near pass's resolve takes it (no vanilla light any more)
-            boolean nearLit = nearOwned && ctx.hasNearLight();
+            // (Minecraft's Vulkan backend: no GL to read our G-buffer from, so only the unified field, whose near field is
+            // atlas's own, takes atlas's near light; the G-buffer mode keeps vanilla's light there)
+            boolean nearLit = nearOwned && ctx.hasNearLight() && (!AtlasVulkan.vulkan() || AtlasNearPass.unified());
             if (nearLit) {
                 frame.flags |= AtlasNative.FRAME_NEAR_LIGHT | AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS;
                 // atlas's clouds, in its light and haze (NirnCraft's deck steps aside: OverworldClouds), unless weather is off
@@ -670,27 +723,77 @@ public final class AtlasClient {
             io.dstNormal = 0;
             io.dstDepth = targets.depthId();
             io.dstSunMap = targets.sunId();
+            if (AtlasVulkan.vulkan()) {  // (no GL names: the outputs are flags, the frame comes back in host memory)
+                io.nearDepthTex = 0;
+                io.nearInfoTex = 0;
+                io.dstColor = io.dstDepth = 1;
+                io.dstSunMap = targets.sunSize() > 0 ? 1 : 0;
+                io.dstNearLight = nearLit ? 1 : 0;
+            }
             if (firstFrame && guard != null) guard.firstFrames();  // a driver crash from here on is the guard's case
             // the images pre-exposed with this frame's eye (the resolve divides it out at once, in full precision)
             preExposure = ctx.setPreExposure(AtlasLook.frame(mc)[0]) ? AtlasLook.frame(mc)[0] : 1f;
             long g0 = System.nanoTime();
-            ctx.glRender(frame, io);
+            boolean delivered = false;
+            if (AtlasVulkan.path() == AtlasVulkan.Path.VK_SHARED) {
+                // on Minecraft's device: atlas traces on its own queue; one spliced command buffer copies the frame into
+                // the registered textures after a timeline wait (no CPU wait, no host memory)
+                // (every splice handed out must reach Minecraft's queue: the next frame waits for its copies, so nothing is
+                // traced where it could not be spliced)
+                if (AtlasVulkan.canSplice()) {
+                    long[] img = targets.vkImages(nearLit);
+                    AtlasNative.VkSplice sp = ctx.vkRenderShared(frame, io, img[0], img[1], img[2], img[3]);
+                    if (sp == null) {
+                        if (!copyReady(() -> AtlasVulkan.finishPending(ctx))) return;
+                        sp = ctx.vkRenderShared(frame, io, img[0], img[1], img[2], img[3]);
+                        if (sp == null) throw new IllegalStateException("atlas: shared Vulkan frame remained busy after completion");
+                    }
+                    if (sp != null) {
+                        if (!AtlasVulkan.splice(ctx, sp))
+                            throw new IllegalStateException("atlas: Minecraft's encoder refused the splice");
+                        delivered = true;
+                    }
+                } else if (!vkPassWarned) {
+                    vkPassWarned = true;
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: no frame (Minecraft's Vulkan encoder is inside a render pass here)");
+                }
+            } else if (AtlasVulkan.vulkan()) {
+                // atlas's own device: the frame in host memory, uploaded into the registered textures (the CPU waits for
+                // atlas's GPU work in the call); inside a render pass the copy cannot be recorded: the previous frame stays
+                AtlasNative.VkHostFrame hf = ctx.vkRender(frame, io);
+                delivered = hf != null && targets.upload(hf);
+                if (hf != null && !delivered && !vkPassWarned) {
+                    vkPassWarned = true;
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: frame not uploaded (Minecraft's Vulkan encoder is inside a render pass here)");
+                }
+            } else {
+                ctx.glRender(frame, io);
+                delivered = true;
+            }
             long g1 = System.nanoTime();
             AtlasRecorder.end(Z_GL_RENDER, g0);
             glRenderMs += ((g1 - g0) * 1e-6 - glRenderMs) * 0.05;  // (eased: atlas-info's wall time in the call)
+            if (!delivered) {
+                skippedFrames++;
+                return;
+            }
+            deliveredFrames++;
+            outputDelivered();
+            lastDeliveredNs = g1;
             if (lastFrameNs != 0) frameWallMs += ((g1 - lastFrameNs) * 1e-6 - frameWallMs) * 0.05;
             lastFrameNs = g1;
             AtlasLoadStats.frame(g1);
             farThisFrame = true;
             nearLitThisFrame = nearLit;
-            if (pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData)) {
+            boolean fallbackDrawn = pass != null && !pack && !nearOwned && !AtlasFallback.fogHidesFarField(cam.fogData);
+            if (fallbackDrawn) {
                 AtlasTargets t = targets;
                 AtlasGuard.run(AtlasFallback.FEATURE, () -> AtlasFallback.draw(pass, t));
             }
             if (guard != null) guard.frame(now);
             if (firstFrame) {
                 firstFrame = false;
-                status(AtlasStatusLine.on(ctx.info(), !pack, com.nirncraft.render.quality.QualityClient.qualityName()),
+                status(AtlasStatusLine.on(ctx.info(), fallbackDrawn && !AtlasGuard.off(AtlasFallback.FEATURE), com.nirncraft.render.quality.QualityClient.qualityName()),
                         null);
             }
             // atlas's own GPU time (its timestamps, a couple of frames late) for the quality controller's cost model; on
@@ -774,7 +877,8 @@ public final class AtlasClient {
                     return false;
                 }
                 String backend = RenderSystem.getDevice().getDeviceInfo().backendName();
-                if (backend != null && !backend.toLowerCase(Locale.ROOT).contains("gl")) {
+                // OpenGL (the GL bridge) and Vulkan (docs/ATLAS-VULKAN-BACKEND.md: AtlasVulkan) take atlas's frame
+                if (backend != null && !backend.toLowerCase(Locale.ROOT).contains("gl") && !AtlasVulkan.vulkan()) {
                     offForSession("the game runs on the " + backend + " renderer backend; atlas shares its images with "
                             + "OpenGL only (Options > Video > Graphics API: OpenGL)", AtlasStatusLine.Off.SETTING, null);
                     return false;
@@ -814,12 +918,24 @@ public final class AtlasClient {
             if (ctxBuild == null) {
                 boolean forceCpu = "cpu".equalsIgnoreCase(System.getProperty("nirncraft.atlas.backend"));
                 AtlasNative l = lib;
+                // (Minecraft's Vulkan backend with the device-sharing mixin's features and queues: atlas on Minecraft's
+                // own device, stage S3; else, or when that fails, atlas's own device, S1)
+                long[] share = sharedDeviceArgs(l);
                 java.util.concurrent.CompletableFuture<Object[]> build = new java.util.concurrent.CompletableFuture<>();
                 Thread t = new Thread(() -> {
                     try {
                         if (forceCpu) {
                             build.complete(new Object[]{l.create(AtlasNative.BACKEND_CPU), true});
                             return;
+                        }
+                        if (share != null) {
+                            try {
+                                build.complete(new Object[]{l.createOnVulkan(share[0], share[1], share[2], (int) share[3],
+                                        (int) share[4], (int) share[5], (int) share[6], (int) share[7], (int) share[8]), false, true});
+                                return;
+                            } catch (AtlasNative.AtlasException e) {
+                                com.nirncraft.NirnCraft.LOGGER.warn("atlas: not on Minecraft's Vulkan device ({}): its own device instead", e.getMessage());
+                            }
                         }
                         try {
                             build.complete(new Object[]{l.create(AtlasNative.BACKEND_VULKAN), false});
@@ -851,9 +967,23 @@ public final class AtlasClient {
             ctx = (AtlasNative.Context) made[0];
             infoReaders = new ContextReaders(ctx, null, new AtlasReleaseGate());
             cpuBackend = (Boolean) made[1];
+            AtlasVulkan.choose(!AtlasVulkan.vulkan() ? AtlasVulkan.Path.GL
+                    : made.length > 2 ? AtlasVulkan.Path.VK_SHARED : AtlasVulkan.Path.VK_HOST);
+            if (AtlasVulkan.vulkan())
+                com.nirncraft.NirnCraft.LOGGER.info("atlas: on Minecraft's Vulkan backend, path {}{}", AtlasVulkan.path(),
+                        AtlasVulkan.path() == AtlasVulkan.Path.VK_SHARED ? "" : " (shared device: " + AtlasVkShare.why() + ")");
+            if (AtlasVulkan.path() == AtlasVulkan.Path.VK_HOST && (cpuBackend || !ctx.hasVulkanHost())) {
+                // (Minecraft's Vulkan backend: atlas's frame reaches it through atlas_vk_*, a GPU context of a core that has it)
+                stop();
+                offForSession(cpuBackend ? "Minecraft runs Vulkan and atlas has no Vulkan device of its own (the CPU backend needs OpenGL)"
+                        : "this atlas_core cannot render for Minecraft's Vulkan backend (no atlas_vk_attach)", AtlasStatusLine.Off.PLATFORM, null);
+                return false;
+            }
             com.nirncraft.NirnCraft.LOGGER.info("atlas: context made in {} s (its kernels built off the render thread)",
                     String.format("%.1f", (System.nanoTime() - ctxBuildStartNs) / 1e9));
             firstFrame = true;
+            deliveredFrames = skippedFrames = lastDeliveredNs = lastFrameNs = 0;
+            outputReady = false;
             armTestFault(ctx);
             // memory: what this machine can spare sizes the targets, the sun map, the clouds and the clipmap (on the
             // CPU also what it can render: a third of the window to start, quarter-resolution clouds, a 256 sun map)
@@ -1121,6 +1251,24 @@ public final class AtlasClient {
         return ctx != null;
     }
 
+    /** The current attachment has delivered an output; shared Vulkan additionally waits for its copy completion. */
+    static boolean outputReady() {
+        return ctx != null && outputReady;
+    }
+
+    static boolean copyReady(java.util.function.BooleanSupplier check) {
+        try {
+            boolean ready = check.getAsBoolean();
+            if (!ready) outputReady = false;
+            return ready;
+        } catch (RuntimeException | Error failure) {
+            outputReady = false;
+            throw failure;
+        }
+    }
+
+    static void outputDelivered() { outputReady = true; }
+
     /**
      * atlas_info's JSON as the info thread last read it (AtlasReady; the per-tick callers), or null without a context or before
      * the first read. Never waits for the core: the call itself walks books the generator's threads hold.
@@ -1353,6 +1501,23 @@ public final class AtlasClient {
      * temporal resolve a jittered far field would visibly shake by a pixel.
      */
     private static double glRenderMs, frameWallMs;
+    private static boolean vkPassWarned;
+
+    /**
+     * (Minecraft's Vulkan backend) atlas_create_on_vulkan's arguments when atlas can run on Minecraft's own device: the
+     * device-sharing mixin ran (AtlasVkShare), the core has the entry, the device is reachable; else null. Render thread.
+     */
+    private static long[] sharedDeviceArgs(AtlasNative l) {
+        if (!AtlasVulkan.vulkan()) return null;
+        AtlasVkShare.Shared s = AtlasVkShare.shared();
+        if (s == null || !l.hasCreateOnVulkan() || !AtlasVkShare.sharedSyncEnabled()) return null;
+        var d = AtlasVulkan.device();
+        if (d == null) return null;
+        int flags = (s.float64() ? 1 : 0) | (s.memoryBudget() ? 2 : 0) | (s.calibrated() ? 4 : 0);
+        return new long[] {d.instance().vkInstance().address(), d.vkDevice().getPhysicalDevice().address(),
+                d.vkDevice().address(), s.frameFamily(), s.frameIndex(), s.genFamily(), s.genIndex(), flags,
+                d.graphicsQueue().queueFamilyIndex()};
+    }
     // flight recorder zones (AtlasRecorder)
     private static final AtlasRecorder.Zone Z_INFO = AtlasRecorder.zone("atlas:info (ctx.info)"), Z_STATE_SECTIONS = AtlasRecorder.zone("atlas:state sections"),
             Z_STATE_EDITS = AtlasRecorder.zone("atlas:state edits"), Z_STATE_GEN = AtlasRecorder.zone("atlas:state clientGen");
@@ -1374,17 +1539,33 @@ public final class AtlasClient {
     private static void profileTick() {
         if (!PROFILE || ++profileTicks % 40 != 0) return;
         var mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+        if (mc.player == null) {
+            // Opt-in baseline before terrain/ATLAS startup. Default profiling keeps its usual player-only rows.
+            String memory = AtlasVulkanMemory.profile(mc);
+            if (!memory.isEmpty()) {
+                String line = java.time.LocalTime.now() + " pos=unavailable kind=memory-baseline" + memory + "\n";
+                java.nio.file.Path file = mc.gameDirectory.toPath().resolve("atlas-profile.log");
+                PROFILE_WRITER.execute(() -> {
+                    try {
+                        java.nio.file.Files.writeString(file, line, java.nio.file.StandardOpenOption.CREATE,
+                                java.nio.file.StandardOpenOption.APPEND);
+                    } catch (Exception ignored) { }
+                });
+            }
+            return;
+        }
         try {
             // (the render thread's part: the position, the frame line, a few reads of the client; the rest is composed and written
             // on a thread of its own: the core's report, the feeds' states and the file append took 0.2 to 4.2 s of a tick)
             String when = java.time.LocalTime.now() + String.format(java.util.Locale.ROOT, " pos=%.1f,%.1f,%.1f ",
                     mc.player.getX(), mc.player.getY(), mc.player.getZ()) + com.nirncraft.render.quality.QualityClient.profileLine() + " ";
             String frame = frameLine(ctx);
+            // Vulkan device lifetime belongs to this thread; the writer receives only an immutable sample.
+            String memory = AtlasVulkanMemory.profile(mc);
             java.nio.file.Path file = mc.gameDirectory.toPath().resolve("atlas-profile.log");
             PROFILE_WRITER.execute(() -> {
                 try {
-                    String line = when + debugInfo(frame, AtlasInfo.fresh(1000)).replaceAll("\\s+", " ") + "\n";
+                    String line = when + debugInfo(frame, AtlasInfo.fresh(1000)).replaceAll("\\s+", " ") + memory + "\n";
                     java.nio.file.Files.writeString(file, line, java.nio.file.StandardOpenOption.CREATE,
                             java.nio.file.StandardOpenOption.APPEND);
                 } catch (Exception e) {
@@ -1469,9 +1650,10 @@ public final class AtlasClient {
     /** The "frame{...}" part of the profile line (the client's own numbers; the render thread). */
     private static String frameLine(AtlasNative.Context c) {
         var lvl = Minecraft.getInstance().level;
-        return c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d t=%d} ",
+        return c != null ? String.format(java.util.Locale.ROOT, "frame{atlasMs=%.2f glRenderWallMs=%.2f frameWallMs=%.2f fps=%d unified=%b loadedChunks=%d delivered=%d skipped=%d outputAgeMs=%.2f t=%d} ",
                 c.stats().frameMs(), glRenderMs, frameWallMs, Minecraft.getInstance().getFps(), AtlasNearPass.unified(),
-                lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, System.currentTimeMillis() % 1_000_000) : "";
+                lvl != null ? lvl.getChunkSource().getLoadedChunksCount() : -1, deliveredFrames, skippedFrames,
+                lastDeliveredNs == 0 ? -1 : (System.nanoTime() - lastDeliveredNs) * 1e-6, System.currentTimeMillis() % 1_000_000) : "";
     }
 
     /** The profile line from a frame part and the core's JSON (null: read it now, at most 0.5 s old). Any thread. */
@@ -1608,9 +1790,11 @@ public final class AtlasClient {
     private static void stop() {
         AtlasMaterials m = materials;
         AtlasNative.Context c = ctx;
-        // Close admission immediately; the release worker retains context ownership until all users exit.
+        // Request cancellation immediately, but keep all targets and context ownership until the last submitted copy
+        // has completed. Polling is nonblocking and never submits or cancels an ambiguous splice.
         if (!retirementRequested) {
             retirementRequested = true;
+            outputReady = false;
             farThisFrame = false;
             nearLitThisFrame = false;
             synchronized (CLIENT_GEN_LOCK) {
@@ -1621,10 +1805,21 @@ public final class AtlasClient {
             retiringReaders = infoReaders;
             infoReaders = null;
             if (retiringReaders != null) retiringReaders.gate().closeAdmission();
+            if (c != null && AtlasVulkan.path() == AtlasVulkan.Path.VK_SHARED) {
+                try {
+                    retirementCopy = AtlasVulkan.waitCopyAsync(c, AtlasVulkan.Path.VK_SHARED);
+                } catch (Throwable t) {
+                    retirementCopy = java.util.concurrent.CompletableFuture.failedFuture(t);
+                }
+            } else retirementCopy = java.util.concurrent.CompletableFuture.completedFuture(null);
         }
+        if (retirementCopy == null || !retirementCopy.isDone()) return;
+        retirementCopy.join(); // completed only; failures retain every resource and remain visible to shutdown
+        if (c != null) AtlasVulkan.copyConfirmed(c);
         if (m != null) m.flushLog();  // (the material numbering of this session: the next launch replays it)
         if (targets != null) targets.close();
         targets = null;
+        AtlasVulkan.Path retiredPath = AtlasVulkan.path();
         AtlasFarField oldFar = farField;
         var oldFarExited = farGenerationExited;
         Thread starting = clientGenStart;
@@ -1639,7 +1834,7 @@ public final class AtlasClient {
         ctxBuild = null;
         retiringReaders = null;
         if (c != null || oldFar != null || starting != null || pendingBuild != null) {
-            ReleaseTicket ticket = new ReleaseTicket(c, starting, startFailure, oldGen, oldFar,
+            ReleaseTicket ticket = new ReleaseTicket(c, retiredPath, starting, startFailure, oldGen, oldFar,
                     oldFarExited == null ? new java.util.concurrent.CompletableFuture<>() : oldFarExited, pendingBuild,
                     readers == null ? null : readers.gate());
             releases.add(ticket);
@@ -1654,6 +1849,7 @@ public final class AtlasClient {
         clientGenStart = null;
         clientGenStartFailure = null;
         clientGenStartupFailed = null;
+        retirementCopy = null;
         retirementRequested = false;
         farField = null;
         farGenerationExited = null;
@@ -1664,7 +1860,8 @@ public final class AtlasClient {
         startedFor = null;
         startedModels = null;
         firstFrame = true;
-        lastFrameNs = 0;
+        deliveredFrames = skippedFrames = lastDeliveredNs = lastFrameNs = 0;
+        outputReady = false;
     }
 
     static GpuFormat colorFormat() {

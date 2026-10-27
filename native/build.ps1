@@ -30,6 +30,8 @@ if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
     py -3 -I (Join-Path $here 'tools\export_cloud_noise.py') $repo | Out-Host
 }
 if (-not $NoTest) {
+    & (Join-Path $build "$Config\atlas_close_admission_test.exe")
+    if ($LASTEXITCODE) { throw 'close admission tests failed' }
     & (Join-Path $build "$Config\atlas_pipeline_cache_io_test.exe")
     if ($LASTEXITCODE) { throw 'pipeline cache IO tests failed' }
     & (Join-Path $build "$Config\atlas_cache_lifetime_test.exe")
@@ -48,6 +50,8 @@ if (-not $NoTest) {
     # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit
     & (Join-Path $build "$Config\atlas_height_test.exe")
     if ($LASTEXITCODE) { throw 'height tests failed' }
+    & (Join-Path $build "$Config\atlas_vk_test.exe") (Join-Path $here 'data')
+    if ($LASTEXITCODE) { throw 'vulkan backend tests failed' }
     # the GL bridge, zero-copy where the driver pair allows it, on two contexts: the default (compatibility) one and
     # an OpenGL 3.3 core forward-compatible profile like Minecraft's, which must land on the same interop path ...
     & (Join-Path $build "$Config\atlas_gl_test.exe") (Join-Path $here 'data') --context=both

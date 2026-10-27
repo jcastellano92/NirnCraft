@@ -31,7 +31,8 @@
     X(vkCreateSemaphore) X(vkDestroySemaphore) X(vkCreateQueryPool) X(vkDestroyQueryPool) X(vkGetQueryPoolResults)   \
     X(vkCmdBindPipeline) X(vkCmdBindDescriptorSets) X(vkCmdPushConstants) X(vkCmdDispatch) X(vkCmdDispatchIndirect) X(vkCmdPipelineBarrier)   \
     X(vkCmdCopyBuffer) X(vkCmdCopyBufferToImage) X(vkCmdCopyImageToBuffer) X(vkCmdFillBuffer) X(vkCmdUpdateBuffer)                      \
-    X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp) X(vkCmdDispatchBase) X(vkWaitSemaphores) X(vkGetSemaphoreCounterValue)
+    X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp) X(vkCmdDispatchBase) X(vkWaitSemaphores) X(vkGetSemaphoreCounterValue) \
+    X(vkQueueWaitIdle) X(vkCmdCopyImage) X(vkSignalSemaphore)
 
 namespace atlas {
 

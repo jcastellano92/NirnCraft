@@ -30,17 +30,17 @@ class AtlasFarGateTest {
     }
 
     @Test
-    void stalledGateIsReleasedAfterThirtySecondsOfBlocking() {
+    void stalledGateRemainsIncompleteAfterThirtySecondsOfBlocking() {
         AtlasFarGate g = new AtlasFarGate();
         g.scanned(50, 32, 0, 18, 0, 7, 0);
         assertEquals(32, g.up(false, 100 * S));            // (not what readiness waits on: no clock)
         assertEquals(32, g.up(true, 100 * S));             // (blocking from here)
         assertEquals(32, g.up(true, 100 * S + STALL - 1));
-        assertEquals(-1 - 50, g.up(true, 100 * S + STALL)); // (released by this call: the caller logs why)
-        assertEquals(50, g.up(true, 100 * S + STALL + 1));
+        assertEquals(-1 - 32, g.up(true, 100 * S + STALL)); // warning carries observed count
+        assertEquals(32, g.up(true, 100 * S + STALL + 1));
         assertTrue(g.why().contains("18 the coarse bake looks after"), g.why());
-        g.scanned(50, 32, 0, 18, 0, 7, 200 * S);           // (the same set, the same count: stays released)
-        assertEquals(50, g.up(true, 200 * S));
+        g.scanned(50, 32, 0, 18, 0, 7, 200 * S);           // (the same set and count remain incomplete)
+        assertEquals(32, g.up(true, 200 * S));
         g.scanned(25, 3, 22, 0, 0, 8, 210 * S);            // (a window placed afresh: counted afresh)
         assertFalse(g.released());
         assertEquals(3, g.up(true, 210 * S));
@@ -54,6 +54,22 @@ class AtlasFarGateTest {
         assertEquals(10, g.up(true, t));
         g.scanned(25, 11, 14, 0, 0, 1, t + STALL - S);
         assertEquals(11, g.up(true, t + STALL + S));
-        assertEquals(-1 - 25, g.up(true, t + 2 * STALL - S));
+        assertEquals(-1 - 11, g.up(true, t + 2 * STALL - S));
+    }
+    @Test
+    void reloadTurnsAlternateAndResetWhenPrerequisitesChange() {
+        AtlasFarGate g = new AtlasFarGate();
+        assertFalse(g.nextReloadTurn(false));
+        for (int i = 0; i < 20; i++) {
+            assertTrue(g.nextReloadTurn(true));
+            assertFalse(g.nextReloadTurn(true));
+        }
+        assertTrue(g.nextReloadTurn(true));
+        assertFalse(g.nextReloadTurn(false));
+        assertTrue(g.nextReloadTurn(true));
+        g.scanned(50, 29, 21, 0, 0, 1, 1);
+        assertEquals(29, g.up(true, 2));
+        g.scanned(50, 50, 0, 0, 0, 1, 3);
+        assertEquals(50, g.up(true, 4));
     }
 }

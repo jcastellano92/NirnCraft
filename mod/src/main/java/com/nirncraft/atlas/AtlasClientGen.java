@@ -272,8 +272,8 @@ final class AtlasClientGen implements AutoCloseable {
      */
     /**
      * (dev) {@code -Dnirncraft.atlas.dump=<dir>}: the generator's program, its map and the decoration's program and id tables
-     * as little-endian int files (prog.bin, map.bin, feat.bin, g2f.bin, f2g.bin), what native/tools/gen_bake_tool loads to run
-     * the far path, the trees included, without the game (the inner loop of the bake's slicing).
+     * as little-endian int files (prog.bin, map.bin, feat.bin, g2f.bin, f2g.bin); native/tools/gen_bake_tool uses these to run
+     * the far path without the game. ingest.bin and ingest.json record the actual table sent to the native generator.
      */
     private static void dumpWords(String name, int[] words) {
         String dir = System.getProperty("nirncraft.atlas.dump");
@@ -285,6 +285,20 @@ final class AtlasClientGen implements AutoCloseable {
             java.nio.file.Files.write(java.nio.file.Path.of(dir, name), bb.array());
         } catch (java.io.IOException e) {
             com.nirncraft.NirnCraft.LOGGER.warn("atlas dump {} failed", name, e);
+        }
+    }
+
+    private static void dumpIngest(int[] words, AtlasGenProgram prog, AtlasGenNative.Gen gen) {
+        String dir = System.getProperty("nirncraft.atlas.dump");
+        if (dir == null || dir.isEmpty()) return;
+        try {
+            Object models = net.minecraft.client.Minecraft.getInstance().getModelManager().getBlockStateModelSet();
+            Path root = AtlasIngestDump.publish(Path.of(dir), words,
+                    Long.toUnsignedString(AtlasCanonicalLooks.fingerprint(prog.words, 0, 1, prog.words.length), 16),
+                    gen.fingerprintParts(), Integer.toHexString(System.identityHashCode(models)));
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: ingest diagnostic {}", root);
+        } catch (java.io.IOException | RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.warn("atlas ingest dump failed", e);
         }
     }
 
@@ -427,7 +441,11 @@ final class AtlasClientGen implements AutoCloseable {
                 if (ovl != null && !gen.setFeatureOverlays(stages, ovl))
                     com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the GPU decoration's mask without the structure pieces (an older library)");
             }
-            if (direct) gen.setIngest(ingestTable(prog, mats, ctx));
+            if (direct) {
+                int[] ingest = ingestTable(prog, mats, ctx);
+                gen.setIngest(ingest);
+                dumpIngest(ingest, prog, gen);  // same array that the successful native call consumed
+            }
             // the self-baking cache: the instance's atlas-cache/<seed>/ (nirncraft.atlas.cacheDir moves it; "off": none),
             // the generator's fingerprint completed by the far identity (world generation and painting code)
             boolean cacheArm = false;
@@ -937,6 +955,13 @@ final class AtlasClientGen implements AutoCloseable {
                 }
                 // (direct: terrain goes device to device, the ready queue holds only decorated chunks: never a reason to wait)
                 boolean full = !direct && waiting >= READY_MAX;
+                // In-world reload has no loading-screen hold. Alternate one far turn with one normal
+                // near-work turn once spawn and coarse coverage are ready, so neither side starves.
+                if (camSet && !full && !AtlasCoarseBake.probing() && !AtlasLoadingScreen.holding()
+                        && reloadFarTurn()) {
+                    farStep();
+                    continue;
+                }
                 if (camSet && !full && !AtlasCoarseBake.probing() && outerRingsWait()) {
                     // (the far tiles the bake does not own, the finer levels around the spawn, go on: the horizon gate waits for them)
                     boolean moved = farOn && farStep();
@@ -1161,6 +1186,15 @@ final class AtlasClientGen implements AutoCloseable {
      * rings. While the screen holds the player and the spawn area is in but the horizon is not, the outer rings wait (the GPU is
      * the bake's: they went on beside it, and the player waited for both); they follow once the horizon is loaded, in play.
      */
+    private boolean reloadFarTurn() {
+        Progress p = progress();
+        AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
+        boolean eligible = farOn && p != null && p.nearDone()
+                && (b == null || b.phase() <= 0 || b.loaded())
+                && p.farTotal() > 0 && p.far() < p.farTotal();
+        return farGate.nextReloadTurn(eligible);
+    }
+
     private boolean outerRingsWait() {
         if (!AtlasLoadingScreen.holding() || windowUpNs != 0) return false;
         Progress p = progress();
@@ -1538,7 +1572,7 @@ final class AtlasClientGen implements AutoCloseable {
         } else if (AtlasLoadingScreen.holding() && windowUpNs == 0) {
             AtlasCoarseBake.Progress b = AtlasCoarseBake.progress();
             why = b != null && b.phase() > 0 && !b.loaded() ? "the outer rings wait for the coarse bake (outerRingsWait)"
-                    : farGate.known() && farGate.seen() < farGate.total() && !farGate.released()
+                    : farGate.known() && farGate.seen() < farGate.total()
                     ? "the outer rings wait for the far gate (outerRingsWait)" : "flushed when the window's plan is empty";
         } else {
             why = "flushed when the window's plan is empty";
@@ -1580,12 +1614,12 @@ final class AtlasClientGen implements AutoCloseable {
         boolean nearDone = c.windowUpNs != 0 || (c.jumpNs != 0 && spawnUp >= spawnTotal);
         if (c.farOn && c.farGate.known()) {
             // (the stall guard: when the gate is what readiness waits on, the spawn area in and the bake loaded, and neither
-            // its count nor its set moved for 30 s, it is released: a wait that cannot progress never holds the player)
+            // its count nor its set moved for 30 s, warn without treating missing tiles as present)
             boolean blocking = nearDone && (bk == null || bk.phase() <= 0 || bk.loaded());
             farUp = c.farGate.up(blocking, System.nanoTime());
             if (farUp < 0) {
                 farUp = -1 - farUp;
-                com.nirncraft.NirnCraft.LOGGER.warn("atlas far gate: released, no progress for {} s: {}; {}",
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas far gate: stalled, no progress for {} s: {}; {}",
                         AtlasFarGate.STALL_NS / 1_000_000_000L, c.farGate.why(), c.stallLine());
             }
         }

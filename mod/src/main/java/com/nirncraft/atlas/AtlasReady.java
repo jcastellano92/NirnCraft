@@ -64,6 +64,7 @@ public final class AtlasReady {
                     : "pipelines still building off the render thread (" + pp.done() + " / " + pp.total() + ", " + pp.name() + ")";
         }
         if (!AtlasClient.started()) return "renderer not started";
+        if (!AtlasClient.outputReady()) return "renderer first output not delivered";
         JsonObject info = null;
         if (core != null) {
             try {

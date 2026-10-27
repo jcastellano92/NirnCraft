@@ -6,12 +6,37 @@ the renderer. No pushes are authorized.
 
 | Owner | Model | Goal | Measurable gate | Workspace / ownership |
 |---|---|---|---|---|
-| Coordinator | Current session | Repair confirmed grid standby admission, then finish measured reload/route evaluation | CPU RED/GREEN, actual GPU ranking, native/packages/gate, same-camera reload and fresh1440p route; thresholds unchanged | grid-standby-admission: VoxGrid/frame-lock; main-ingest-stability: GL Java/lifecycle; main integration and packaging |
-| Renderer worker (`sol_review`) | gpt-6.1-sol, high | Prove checked shared-device shutdown with failed drains and in-flight work | ABI0.19/176; normal/failure/deadline matrix, reattach/cancel compatibility, both native packages, Java bindings and live shutdown | shared-device-audit; native terminal close and Java callers/tests. Focused cases pass; integration pending. |
-| Cache worker (`terra_seam`) | gpt-6.1-terra | Attribute cache misses by coordinate and assist actual GPU standby regression | Bounded witness/immutable inspector with unchanged producer identity; real rank-to-request proof | cache-revisit-witness owns diagnostics; GPU fixture planning read-only pending assignment. Seam variants remain parked. |
+| Coordinator | Current session | Complete the default shared-Vulkan migration, then renderer targets | Actual MC Vulkan/shared-device delivery, genuine complete loading, paired captures, bounded memory and graceful shutdown; full integration gate | grid-standby-admission: reviewed Vulkan assembly, native packages, product defaults and main integration |
+| Renderer worker (`sol_review`) | gpt-6.1-sol, high | Resolve real Minecraft device shutdown and isolate native allocation growth | Preserve checked terminal failure behavior; prove actual MC queue/token retirement and natural process exit, then bounded cold generation | Vulkan source/review and focused independent fixtures; donor evidence remains separate from assembled evidence |
+| Loading worker (`terra_seam`) | gpt-6.1-terra | Fix loading/cache latency and isolate generation/capture allocation ownership | Real finer-horizon completion and near fairness, per-coordinate cache attribution, bounded actual store-stage workload | loading-cache-latency; cache witness preserved; Crafter implementation remains isolated with unverified runtime tests |
 | Independent gatekeeper (`renderer_gatekeeper`) | gpt-6.1-terra | Verify evidence against the complete stage0-5 requirements and catch regressions | Maintain requirement/evidence/gap matrix; independent image/diff verdicts; reject insufficient coverage, stale artifacts or narrow checks used as broad acceptance | Read-only tracked source; own reports under E:/NirnCraft-scratch/codex-gatekeeper-evidence |
 
-## Current checkpoint (2026-10-27,09:42EDT)
+## Direct Vulkan candidate checkpoint (2026-10-27,11:50EDT)
+
+Accepted main remains at42132fa6 with GL-host/native Vulkan. The isolated candidate now includes default-on shared
+Vulkan, Vulkan-first pack/development defaults, the reviewed ABI0.19 lifetime implementation and existing main
+cache/grid fixes. A protected recovery tag `before-direct-vulkan-adoption-2026-10-27` and immutable Jar/native copies
+preserve the pre-adoption baseline. Current native source e6c948dc2781, Windows DLLd9ed4106 and both packaged
+platforms load ABI0.19 with176 exports. All83 production/114 configured SPVs match the accepted shader binaries.
+Java392 tests report zero failures/errors and19 opt-in skips; all3 actual native FFM tests executed. Native/kernel
+checks pass, as do fresh assembled populated-shutdown and admitted-update fixtures with zero validation errors.
+Explicit42132fa6 check-tier gate:19 passes, existing Crafter UI failure known, zero new failures or missing items.
+
+Actual default shared run `live-20261027-113118-820053` reached Minecraft Vulkan, VK_SHARED, onMinecraftDevice=true,
+ABI0.19, spawn441/441 and finer horizon50/50, with thousands of delivered frames and one capture. Cold generation
+then exceeded the sampled24GiB-job reserve: peak22.71GiB, forced cleanup. This is not migration acceptance.
+Warm diagnostic replay `live-20261027-114700-292044` reached ready and produced both captures at peak13.56GiB, but
+also required forced cleanup. Its verified Minecraft VMA/native/driver/heap counters have different scopes and do
+not attribute the earlier cold private-memory growth. Two independent checks confirmed restored settings, no lease
+and no matching client/launcher; they do not establish graceful native retirement. Main integration stays pending.
+
+The earlier GL reload's72.86-second ready observation used a30-second stalled finer gate with21 tiles outstanding.
+It was not a complete horizon. The candidate now retains the real count and alternates bounded finer-horizon work
+with near work during an eligible reload; five focused tests pass. Its actual in-world fairness and cached under2s
+target still require measurement. No route, seam, driver-budget, content or overall renderer stage target is newly
+accepted. Source work/reviews continue in parallel; only one heavy job runs at a time.
+
+## Earlier checkpoint (2026-10-27,09:42EDT)
 
 Main remains GL-host/native Vulkan at ABI0.17/166, source076af4d670e6. Routine relaunch preserves caches unless
 explicit `--cold`. A matched retained-cache GL pair reached readiness in89.53s then65.98s; the second ready profile

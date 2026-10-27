@@ -31,8 +31,8 @@ public final class AtlasNative {
     // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS, 0.15: the near
     // light (FRAME_NEAR_LIGHT, GlFrameIO.nearInfoTex / dstNearLight), 0.16: the air (atlas_set_air, atlas_air_*) and
     // the near field's textures (atlas_set_material_textures), 0.17: the grid's primary near rays (FRAME_PRIMARY_NEAR)
-    // and the sky's own light (atlas_set_sky_glow) (all optional)
-    public static final int ABI_VERSION = 0x001100, ABI_MIN = 0x000B00;
+    // and the sky's own light; 0.18 shared-Vulkan retirement; 0.19 checked terminal close (required for S3).
+    public static final int ABI_VERSION = 0x001300, ABI_MIN = 0x000B00;
     /** The first ABI with the near light (FRAME_NEAR_LIGHT); an older core is never handed the flag or its fields. */
     public static final int ABI_NEAR_LIGHT = 0x000F00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
@@ -157,6 +157,9 @@ public final class AtlasNative {
     private final MethodHandle setBricks, setOffsets;
     // tests: level 0's block ids as the GPU holds them (atlas_debug_read_blocks; null with an older library)
     private final MethodHandle readBlocks;
+    // Minecraft's Vulkan backend (atlas_vk_attach / atlas_vk_render; null with an older library)
+    private final MethodHandle vkAttach, vkRender, createOnVulkan, vkRenderShared;
+    private final MethodHandle vkCopyComplete, vkWaitCopy, vkCancelSplice, vkPrepareClose, vkDetachRetired, vkReleaseRetired;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
     private int abi;
@@ -255,6 +258,17 @@ public final class AtlasNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG));
         setOffsets = bindOptional(l, lib, "atlas_set_material_offsets", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         readBlocks = bindOptional(l, lib, "atlas_debug_read_blocks", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+        vkAttach = bindOptional(l, lib, "atlas_vk_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
+        vkRender = bindOptional(l, lib, "atlas_vk_render", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        createOnVulkan = bindOptional(l, lib, "atlas_create_on_vulkan", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        vkRenderShared = bindOptional(l, lib, "atlas_vk_render_shared",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        vkCopyComplete = bindOptional(l, lib, "atlas_vk_copy_complete", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG, ADDRESS));
+        vkWaitCopy = bindOptional(l, lib, "atlas_vk_wait_copy", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG, JAVA_LONG));
+        vkCancelSplice = bindOptional(l, lib, "atlas_vk_cancel_splice", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
+        vkPrepareClose = bindOptional(l, lib, "atlas_vk_prepare_close", FunctionDescriptor.of(JAVA_INT, ADDRESS));
+        vkDetachRetired = bindOptional(l, lib, "atlas_vk_detach_retired", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        vkReleaseRetired = bindOptional(l, lib, "atlas_vk_release_retired", FunctionDescriptor.of(JAVA_INT, ADDRESS));
         setBricks = bindOptional(l, lib, "atlas_set_material_bricks", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
                 ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT, ADDRESS));
     }
@@ -507,6 +521,43 @@ public final class AtlasNative {
         }
     }
 
+    /** atlas_create_on_vulkan is in this core (stage S3: atlas on Minecraft's VkDevice). */
+    public boolean hasCreateOnVulkan() {
+        return createOnVulkan != null && vkRenderShared != null && vkCopyComplete != null && vkWaitCopy != null
+                && vkCancelSplice != null && vkPrepareClose != null && vkDetachRetired != null && vkReleaseRetired != null;
+    }
+
+    /**
+     * (Minecraft's Vulkan backend, stage S3) a context on Minecraft's own VkDevice (AtlasVkDevice in atlas.h): handles as
+     * addresses; frame / generator queue families and indices the device-sharing mixin added (genFamily -1: none);
+     * flags 1 float64, 2 memory budget, 4 calibrated timestamps; graphicsFamily Minecraft's graphics queue's (the splices').
+     */
+    public Context createOnVulkan(long instance, long physical, long device, int frameFamily, int frameIndex, int genFamily,
+                                  int genIndex, int flags, int graphicsFamily) {
+        if (createOnVulkan == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no atlas_create_on_vulkan");
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment d = a.allocate(48, 8);
+            d.set(JAVA_LONG, 0, instance);
+            d.set(JAVA_LONG, 8, physical);
+            d.set(JAVA_LONG, 16, device);
+            d.set(JAVA_INT, 24, frameFamily);
+            d.set(JAVA_INT, 28, frameIndex);
+            d.set(JAVA_INT, 32, genFamily);
+            d.set(JAVA_INT, 36, genIndex);
+            d.set(JAVA_INT, 40, flags);
+            d.set(JAVA_INT, 44, graphicsFamily);
+            MemorySegment out = a.allocate(ADDRESS);
+            int s = (int) createOnVulkan.invokeExact(d, out);
+            if (s != 0) {
+                String why = ((MemorySegment) lastError.invokeExact(MemorySegment.NULL)).reinterpret(4096).getString(0);
+                throw new AtlasException(s, "atlas_create_on_vulkan failed: " + AtlasException.statusName(s) + " (" + why + ")");
+            }
+            return new Context(out.get(ADDRESS, 0));
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
     static RuntimeException rethrow(Throwable t) {
         if (t instanceof RuntimeException r) return r;
         if (t instanceof Error e) throw e;
@@ -552,6 +603,20 @@ public final class AtlasNative {
     public record MemoryInfo(long deviceLocal, long budget, long usage, long hostHeap, long atlas, boolean integrated,
                              boolean budgetExt) {}
 
+    /**
+     * (Minecraft's Vulkan backend, atlas on its own device: atlas_vk_render) a frame in host memory, the GL path's layouts
+     * (rows bottom-up): colour RGBA16F, depth R32F, near light RGBA16F (null: none), sun map RG32F sunSize x sunSize + 1
+     * (null: none). Valid until the next render call. Null colour: no frame yet.
+     */
+    public record VkHostFrame(MemorySegment color, MemorySegment depth, MemorySegment nearLight, MemorySegment sunMap,
+                              int width, int height, int sunSize) {}
+
+    /**
+     * (stage S3) atlas's splice into Minecraft's frame (AtlasVkSplice): wait on waitSemaphore for waitValue (0: none),
+     * execute the command buffer (its copies into Minecraft's textures), signal signalSemaphore = signalValue.
+     */
+    public record VkSplice(long waitSemaphore, long waitValue, long commandBuffer, long signalSemaphore, long signalValue) {}
+
     /** GL texture names of the images shared with the game's GL context (rows bottom-up). */
     public record GlTargets(int color, int normal, int depth, int nearDepth, int width, int height) {}
 
@@ -589,6 +654,27 @@ public final class AtlasNative {
             s.set(JAVA_INT, 92, dstSunMap);
             s.set(JAVA_INT, 96, nearLight ? nearInfoTex : 0);
             s.set(JAVA_INT, 100, nearLight ? dstNearLight : 0);
+        }
+    }
+
+    /** Independently owned S3 images/sun and copy commands; close only after Minecraft retires its submission. */
+    public final class RetiredVulkan implements AutoCloseable {
+        private MemorySegment token;
+
+        private RetiredVulkan(MemorySegment token) {
+            this.token = token;
+        }
+
+        @Override
+        public synchronized void close() {
+            if (token.address() == 0) return;
+            try {
+                int result = (int) vkReleaseRetired.invokeExact(token);
+                if (result != OK) throw new AtlasException(result, "atlas_vk_release_retired failed");
+                token = MemorySegment.NULL;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
         }
     }
 
@@ -1337,6 +1423,132 @@ public final class AtlasNative {
                 // exact-type check then fails on every frame
                 MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
                 check((int) glRenderIo.invokeExact(ptr, frameSeg, ioArg), "atlas_gl_render_io");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (Minecraft's Vulkan backend) atlas_vk_attach is in this core. */
+        public boolean hasVulkanHost() {
+            return vkAttach != null && vkRender != null;
+        }
+
+        /** (Minecraft's Vulkan backend, atlas's own device) the frame's images, no GL (re-attach on resize). */
+        public void vkAttach(int width, int height) {
+            if (vkAttach == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no atlas_vk_attach");
+            try {
+                check((int) vkAttach.invokeExact(ptr, width, height), "atlas_vk_attach");
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
+        private MemorySegment vkOutSeg;
+
+        /**
+         * (Minecraft's Vulkan backend, atlas's own device) renders the frame and hands it over in host memory; the CPU waits
+         * for the frame's GPU work. io's texture names are flags only (dstNearLight != 0: the near light, primary frames only).
+         */
+        public VkHostFrame vkRender(Frame f, GlFrameIO io) {
+            boolean nearLight = hasNearLight() && io != null && io.dstNearLight != 0;
+            f.write(frameSeg, nearLight);
+            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
+            if (vkOutSeg == null) vkOutSeg = frameArena.allocate(56, 8);
+            if (io != null) io.write(ioSeg, nearLight);
+            try {
+                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
+                check((int) vkRender.invokeExact(ptr, frameSeg, ioArg, vkOutSeg), "atlas_vk_render");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+            MemorySegment color = vkOutSeg.get(ADDRESS, 0);
+            if (color.address() == 0) return null;
+            int w = vkOutSeg.get(JAVA_INT, 40), h = vkOutSeg.get(JAVA_INT, 44), sun = vkOutSeg.get(JAVA_INT, 48);
+            long px = (long) w * h;
+            MemorySegment depth = vkOutSeg.get(ADDRESS, 16), near = vkOutSeg.get(ADDRESS, 24), sunMap = vkOutSeg.get(ADDRESS, 32);
+            return new VkHostFrame(color.reinterpret(px * 8), depth.reinterpret(px * 4),
+                    near.address() == 0 ? null : near.reinterpret(px * 8),
+                    sunMap.address() == 0 || sun == 0 ? null : sunMap.reinterpret((long) sun * (sun + 1) * 8), w, h, sun);
+        }
+
+        private MemorySegment vkTargetsSeg, vkSpliceSeg;
+
+        /**
+         * (stage S3, a context made by createOnVulkan) traces the frame on atlas's queue and returns the splice that copies
+         * it into Minecraft's images (VkImage handles, GENERAL layout; 0: not wanted). io as for vkRender.
+         */
+        public VkSplice vkRenderShared(Frame f, GlFrameIO io, long color, long depth, long nearLight, long sunMap) {
+            if (vkRenderShared == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no atlas_vk_render_shared");
+            boolean nearLit = hasNearLight() && io != null && io.dstNearLight != 0;
+            f.write(frameSeg, nearLit);
+            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
+            if (vkTargetsSeg == null) vkTargetsSeg = frameArena.allocate(32, 8);
+            if (vkSpliceSeg == null) vkSpliceSeg = frameArena.allocate(40, 8);
+            if (io != null) io.write(ioSeg, nearLit);
+            vkTargetsSeg.set(JAVA_LONG, 0, color);
+            vkTargetsSeg.set(JAVA_LONG, 8, depth);
+            vkTargetsSeg.set(JAVA_LONG, 16, nearLight);
+            vkTargetsSeg.set(JAVA_LONG, 24, sunMap);
+            try {
+                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
+                check((int) vkRenderShared.invokeExact(ptr, frameSeg, ioArg, vkTargetsSeg, vkSpliceSeg), "atlas_vk_render_shared");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+            long cb = vkSpliceSeg.get(JAVA_LONG, 16);
+            return cb == 0 ? null : new VkSplice(vkSpliceSeg.get(JAVA_LONG, 0), vkSpliceSeg.get(JAVA_LONG, 8), cb,
+                    vkSpliceSeg.get(JAVA_LONG, 24), vkSpliceSeg.get(JAVA_LONG, 32));
+        }
+
+        /** Whether the named copy completed; value zero queries the current attachment's latest required copy. */
+        public boolean vkCopyComplete(long value) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment ready = a.allocate(JAVA_INT);
+                check((int) vkCopyComplete.invokeExact(ptr, value, ready), "atlas_vk_copy_complete");
+                return ready.get(JAVA_INT, 0) != 0;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** A bounded synchronous wait; an ordinary timeout leaves the context usable. */
+        public boolean vkWaitCopy(long value, long timeoutNs) {
+            try {
+                int result = (int) vkWaitCopy.invokeExact(ptr, value, timeoutNs);
+                if (result == ERR_TIMEOUT) return false;
+                check(result, "atlas_vk_wait_copy");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Only for an offered splice which has never been inserted into Minecraft's encoder. */
+        public void vkCancelSplice(long value) {
+            try {
+                check((int) vkCancelSplice.invokeExact(ptr, value), "atlas_vk_cancel_splice");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Drain native work and transfer external copy resources to Minecraft's submission retirement. */
+        /** Terminal admission seal and checked native drain; failure retains this context for the stopping barrier. */
+        public void vkPrepareClose() {
+            if (vkPrepareClose == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no checked terminal Vulkan close");
+            try {
+                check((int) vkPrepareClose.invokeExact(ptr), "atlas_vk_prepare_close");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        public RetiredVulkan vkDetachRetired() {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment out = a.allocate(ADDRESS);
+                check((int) vkDetachRetired.invokeExact(ptr, out), "atlas_vk_detach_retired");
+                MemorySegment token = out.get(ADDRESS, 0);
+                return token.address() == 0 ? null : new RetiredVulkan(token);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

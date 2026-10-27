@@ -177,7 +177,8 @@ public final class AtlasNearPass {
             .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .build();
-    private static com.mojang.renderpearl.api.textures.GpuTexture lightmapScratch;
+    private static com.mojang.renderpearl.api.textures.GpuTexture lightmapScratch, lightmapBlank;
+    private static com.mojang.renderpearl.api.textures.GpuTextureView lightmapBlankView;
     private static com.mojang.renderpearl.api.textures.GpuTextureView lightmapScratchView;
 
     private static final ObjectArrayList<SectionRenderDispatcher.RenderSection> visible = new ObjectArrayList<>();
@@ -238,8 +239,10 @@ public final class AtlasNearPass {
                 AtlasGuard.run(FEATURE, Z_COPY_SKY, AtlasNearPass::copySky));
         NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterTranslucentFeatures e) -> AtlasGuard.run(FEATURE, Z_TRANSLUCENT,
                 () -> drawTranslucent(e.getRenderPass())));
-        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel e) -> AtlasGuard.run(FEATURE, Z_END_FRAME,
-                AtlasNearPass::endFrame));
+        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel e) -> {
+            popEntity();  // (outside the guard: a near pass switched off mid-frame must not leave its modifier pushed)
+            AtlasGuard.run(FEATURE, Z_END_FRAME, AtlasNearPass::endFrame);
+        });
     }
 
     /** Vanilla's opaque terrain pipelines with our G-buffer shaders and two colour targets; anything else as is. */
@@ -402,6 +405,12 @@ public final class AtlasNearPass {
         return owned && drawn;
     }
 
+    /** Whether the near compositor can take terrain, independent of this frame's draw state. */
+    static boolean capable(Minecraft mc) {
+        return active && !AtlasGuard.off(FEATURE) && !AtlasClient.irisPackInUse()
+                && !mc.gameRenderer.useImprovedTransparency();
+    }
+
     /** The G-buffer's light target (block, sky, normal): atlas's near light reads it (AtlasGlIO.nearInfoTex). */
     static int infoGlId() {
         return light == null ? 0 : AtlasTargets.glIdOf(light.getColorTexture());
@@ -441,7 +450,7 @@ public final class AtlasNearPass {
             for (var u : mc.gameRenderer.gameRenderState().levelRenderState.sectionUpdateRenderStates)
                 AtlasClientSections.changed(net.minecraft.world.level.ChunkPos.pack(
                         net.minecraft.core.SectionPos.x(u.sectionNode()), net.minecraft.core.SectionPos.z(u.sectionNode())));
-        if (!active || mc.level == null || AtlasClient.irisPackInUse() || mc.gameRenderer.useImprovedTransparency()) return;
+        if (mc.level == null || !capable(mc)) return;
         if (!skyPassRuns(mc)) return;
         LevelRenderer lr = mc.levelRenderer;
         visible.clear();
@@ -894,6 +903,12 @@ public final class AtlasNearPass {
             lightmapScratch = device.createTexture("atlas near lightmap", com.mojang.renderpearl.api.textures.GpuTexture.USAGE_RENDER_ATTACHMENT
                     | com.mojang.renderpearl.api.textures.GpuTexture.USAGE_COPY_SRC, GpuFormat.RGBA8_UNORM, 16, 16, 1, 1);
             lightmapScratchView = device.createTextureView(lightmapScratch);
+            // Sampler6 needs a sampled image distinct from the active lightmap render target.
+            lightmapBlank = device.createTexture("atlas near lightmap blank", com.mojang.renderpearl.api.textures.GpuTexture.USAGE_TEXTURE_BINDING
+                    | com.mojang.renderpearl.api.textures.GpuTexture.USAGE_RENDER_ATTACHMENT
+                    | com.mojang.renderpearl.api.textures.GpuTexture.USAGE_COPY_DST, GpuFormat.RGBA16_FLOAT, 1, 1, 1, 1);
+            device.createCommandEncoder().clearColorTexture(lightmapBlank, new Vector4f(0f, 0f, 0f, 0f));
+            lightmapBlankView = device.createTextureView(lightmapBlank);
         }
         var encoder = device.createCommandEncoder();
         try (RenderPass pass = encoder.createRenderPass(() -> "Infinite ATLAS lightmap", lightmapScratchView, Optional.empty())) {
@@ -902,20 +917,27 @@ public final class AtlasNearPass {
             AtlasTargets far = AtlasClient.farTargetsThisFrame();
             var linear = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
                     FilterMode.LINEAR, FilterMode.LINEAR, false);
-            pass.setUniform("Sampler6", far != null ? far.nearLightTarget().getTextureView() : lightmapScratchView, linear);
+            pass.setUniform("Sampler6", far != null ? far.nearLightTarget().getTextureView() : lightmapBlankView, linear);
+            bindShadow(pass);  // (declared by atlas_light.glsl: Minecraft's Vulkan backend refuses a draw with it unbound)
             pass.draw(3, 1, 0, 0);
         }
         encoder.copyTextureToTexture(lightmapScratch, lightmap.texture(), 0, 0, 0, 0, 0, 16, 16);
     }
 
+    private static void popEntity() {
+        if (entityPushed) {
+            entityPushed = false;
+            RenderSystem.popPipelineModifier();
+        }
+    }
+
     private static void endFrame() {
         chunks = null;
+        // the entity modifier off the stack first: anything below may throw, and a modifier left on the stack fails
+        // Minecraft's frame-end check (a crash, not just the near pass off)
+        popEntity();
         if (drawn && lit) AtlasMeter.meter(AtlasLook.lastLog2());  // the eye meters the finished frame
         if (lit) lightmapInOurLook();
-        if (entityPushed) {
-            RenderSystem.popPipelineModifier();
-            entityPushed = false;
-        }
         if (info != null && drawn) info.rotate();
         lit = false;
         if (!owned) return;

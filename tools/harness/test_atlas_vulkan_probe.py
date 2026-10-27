@@ -69,6 +69,7 @@ class FlagTransactionTests(unittest.TestCase):
         self.assertEqual(self.flags.read_bytes(), b'old=yes\nunrelated=before\n')
 
     def test_worker_journals_raw_nmt_before_real_writer(self):
+        self.jvm.pop('nirncraft.atlas.vkSharedSync')  # the shared worker now exercises the product default
         game_dir = self.root / 'game'; game_dir.mkdir()
         def fail_after_write(group, groups):
             probe.game._set_group_flags(self.jvm)
@@ -419,7 +420,7 @@ class SupervisorChecks(unittest.TestCase):
         self.assertEqual(original, {'NIRNCRAFT_HARNESS_JVM': 'existing=true,nirncraft.atlas.vkSharedSync=true'})
         shared = probe.transport_environment(host, 'shared')
         properties = dict(item.split('=', 1) for item in shared['NIRNCRAFT_HARNESS_JVM'].split(','))
-        self.assertEqual(properties['nirncraft.atlas.vkSharedSync'], 'true')
+        self.assertNotIn('nirncraft.atlas.vkSharedSync', properties)
         with self.assertRaises(ValueError):
             probe.transport_environment(original, 'unknown')
 

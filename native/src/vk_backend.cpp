@@ -184,7 +184,11 @@ void glImportSemaphore(const GlApi& gl, GLuint obj, ExtHandle& h) {
 }
 #endif
 
-enum class Interop { None, ZeroCopy, HostCopy };
+// VkHost: Minecraft's Vulkan backend with atlas on its own device (stage S1 of docs/ATLAS-VULKAN-BACKEND.md): no GL at
+// all, the frame copied to host memory for the caller to upload into its own textures (atlas_vk_render)
+// VkShared: atlas on Minecraft's own VkDevice (stage S3): traced on atlas's queue, copied into Minecraft's images by a
+// command buffer the caller splices into its frame after a timeline wait (atlas_vk_render_shared)
+enum class Interop { None, ZeroCopy, HostCopy, VkHost, VkShared };
 
 std::string jsonEscape(const std::string& s) {
     std::string o;
@@ -346,6 +350,32 @@ struct SharedImage {
     GLuint glMem = 0, glTex = 0;  // host-copy: glTex is a plain GL texture, glMem 0
 };
 
+// Independent of VulkanBackend/AtlasContext: the caller releases this only after Minecraft's queue has retired all
+// commands that may reference the images, command buffers or semaphores. The VkDevice must still be alive.
+struct SharedVkRetirement final : VkRetirement {
+    VkDevice device = VK_NULL_HANDLE;
+    SharedImage images[IMAGES]{};
+    SharedImage sun{};
+    VkSemaphore frame = VK_NULL_HANDLE, copy = VK_NULL_HANDLE;
+    VkCommandPool pool = VK_NULL_HANDLE;
+    PFN_vkDestroyImageView destroyView = vkDestroyImageView;
+    PFN_vkDestroyImage destroyImage = vkDestroyImage;
+    PFN_vkFreeMemory freeMemory = vkFreeMemory;
+    PFN_vkDestroySemaphore destroySemaphore = vkDestroySemaphore;
+    PFN_vkDestroyCommandPool destroyPool = vkDestroyCommandPool;
+    ~SharedVkRetirement() override {
+        if (pool) destroyPool(device, pool, nullptr);
+        if (frame) destroySemaphore(device, frame, nullptr);
+        if (copy) destroySemaphore(device, copy, nullptr);
+        for (SharedImage* s : {&images[0], &images[1], &images[2], &images[3], &images[4], &images[5], &sun}) {
+            if (s->view) destroyView(device, s->view, nullptr);
+            if (s->image) destroyImage(device, s->image, nullptr);
+            if (s->mem) freeMemory(device, s->mem, nullptr);
+            closeHandle(s->handle);
+        }
+    }
+};
+
 struct SharedSemaphore {
     VkSemaphore sem = VK_NULL_HANDLE;
     ExtHandle handle = NO_HANDLE;
@@ -435,6 +465,7 @@ class VulkanBackend final : public Backend {
 public:
     ~VulkanBackend() override {
         if (fault_ == Fault::Timeout) {
+            finishDeviceChildren(false);
             // a hung device may still run atlas's work: destroying what it uses (or waiting for it) could crash or
             // freeze the game, so everything is left to the driver and the process exit (a few hundred MB at most)
             std::fprintf(stderr, "[atlas] the GPU hung: the Vulkan device is abandoned, not destroyed\n");
@@ -444,7 +475,9 @@ public:
             return;
         }
         if (dev_) {
-            vkDeviceWaitIdle(dev_);  // after a loss it returns VK_ERROR_DEVICE_LOST at once
+            // A checked terminal close already sealed every submitter and proved the queue's real tail fence.
+            VkResult drained = closeState() == CloseState::Drained ? VK_SUCCESS : waitIdle();
+            finishDeviceChildren(drained == VK_SUCCESS);
             destroyInterop();
             for (auto& s : slots_) {
                 for (auto& b : s.bufs) release(b);
@@ -487,6 +520,7 @@ public:
             }
             if (uploadPool_) vkDestroyCommandPool(dev_, uploadPool_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
+            if (closeFence_) vkDestroyFence(dev_, closeFence_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
             if (reloadThread_.joinable()) reloadThread_.join();  // a shader reload still building
             if (farSplitThread_.joinable()) farSplitThread_.join();  // (the split frames' far kernel still building)
@@ -524,8 +558,9 @@ public:
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
             if (pipeCache_) vkDestroyPipelineCache(dev_, pipeCache_, nullptr);
-            vkDestroyDevice(dev_, nullptr);
+            if (!adopted_) vkDestroyDevice(dev_, nullptr);  // (Minecraft's device stays Minecraft's)
         }
+        if (adopted_) return;  // (and so does its instance)
         if (messenger_) {
             auto destroy = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
                 vkGetInstanceProcAddr(inst_, "vkDestroyDebugUtilsMessengerEXT"));
@@ -561,10 +596,12 @@ public:
                         q(typeName(props_.deviceType)) + ",\"vendor\":\"" + vendor + "\",\"driver\":" + q(driverName_) +
                         ",\"driverId\":" + std::to_string(driverId_) + ",\"api\":" + q(apiString(props_.apiVersion)) +
                         ",\"deviceUuid\":" + q(hex16(deviceUuid_)) + ",\"driverUuid\":" + q(hex16(driverUuid_)) +
-                        ",\"pickedForGlContext\":" + b(glMatchedAtCreate_);
-        const char* mode = mode_ == Interop::ZeroCopy ? INTEROP_NAME : mode_ == Interop::HostCopy ? "host-copy" : "not attached";
+                        ",\"pickedForGlContext\":" + b(glMatchedAtCreate_) + ",\"onMinecraftDevice\":" + b(adopted_);
+        const char* mode = mode_ == Interop::ZeroCopy ? INTEROP_NAME : mode_ == Interop::HostCopy ? "host-copy"
+                           : mode_ == Interop::VkHost ? "vulkan host-copy (own device)"
+                           : mode_ == Interop::VkShared ? "vulkan shared device (zero-copy)" : "not attached";
         o += ",\"interop\":" + q(mode);
-        if (mode_ == Interop::HostCopy) {
+        if (mode_ == Interop::HostCopy || mode_ == Interop::VkHost) {
             o += ",\"interopReason\":" + q(interopWhy_) + ",\"hostCopy\":{\"waitMs\":" + std::to_string(hostWaitMs_) +
                  ",\"uploadMs\":" + std::to_string(hostUploadMs_) + ",\"nearDepthSkip\":false}";
         }
@@ -572,6 +609,35 @@ public:
         if (!interopCapable_) o += ",\"vkExportReason\":" + q(vkInteropWhy_);
         o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) + ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
              ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
+        // Allocation counters are not process-private memory: generator/feature engines,
+        // Minecraft, the driver and detached retirement tokens have separate ownership.
+        o += ",\"backendMemory\":{\"allocatedBytes\":" + std::to_string(allocated_.load()) +
+             ",\"retiredBufferBytes\":" + std::to_string(retiredBytes_.load()) +
+             ",\"retiredBufferCount\":" + std::to_string(retiredCount_.load()) +
+             ",\"submittedFrames\":" + std::to_string(frameCounter_.load()) +
+             ",\"completedFrames\":" + std::to_string(completedFrame_.load()) + "}";
+        const char* memoryTrace = std::getenv("ATLAS_MEMORY_DIAGNOSTICS");
+        const bool heapDiagnostics = memoryTrace && *memoryTrace == '1';
+        o += ",\"driverHeapDiagnostics\":{\"requested\":" + b(heapDiagnostics) + ",\"supported\":" + b(budgetExt_) + "}";
+        if (heapDiagnostics && budgetExt_) {
+            // Driver queries may stall. Keep this out of normal atlas_info; opt-in
+            // attribution runs report query cost and cannot serve as timing acceptance.
+            const auto queryStart = std::chrono::steady_clock::now();
+            VkPhysicalDeviceMemoryBudgetPropertiesEXT budgets{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT};
+            VkPhysicalDeviceMemoryProperties2 heaps{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2};
+            heaps.pNext = &budgets;
+            vkGetPhysicalDeviceMemoryProperties2(phys_, &heaps);
+            o += ",\"driverHeapEstimates\":[";
+            for (uint32_t i = 0; i < heaps.memoryProperties.memoryHeapCount; ++i) {
+                if (i) o += ",";
+                o += "{\"heap\":" + std::to_string(i) +
+                     ",\"deviceLocal\":" + b((heaps.memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0) +
+                     ",\"usageBytes\":" + std::to_string(budgets.heapUsage[i]) +
+                     ",\"budgetBytes\":" + std::to_string(budgets.heapBudget[i]) + "}";
+            }
+            const double queryMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - queryStart).count();
+            o += "],\"driverHeapQueryMs\":" + std::to_string(queryMs);
+        }
         if (glLoaded_) {
             o += ",\"gl\":{\"renderer\":" + q(glRenderer_) + ",\"version\":" + q(glVersion_) + ",\"vendor\":" + q(glVendor_) +
                  ",\"winsys\":" + q(glWinsys_) + ",\"memoryObject\":" + b(glHasInterop(gl_)) +
@@ -590,7 +656,7 @@ public:
         return o + "]}";
     }
 
-    bool init(std::string& err) {
+    bool init(std::string& err, const VkAdopt* adopt = nullptr) {
         pipeprog::done.store(0);
         pipeprog::total.store(pipeprog::INIT_KERNELS);
         pipeprog::split.store(0);
@@ -598,7 +664,11 @@ public:
             std::lock_guard<std::mutex> l(pipeprog::mu);
             std::snprintf(pipeprog::name, sizeof pipeprog::name, "%s", "the device");  // (before its first kernel)
         }
-        if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) return false;
+        if (adopt) {
+            if (!adoptDevice(*adopt, err)) return false;
+        } else if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) {
+            return false;
+        }
         probeInterop();
         // far kernel: binding 0 uniform, the rest storage buffers
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
@@ -689,7 +759,8 @@ public:
             smci.pCode = atlas_farsplit_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &farSplitShader_) == VK_SUCCESS) {
                 pipeprog::split.store(1);
-                farSplitThread_ = std::thread([this] {
+                auto job = admitWork();
+                farSplitThread_ = std::thread([this, job = std::move(job)] {
                     VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
                     cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
                     cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
@@ -834,10 +905,63 @@ public:
             VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
             if (!vkOk(vkCreateFence(dev_, &fci, nullptr, &c.uploadFence), "vkCreateFence (upload)", err)) return false;
         }
+        if (adopted_) {
+            VkFenceCreateInfo closeFenceInfo{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+            if (!vkOk(vkCreateFence(dev_, &closeFenceInfo, nullptr, &closeFence_), "vkCreateFence (close tail)", err)) return false;
+        }
         return true;
     }
 
-    bool sharedDevice(SharedDevice& d) override {
+    bool supportsTerminalClose() const override { return adopted_; }
+    bool stagedSceneReadyForTest(uint64_t revision) override {
+        std::unique_lock<std::mutex> scene(sceneMu_, std::try_to_lock);
+        if (!scene.owns_lock() || staged_ < 0 || copies_[staged_].revision != revision) return false;
+        const SceneCopy& copy = copies_[staged_];
+        return !copy.uploading || vkGetFenceStatus(dev_, copy.uploadFence) == VK_SUCCESS;
+    }
+    void holdCloseLockForTest(uint32_t mode, uint32_t milliseconds, std::atomic<bool>& held) override {
+        std::unique_lock<std::mutex> lock(mode == 2 ? sceneMu_ : queueMu_);
+        held.store(true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    }
+    CloseDrain drainForClose(std::chrono::steady_clock::time_point deadline, std::string& err) override {
+        if (producerCloseFailed_.load(std::memory_order_acquire) || lost_) {
+            err = "producer/device failure; ownership retained";
+            return CloseDrain::Error;
+        }
+        auto lockUntil = [&](std::unique_lock<std::mutex>& lock) {
+            for (;;) {
+                if (std::chrono::steady_clock::now() >= deadline) return false;
+                if (lock.try_lock()) return true;
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        };
+        std::unique_lock<std::mutex> scene(sceneMu_, std::defer_lock);
+        if (!lockUntil(scene)) { err = "terminal close timed out acquiring scene lock"; return CloseDrain::Timeout; }
+        std::unique_lock<std::mutex> queue(queueMu_, std::defer_lock);
+        if (!lockUntil(queue)) { err = "terminal close timed out acquiring queue lock"; return CloseDrain::Timeout; }
+        // All admitted submitters and producers have exited. This real queue-tail submission covers every prior
+        // native frame, scene upload, peek, noise and sun readback, without waiting Minecraft's graphics queue.
+        if (!closeTailSubmitted_) {
+            VkSubmitInfo tail{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+            if (!vkOk(vkQueueSubmit(queue_, 1, &tail, closeFence_), "terminal close queue tail", err)) return CloseDrain::Error;
+            closeTailSubmitted_ = true;
+        }
+        if (consumeCloseFault(ATLAS_FAULT_CLOSE_CONSUMER)) {
+            err = "injected consumer close refusal after real queue tail; ownership retained";
+            return CloseDrain::Timeout;
+        }
+        auto left = deadline - std::chrono::steady_clock::now();
+        uint64_t ns = left > decltype(left)::zero() ? uint64_t(std::chrono::duration_cast<std::chrono::nanoseconds>(left).count()) : 0;
+        VkResult result = vkWaitForFences(dev_, 1, &closeFence_, VK_TRUE, ns);
+        if (result == VK_TIMEOUT) { err = "terminal close queue tail timed out"; return CloseDrain::Timeout; }
+        if (!vkOk(result, "terminal close queue tail", err)) return CloseDrain::Error;
+        std::fprintf(stderr, "TRACE terminal close: native queue tail completed; frame and upload admission sealed\n");
+        return CloseDrain::Ok;
+    }
+
+    bool sharedDevice(SharedDevice& d, const WorkTicket& work) override {
+        if (!work.belongsTo(this)) return false;
         if (!dev_ || lost_) return false;
         d.instance = inst_;
         d.physical = phys_;
@@ -859,6 +983,15 @@ public:
         d.timeline = timeline_;
         return true;
     }
+    bool retainDeviceChildren(std::unique_ptr<DeviceChildOwner>& owner) override {
+        if (!owner) return true;
+        std::lock_guard<std::mutex> lock(deviceChildrenMu_);
+        owner->next = deviceChildren_;
+        deviceChildren_ = owner.release();  // no allocation, and no GPU/free operation on the producer thread
+        return true;
+    }
+    void producerCloseFailed() override { producerCloseFailed_.store(true, std::memory_order_release); }
+    bool producerCloseHasFailed() const override { return producerCloseFailed_.load(std::memory_order_acquire); }
     uint64_t framesSubmitted() const override { return frameCounter_.load(); }
     double frameGpuMs() const override { return frameGpuEma_.load(); }
     std::atomic<double> frameGpuEma_{0.0};
@@ -981,6 +1114,7 @@ public:
     // ---- GL interop ------------------------------------------------------------------------------------------
 
     bool glAttach(uint32_t w, uint32_t h, GlTargets& out, std::string& err) override {
+        if (adopted_) return fail(err, "a Minecraft-owned Vulkan device cannot attach OpenGL interop");
         if (attached_) glDetach();
         if (!gl_.load(err)) return false;
         glLoaded_ = true;
@@ -1036,6 +1170,132 @@ public:
         return true;
     }
 
+    // ---- Minecraft's Vulkan backend, atlas on its own device (stage S1): no GL, the frame in host memory ---------
+
+    bool vkAttach(uint32_t w, uint32_t h, std::string& err) override {
+        if (attached_ && mode_ == Interop::VkShared) {
+            bool ready = false;
+            if (!vkCopyComplete(0, ready, err)) return false;
+            if (!ready) return fail(err, "cannot reattach while Minecraft's copy is outstanding");
+        }
+        if (attached_) glDetach();
+        mode_ = adopted_ ? Interop::VkShared : Interop::VkHost;
+        if (!createTargets(w, h, err) || (adopted_ && !createSplice(err))) {
+            destroyInterop();
+            mode_ = Interop::None;
+            return false;
+        }
+        interopWhy_ = adopted_ ? "atlas on Minecraft's Vulkan device" : "Minecraft's Vulkan backend, atlas on its own device";
+        width_ = w;
+        height_ = h;
+        firstGlFrame_ = true;
+        attached_ = true;
+        frameIndex_ = 0;
+        vkHostOut_ = {};
+        for (auto& s : slots_) s.publishDirty = s.ingestDirty = true;
+        return true;
+    }
+
+    bool vkSharedAttached() const override { return attached_ && mode_ == Interop::VkShared; }
+
+    bool vkCopyComplete(uint64_t value, bool& ready, std::string& err) override {
+        ready = false;
+        if (adopted_ && !attached_ && value == 0) { ready = true; return true; }
+        if (!vkSharedAttached() || !copyTl_) return fail(err, "not attached to Minecraft's Vulkan device");
+        uint64_t wanted = value ? value : lastCopyWait_;
+        if (wanted > copyValue_) return fail(err, "copy value was never offered");
+        if (!wanted) { ready = true; return true; }
+        uint64_t completed = 0;
+        if (!vkOk(vkGetSemaphoreCounterValue(dev_, copyTl_, &completed), "querying Minecraft's copies", err)) return false;
+        ready = completed >= wanted;
+        return true;
+    }
+
+    bool vkWaitCopy(uint64_t value, uint64_t timeoutNs, bool& ready, std::string& err) override {
+        ready = false;
+        if (adopted_ && !attached_ && value == 0) { ready = true; return true; }
+        if (!vkSharedAttached() || !copyTl_) return fail(err, "not attached to Minecraft's Vulkan device");
+        uint64_t wanted = value ? value : lastCopyWait_;
+        if (wanted > copyValue_) return fail(err, "copy value was never offered");
+        if (!wanted) { ready = true; return true; }
+        VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+        wi.semaphoreCount = 1;
+        wi.pSemaphores = &copyTl_;
+        wi.pValues = &wanted;
+        VkResult result = vkWaitSemaphores(dev_, &wi, timeoutNs);
+        if (result == VK_TIMEOUT) return true;  // ordinary backpressure, not a device fault
+        if (!vkOk(result, "waiting for Minecraft's copy", err)) return false;
+        ready = true;
+        return true;
+    }
+
+    bool vkCancelSplice(uint64_t value, std::string& err) override {
+        if (!vkSharedAttached() || !value || value != lastCopyWait_) return fail(err, "not the latest outstanding splice");
+        bool ready = false;
+        if (!vkCopyComplete(value, ready, err)) return false;
+        if (ready) return fail(err, "the splice has already completed");
+        // The caller guarantees this command buffer was never recorded/submitted. No host signal is issued.
+        spliceValue_[uint32_t(frameTlValue_ % SPLICE_RING)] = 0;
+        lastCopyWait_ = priorCopyWait_;  // keep the previous completed copy's GPU memory dependency
+        // recordFar's global compute barrier orders the canceled publish before the next trace/publish;
+        // copySunToImage separately orders its transfer writes. Queue order alone is insufficient.
+        splice_ = {};
+        return true;
+    }
+
+    bool vkDetachRetired(VkRetirement*& out, std::string& err) override {
+        out = nullptr;
+        // Java's VK_SHARED release ticket checks this result even before the first attach; on failure it stays in
+        // the stopping barrier, keeping Minecraft from destroying the borrowed device under an unretired producer.
+        if (producerCloseFailed_.load(std::memory_order_acquire)) return fail(err, "generator close did not drain its producer; device ownership retained");
+        if (adopted_ && !attached_) return true;
+        if (!vkSharedAttached()) return fail(err, "not attached to Minecraft's Vulkan device");
+        // Backpressure guarantees no native frame is waiting on an uncompleted external copy. Drain all native slots
+        // with the existing bounded fence wait before transferring their images and splice objects to the caller.
+        if (closeState() != CloseState::Drained)
+            for (auto& s : slots_) if (!waitSlot(s, nullptr, err)) return false;
+        auto token = std::make_unique<SharedVkRetirement>();
+        token->device = dev_;
+        for (int i = 0; i < IMAGES; i++) {
+            token->images[i] = images_[i];
+            if (images_[i].mem) allocated_ -= images_[i].size;
+            images_[i] = {};
+        }
+        token->sun = sunImage_;
+        if (sunImage_.mem) allocated_ -= sunImage_.size;
+        sunImage_ = {};
+        sunImageSize_ = 0;
+        token->frame = frameTl_; token->copy = copyTl_; token->pool = splicePool_;
+        frameTl_ = copyTl_ = VK_NULL_HANDLE; splicePool_ = VK_NULL_HANDLE;
+        for (auto& cb : spliceCmd_) cb = VK_NULL_HANDLE;
+        for (auto& value : spliceValue_) value = 0;
+        frameTlValue_ = copyValue_ = lastCopyWait_ = priorCopyWait_ = 0;
+        splice_ = {};
+        attached_ = false;
+        mode_ = Interop::None;
+        for (auto& s : slots_) s.hostPending = false;
+        out = token.release();
+        return true;
+    }
+
+    bool vkRenderShared(const FrameInputs& in, const GlFrameIO* io, const VkSharedTargets& targets, VkSplice& out,
+                        double* gpuMs, std::string& err) override {
+        if (mode_ != Interop::VkShared) return fail(err, "atlas_vk_attach on a context made by atlas_create_on_vulkan first");
+        sharedTargets_ = targets;
+        splice_ = {};
+        if (!glRender(in, io, gpuMs, err)) return false;
+        out = splice_;
+        return true;
+    }
+
+    bool vkRender(const FrameInputs& in, const GlFrameIO* io, VkHostFrame& out, double* gpuMs, std::string& err) override {
+        if (mode_ != Interop::VkHost) return fail(err, "atlas_vk_attach first");
+        vkHostOut_ = {};
+        if (!glRender(in, io, gpuMs, err)) return false;
+        out = vkHostOut_;
+        return true;
+    }
+
     bool glRender(const FrameInputs& in, const GlFrameIO* io, double* gpuMs, std::string& err) override {
         if (!attached_) return fail(err, "atlas_gl_attach first");
         if (lost_) return fail(err, "the device was lost");
@@ -1048,16 +1308,17 @@ public:
         auto tg0 = std::chrono::steady_clock::now();
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         auto tg1 = std::chrono::steady_clock::now();
-        const bool host = mode_ == Interop::HostCopy;
+        const bool host = mode_ == Interop::HostCopy || mode_ == Interop::VkHost;
+        const bool vk = mode_ == Interop::VkHost || mode_ == Interop::VkShared;  // (no GL: no near depth / info inputs)
         // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
         // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field; the near light is an output only, traced in the far pass)
         const bool primaryNear = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
         const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight &&
-                               (primaryNear || (in.wantNearDepth && io->nearDepthTex && io->nearInfoTex));
+                               (primaryNear || (!vk && in.wantNearDepth && io->nearDepthTex && io->nearInfoTex));
         // the near-depth skip reads the near field's distances from the shared image; host copies cannot share it
         // without stalling GL on the near field, so they march every pixel (the composite's depth test still keeps
         // whatever is nearer). The near light needs those distances: host copies then read them back (the stall)
-        const bool nearOn = in.wantNearDepth && !primaryNear && (!host || nearLight);
+        const bool nearOn = in.wantNearDepth && !primaryNear && !vk && (!host || nearLight);
         FrameGpu frame = in.frame;
         if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
         else frame.dims[2] &= ~0x20u;
@@ -1081,7 +1342,7 @@ public:
 
         {
             ATLAS_ZONE_MIN("gl:linearizeNearDepth", 100);
-            if (io && io->nearDepthTex && !primaryNear && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
+            if (io && io->nearDepthTex && !primaryNear && !vk && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
                 return false;
         }
         if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
@@ -1098,6 +1359,17 @@ public:
         }
         auto tg2 = std::chrono::steady_clock::now();
         if (host) return hostCopyFrame(s, in, frame, io, nearLight, gpuMs, err);
+        if (mode_ == Interop::VkShared) {
+            if (!sharedFrame(s, in, frame, nearLight, err)) return false;
+            auto tg3 = std::chrono::steady_clock::now();
+            auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
+                v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
+            };
+            ease(glTimes_.waitMs, tg0, tg1);
+            ease(glTimes_.prepareMs, tg1, tg2);
+            ease(glTimes_.recordMs, tg2, tg3);
+            return true;
+        }
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
         GLuint tex[IMAGES + 1];
@@ -1176,6 +1448,192 @@ public:
                                  GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
     }
 
+    // ---- atlas on Minecraft's device (stage S3) ---------------------------------------------------------------
+    // The frame is traced on atlas's own queue (a compute-only family where there is one, the images then shared by
+    // both families; else a second queue of Minecraft's graphics family) into atlas's images, as the other paths; its submission waits for Minecraft's copies out of those images from the
+    // previous frame (copyTl_) and signals frameTl_. The copies into Minecraft's images are a command buffer the caller
+    // splices into its frame (waitSemaphore frameTl_, execute, signalSemaphore copyTl_), so neither side's CPU waits.
+
+    static constexpr uint32_t SPLICE_RING = 4;  // copy command buffers: Minecraft keeps up to 2 frames in flight
+
+    bool createTimeline(VkSemaphore& sem, std::string& err) {
+        VkSemaphoreTypeCreateInfo ty{VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO};
+        ty.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+        VkSemaphoreCreateInfo sc{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+        sc.pNext = &ty;
+        return vkOk(vkCreateSemaphore(dev_, &sc, nullptr, &sem), "vkCreateSemaphore (timeline)", err);
+    }
+
+    bool createSplice(std::string& err) {
+        if (!createTimeline(frameTl_, err) || !createTimeline(copyTl_, err)) return false;
+        frameTlValue_ = copyValue_ = lastCopyWait_ = priorCopyWait_ = 0;
+        VkCommandPoolCreateInfo pc{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+        pc.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        pc.queueFamilyIndex = graphicsFamily_;  // (Minecraft's queue executes them)
+        if (!vkOk(vkCreateCommandPool(dev_, &pc, nullptr, &splicePool_), "vkCreateCommandPool (splice)", err)) return false;
+        VkCommandBufferAllocateInfo ai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+        ai.commandPool = splicePool_;
+        ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        ai.commandBufferCount = SPLICE_RING;
+        if (!vkOk(vkAllocateCommandBuffers(dev_, &ai, spliceCmd_), "vkAllocateCommandBuffers (splice)", err)) return false;
+        for (auto& v : spliceValue_) v = 0;
+        return true;
+    }
+
+    // Minecraft's copies of every splice handed out are done (bounded: a frame never submitted would hang here)
+    bool splicesDone(uint64_t timeoutNs) {
+        if (!copyTl_ || lastCopyWait_ == 0) return true;
+        VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+        wi.semaphoreCount = 1;
+        wi.pSemaphores = &copyTl_;
+        wi.pValues = &lastCopyWait_;
+        return vkWaitSemaphores(dev_, &wi, timeoutNs) == VK_SUCCESS;
+    }
+
+    void destroySplice() {
+        if (!dev_ || (!frameTl_ && !copyTl_ && !splicePool_)) return;
+        // Minecraft's frames may still run the last copies (they read atlas's images): their end first. A splice that
+        // never reached Minecraft's queue would hold this forever: then the objects are left (a few MB, logged)
+        if (!splicesDone(2'000'000'000ull)) {
+            std::fprintf(stderr, "[atlas] Minecraft's copies of atlas's frame did not finish: the splice objects are left\n");
+            leakImages_ = true;
+            frameTl_ = copyTl_ = VK_NULL_HANDLE;
+            splicePool_ = VK_NULL_HANDLE;
+            return;
+        }
+        if (splicePool_) vkDestroyCommandPool(dev_, splicePool_, nullptr);
+        if (frameTl_) vkDestroySemaphore(dev_, frameTl_, nullptr);
+        if (copyTl_) vkDestroySemaphore(dev_, copyTl_, nullptr);
+        frameTl_ = copyTl_ = VK_NULL_HANDLE;
+        splicePool_ = VK_NULL_HANDLE;
+    }
+
+    bool sharedFrame(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool nearLight, std::string& err) {
+        uint32_t w = width_, h = height_;
+        begin(s);
+        hostImageBarrier(s.cmd, true);  // (first frame: the images' layout; then: the copies' reads before this frame's writes)
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
+                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
+        computeBarrier(s.cmd);
+        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
+        std::memcpy(&pcv[3], &in.preExposure, 4);
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
+        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
+        vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        const bool sun = sharedTargets_.sunMap && sunDispatchRows_ && sunImage_.image && sunSize_;
+        if (sun) {
+            if (sunImageFresh_) {
+                VkImageMemoryBarrier ib{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                ib.image = sunImage_.image;
+                ib.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+                ib.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                ib.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                ib.srcQueueFamilyIndex = ib.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                ib.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
+                                     nullptr, 1, &ib);
+                sunImageFresh_ = false;
+            }
+            copySunToImage(s.cmd);
+        }
+        // (the publish's writes reach Minecraft's copies through frameTl_: a semaphore signal makes them available)
+        uint64_t value = ++frameTlValue_;
+        if (!submitTimeline(s, lastCopyWait_, value, err)) return false;
+        firstGlFrame_ = false;
+        frameIndex_++;
+
+        // the copies into Minecraft's images, on its queue after the wait; the ring slot's last use must be done
+        uint32_t ri = uint32_t(value % SPLICE_RING);
+        if (spliceValue_[ri]) {
+            VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+            wi.semaphoreCount = 1;
+            wi.pSemaphores = &copyTl_;
+            wi.pValues = &spliceValue_[ri];
+            if (!vkOk(vkWaitSemaphores(dev_, &wi, FENCE_TIMEOUT_NS), "waiting for Minecraft's copies", err)) return false;
+        }
+        VkCommandBuffer cb = spliceCmd_[ri];
+        vkResetCommandBuffer(cb, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cb, &bi);
+        // Minecraft's earlier work on its images (the last frame's samples, a clear) before the copies write them
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+        vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0,
+                             nullptr);
+        auto copy = [&](int img, uint64_t dst) {
+            if (!dst) return;
+            VkImageCopy r{};
+            r.srcSubresource = r.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            r.extent = {w, h, 1};
+            vkCmdCopyImage(cb, images_[img].image, VK_IMAGE_LAYOUT_GENERAL, reinterpret_cast<VkImage>(dst),
+                           VK_IMAGE_LAYOUT_GENERAL, 1, &r);
+        };
+        copy(IMG_COLOR, sharedTargets_.color);
+        copy(IMG_DEPTH, sharedTargets_.depth);
+        if (nearLight) copy(IMG_NEAR_LIGHT, sharedTargets_.nearLight);
+        if (sun) {
+            VkImageCopy r{};
+            r.srcSubresource = r.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            r.extent = {sunSize_, sunSize_ + 1, 1};
+            vkCmdCopyImage(cb, sunImage_.image, VK_IMAGE_LAYOUT_GENERAL, reinterpret_cast<VkImage>(sharedTargets_.sunMap),
+                           VK_IMAGE_LAYOUT_GENERAL, 1, &r);
+        }
+        // and the copies before anything of Minecraft's after them reads or writes those images
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+        mb.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+        vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 1, &mb, 0, nullptr, 0,
+                             nullptr);
+        if (!vkOk(vkEndCommandBuffer(cb), "vkEndCommandBuffer (splice)", err)) return false;
+        uint64_t copied = ++copyValue_;
+        spliceValue_[ri] = copied;
+        priorCopyWait_ = lastCopyWait_;
+        lastCopyWait_ = copied;  // (the next frame's trace waits for these copies before it overwrites the images)
+        splice_ = VkSplice{uint64_t(reinterpret_cast<uintptr_t>(frameTl_)), value, cb,
+                           uint64_t(reinterpret_cast<uintptr_t>(copyTl_)), copied};
+        return true;
+    }
+
+    // The frame's submission on atlas's queue with timeline semaphores: wait copyTl_ >= waitCopy (0: none), signal
+    // frameTl_ = signal; the slot's fence as on the other paths
+    bool submitTimeline(Slot& s, uint64_t waitCopy, uint64_t signal, std::string& err) {
+        if (s.query) vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 1);
+        s.gt.mark(s.cmd, "publish");
+        vkEndCommandBuffer(s.cmd);
+        VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
+        VkTimelineSemaphoreSubmitInfo ts{VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO};
+        ts.waitSemaphoreValueCount = waitCopy ? 1 : 0;
+        ts.pWaitSemaphoreValues = &waitCopy;
+        ts.signalSemaphoreValueCount = 1;
+        ts.pSignalSemaphoreValues = &signal;
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.pNext = &ts;
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &s.cmd;
+        if (waitCopy) {
+            si.waitSemaphoreCount = 1;
+            si.pWaitSemaphores = &copyTl_;
+            si.pWaitDstStageMask = &stage;
+        }
+        si.signalSemaphoreCount = 1;
+        si.pSignalSemaphores = &frameTl_;
+        {
+            ATLAS_ZONE_MIN("vk:queueSubmit", 100);
+            std::lock_guard<std::mutex> q(queueMu_);
+            vkResetFences(dev_, 1, &s.fence);
+            s.gt.submitted();
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (shared frame)", err)) return false;
+            lastFrameFence_ = s.fence;
+            vgOpen_ = false;
+        }
+        s.inFlight = true;
+        s.frameNumber = ++frameCounter_;
+        copies_[current_].lastFrame.store(s.frameNumber);
+        return true;
+    }
+
     // ---- host-copy fallback ----------------------------------------------------------------------------------
     // The frame is published into Vulkan-local images (the same publish pass, so the GL textures hold exactly what
     // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
@@ -1185,7 +1643,8 @@ public:
                        double* gpuMs, std::string& err) {
         uint32_t w = width_, h = height_;
         size_t px = size_t(w) * h;
-        VkDeviceSize sunBytes = sunDispatchRows_ && sunImage_.glTex ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0;
+        const bool vk = mode_ == Interop::VkHost;
+        VkDeviceSize sunBytes = sunDispatchRows_ && (sunImage_.glTex || (vk && sunSize_)) ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0;
         // colour, normal, depth, the near light (RGBA16F) and the sun map, one after the other
         VkDeviceSize bytes = VkDeviceSize(px) * 24 + VkDeviceSize(sunSize_ ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0);
         if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
@@ -1234,12 +1693,20 @@ public:
         auto t0 = std::chrono::steady_clock::now();
         if (!waitSlot(up, gpuMs, err)) return false;
         auto t1 = std::chrono::steady_clock::now();
-        hostUpload(up, w, h);
+        if (vk) {
+            // (Minecraft's Vulkan backend) the caller uploads from here (its encoder's writeToTexture) before the next call
+            const char* p = static_cast<const char*>(up.hostOut.map);
+            size_t px = size_t(w) * h;
+            vkHostOut_ = VkHostFrame{p, p + px * 8, p + px * 12, up.hostNearLight ? p + px * 16 : nullptr,
+                                     up.hostSun ? p + px * 24 : nullptr, w, h, up.hostSun ? sunSize_ : 0u};
+        } else {
+            hostUpload(up, w, h);
+        }
         up.hostPending = false;
         auto t2 = std::chrono::steady_clock::now();
         hostWaitMs_ = std::chrono::duration<double, std::milli>(t1 - t0).count();
         hostUploadMs_ = std::chrono::duration<double, std::milli>(t2 - t1).count();
-        copyToCaller(io, w, h, nearLight && up.hostNearLight);
+        if (!vk) copyToCaller(io, w, h, nearLight && up.hostNearLight);
         return true;
     }
 
@@ -1332,7 +1799,8 @@ public:
         if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, GLuint(pbo));
     }
 
-    bool stageScene(const PackedScene& sc) override {
+    bool stageScene(const PackedScene& sc, const WorkTicket& work) override {
+        if (!work.belongsTo(this)) return false;
         if (lost_) return false;
         ATLAS_ZONE_MIN("vk:stageScene", 50);
         std::lock_guard<std::mutex> lock(sceneMu_);
@@ -1346,6 +1814,14 @@ public:
     }
 
     void glDetach() override {
+        if (vkSharedAttached()) {
+            std::string err;
+            bool ready = false;
+            if (!vkCopyComplete(0, ready, err) || !ready) {
+                std::fprintf(stderr, "[atlas] refusing legacy detach with an outstanding Vulkan splice; use atlas_vk_detach_retired\n");
+                return;
+            }
+        }
         if (fault_ == Fault::Timeout) {
             // hung: nothing that work may still touch is freed (see the destructor); GL forgets the images
             attached_ = false;
@@ -1353,7 +1829,7 @@ public:
             return;
         }
         if (reloadThread_.joinable()) reloadThread_.join();  // (a shader reload still building)
-        if (dev_) vkDeviceWaitIdle(dev_);  // (the split kernel's build reads nothing freed here: not waited for)
+        if (closeState() != CloseState::Drained) waitIdle();  // a checked terminal close already drained this queue
         for (auto& s : slots_) s.inFlight = false;
         destroyInterop();
         mode_ = Interop::None;
@@ -1563,20 +2039,7 @@ private:
         phys_ = devs[size_t(best)];
         chosen_ = best;
         glMatchedAtCreate_ = seen_[size_t(best)].glMatch;
-        VkPhysicalDeviceDriverProperties drv{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
-        VkPhysicalDeviceIDProperties idp{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
-        idp.pNext = &drv;
-        VkPhysicalDeviceProperties2 props2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
-        props2.pNext = &idp;
-        vkGetPhysicalDeviceProperties2(phys_, &props2);
-        props_ = props2.properties;
-        std::memcpy(deviceUuid_, idp.deviceUUID, VK_UUID_SIZE);
-        std::memcpy(driverUuid_, idp.driverUUID, VK_UUID_SIZE);
-        driverName_ = std::string(drv.driverName) + " " + drv.driverInfo;
-        driverId_ = uint32_t(drv.driverID);
-        std::snprintf(deviceName_, sizeof(deviceName_), "vulkan (%s)", props2.properties.deviceName);
-        timestampPeriod_ = props2.properties.limits.timestampPeriod;
-        maxStorageRange_ = props2.properties.limits.maxStorageBufferRange;
+        describeDevice();
         uint32_t qn = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, nullptr);
         std::vector<VkQueueFamilyProperties> qf(qn);
@@ -1608,6 +2071,109 @@ private:
             genTimestamps_ = timestamps_;
         }
         return family_ != UINT32_MAX || fail(err, "no compute queue");
+    }
+
+    // The chosen device's properties: name, UUIDs, driver, limits (pickDevice, adoptDevice)
+    void describeDevice() {
+        VkPhysicalDeviceDriverProperties drv{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
+        VkPhysicalDeviceIDProperties idp{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
+        idp.pNext = &drv;
+        VkPhysicalDeviceProperties2 props2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+        props2.pNext = &idp;
+        vkGetPhysicalDeviceProperties2(phys_, &props2);
+        props_ = props2.properties;
+        std::memcpy(deviceUuid_, idp.deviceUUID, VK_UUID_SIZE);
+        std::memcpy(driverUuid_, idp.driverUUID, VK_UUID_SIZE);
+        driverName_ = std::string(drv.driverName) + " " + drv.driverInfo;
+        driverId_ = uint32_t(drv.driverID);
+        std::snprintf(deviceName_, sizeof(deviceName_), "vulkan (%s)", props2.properties.deviceName);
+        timestampPeriod_ = props2.properties.limits.timestampPeriod;
+        maxStorageRange_ = props2.properties.limits.maxStorageBufferRange;
+    }
+
+    // (stage S3) Minecraft's own device, made by the device-sharing mixin with atlas's features and queues: adopted, not
+    // created (and never destroyed here). Only atlas's own queues are ever submitted to or waited on.
+    bool adoptDevice(const VkAdopt& a, std::string& err) {
+        if (!a.instance || !a.physical || !a.device) return fail(err, "atlas_create_on_vulkan: null handles");
+        if (!vkLoadGlobal(err)) return false;
+        inst_ = static_cast<VkInstance>(a.instance);
+        if (!vkLoadInstance(inst_, err)) return false;
+        adopted_ = true;
+        phys_ = static_cast<VkPhysicalDevice>(a.physical);
+        dev_ = static_cast<VkDevice>(a.device);
+        describeDevice();
+        if (props_.apiVersion < VK_API_VERSION_1_2) return fail(err, "Minecraft's Vulkan device is older than 1.2");
+        uint32_t qn = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, nullptr);
+        std::vector<VkQueueFamilyProperties> qf(qn);
+        vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, qf.data());
+        if (a.frameFamily >= qn || !(qf[a.frameFamily].queueFlags & VK_QUEUE_COMPUTE_BIT))
+            return fail(err, "atlas_create_on_vulkan: the frames' queue family is not a compute family");
+        if (a.graphicsFamily >= qn) return fail(err, "atlas_create_on_vulkan: no such graphics family");
+        if (a.frameIndex >= qf[a.frameFamily].queueCount || (a.frameFamily == a.graphicsFamily && a.frameIndex == 0))
+            return fail(err, "atlas_create_on_vulkan: frames must use a dedicated non-Minecraft queue");
+        if (a.genFamily < qn && (a.genIndex >= qf[a.genFamily].queueCount ||
+            (a.genFamily == a.graphicsFamily && a.genIndex == 0) ||
+            (a.genFamily == a.frameFamily && a.genIndex == a.frameIndex)))
+            return fail(err, "atlas_create_on_vulkan: explicit generator queue aliases a host/frame queue; use the mutex fallback");
+        family_ = a.frameFamily;
+        graphicsFamily_ = a.graphicsFamily;
+        timestamps_ = qf[family_].timestampValidBits > 0;
+        genFamily_ = a.genFamily < qn ? a.genFamily : UINT32_MAX;
+        genTimestamps_ = genFamily_ != UINT32_MAX && qf[genFamily_].timestampValidBits > 0;
+        float64_ = (a.flags & 1u) != 0;
+        budgetExt_ = (a.flags & 2u) != 0;
+        calibratedTs_ = (a.flags & 4u) != 0;
+        timeline_ = true;  // (Minecraft's device requires timeline semaphores)
+        vkGetDeviceQueue(dev_, family_, a.frameIndex, &queue_);
+        if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, a.genIndex, &genQueue_);
+        if (!queue_) return fail(err, "atlas_create_on_vulkan: no queue at the frames' family / index");
+        fr::gpuInit(dev_, timestampPeriod_, 64, calibratedTs_);
+        interopCapable_ = false;
+        vkInteropWhy_ = "on Minecraft's Vulkan device (no OpenGL)";
+        seen_.push_back(DeviceSeen{props_.deviceName, typeName(props_.deviceType), apiString(props_.apiVersion), false, ""});
+        chosen_ = int(seen_.size()) - 1;
+        return true;
+    }
+
+    // Waits until atlas's own work is done: the whole device when it is atlas's, else atlas's frames' queue (Minecraft's
+    // queues are Minecraft's: vkDeviceWaitIdle would need them all externally synchronised)
+    VkResult waitIdle() {
+        if (!dev_) return VK_SUCCESS;
+        if (!adopted_) {
+            return vkDeviceWaitIdle(dev_);
+        }
+        std::lock_guard<std::mutex> q(queueMu_);
+        return queue_ ? vkQueueWaitIdle(queue_) : VK_SUCCESS;
+    }
+
+    void finishDeviceChildren(bool consumerDrained) {
+        DeviceChildOwner* owners;
+        {
+            std::lock_guard<std::mutex> lock(deviceChildrenMu_);
+            owners = deviceChildren_;
+            deviceChildren_ = nullptr;
+        }
+        if (!consumerDrained && owners) {
+            // No destructor may free buffers that an uncompleted native frame still reads. Keep an explicit
+            // process-lifetime owner on failure; this is incomplete cleanup, never a successful device teardown.
+            static std::mutex failedMu;
+            static DeviceChildOwner* failedOwners = nullptr;
+            std::lock_guard<std::mutex> lock(failedMu);
+            while (owners) {
+                DeviceChildOwner* next = owners->next;
+                owners->next = failedOwners;
+                failedOwners = owners;
+                owners = next;
+            }
+            std::fprintf(stderr, "[atlas] incomplete cleanup: generator buffers retained after native consumer drain failed\n");
+        }
+        while (owners) {
+            DeviceChildOwner* next = owners->next;
+            owners->release();
+            delete owners;
+            owners = next;
+        }
     }
 
     static bool nameContains(const char* name, const char* sub) {
@@ -2132,7 +2698,7 @@ private:
             reloadThread_.join();
             constexpr int K = RELOAD_KERNELS;
             if (reloadOk_) {
-                vkDeviceWaitIdle(dev_);  // frames in flight still use the old pipelines
+                waitIdle();  // frames in flight still use the old pipelines
                 VkPipeline* pipes[K] = {&farPipe_, &cloudPipe_, &sunPipe_, &nearLightPipe_, &nearUpPipe_, &nearTempPipe_};
                 VkShaderModule* mods[K] = {&farShader_, &cloudShader_, &sunShader_, &nearLightShader_, &nearUpShader_,
                                            &nearTempShader_};
@@ -2159,7 +2725,9 @@ private:
         reloadStamp_ = stamp;
         reloadDone_.store(false);
         reloadBusy_.store(true, std::memory_order_release);
-        reloadThread_ = std::thread([this, base] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
+        auto job = admitWork();
+        if (!job) { reloadBusy_.store(false); return; }
+        reloadThread_ = std::thread([this, base, job = std::move(job)] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
         if (waitReload) hotReload();  // (the swap, after the build)
     }
 
@@ -3423,6 +3991,7 @@ private:
         if (mode_ == Interop::ZeroCopy)
             for (auto& s : slots_)
                 if (!createSemaphore(s.glReady, err) || !createSemaphore(s.vkDone, err)) return false;
+        if (mode_ == Interop::VkHost || mode_ == Interop::VkShared) return true;  // (no GL: the first frame's barrier starts them)
         // nothing covers anything until the GL side writes the near field's distances
         float uncovered = 1e30f, zero[4] = {};
         gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
@@ -3469,6 +4038,13 @@ private:
         ic.tiling = VK_IMAGE_TILING_OPTIMAL;
         ic.usage = SHARED_USAGE;
         ic.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        // (on Minecraft's device with atlas's queue in another family: Minecraft's queue copies out of them, no transfers)
+        uint32_t both[2] = {family_, graphicsFamily_};
+        if (adopted_ && family_ != graphicsFamily_) {
+            ic.sharingMode = VK_SHARING_MODE_CONCURRENT;
+            ic.queueFamilyIndexCount = 2;
+            ic.pQueueFamilyIndices = both;
+        }
         if (!vkOk(vkCreateImage(dev_, &ic, nullptr, &s.image), "vkCreateImage (shared)", err)) {
             s.image = VK_NULL_HANDLE;
             return false;
@@ -3534,6 +4110,7 @@ private:
     // host-copy: a Vulkan-only image the publish pass writes, and a plain GL texture the frame is uploaded into
     bool createLocal(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
         if (!createVkImage(s, fmt, w, h, false, err)) return false;
+        if (mode_ == Interop::VkHost || mode_ == Interop::VkShared) return true;
         gl_.CreateTextures(GL_TEXTURE_2D, 1, &s.glTex);
         gl_.TextureStorage2D(s.glTex, 1, glFmt, GLsizei(w), GLsizei(h));
         glTextureParams(s.glTex);
@@ -3558,6 +4135,11 @@ private:
     }
 
     void destroyInterop() {
+        destroySplice();
+        if (leakImages_) {  // (Minecraft may still read them: left to the process exit, see destroySplice)
+            for (auto& s : images_) s = {};
+            leakImages_ = false;
+        }
         destroyShared(sunImage_);
         sunImageSize_ = 0;
         bool glOk = glUsable();
@@ -3582,14 +4164,21 @@ private:
         uint64_t frame;
     };
     std::vector<RetiredBuf> retired_;
+    std::atomic<uint64_t> retiredBytes_{0}, retiredCount_{0};
     void retire(Buf& b) {
-        if (b.buf) retired_.push_back({b, frameCounter_});
+        if (b.buf) {
+            retired_.push_back({b, frameCounter_});
+            retiredBytes_ += b.memBytes;
+            retiredCount_++;
+        }
         b = {};
     }
     void releaseRetired(bool all) {
         ATLAS_ZONE_MIN("vk:releaseRetired", 100);
         for (size_t i = 0; i < retired_.size();) {
             if (all || retired_[i].frame <= completedFrame_.load()) {
+                retiredBytes_ -= retired_[i].b.memBytes;
+                retiredCount_--;
                 release(retired_[i].b);
                 retired_[i] = retired_.back();
                 retired_.pop_back();
@@ -3763,6 +4352,8 @@ private:
             std::lock_guard<std::mutex> q(queueMu_);
             if (!vkOk(vkQueueSubmit(queue_, 1, &si, c.uploadFence), "vkQueueSubmit (scene upload)", err)) return false;
         }
+        if (closeState() == CloseState::Sealed)
+            std::fprintf(stderr, "TRACE terminal-close admitted scene-upload submitted revision=%llu\n", (unsigned long long)sc.revision);
         c.uploading = true;
         c.revision = sc.revision;
         if (wait && !waitFence(c.uploadFence, "scene upload", err)) return false;
@@ -3892,6 +4483,11 @@ private:
     int current_ = -1, staged_ = -1;
     std::mutex sceneMu_;
     std::mutex queueMu_;  // vkQueueSubmit from the render and staging threads
+    VkFence closeFence_ = VK_NULL_HANDLE;
+    bool closeTailSubmitted_ = false;
+    std::mutex deviceChildrenMu_;
+    DeviceChildOwner* deviceChildren_ = nullptr;  // generator slabs, retained until actual native consumer drain
+    std::atomic<bool> producerCloseFailed_{false};
     VkFence lastFrameFence_ = VK_NULL_HANDLE;  // (under queueMu_) the last frame submitted's
     VkCommandPool uploadPool_ = VK_NULL_HANDLE;
     std::atomic<uint64_t> frameCounter_{0};  // (atomic: the client generator reads it, framesSubmitted)
@@ -3931,6 +4527,17 @@ private:
     bool glLoaded_ = false, glUuidMatch_ = false;
     std::string glRenderer_, glVersion_, glVendor_, glWinsys_, glDriverUuid_;
     double hostWaitMs_ = 0, hostUploadMs_ = 0;  // host-copy: last frame's CPU wait for the GPU, and upload time
+    VkHostFrame vkHostOut_;  // (VkHost) the frame the last vkRender handed over (null pointers: none yet)
+    // (VkShared, stage S3) Minecraft's device adopted; the splice's timelines, copy command buffers and targets
+    bool adopted_ = false, leakImages_ = false;
+    uint32_t graphicsFamily_ = 0;  // Minecraft's graphics queue's family (its queue runs the splices)
+    VkSemaphore frameTl_ = VK_NULL_HANDLE, copyTl_ = VK_NULL_HANDLE;
+    uint64_t frameTlValue_ = 0, copyValue_ = 0, lastCopyWait_ = 0, priorCopyWait_ = 0;
+    VkCommandPool splicePool_ = VK_NULL_HANDLE;
+    VkCommandBuffer spliceCmd_[4] = {};
+    uint64_t spliceValue_[4] = {};
+    VkSharedTargets sharedTargets_;
+    VkSplice splice_;
     GlApi gl_;
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
@@ -3944,6 +4551,12 @@ private:
 std::unique_ptr<Backend> makeVulkanBackend(std::string& err) {
     auto b = std::make_unique<VulkanBackend>();
     if (!b->init(err)) return nullptr;
+    return b;
+}
+
+std::unique_ptr<Backend> makeVulkanBackendOn(const VkAdopt& device, std::string& err) {
+    auto b = std::make_unique<VulkanBackend>();
+    if (!b->init(err, &device)) return nullptr;
     return b;
 }
 

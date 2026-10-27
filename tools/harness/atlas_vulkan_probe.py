@@ -44,7 +44,7 @@ def reject_existing_native_tracking(cfg):
         raise RuntimeError('existing raw NativeMemoryTracking option conflicts with the probe')
 
 
-def abi_logged(raw, version="0.18.0"):
+def abi_logged(raw, version="0.19.0"):
     return bool(re.search(r"atlas_core [^\n]*\(abi\s+" + re.escape(version) + r"(?:[;)\s])", raw))
 
 
@@ -261,8 +261,11 @@ def transport_environment(env, transport):
     env = dict(env)
     env['NIRNCRAFT_ATLAS_PROBE_TRANSPORT'] = transport
     extra = ['nirncraft.atlas.vkProbe=false']
-    if transport != 'gl': extra.insert(0, 'nirncraft.atlas.vkSharedSync=' + ('true' if transport == 'shared' else 'false'))
-    env['NIRNCRAFT_HARNESS_JVM'] = ','.join(filter(None, [env.get('NIRNCRAFT_HARNESS_JVM', ''), *extra]))
+    inherited = env.get('NIRNCRAFT_HARNESS_JVM', '')
+    if transport == 'shared':
+        inherited = ','.join(item for item in inherited.split(',') if item.split('=', 1)[0] != 'nirncraft.atlas.vkSharedSync')
+    if transport == 'host': extra.insert(0, 'nirncraft.atlas.vkSharedSync=false')
+    env['NIRNCRAFT_HARNESS_JVM'] = ','.join(filter(None, [inherited, *extra]))
     return env
 
 
@@ -297,6 +300,8 @@ def worker(evidence, deadline):
     game.launch = bounded_launch
     original_flags_writer = game._set_group_flags
     def journaled_flags(jvm):
+        if transport == 'shared' and 'nirncraft.atlas.vkSharedSync' in jvm:
+            raise RuntimeError('shared probe requires the product transport default, not a group override')
         probe_flags.guard_before_write(game.lw.INSTANCE / 'instance.cfg', game.FLAGS_FILE, evidence)
         raw_args = ('-XX:NativeMemoryTracking=summary',) if os.environ.get('NIRNCRAFT_ATLAS_PROBE_JVM_NMT') == '1' else ()
         probe_flags.journal(jvm, evidence, game.lw.atomic, raw_args)
@@ -386,7 +391,7 @@ def worker(evidence, deadline):
             'own_device': '"onMinecraftDevice":false' in joined,
             'shared_interop': '"interop":"vulkan shared device (zero-copy)"' in joined,
             'host_interop': '"interop":"vulkan host-copy (own device)"' in joined,
-            'abi_0_18': abi_logged(fresh_text),
+            'abi_0_19': abi_logged(fresh_text),
             'abi_0_17': abi_logged(fresh_text, '0.17.0'),
             'gl_interop_gpu': bool(re.search(r'\"interop\":\"(?:zero-copy|host-copy)', joined)),
             'gl_backend_and_gpu_interop_observed': transport == 'gl' and gl_path_observed(fresh_text, joined),

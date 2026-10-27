@@ -1,4 +1,5 @@
 tutorialStep:none
+preferredGraphicsBackend:"vulkan"
 onboardAccessibility:false
 toggleCrouch:false
 renderDistance:10

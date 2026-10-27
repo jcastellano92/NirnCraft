@@ -81,6 +81,7 @@ namespace atlas {
 Backend* contextBackend(AtlasContext* ctx);
 VoxGrid* contextGrid(AtlasContext* ctx);
 World* contextWorld(AtlasContext* ctx);
+AtlasStatus contextUploadSection(AtlasContext*, int32_t, int32_t, int32_t, const uint16_t*, const Backend::WorkTicket&);
 }  // namespace atlas
 
 using namespace atlas;
@@ -203,6 +204,7 @@ struct Stage {
 class Engine {
 public:
     virtual ~Engine() = default;
+    virtual bool prepareClose(std::string&) { return true; }
     // the stages the batch runs between the terrain and its sections (sorted by order; GPU engines only)
     virtual bool setStages(const std::vector<Stage>& stages, std::string& err) {
         if (!stages.empty()) return (err = "stages run on a Vulkan generator only"), false;
@@ -525,6 +527,28 @@ struct Buf {
     VkDeviceSize size = 0;
 };
 
+struct GeneratorSlabOwner final : DeviceChildOwner {
+    explicit GeneratorSlabOwner(VkDevice d) : device(d) {}
+    VkDevice device;
+    std::vector<Buf> buffers;
+    PFN_vkDestroyBuffer destroyBuffer = vkDestroyBuffer;
+    PFN_vkFreeMemory freeMemory = vkFreeMemory;
+    PFN_vkUnmapMemory unmapMemory = vkUnmapMemory;
+    void release() noexcept override {
+        uint64_t bytes = 0;
+        for (Buf& b : buffers) {
+            bytes += b.size;
+            if (b.map) unmapMemory(device, b.mem);
+            if (b.buf) destroyBuffer(device, b.buf, nullptr);
+            if (b.mem) freeMemory(device, b.mem, nullptr);
+            b = {};
+        }
+        std::fprintf(stderr, "TRACE generator slabs released after native consumer drain: %zu buffers, %llu requested bytes\n",
+                     buffers.size(), (unsigned long long)bytes);
+        buffers.clear();
+    }
+};
+
 class VulkanEngine final : public Engine {
 public:
     explicit VulkanEngine(uint32_t slots) : slots_(slots) {}
@@ -534,20 +558,16 @@ public:
             return;
         }
         if (dev_) {
-            {
-                std::string e;
-                if (!dead_) drain(e);
+            std::string err;
+            if (!closePrepared_ && !prepareClose(err)) {
+                std::fprintf(stderr, "[atlas] incomplete cleanup: generator initialization did not drain: %s\n", err.c_str());
+                return;
             }
-            if (shared_) {
-                // our submissions were all waited for; the slots the grid still reads stay (freed with the device)
-                bool leak = !idle(1000);
-                if (leak) std::fprintf(stderr, "[atlas] generator: grid sections still pending at close; their buffers stay\n");
-                for (Slab& s : slabs_)
-                    if (!leak) release(s.buf);
-                for (FarSlab& f : farSlabs_)
-                    if (!leak) release(f.buf);
-            } else {
-                vkDeviceWaitIdle(dev_);
+            if (!shared_) {
+                // Standalone generators normally have no ingest slabs (ingest requires a context), but retain
+                // complete ownership here too. prepareClose already proved this owned device idle.
+                for (Slab& s : slabs_) release(s.buf);
+                for (FarSlab& f : farSlabs_) release(f.buf);
             }
             for (Buf* b : {&prog_, &pages_, &pageIdx_, &chunks_, &corners_, &aq_, &blocks_, &col_, &out_, &readback_, &staging_,
                            &tab_, &info_, &map_, &jobs_, &bad_, &far_})
@@ -575,6 +595,40 @@ public:
             if (!shared_) vkDestroyDevice(dev_, nullptr);
         }
         if (inst_ && !shared_) vkDestroyInstance(inst_, nullptr);
+    }
+    bool prepareClose(std::string& err) override {
+        if (closePrepared_) return true;
+        if (backend_ && backend_->consumeCloseFault(ATLAS_FAULT_CLOSE_PRODUCER)) {
+            err = "injected producer close refusal; generator ownership retained";
+            return false;
+        }
+        // A frame/copy completion proves nothing about our separate producer queue. Drain it first and refuse
+        // destruction on failure; atlas_gen_destroy retains the whole generator, including its command resources.
+        if (hung_ || dead_ || !drain(err)) {
+            if (err.empty()) err = "generator producer queue did not drain";
+            return false;
+        }
+        if (!shared_ && dev_ && vkDeviceWaitIdle(dev_) != VK_SUCCESS) {
+            err = "generator owned device did not drain";
+            return false;
+        }
+        if (shared_ && slabOwner_) {
+            auto* owner = static_cast<GeneratorSlabOwner*>(slabOwner_.get());
+            owner->buffers.clear();
+            // Capacity was reserved BEFORE allocating each slab; close cannot allocate while transferring handles.
+            for (const Slab& s : slabs_) if (s.buf.buf) owner->buffers.push_back(s.buf);
+            for (const FarSlab& f : farSlabs_) if (f.buf.buf) owner->buffers.push_back(f.buf);
+            size_t count = owner->buffers.size();
+            if (!backend_ || !backend_->retainDeviceChildren(slabOwner_)) {
+                err = "backend did not accept generator slab ownership";
+                return false;
+            }
+            for (Slab& s : slabs_) s.buf = {};
+            for (FarSlab& f : farSlabs_) f.buf = {};
+            std::fprintf(stderr, "TRACE generator slabs transferred after producer drain: %zu buffers; retained through context close\n", count);
+        }
+        closePrepared_ = true;
+        return true;
     }
     const char* device() const override { return name_; }
 
@@ -1095,8 +1149,10 @@ public:
             }
         if (pick < 0) {
             if (farSlabs_.size() >= 24) return fail(err, "busy: every far slab is still read by the grid");
+            reserveSlabOwner();
+            farSlabs_.reserve(farSlabs_.size() + 1);
             FarSlab fs;
-            if (!ensure(fs.buf, words * 4, false, err, false, true)) return false;
+            if (!ensure(fs.buf, words * 4, false, err, false, true)) { release(fs.buf); return false; }
             farSlabs_.push_back(std::move(fs));
             pick = int(farSlabs_.size() - 1);
         }
@@ -1993,13 +2049,19 @@ private:
         return true;
     }
     bool addSlab(std::string& err) {
+        reserveSlabOwner();
+        slabs_.reserve(slabs_.size() + 1);
         Slab s;
-        if (!ensure(s.buf, size_t(SLAB_SLOTS) * SECTION_BYTES, false, err, false, true)) return false;
         for (uint32_t k = SLAB_SLOTS; k-- > 0;) s.free.push_back(k);
         s.busy.assign(SLAB_SLOTS, 0);
         s.stamp.assign(SLAB_SLOTS, 0);
+        if (!ensure(s.buf, size_t(SLAB_SLOTS) * SECTION_BYTES, false, err, false, true)) { release(s.buf); return false; }
         slabs_.push_back(std::move(s));
         return true;
+    }
+    void reserveSlabOwner() {
+        if (!slabOwner_) slabOwner_ = std::make_unique<GeneratorSlabOwner>(dev_);
+        static_cast<GeneratorSlabOwner*>(slabOwner_.get())->buffers.reserve(slabs_.size() + farSlabs_.size() + 1);
     }
     // the slots the grid is done with: not waiting in it any more, and a frame submitted since has completed
     void reclaim() {
@@ -2023,15 +2085,6 @@ private:
                     s.free.push_back(k);
                 }
             }
-        }
-    }
-    bool idle(int waitMs) {
-        auto t0 = std::chrono::steady_clock::now();
-        for (;;) {
-            reclaim();
-            if (slotsBusy() == 0) return true;
-            if (msSince(t0) > waitMs) return false;
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     }
     bool upload(Buf& dst, VkDeviceSize offset, const void* data, size_t bytes, std::string& err) {
@@ -2801,6 +2854,8 @@ private:
     VoxGrid* grid_ = nullptr;
     Backend* backend_ = nullptr;
     std::vector<Slab> slabs_;
+    std::unique_ptr<DeviceChildOwner> slabOwner_;
+    bool closePrepared_ = false;
     int maxSlabs_ = 16;  // ATLAS_GEN_INGEST_MB (default 256)
     bool timestamps_ = false;
     float timestampPeriod_ = 1.0f;
@@ -2841,6 +2896,9 @@ int64_t key(int32_t cx, int32_t cz) { return (int64_t(cx) << 32) ^ int64_t(uint3
 }  // namespace
 
 struct AtlasGen {
+    Backend* producerBackend = nullptr;
+    AtlasGen* retainedNext = nullptr;  // explicit failed-close owner chain; never destruct a still-running producer
+    bool closeRetained = false;
     std::atomic<bool> paceBoost{false};  // (the loading phase's bake: the far field is paced as if no frame were running)
     // the idle verifier's counts (atlas_gen_verify_stats): chunks and far tiles made again and compared with the cache's, and
     // how many differed (a cache key that missed a change)
@@ -3269,11 +3327,32 @@ AtlasStatus guarded(F f) {
         return ATLAS_ERR_INTERNAL;
     }
 }
+Backend::WorkTicket genAdmission(AtlasGen* h, bool cleanup) {
+    if (!h || !h->ctx) return {};
+    Backend* backend = contextBackend(h->ctx);
+    return backend ? (cleanup ? backend->admitProducerCleanup() : backend->admitWork()) : Backend::WorkTicket{};
+}
 }  // namespace
 
 extern "C" {
 
 namespace {
+void retainFailedGenerator(AtlasGen* h, const char* reason) {
+    if (h->ctx) {
+        if (Backend* backend = contextBackend(h->ctx)) backend->producerCloseFailed();
+    }
+    static std::mutex retainedMu;
+    static AtlasGen* retained = nullptr;
+    std::lock_guard<std::mutex> lock(retainedMu);
+    if (!h->closeRetained) {
+        h->retainedNext = retained;
+        h->closeRetained = true;
+        retained = h;
+    }
+    std::fprintf(stderr, "[atlas] incomplete cleanup: generator %p retained after close preparation failed: %s\n",
+                 static_cast<void*>(h), reason);
+}
+
 uint64_t fnv64(const void* p, size_t n, uint64_t h = 1469598103934665603ull) {
     const uint8_t* b = static_cast<const uint8_t*>(p);
     for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 1099511628211ull;
@@ -3349,10 +3428,12 @@ ATLAS_API AtlasStatus atlas_gen_create_for(AtlasContext* ctx, AtlasGen** out) {
     return guarded([&] {
         Backend* be = contextBackend(ctx);
         if (!be) return ATLAS_ERR_STATE;
+        auto work = be->admitWork();
+        if (!work) return ATLAS_ERR_STATE;
         auto h = std::make_unique<AtlasGen>();
         if (const char* s = std::getenv("ATLAS_GEN_PAGES")) h->slots = std::max(256u, uint32_t(std::atoi(s)));
         Backend::SharedDevice d;
-        if (!be->sharedDevice(d)) {
+        if (!be->sharedDevice(d, work)) {
             if (std::strncmp(be->name(), "cpu", 3) != 0) return ATLAS_ERR_UNSUPPORTED;
             h->engine = std::make_unique<CpuEngine>(h->slots);  // the CPU backend's fallback
         } else {
@@ -3366,16 +3447,39 @@ ATLAS_API AtlasStatus atlas_gen_create_for(AtlasContext* ctx, AtlasGen** out) {
         }
         h->ctx = ctx;
         h->resetPages();
+        if (!be->producerStarted(work)) return ATLAS_ERR_STATE;
+        h->producerBackend = be;
         *out = h.release();
         return ATLAS_OK;
     });
 }
 
 ATLAS_API void atlas_gen_destroy(AtlasGen* h) {
+    if (!h) return;
     try {
+        Backend::WorkTicket work;
+        if (h->producerBackend) {
+            work = h->producerBackend->admitProducerCleanup();
+            if (!work) { retainFailedGenerator(h, "terminal context does not admit producer cleanup"); return; }
+        }
         atlas::bakeForget(h);
+        std::string err;
+        bool ready;
+        {
+            std::lock_guard<std::mutex> lock(h->mu);
+            if (h->closeRetained) return;
+            ready = h->engine->prepareClose(err);
+        }
+        if (!ready) {
+            retainFailedGenerator(h, err.c_str());
+            return;
+        }
+        Backend* producer = h->producerBackend;
         delete h;
+        if (producer) producer->producerStopped();
     } catch (...) {
+        // No exception may cause deletion of a producer whose completion was not established.
+        retainFailedGenerator(h, "exception before safe destruction");
     }
 }
 
@@ -3383,6 +3487,8 @@ ATLAS_API const char* atlas_gen_last_error(AtlasGen* h) { return h ? h->error.c_
 ATLAS_API const char* atlas_gen_device(AtlasGen* h) { return h ? h->engine->device() : "null handle"; }
 
 ATLAS_API AtlasStatus atlas_gen_set_program(AtlasGen* h, const uint32_t* words, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !words || count < 128 || words[0] != MAGIC) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3401,6 +3507,8 @@ ATLAS_API AtlasStatus atlas_gen_set_program(AtlasGen* h, const uint32_t* words, 
 }
 
 ATLAS_API AtlasStatus atlas_gen_set_ingest(AtlasGen* h, const uint32_t* words, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !words || count < 2) return ATLAS_ERR_ARG;
     uint64_t need = 2 + uint64_t(words[0]) * 2 + uint64_t(words[1]) * 2 + uint64_t(words[0]) * words[1];
     if (count != need || words[0] == 0 || words[1] == 0) return h->fail(ATLAS_ERR_ARG, "ingest table size differs from its counts");
@@ -3416,6 +3524,8 @@ ATLAS_API AtlasStatus atlas_gen_set_ingest(AtlasGen* h, const uint32_t* words, u
 }
 
 ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !words || count < 32 || words[0] != 0x50414D41u) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3433,6 +3543,8 @@ ATLAS_API AtlasStatus atlas_gen_set_map(AtlasGen* h, const uint32_t* words, uint
 }
 
 ATLAS_API AtlasStatus atlas_gen_probe(AtlasGen* h, uint32_t kind, uint32_t n, const int32_t* xz, uint32_t* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !xz || !out || n == 0 || n > (1u << 17)) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3447,6 +3559,8 @@ ATLAS_API uint32_t atlas_gen_page_words(AtlasGen* h) { return h ? h->pageWords :
 
 ATLAS_API uint32_t atlas_gen_missing_pages(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* out,
                                            uint32_t capacity) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return 0;
     if (!h || !chunkXZ) return 0;
     try {
         std::lock_guard<std::mutex> l(h->pagesMu);  // not the engine's: answers while a batch runs
@@ -3476,6 +3590,8 @@ ATLAS_API uint32_t atlas_gen_missing_pages(AtlasGen* h, const int32_t* chunkXZ, 
 
 ATLAS_API AtlasStatus atlas_gen_put_page(AtlasGen* h, int32_t cx, int32_t cz, int32_t full, const uint32_t* words,
                                          uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !words) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3506,6 +3622,8 @@ ATLAS_API AtlasStatus atlas_gen_put_page(AtlasGen* h, int32_t cx, int32_t cz, in
 }
 
 ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, uint32_t* out, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !out) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3525,6 +3643,8 @@ ATLAS_API AtlasStatus atlas_gen_read_page(AtlasGen* h, int32_t cx, int32_t cz, u
 
 ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint32_t count, float* outSurface, float* outWater,
                                       uint32_t* outBlocks, uint32_t* outBiomes, uint32_t* outFlags, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !lodTxTz || !outSurface || !outWater || count == 0) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::unique_lock<std::mutex> l(h->mu);
@@ -3564,6 +3684,8 @@ ATLAS_API AtlasStatus atlas_gen_tiles(AtlasGen* h, const int32_t* lodTxTz, uint3
 
 ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t outMode, uint32_t* outKinds,
                                     uint32_t* outIds, uint32_t capacity, uint32_t* outMixed, uint32_t* outFlags, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !txTz || !outKinds || !outMixed || count == 0 || count > TILE_MAX || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::unique_lock<std::mutex> l(h->mu);
@@ -3594,6 +3716,8 @@ ATLAS_API AtlasStatus atlas_gen_far(AtlasGen* h, int32_t lod, const int32_t* txT
 ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint32_t capacity,
                                            uint32_t* outKinds, uint32_t* outMixed, uint32_t* outTaken, uint32_t* outFlags,
                                            AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !txTz || !outKinds || count == 0 || count > TILE_MAX || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::unique_lock<std::mutex> l(h->mu);
@@ -3629,6 +3753,12 @@ ATLAS_API AtlasStatus atlas_gen_far_ingest(AtlasGen* h, int32_t lod, const int32
 
 ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint32_t droppedCap, uint32_t* outDroppedCount,
                                           int32_t* outWanted, uint32_t wantedCap, uint32_t* outWantedCount) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) {
+        if (outDroppedCount) *outDroppedCount = 0;
+        if (outWantedCount) *outWantedCount = 0;
+        return 0;
+    }
     if (!h) return 0;
     try {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3646,6 +3776,8 @@ ATLAS_API uint32_t atlas_gen_grid_reports(AtlasGen* h, int32_t* outDropped, uint
 }
 
 ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenStageFn fn, void* user, uint32_t* outId) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !fn) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3665,6 +3797,8 @@ ATLAS_API AtlasStatus atlas_gen_add_stage(AtlasGen* h, uint32_t order, AtlasGenS
 }
 
 ATLAS_API AtlasStatus atlas_gen_add_far_stage(AtlasGen* h, AtlasGenFarStageFn fn, void* user, uint64_t fingerprint, uint32_t* outId) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !fn) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3684,6 +3818,8 @@ ATLAS_API AtlasStatus atlas_gen_add_far_stage(AtlasGen* h, AtlasGenFarStageFn fn
 }
 
 ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id) {
+    auto work = genAdmission(h, true);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3703,6 +3839,8 @@ ATLAS_API AtlasStatus atlas_gen_remove_stage(AtlasGen* h, uint32_t id) {
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_enable(AtlasGen* h, uint32_t slots) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || slots < 9) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3718,6 +3856,8 @@ ATLAS_API AtlasStatus atlas_gen_store_enable(AtlasGen* h, uint32_t slots) {
 
 ATLAS_API AtlasStatus atlas_gen_add_store_stage(AtlasGen* h, uint32_t order, uint32_t radius, AtlasGenStoreStageFn fn, void* user,
                                                 uint32_t* outId) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !fn || radius > STORE_RMAX) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3749,6 +3889,8 @@ static bool noBake(const AtlasGen* h, int32_t cx, int32_t cz) {
 
 ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, int32_t* outChunks, uint32_t* outCount,
                                           uint32_t* outIds, uint32_t* outFlags, uint32_t* outInfo, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || (count && !chunkXZ) || !outChunks || !outCount || count > MAX_CHUNKS) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3897,6 +4039,8 @@ ATLAS_API AtlasStatus atlas_gen_run_store(AtlasGen* h, const int32_t* chunkXZ, u
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t minCz, int32_t maxCx, int32_t maxCz) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3922,6 +4066,8 @@ ATLAS_API AtlasStatus atlas_gen_store_keep(AtlasGen* h, int32_t minCx, int32_t m
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_prioritize(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || (count && !chunkXZ)) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);
     h->storePrio.clear();
@@ -3930,6 +4076,8 @@ ATLAS_API AtlasStatus atlas_gen_store_prioritize(AtlasGen* h, const int32_t* chu
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || (count && !chunkXZ) || count > MAX_CHUNKS) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3942,6 +4090,8 @@ ATLAS_API AtlasStatus atlas_gen_store_ensure(AtlasGen* h, const int32_t* chunkXZ
 }
 
 ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || (count && !chunkXZ)) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -3960,6 +4110,8 @@ ATLAS_API AtlasStatus atlas_gen_regenerate(AtlasGen* h, const int32_t* chunkXZ, 
 }
 
 ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, uint32_t count) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || (count && !boxes)) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);
     h->noBake.assign(boxes, boxes + size_t(count) * 4);
@@ -3967,6 +4119,8 @@ ATLAS_API AtlasStatus atlas_gen_set_no_bake(AtlasGen* h, const int32_t* boxes, u
 }
 
 ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return 0;
     if (!h) return 0;
     std::lock_guard<std::mutex> l(h->mu);
     uint32_t r = 0;
@@ -3976,6 +4130,8 @@ ATLAS_API uint32_t atlas_gen_store_reach(AtlasGen* h) {
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint64_t* stageRuns, uint64_t* packs) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);
     if (made) *made = h->storeMade;
@@ -3985,6 +4141,8 @@ ATLAS_API AtlasStatus atlas_gen_store_counters(AtlasGen* h, uint64_t* made, uint
 }
 
 ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_t* waiting, uint32_t* ready) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4002,6 +4160,8 @@ ATLAS_API AtlasStatus atlas_gen_store_stats(AtlasGen* h, uint32_t* held, uint32_
 }
 
 ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !out) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4011,12 +4171,16 @@ ATLAS_API AtlasStatus atlas_gen_device_handles(AtlasGen* h, AtlasGenDevice* out)
 }
 
 ATLAS_API AtlasStatus atlas_gen_completed_submissions(AtlasGen* h, uint64_t* completed) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !completed) return ATLAS_ERR_ARG;
     *completed = h->engine ? h->engine->completedSubmissions() : UINT64_MAX;  // (no lock: called from stage callbacks)
     return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, double* pageMs, int32_t* onDevice) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> pl(h->pagesMu);
     if (pagesMade) *pagesMade = h->pagesMade;
@@ -4027,6 +4191,8 @@ ATLAS_API AtlasStatus atlas_gen_page_stats(AtlasGen* h, uint64_t* pagesMade, dou
 
 ATLAS_API AtlasStatus atlas_gen_chunks(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t outMode,
                                        uint32_t* outIds, uint32_t* outFlags, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !chunkXZ || !outIds || count == 0) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4043,6 +4209,8 @@ ATLAS_API AtlasStatus atlas_gen_chunks(AtlasGen* h, const int32_t* chunkXZ, uint
 
 ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outIds, uint32_t* outFlags,
                                     uint32_t* outInfo, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !chunkXZ || !outInfo || count == 0 || count > MAX_CHUNKS) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4096,6 +4264,8 @@ ATLAS_API AtlasStatus atlas_gen_run(AtlasGen* h, const int32_t* chunkXZ, uint32_
 }
 
 ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* outSections, AtlasGenTimes* times) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !masks) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4122,6 +4292,11 @@ ATLAS_API AtlasStatus atlas_gen_ingest(AtlasGen* h, uint64_t* masks, uint32_t* o
 ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32_t* chunkXZ, uint32_t count,
                                      uint32_t* outFlags, uint32_t* outSections, AtlasGenTimes* times) {
     if (!h || !ctx || !chunkXZ || count == 0) return ATLAS_ERR_ARG;
+    Backend* target = contextBackend(ctx);
+    auto work = target ? target->admitWork() : Backend::WorkTicket{};
+    if (!work) return ATLAS_ERR_STATE;
+    auto sourceWork = h->ctx != ctx ? genAdmission(h, false) : Backend::WorkTicket{};
+    if (h->ctx && h->ctx != ctx && !sourceWork) return ATLAS_ERR_STATE;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
         if (h->prog.empty()) return h->fail(ATLAS_ERR_ARG, "no program");
@@ -4142,7 +4317,7 @@ ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32
                     bool any = false;
                     for (uint32_t k = 0; k < 2048 && !any; k++) any = w[k] != 0u;
                     if (!any) continue;  // air: the grid's default
-                    AtlasStatus s2 = atlas_upload_section(ctx, cx, int32_t(sy) - 4, cz, reinterpret_cast<const uint16_t*>(w));
+                    AtlasStatus s2 = contextUploadSection(ctx, cx, int32_t(sy) - 4, cz, reinterpret_cast<const uint16_t*>(w), work);
                     if (s2 != ATLAS_OK) return h->fail(s2, "section upload failed");
                     sections++;
                 }
@@ -4157,6 +4332,8 @@ ATLAS_API AtlasStatus atlas_gen_into(AtlasGen* h, AtlasContext* ctx, const int32
 }
 
 ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);
@@ -4168,6 +4345,8 @@ ATLAS_API AtlasStatus atlas_gen_set_fingerprint(AtlasGen* h, uint64_t extra) {
 }
 
 ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint32_t* outInfo, uint8_t* outHit) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !chunkXZ || !outInfo || !outHit) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::memset(outHit, 0, count);
@@ -4181,6 +4360,8 @@ ATLAS_API AtlasStatus atlas_gen_cache_lookup(AtlasGen* h, const int32_t* chunkXZ
 
 ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ, uint32_t count, uint64_t* masks,
                                              uint32_t* outSections) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !chunkXZ || !masks) return ATLAS_ERR_ARG;
     return guarded([&] {
         if (outSections) *outSections = 0;
@@ -4267,6 +4448,8 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
 
 ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const int32_t* txTz, uint32_t count, uint8_t* outServed,
                                                  uint32_t* outChunks, uint32_t* outTaken) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !txTz || !outServed || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::memset(outServed, 0, count);
@@ -4318,6 +4501,8 @@ ATLAS_API AtlasStatus atlas_gen_far_cache_ingest(AtlasGen* h, int32_t lod, const
 // (the cache set's key in its parts, for logs: why a launch found another generator's set) build, program, ingest table, map,
 // the caller's extra, the stages, the whole
 ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !out) return ATLAS_ERR_ARG;
     uint64_t st = 0;
     for (const Stage& s : h->stages) st = fnv64(&s.order, 4, s.ffn ? fnv64(&s.fp, 8, st) : st);
@@ -4329,6 +4514,8 @@ ATLAS_API AtlasStatus atlas_gen_fingerprint_parts(AtlasGen* h, uint64_t* out) {
 // The idle verifier (AtlasClientGen.verifyStep): one far tile of the cache made again and compared; result: -1 not comparable
 // (not in the cache, or true data, or made in parts that did not fit), 0 the same, 1 it differed and was baked again.
 ATLAS_API AtlasStatus atlas_gen_verify_far_tile(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz, int32_t* outResult) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !outResult || lod < 1 || lod > 6) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::unique_lock<std::mutex> l(h->mu);
@@ -4361,6 +4548,8 @@ ATLAS_API AtlasStatus atlas_gen_verify_far_tile(AtlasGen* h, int32_t lod, int32_
 
 // A chunk checked by the caller (AtlasClientGen: made again through the store and its section hashes compared): kind 0.
 ATLAS_API AtlasStatus atlas_gen_verify_note(AtlasGen* h, int32_t kind, int32_t bad) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     if (kind == 0) {
         h->verifyChunks++;
@@ -4371,6 +4560,8 @@ ATLAS_API AtlasStatus atlas_gen_verify_note(AtlasGen* h, int32_t kind, int32_t b
 
 // out: chunks checked, chunks that differed, far tiles checked, far tiles that differed (since the generator was made)
 ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !out) return ATLAS_ERR_ARG;
     out[0] = h->verifyChunks, out[1] = h->verifyChunksBad, out[2] = h->verifyTiles, out[3] = h->verifyTilesBad;
     return ATLAS_OK;
@@ -4378,6 +4569,8 @@ ATLAS_API AtlasStatus atlas_gen_verify_stats(AtlasGen* h, uint64_t* out) {
 
 // (gen_bake.cpp) the bake of the loading phase: the far field's submissions are not paced while a loading screen holds the player
 ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h) return ATLAS_ERR_ARG;
     // (1: the loading phase, unpaced; 2: the near field empty in play, the near window's floor raised and held to it)
     h->paceBoost = on == 1;
@@ -4389,12 +4582,16 @@ ATLAS_API AtlasStatus atlas_gen_pace_boost(AtlasGen* h, int32_t on) {
 }
 
 ATLAS_API int32_t atlas_gen_far_known(AtlasGen* h, int32_t lod, int32_t tx, int32_t tz) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return 0;
     if (!h || !h->ctx || lod < 1 || lod > 6) return -1;
     GenCache* gc = contextWorld(h->ctx)->genCache();
     return gc && gc->on() ? (gc->farKnown(lod, tx, tz) ? 1 : 0) : -1;
 }
 
 ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_t* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !h->ctx || !out) return ATLAS_ERR_ARG;
     VoxGrid* g = contextGrid(h->ctx);
     if (!g) return ATLAS_ERR_STATE;
@@ -4403,12 +4600,16 @@ ATLAS_API AtlasStatus atlas_gen_coarse_window(AtlasGen* h, int32_t level, int32_
 }
 
 ATLAS_API uint32_t atlas_gen_coarse_room(AtlasGen* h, int32_t level) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return 0;
     if (!h || !h->ctx) return 0;
     VoxGrid* g = contextGrid(h->ctx);
     return g ? g->coarseFreeSlots(level) : 0;
 }
 
 ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !out) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> l(h->mu);
     Engine::PaceStats s = h->engine->paceStats();
@@ -4423,6 +4624,8 @@ ATLAS_API AtlasStatus atlas_gen_pace_stats(AtlasGen* h, AtlasGenPaceStats* out) 
 }
 
 ATLAS_API uint32_t atlas_gen_sub_stats(AtlasGen* h, char* out, uint32_t cap, int32_t reset) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return 0;
     if (!h || !h->engine) return 0;
     try {
         return uint32_t(h->engine->subStats(out, cap, reset != 0));  // (its own small lock: answers while a batch runs)
@@ -4468,6 +4671,8 @@ ATLAS_API AtlasStatus atlas_gen_cache_peek(AtlasGen* h, AtlasGenCacheStats* out)
 
 extern "C" ATLAS_API AtlasStatus atlas_gen_math(AtlasGen* h, uint32_t op, uint32_t n, const double* a, const double* b,
                                                 double* out, uint32_t* flags) {
+    auto work = genAdmission(h, false);
+    if (h && h->ctx && !work) return ATLAS_ERR_STATE;
     if (!h || !a || !out || n == 0 || n > (1u << 20)) return ATLAS_ERR_ARG;
     return guarded([&] {
         std::lock_guard<std::mutex> l(h->mu);

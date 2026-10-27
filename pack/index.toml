@@ -6,7 +6,7 @@ hash = "d7710a6bac56f5a77d465963c96904d14fed126576b45f23afa96ad0292c8f11"
 
 [[files]]
 file = "config/defaultoptions/options.txt"
-hash = "7279c95dad962c78fea8e401062e9265337131672cc2bd11ca10b2f68c0a6cd5"
+hash = "6d781e3a8b3231aa65f86be8b60ef53bd08ecd798d15cb0839606ab47756c495"
 
 [[files]]
 file = "config/dynamic_fps.json"

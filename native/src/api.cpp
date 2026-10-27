@@ -191,6 +191,12 @@ struct AtlasContext {
     World::GroupStats infoGroups;
     World::CoarseStats infoCoarse;
     std::mutex mu;
+    std::atomic<const char*> lifecycleError{nullptr};
+    std::atomic<bool> closeTestDone{true}; // Private held-close-lock regression, never used by normal callers.
+    // Private regression: pause one actual admitted update INSIDE its taken scene-stage branch.
+    std::atomic<uint32_t> closeTestUpdate{0}; // 0 unused,1 armed,2 paused,3 released,4 finished
+    std::atomic<uint32_t> closeTestUpdateLods{0}, closeTestUpdateUploaded{0};
+    std::atomic<uint64_t> closeTestUpdatePrevious{0}, closeTestUpdateSelected{0}, closeTestUpdateReached{0};
     uint64_t stagedRevision = UINT64_MAX;
     // the last frame, for temporal cloud reprojection
     bool haveHistory = false;
@@ -298,6 +304,14 @@ AtlasStatus backendFailure(AtlasContext* ctx, const std::string& err, AtlasStatu
     } catch (...) {
         return s;
     }
+}
+
+
+// A denied late caller must not race an admitted caller's mutable error string.
+static AtlasStatus closeRejected(AtlasContext* ctx) {
+    const char* empty = nullptr;
+    ctx->lifecycleError.compare_exchange_strong(empty, "terminal close has sealed GPU admission");
+    return ATLAS_ERR_STATE;
 }
 
 // A context whose device is gone refuses GPU work (the same status every time) until it is destroyed.
@@ -639,16 +653,78 @@ ATLAS_API uint64_t atlas_build_hash(void) { return atlas::buildHash(); }
 // (a record's write), the grid's (an ingest, a take) and the world's (an update's commit). Returns once all three are held; they
 // are let go after holdMs. The call that must not wait for them: atlas_info (the mod's per-tick caller reads its copy).
 ATLAS_API AtlasStatus atlas_debug_hold_locks(AtlasContext* ctx, uint32_t holdMs) {
+    uint32_t closeLock = holdMs >> 24;
+    bool cleanupQuery = closeLock == 4 || closeLock == 6 || closeLock == 7 || closeLock == 8;
+    auto work = ctx ? (cleanupQuery ? ctx->backend->admitProducerCleanup() : ctx->backend->admitWork()) : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx) return ATLAS_ERR_ARG;
     ATLAS_TRY
+    // 5 arms,6 observes pause,7 releases,8 checks the actual upload result. Query/release are CPU-only cleanup,
+    // admitted while SEALED so the blocked original update can finish; none grants a ticket for new GPU work.
+    if (closeLock == 5) {
+        uint32_t unused = 0;
+        return ctx->closeTestUpdate.compare_exchange_strong(unused, 1) ? ATLAS_OK : ATLAS_ERR_STATE;
+    }
+    if (closeLock == 6) return ctx->closeTestUpdate.load() == 2 ? ATLAS_OK : ATLAS_ERR_TIMEOUT;
+    if (closeLock == 7) {
+        uint32_t state = ctx->closeTestUpdate.load();
+        while (state == 1 || state == 2)
+            if (ctx->closeTestUpdate.compare_exchange_weak(state, 3)) return ATLAS_OK;
+        return ATLAS_ERR_STATE;
+    }
+    if (closeLock == 8) {
+        if (ctx->closeTestUpdate.load() != 4 || !ctx->closeTestUpdateUploaded.load()) return ATLAS_ERR_STATE;
+        uint64_t previous = ctx->closeTestUpdatePrevious.load(), selected = ctx->closeTestUpdateSelected.load();
+        uint64_t reached = ctx->closeTestUpdateReached.load();
+        uint32_t lods = ctx->closeTestUpdateLods.load();
+        bool sealed = ctx->backend->closeState() == Backend::CloseState::Sealed;
+        if (!lods || selected <= previous || reached != selected || !sealed) return ATLAS_ERR_STATE;
+        std::fprintf(stderr, "TRACE terminal-close admitted-update staged lodCount=%u previous=%llu selected=%llu reached=%llu sealed=1 uploaded=1\n",
+                     lods, (unsigned long long)previous, (unsigned long long)selected, (unsigned long long)reached);
+        return ATLAS_OK;
+    }
+    if (closeLock == 9) {
+        // OPEN-only baseline observation: no queue submission/wait, and no fabricated initial revision.
+        auto snap = ctx->world.packed();
+        if (!snap->lodCount || snap->regions.empty() || ctx->stagedRevision == UINT64_MAX ||
+            snap->revision != ctx->stagedRevision || !ctx->backend->stagedSceneReadyForTest(snap->revision))
+            return ATLAS_ERR_TIMEOUT;
+        std::fprintf(stderr, "TRACE terminal-close admitted-update primed lodCount=%u regions=%zu revision=%llu actual-upload-complete\n",
+                     snap->lodCount, snap->regions.size(), (unsigned long long)snap->revision);
+        return ATLAS_OK;
+    }
+    // Private regression protocol: high byte 1/2/3 holds the real context/scene/queue mutex, low 24 bits ms.
+    // These deliberately unadmitted lock owners exercise prepare's bounded mutex acquisition independently of
+    // active-work waiting. The caller owns ctx until the requested hold interval has elapsed (as for raw API handles).
+    if (closeLock == 4) return ctx->closeTestDone.load() ? ATLAS_OK : ATLAS_ERR_TIMEOUT;
+    if (closeLock) {
+        if (closeLock > 3 || !(holdMs & 0xffffffu)) return ATLAS_ERR_ARG;
+        uint32_t milliseconds = holdMs & 0xffffffu;
+        auto held = std::make_shared<std::atomic<bool>>(false);
+        if (!ctx->closeTestDone.exchange(false)) return ATLAS_ERR_STATE;
+        try {
+            std::thread([ctx, closeLock, milliseconds, held] {
+                if (closeLock == 1) {
+                    std::lock_guard<std::mutex> lock(ctx->mu);
+                    held->store(true);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+                } else ctx->backend->holdCloseLockForTest(closeLock, milliseconds, *held);
+                ctx->closeTestDone.store(true); // Last access to ctx: test must observe this before destroying it.
+            }).detach();
+        } catch (...) { ctx->closeTestDone.store(true); throw; }
+        while (!held->load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        return ATLAS_OK;
+    }
     auto release = std::make_shared<std::atomic<bool>>(false);
     auto held = std::make_shared<std::array<std::atomic<bool>, 3>>();
+    auto lifetime = std::make_shared<Backend::WorkTicket>(std::move(work));
     for (auto& h : *held) h.store(false);
     GenCache* gc = ctx->world.genCache();
-    std::thread([=] { if (gc) gc->holdLockForTest(*release, (*held)[0]); else (*held)[0].store(true); }).detach();
-    std::thread([=] { ctx->voxgrid.holdLockForTest(*release, (*held)[1]); }).detach();
-    std::thread([=] { ctx->world.holdLockForTest(*release, (*held)[2]); }).detach();
+    std::thread([=] { (void)lifetime; if (gc) gc->holdLockForTest(*release, (*held)[0]); else (*held)[0].store(true); }).detach();
+    std::thread([=] { (void)lifetime; ctx->voxgrid.holdLockForTest(*release, (*held)[1]); }).detach();
+    std::thread([=] { (void)lifetime; ctx->world.holdLockForTest(*release, (*held)[2]); }).detach();
     std::thread([=] {
+        (void)lifetime;
         std::this_thread::sleep_for(std::chrono::milliseconds(holdMs));
         release->store(true);
     }).detach();
@@ -663,6 +739,8 @@ ATLAS_API AtlasStatus atlas_set_pipeline_cache(const char* path) {
 }
 
 void atlasPipelinesBuilt();  // (vk_backend.cpp)
+
+static AtlasStatus finishCreate(std::unique_ptr<AtlasContext> ctx, bool vulkan, AtlasContext** out);
 
 ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     if (!out) return ATLAS_ERR_ARG;
@@ -679,6 +757,36 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     } else {
         ctx->backend = makeCpuBackend();
     }
+    return finishCreate(std::move(ctx), backend == ATLAS_BACKEND_VULKAN, out);
+    ATLAS_CATCH(nullptr)
+}
+
+ATLAS_API AtlasStatus atlas_create_on_vulkan(const AtlasVkDevice* d, AtlasContext** out) {
+    if (!out || !d) return ATLAS_ERR_ARG;
+    *out = nullptr;
+    ATLAS_TRY
+    auto ctx = std::make_unique<AtlasContext>();
+    VkAdopt a;
+    a.instance = d->instance;
+    a.physical = d->physicalDevice;
+    a.device = d->device;
+    a.frameFamily = d->frameFamily;
+    a.frameIndex = d->frameIndex;
+    a.genFamily = d->genFamily;
+    a.genIndex = d->genIndex;
+    a.flags = d->flags;
+    a.graphicsFamily = d->graphicsFamily;
+    std::string err;
+    ctx->backend = makeVulkanBackendOn(a, err);
+    if (!ctx->backend) {
+        createError() = "atlas on Minecraft's Vulkan device: " + err;
+        return ATLAS_ERR_GPU;
+    }
+    return finishCreate(std::move(ctx), true, out);
+    ATLAS_CATCH(nullptr)
+}
+
+static AtlasStatus finishCreate(std::unique_ptr<AtlasContext> ctx, bool vulkan, AtlasContext** out) {
     armFromEnvironment(*ctx->backend);
     ctx->voxgrid.setWorld(&ctx->world);  // (the grid takes its sections back from the world's tiers)
     ctx->voxgrid.gpuRank = ctx->backend->onDevice();  // (level 0 ranked on the GPU; the CPU backend ranks here)
@@ -704,14 +812,32 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
         ctx->airC = c;
         writeLut(ctx->airLut, ctx->weather);
     }
-    if (backend == ATLAS_BACKEND_VULKAN) atlasPipelinesBuilt();  // (atlas_pipeline_progress: the list as built)
+    if (vulkan) atlasPipelinesBuilt();  // (atlas_pipeline_progress: the list as built)
     *out = ctx.release();
     return ATLAS_OK;
-    ATLAS_CATCH(nullptr)
 }
 
 ATLAS_API void atlas_destroy(AtlasContext* ctx) {
     try {
+        if (ctx) {
+            if (ctx->backend->activeProducers() || ctx->backend->producerCloseHasFailed()) {
+                std::fprintf(stderr, "[atlas] incomplete cleanup: refusing destroy with live/failed generator owners\n");
+                return;
+            }
+            if (ctx->backend->closeState() == Backend::CloseState::Sealed) {
+                std::fprintf(stderr, "[atlas] incomplete cleanup: refusing destroy of SEALED, undrained context\n");
+                return;
+            }
+            std::lock_guard<std::mutex> lock(ctx->mu);
+            if (ctx->backend->vkSharedAttached()) {
+                bool ready = false;
+                std::string err;
+                if (!ctx->backend->vkCopyComplete(0, ready, err) || !ready) {
+                    std::fprintf(stderr, "[atlas] refusing destroy with an outstanding Vulkan splice; use atlas_vk_detach_retired\n");
+                    return;
+                }
+            }
+        }
         delete ctx;
     } catch (...) {
         // destructors do not throw; if one ever did, leaking beats terminating the game
@@ -719,11 +845,16 @@ ATLAS_API void atlas_destroy(AtlasContext* ctx) {
 }
 
 ATLAS_API const char* atlas_last_error(AtlasContext* ctx) {
-    if (ctx) return ctx->error.c_str();
+    if (ctx) {
+        if (const char* reason = ctx->lifecycleError.load()) return reason;
+        return ctx->error.c_str();
+    }
     return createError().empty() ? "null context" : createError().c_str();
 }
 
 ATLAS_API AtlasStatus atlas_set_palette(AtlasContext* ctx, const AtlasMaterial* m, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || (!m && count)) return ATLAS_ERR_ARG;
     if (count > 65534) return ctx->fail(ATLAS_ERR_ARG, "palette too large");
     ATLAS_TRY
@@ -734,6 +865,8 @@ ATLAS_API AtlasStatus atlas_set_palette(AtlasContext* ctx, const AtlasMaterial* 
 }
 
 ATLAS_API AtlasStatus atlas_upload_column_tile(AtlasContext* ctx, const AtlasColumnTile* t) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !t || !t->surface || !t->water || !t->topMat || !t->fillMat) return ATLAS_ERR_ARG;
     if (t->lod < 0 || t->lod >= MAX_LODS) return ctx->fail(ATLAS_ERR_ARG, "lod out of range");
     ATLAS_TRY
@@ -755,19 +888,27 @@ ATLAS_API AtlasStatus atlas_upload_column_tile(AtlasContext* ctx, const AtlasCol
     ATLAS_CATCH(ctx)
 }
 
-ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
-    if (!ctx || !mats) return ATLAS_ERR_ARG;
-    ATLAS_TRY
+static AtlasStatus uploadSectionAdmitted(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
     // (the grid's books share the world's stored copy: one section's ids once in memory, whatever reads them)
     ATLAS_ZONE_MIN("api:uploadSection", 30);
     std::shared_ptr<const Section> sec = ctx->world.putSection(sx, sy, sz, mats);
     ctx->voxgrid.put(sx, sy, sz, VgIds(sec, &sec->mats));
     return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_upload_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || !mats) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    return uploadSectionAdmitted(ctx, sx, sy, sz, mats);
     ATLAS_CATCH(ctx)
 }
 
 ATLAS_API AtlasStatus atlas_upload_section_flags(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats,
                                                  uint32_t flags) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !mats || (flags & ~ATLAS_SECTION_REGENERABLE)) return ATLAS_ERR_ARG;
     ATLAS_TRY
     uint8_t f = (flags & ATLAS_SECTION_REGENERABLE) ? SectionStore::REGEN : 0;
@@ -795,6 +936,8 @@ void applyCache(AtlasContext* ctx) {
 
 ATLAS_API AtlasStatus atlas_set_cache(AtlasContext* ctx, const char* dir, uint64_t seed, uint32_t genVersion, uint64_t hostBytes,
                                       uint64_t diskBytes) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -809,6 +952,8 @@ ATLAS_API AtlasStatus atlas_set_cache(AtlasContext* ctx, const char* dir, uint64
 }
 
 ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx) return ATLAS_ERR_ARG;
     if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return ATLAS_OK;
     ATLAS_TRY
@@ -823,6 +968,8 @@ ATLAS_API AtlasStatus atlas_notify_block(AtlasContext* ctx, int32_t x, int32_t y
 }
 
 ATLAS_API AtlasStatus atlas_set_weather(AtlasContext* ctx, const AtlasWeather* w) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !w) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     const uint32_t* src[4] = {w->nearField, w->nearDyn, w->farField, w->farDyn};
@@ -870,6 +1017,8 @@ ATLAS_API AtlasStatus atlas_air_from_climate(const AtlasClimate* k, AtlasAir* ou
 }
 
 ATLAS_API AtlasStatus atlas_set_air(AtlasContext* ctx, const AtlasAir* a) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !a) return ATLAS_ERR_ARG;
     ATLAS_TRY
     air::Coeffs c;
@@ -955,6 +1104,8 @@ ATLAS_API AtlasStatus atlas_air_sky(const AtlasAir* a, const float sunDir[3], co
 }
 
 ATLAS_API AtlasStatus atlas_set_cloud_noise(AtlasContext* ctx, const uint32_t* rgba) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !rgba) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -965,6 +1116,8 @@ ATLAS_API AtlasStatus atlas_set_cloud_noise(AtlasContext* ctx, const uint32_t* r
 }
 
 ATLAS_API AtlasStatus atlas_set_actors(AtlasContext* ctx, const AtlasActor* a, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || (!a && count)) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -974,6 +1127,8 @@ ATLAS_API AtlasStatus atlas_set_actors(AtlasContext* ctx, const AtlasActor* a, u
 }
 
 ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], double budgetMs) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !centre) return ATLAS_ERR_ARG;
     ATLAS_TRY
     ATLAS_ZONE("api:update");
@@ -1001,7 +1156,24 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
     // a lost device stages nothing (the render thread reports the loss)
     auto snap = ctx->world.packed();
     if (snap->lodCount && snap->revision != ctx->stagedRevision && !ctx->backend->lost()) {
-        if (ctx->backend->stageScene(*snap)) ctx->stagedRevision = snap->revision;
+        uint32_t armed = 1;
+        bool paused = ctx->closeTestUpdate.load(std::memory_order_relaxed) == 1 &&
+                      ctx->closeTestUpdate.compare_exchange_strong(armed, 2);
+        if (paused) {
+            ctx->closeTestUpdateLods.store(snap->lodCount);
+            ctx->closeTestUpdatePrevious.store(ctx->stagedRevision);
+            ctx->closeTestUpdateSelected.store(snap->revision);
+            std::fprintf(stderr, "TRACE terminal-close admitted-update paused in taken stageScene branch lodCount=%u revision=%llu\n",
+                         snap->lodCount, (unsigned long long)snap->revision);
+            while (ctx->closeTestUpdate.load() == 2) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        bool staged = ctx->backend->stageScene(*snap, work);
+        if (staged) ctx->stagedRevision = snap->revision;
+        if (paused) {
+            ctx->closeTestUpdateReached.store(ctx->stagedRevision);
+            ctx->closeTestUpdateUploaded.store(staged ? 1u : 0u);
+            ctx->closeTestUpdate.store(4);
+        }
     }
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
@@ -1011,11 +1183,15 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
 static void rememberFrame(AtlasContext* ctx, const AtlasFrame* f);
 
 ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const AtlasFrameOutput* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !f || !out || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
+    if (ctx->backend->vkSharedAttached())
+        return ctx->fail(ATLAS_ERR_STATE, "shared Vulkan attachments require atlas_vk_render_shared");
     FrameInputs in{};
     AtlasStatus st = buildInputs(ctx, f, in);
     if (st != ATLAS_OK) return st;
@@ -1096,6 +1272,8 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
 }
 
 ATLAS_API AtlasStatus atlas_gl_attach(AtlasContext* ctx, uint32_t w, uint32_t h, AtlasGlTargets* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out || w == 0 || h == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -1113,10 +1291,173 @@ ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* f) {
     return atlas_gl_render_io(ctx, f, nullptr);
 }
 
+static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* vkOut,
+                            const VkSharedTargets* shared = nullptr, VkSplice* splice = nullptr);
+
 ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    return renderIo(ctx, f, io, nullptr);
+}
+
+ATLAS_API AtlasStatus atlas_vk_attach(AtlasContext* ctx, uint32_t w, uint32_t h) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || w == 0 || h == 0) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    std::string err;
+    if (ctx->backend->vkSharedAttached()) {
+        bool ready = false;
+        if (!ctx->backend->vkCopyComplete(0, ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+        if (!ready) return ctx->fail(ATLAS_ERR_STATE, "cannot resize while Minecraft's copy is outstanding");
+    }
+    if (!ctx->backend->vkAttach(w, h, err)) return backendFailure(ctx, err, ATLAS_ERR_UNSUPPORTED);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_render(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!out) return ATLAS_ERR_ARG;
+    *out = AtlasVkHostFrame{};
+    return renderIo(ctx, f, io, out);
+}
+
+ATLAS_API AtlasStatus atlas_vk_render_shared(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io,
+                                             const AtlasVkTargets* targets, AtlasVkSplice* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!out || !targets) return ATLAS_ERR_ARG;
+    *out = AtlasVkSplice{};
+    VkSharedTargets t;
+    t.color = targets->color;
+    t.depth = targets->depth;
+    t.nearLight = targets->nearLight;
+    t.sunMap = targets->sunMap;
+    VkSplice s;
+    AtlasStatus st = renderIo(ctx, f, io, nullptr, &t, &s);
+    if (st == ATLAS_OK) *out = AtlasVkSplice{s.waitSemaphore, s.waitValue, s.commandBuffer, s.signalSemaphore, s.signalValue};
+    return st;
+}
+
+ATLAS_API AtlasStatus atlas_vk_copy_complete(AtlasContext* ctx, uint64_t value, uint32_t* ready) {
+    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || !ready) return ATLAS_ERR_ARG;
+    *ready = 0;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    bool done = false;
+    std::string err;
+    if (!ctx->backend->vkCopyComplete(value, done, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+    *ready = done ? 1u : 0u;
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_wait_copy(AtlasContext* ctx, uint64_t value, uint64_t timeoutNs) {
+    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    bool done = false;
+    std::string err;
+    if (!ctx->backend->vkWaitCopy(value, timeoutNs, done, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+    return done ? ATLAS_OK : ATLAS_ERR_TIMEOUT;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_cancel_splice(AtlasContext* ctx, uint64_t value) {
+    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || !value) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    std::string err;
+    return ctx->backend->vkCancelSplice(value, err) ? ATLAS_OK : backendFailure(ctx, err, ATLAS_ERR_STATE);
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_prepare_close(AtlasContext* ctx) {
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    if (!ctx) return ATLAS_ERR_ARG;
+    ATLAS_TRY
+    Backend& backend = *ctx->backend;
+    if (!backend.supportsTerminalClose()) return ctx->fail(ATLAS_ERR_UNSUPPORTED, "terminal close requires an adopted Vulkan context");
+    if (backend.closeState() == Backend::CloseState::Drained) return ATLAS_OK;
+    backend.sealWork();
+    auto failClose = [&](AtlasStatus status, const char* reason) {
+        ctx->lifecycleError.store(reason);
+        return status;
+    };
+    // No ctx/scene/queue mutex is held while existing callers leave. Nested update->stageScene carries the same
+    // admission ticket, so sealing does not reject half of an operation that was already counted.
+    while (backend.activeWork() != 0) {
+        if (std::chrono::steady_clock::now() >= deadline)
+            return failClose(ATLAS_ERR_TIMEOUT, "terminal close timed out waiting admitted work; ownership retained");
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    if (backend.producerCloseHasFailed()) return failClose(ATLAS_ERR_GPU, "terminal close has a failed producer; ownership retained");
+    if (backend.activeProducers()) return failClose(ATLAS_ERR_STATE, "terminal close requires every generator owner to close first");
+    std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
+    for (;;) {
+        if (std::chrono::steady_clock::now() >= deadline)
+            return failClose(ATLAS_ERR_TIMEOUT, "terminal close timed out acquiring context lock; ownership retained");
+        if (lock.try_lock()) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    std::string err;
+    Backend::CloseDrain drained = backend.drainForClose(deadline, err);
+    if (drained != Backend::CloseDrain::Ok) {
+        std::fprintf(stderr, "[atlas] incomplete terminal close: %s\n", err.c_str());
+        return failClose(drained == Backend::CloseDrain::Timeout ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU,
+                         "terminal native queue drain did not complete; ownership retained");
+    }
+    backend.markDrained();
+    ctx->lifecycleError.store(nullptr);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_detach_retired(AtlasContext* ctx, AtlasVkRetirement** out) {
+    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || !out) return ATLAS_ERR_ARG;
+    *out = nullptr;
+    ATLAS_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AtlasStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    VkRetirement* token = nullptr;
+    std::string err;
+    if (!ctx->backend->vkDetachRetired(token, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+    *out = reinterpret_cast<AtlasVkRetirement*>(token);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_vk_release_retired(AtlasVkRetirement* retired) {
+    try { delete reinterpret_cast<VkRetirement*>(retired); return ATLAS_OK; }
+    catch (...) { return ATLAS_ERR_INTERNAL; }
+}
+
+// The frame for the GL path (vkOut and shared null) or for Minecraft's Vulkan backend (vkOut: the frame in host memory;
+// shared: on Minecraft's device, the splice into its frame)
+static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* vkOut,
+                            const VkSharedTargets* shared, VkSplice* splice) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
-    fr::frame();  // the flight recorder's frame boundary: one atlas frame a game frame
     ATLAS_ZONE("api:glRender");
     std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
     {
@@ -1125,6 +1466,15 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     }
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
+    if (ctx->backend->vkSharedAttached() && !shared)
+        return ctx->fail(ATLAS_ERR_STATE, "shared Vulkan attachments require atlas_vk_render_shared");
+    if (shared) {
+        bool ready = false;
+        std::string err;
+        if (!ctx->backend->vkCopyComplete(0, ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+        if (!ready) return ATLAS_OK;  // no frame, history, images or stats changed
+    }
+    fr::frame();  // the flight recorder's frame boundary: one atlas frame a game frame
     FrameInputs in{};
     auto tb0 = std::chrono::steady_clock::now();
     AtlasStatus st;
@@ -1159,7 +1509,16 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
     if (!io || (!primaryNear && (!g.nearDepthTex || !g.nearInfoTex)) || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
     double ms = ctx->stats.lastFrameMs;
     std::string err;
-    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
+    if (shared) {
+        if (!ctx->backend->vkRenderShared(in, io ? &g : nullptr, *shared, *splice, &ms, err))
+            return backendFailure(ctx, err, ATLAS_ERR_GPU);
+    } else if (vkOut) {
+        VkHostFrame h;
+        if (!ctx->backend->vkRender(in, io ? &g : nullptr, h, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
+        *vkOut = AtlasVkHostFrame{h.color, h.normal, h.depth, h.nearLight, h.sunMap, h.width, h.height, h.sunSize, 0};
+    } else if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) {
+        return backendFailure(ctx, err, ATLAS_ERR_GPU);
+    }
     rememberFrame(ctx, f);
     ctx->stats.lastFrameMs = ms;
     return ATLAS_OK;
@@ -1167,6 +1526,8 @@ ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f,
 }
 
 ATLAS_API void atlas_gl_detach(AtlasContext* ctx) {
+    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
+    if (ctx && !work) { std::fprintf(stderr, "[atlas] refusing detach while terminal close is unresolved\n"); return; }
     if (!ctx) return;
     try {
         std::lock_guard<std::mutex> lock(ctx->mu);
@@ -1697,6 +2058,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
 }
 
 ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out) return ATLAS_ERR_ARG;
     ATLAS_TRY
     ctx->stats.regions = uint32_t(ctx->world.regionCount());
@@ -1710,6 +2073,8 @@ ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out) {
 }
 
 ATLAS_API AtlasStatus atlas_preview_load_raster(AtlasContext* ctx, const char* path) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !path) return ATLAS_ERR_ARG;
     ATLAS_TRY
     auto p = std::make_unique<PreviewSource>();
@@ -1721,6 +2086,8 @@ ATLAS_API AtlasStatus atlas_preview_load_raster(AtlasContext* ctx, const char* p
 }
 
 ATLAS_API AtlasStatus atlas_preview_generate(AtlasContext* ctx, int32_t lod, int32_t x0, int32_t z0, int32_t x1, int32_t z1) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lod < 0 || lod >= MAX_LODS) return ATLAS_ERR_ARG;
     if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded");
     ATLAS_TRY
@@ -1746,6 +2113,8 @@ ATLAS_API AtlasStatus atlas_preview_generate(AtlasContext* ctx, int32_t lod, int
 
 ATLAS_API AtlasStatus atlas_upload_column_heights(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                      const float* surface, const float* water) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
     if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     ATLAS_TRY
@@ -1757,6 +2126,8 @@ ATLAS_API AtlasStatus atlas_upload_column_heights(AtlasContext* ctx, int32_t lod
 ATLAS_API AtlasStatus atlas_upload_column_heights2(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                       const float* surface, const float* water, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
     if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     ATLAS_TRY
@@ -1769,6 +2140,8 @@ ATLAS_API AtlasStatus atlas_upload_column_heights3(AtlasContext* ctx, int32_t lo
                                                       const float* surface, const float* water, const uint16_t* topMat,
                                                       const uint16_t* fillMat, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat, const uint8_t* flags) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return ATLAS_ERR_ARG;
     if (!ctx->preview) return ctx->fail(ATLAS_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     PreviewSource::Overrides o;
@@ -1784,6 +2157,8 @@ ATLAS_API AtlasStatus atlas_upload_column_heights3(AtlasContext* ctx, int32_t lo
 ATLAS_API AtlasStatus atlas_upload_column_structures(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     return atlas_upload_column_structures2(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, nullptr);
 }
 
@@ -1791,6 +2166,8 @@ ATLAS_API AtlasStatus atlas_upload_column_structures2(AtlasContext* ctx, int32_t
                                                          const float* wallTop, const float* roofTop,
                                                          const uint16_t* wallMat, const uint16_t* roofMat,
                                                          const float* base) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     return atlas_upload_column_structures3(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, base, 0u);
 }
 
@@ -1798,6 +2175,8 @@ ATLAS_API AtlasStatus atlas_upload_column_structures3(AtlasContext* ctx, int32_t
                                                          const float* wallTop, const float* roofTop,
                                                          const uint16_t* wallMat, const uint16_t* roofMat,
                                                          const float* base, uint32_t flags) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lod < 0 || lod >= MAX_LODS) return ATLAS_ERR_ARG;
     ATLAS_TRY
     if (!wallTop) {
@@ -1831,6 +2210,8 @@ ATLAS_API AtlasStatus atlas_upload_column_structures3(AtlasContext* ctx, int32_t
 }
 
 ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, const AtlasMaterial* m, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || first == 0 || (!m && count)) return ATLAS_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
     ATLAS_TRY
@@ -1844,9 +2225,17 @@ ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, con
 }
 
 ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float halfExtent) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || (size && (size < 64 || size > 4096)) || (size && !(halfExtent >= 256.0f && halfExtent <= 16384.0f)))
         return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
+    if (ctx->backend->vkSharedAttached()) {
+        bool ready = false;
+        std::string err;
+        if (!ctx->backend->vkCopyComplete(0, ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+        if (!ready) return ctx->fail(ATLAS_ERR_STATE, "cannot change the sun map while Minecraft's copy is outstanding");
+    }
     ctx->sunMapSize = size;
     ctx->sunMapHalf = halfExtent;
     ctx->sunMapFull = true;
@@ -1854,6 +2243,8 @@ ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float 
 }
 
 ATLAS_API AtlasStatus atlas_set_eclipse(AtlasContext* ctx, const float occulters[8], float kmPerBlock) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !occulters || !std::isfinite(kmPerBlock) || kmPerBlock <= 0.0f) return ATLAS_ERR_ARG;
     for (int i = 0; i < 8; i++) {
         if (!std::isfinite(occulters[i])) return ATLAS_ERR_ARG;
@@ -1864,6 +2255,8 @@ ATLAS_API AtlasStatus atlas_set_eclipse(AtlasContext* ctx, const float occulters
 }
 
 ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], const float radiance[3]) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !dir || !radiance) return ATLAS_ERR_ARG;
     float len = std::sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
     if (!(len > 1e-4f) || !std::isfinite(len)) return ATLAS_ERR_ARG;
@@ -1877,6 +2270,8 @@ ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], cons
 }
 
 ATLAS_API AtlasStatus atlas_set_sky_glow(AtlasContext* ctx, const float up[3], const float ground[3]) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !up || !ground) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     for (int i = 0; i < 3; i++) {
@@ -1887,6 +2282,8 @@ ATLAS_API AtlasStatus atlas_set_sky_glow(AtlasContext* ctx, const float up[3], c
 }
 
 ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !std::isfinite(x) || !std::isfinite(y)) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->jitter[0] = std::clamp(x, -0.5f, 0.5f);
@@ -1896,6 +2293,8 @@ ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y) {
 
 ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
                                                 uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || first == 0 || (!shapes && count)) return ATLAS_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
     ATLAS_TRY
@@ -1917,6 +2316,8 @@ ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t firs
 }
 
 ATLAS_API AtlasStatus atlas_set_pre_exposure(AtlasContext* ctx, float exposure) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !(exposure > 0.0f) || !std::isfinite(exposure)) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->preExposure = exposure;
@@ -1925,6 +2326,8 @@ ATLAS_API AtlasStatus atlas_set_pre_exposure(AtlasContext* ctx, float exposure) 
 
 ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t first, const uint32_t* textures,
                                                   uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || first == 0 || (!textures && count)) return ATLAS_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
     ATLAS_TRY
@@ -1942,6 +2345,8 @@ ATLAS_API AtlasStatus atlas_set_material_textures(AtlasContext* ctx, uint32_t fi
 }
 
 ATLAS_API AtlasStatus atlas_set_material_offsets(AtlasContext* ctx, uint32_t first, const uint32_t* words, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || first == 0 || (!words && count)) return ATLAS_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
     ATLAS_TRY
@@ -1953,6 +2358,8 @@ ATLAS_API AtlasStatus atlas_set_material_offsets(AtlasContext* ctx, uint32_t fir
 ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t first, uint32_t count, const AtlasBrickQuad* quads,
                                                 uint32_t quadCount, const AtlasBrickSprite* sprites, uint32_t spriteCount,
                                                 const uint32_t* texels, uint32_t texelCount, const float* emission) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || first == 0 || (!quads && quadCount) || (!sprites && spriteCount) || (!texels && texelCount)) return ATLAS_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
     ATLAS_TRY
@@ -2014,6 +2421,8 @@ ATLAS_API AtlasStatus atlas_set_material_bricks(AtlasContext* ctx, uint32_t firs
 }
 
 ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || (!cards && count)) return ATLAS_ERR_ARG;
     if (count > (1u << 24)) return ctx->fail(ATLAS_ERR_ARG, "too many surface cards");
     ATLAS_TRY
@@ -2069,6 +2478,8 @@ ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurf
 }
 
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2085,6 +2496,8 @@ ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t
 }
 
 ATLAS_API AtlasStatus atlas_debug_read_blocks(AtlasContext* ctx, const int32_t* xyz, uint32_t count, uint32_t* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !xyz || !out || !count || count > 4096) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2109,6 +2522,8 @@ ATLAS_API AtlasStatus atlas_debug_read_blocks(AtlasContext* ctx, const int32_t* 
 }
 
 ATLAS_API AtlasStatus atlas_set_light_group(AtlasContext* ctx, uint32_t group, const AtlasLight* lights, uint32_t count) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || (!lights && count)) return ATLAS_ERR_ARG;
     if (count > 1u << 20) return ctx->fail(ATLAS_ERR_ARG, "light group too large");
     ctx->lights.setGroup(group, lights, count);
@@ -2116,12 +2531,16 @@ ATLAS_API AtlasStatus atlas_set_light_group(AtlasContext* ctx, uint32_t group, c
 }
 
 ATLAS_API AtlasStatus atlas_set_light_budget(AtlasContext* ctx, uint32_t maxPerFrame, float clusterDistance) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !(clusterDistance >= 0.0f)) return ATLAS_ERR_ARG;
     ctx->lights.setBudget(maxPerFrame, clusterDistance);
     return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_set_transitions(AtlasContext* ctx, float fadeSeconds) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !(fadeSeconds >= 0.0f && fadeSeconds <= 10.0f)) return ATLAS_ERR_ARG;
     ctx->world.fadeMs = uint32_t(fadeSeconds * 1000.0f + 0.5f);
     return ATLAS_OK;
@@ -2142,6 +2561,8 @@ ATLAS_API float atlas_preview_height(AtlasContext* ctx, double x, double z) {
 }
 
 ATLAS_API AtlasStatus atlas_memory_info(AtlasContext* ctx, AtlasMemoryInfo* out) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2163,12 +2584,16 @@ ATLAS_API AtlasStatus atlas_memory_info(AtlasContext* ctx, AtlasMemoryInfo* out)
 }
 
 ATLAS_API AtlasStatus atlas_set_clipmap(AtlasContext* ctx, uint32_t lodCount) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || lodCount < 1 || lodCount > 7u) return ATLAS_ERR_ARG;  // 7: the default (and the most the mod streams)
     ctx->world.lodCount = int(lodCount);
     return ATLAS_OK;
 }
 
 ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, uint16_t* out, uint32_t* tier) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out || !tier) return ATLAS_ERR_ARG;
     ATLAS_TRY
     World::SectionSrc s = ctx->world.sectionSource(sx, sy, sz);
@@ -2180,6 +2605,8 @@ ATLAS_API AtlasStatus atlas_debug_section(AtlasContext* ctx, int32_t sx, int32_t
 }
 
 ATLAS_API AtlasStatus atlas_set_texture_ticks(AtlasContext* ctx, uint32_t ticks) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->textureTicks = ticks == 0xFFFFFFFFu ? 1u : ticks + 1u;
@@ -2187,6 +2614,8 @@ ATLAS_API AtlasStatus atlas_set_texture_ticks(AtlasContext* ctx, uint32_t ticks)
 }
 
 ATLAS_API AtlasStatus atlas_debug_ablate(AtlasContext* ctx, uint32_t bits) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx) return ATLAS_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->ablateExtra = bits;
@@ -2194,6 +2623,8 @@ ATLAS_API AtlasStatus atlas_debug_ablate(AtlasContext* ctx, uint32_t bits) {
 }
 
 ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint32_t out[6]) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !out) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2216,6 +2647,8 @@ ATLAS_API AtlasStatus atlas_debug_material(AtlasContext* ctx, uint32_t mat, uint
 
 ATLAS_API AtlasStatus atlas_debug_gpu_sections(AtlasContext* ctx, uint32_t count, const int32_t* pos, const uint16_t* ids,
                                                const uint32_t* uniform, uint8_t* accepted) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !pos || (count && !ids)) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2231,6 +2664,8 @@ ATLAS_API AtlasStatus atlas_debug_gpu_sections(AtlasContext* ctx, uint32_t count
 
 ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level, uint32_t count, const int32_t* pos,
                                                 const uint32_t* kinds, const uint16_t* ids, uint8_t* accepted) {
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
     if (!ctx || !pos || !kinds || (count && !ids)) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -2245,9 +2680,16 @@ ATLAS_API AtlasStatus atlas_debug_coarse_chunks(AtlasContext* ctx, int32_t level
 }
 
 ATLAS_API AtlasStatus atlas_debug_fault(AtlasContext* ctx, uint32_t fault, uint32_t afterFrames) {
-    if (!ctx || fault > ATLAS_FAULT_TIMEOUT) return ATLAS_ERR_ARG;
+    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
+    if (ctx && !work) return closeRejected(ctx);
+    if (!ctx || fault > ATLAS_FAULT_CLOSE_CONSUMER) return ATLAS_ERR_ARG;
     ATLAS_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
+    if (fault == ATLAS_FAULT_CLOSE_PRODUCER || fault == ATLAS_FAULT_CLOSE_CONSUMER) {
+        ctx->backend->injectCloseFault(fault);
+        return ATLAS_OK;
+    }
+    if (fault == ATLAS_FAULT_NONE) ctx->backend->injectCloseFault(0);
     Fault f = fault == ATLAS_FAULT_DEVICE_LOST    ? Fault::DeviceLost
               : fault == ATLAS_FAULT_OUT_OF_MEMORY ? Fault::OutOfMemory
               : fault == ATLAS_FAULT_TIMEOUT       ? Fault::Timeout
@@ -2264,4 +2706,11 @@ namespace atlas {
 Backend* contextBackend(AtlasContext* ctx) { return ctx ? ctx->backend.get() : nullptr; }
 VoxGrid* contextGrid(AtlasContext* ctx) { return ctx ? &ctx->voxgrid : nullptr; }
 World* contextWorld(AtlasContext* ctx) { return ctx ? &ctx->world : nullptr; }
+AtlasStatus contextUploadSection(AtlasContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats,
+                                 const Backend::WorkTicket& work) {
+    if (!ctx || !mats || !work.belongsTo(ctx->backend.get())) return ATLAS_ERR_STATE;
+    ATLAS_TRY
+    return uploadSectionAdmitted(ctx, sx, sy, sz, mats);
+    ATLAS_CATCH(ctx)
+}
 }  // namespace atlas

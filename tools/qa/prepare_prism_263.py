@@ -174,7 +174,7 @@ def configure(instance, java, *, live=False, tour="", extra="", width=1280, heig
         "\n".join(f"{key}={escape(value)}" for key, value in properties.items()) + "\n", encoding="ascii")
     (game / "options.txt").write_text("\n".join([
         "onboardAccessibility:false", "pauseOnLostFocus:false", "skipMultiplayerWarning:true", "tutorialStep:none",
-        "renderDistance:12", "simulationDistance:8", "maxFps:60", "fullscreen:false", "lastServer:", "",
+        "renderDistance:12", "simulationDistance:8", "maxFps:60", "fullscreen:false", 'preferredGraphicsBackend:"vulkan"', "lastServer:", "",
         ]).replace("lastServer:\n", 'lastServer:\ninactivityFpsLimit:"minimized"\n'), encoding="ascii")
     # The harness drives an unfocused window: Dynamic FPS's default (1 fps when unfocused, 10 when idle) starves
     # chunk meshing and lighting so readiness never settles. Disabled in disposable test instances only.

@@ -7,6 +7,10 @@ displayName="${mod_name}"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
+# The narrowly approved device-sharing hook; no terrain/generation mixins.
+[[mixins]]
+config="nirncraft.mixins.json"
+
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
