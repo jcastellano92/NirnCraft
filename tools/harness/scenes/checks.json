@@ -208,7 +208,7 @@
         "powershell",
         "-NoProfile",
         "-Command",
-        "& native/build/Release/spv_budget.exe native/shaders/kernel_budget.json native/build/gen native/build/gen/spv_modules.txt; $r = $LASTEXITCODE; py -3 native/tools/shader_lint.py; exit $r"
+        "$ErrorActionPreference = 'Stop'; if (-not (Test-Path -LiteralPath native/build/Release/spv_budget.exe -PathType Leaf)) { Write-Output 'FAIL: spv_budget.exe missing; build native first'; exit 2 }; & native/build/Release/spv_budget.exe native/shaders/kernel_budget.json native/build/gen native/build/gen/spv_modules.txt; $r = $LASTEXITCODE; if ($r -ne 0) { exit $r }; py -3 native/tools/shader_lint.py; exit $LASTEXITCODE"
       ],
       "inputs": [
         "native/shaders",
