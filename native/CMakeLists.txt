@@ -336,6 +336,12 @@ add_executable(atlas_cache_test tests/cache_test.cpp src/gencache.cpp)
 target_include_directories(atlas_cache_test PRIVATE src include)
 target_link_libraries(atlas_cache_test PRIVATE Threads::Threads)
 
+# Host lock/snapshot regression: real terrain bookkeeping, no renderer, generated shaders or GPU context.
+add_executable(atlas_frame_lock_test tests/frame_lock_test.cpp src/world.cpp src/voxgrid.cpp src/sectionstore.cpp
+  src/gencache.cpp src/groups.cpp src/svdag.cpp)
+target_include_directories(atlas_frame_lock_test PRIVATE src include "${ATLAS_VK_INCLUDE}")
+target_link_libraries(atlas_frame_lock_test PRIVATE Threads::Threads)
+
 add_executable(atlas_gl_test tests/gl_interop_test.cpp src/gl_api.cpp)
 target_include_directories(atlas_gl_test PRIVATE src include)
 target_include_directories(atlas_gl_test PRIVATE tests)
@@ -597,6 +603,7 @@ target_link_libraries(atlas_height_test PRIVATE atlas_core)
 enable_testing()
 add_test(NAME atlas_tests COMMAND atlas_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 add_test(NAME atlas_cache_test COMMAND atlas_cache_test)
+add_test(NAME atlas_frame_lock_test COMMAND atlas_frame_lock_test)
 
 # offline lab for the shader pack's screen passes over an atlas-rendered scene (Windows, GL compatibility context)
 if(WIN32)

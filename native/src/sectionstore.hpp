@@ -77,6 +77,40 @@ public:
     bool has(const Key3& k) const { return warm_.count(k) != 0; }
     // every section of columns [sx0, sx1) x [sz0, sz1) the tiers hold (the cold ones read back into warm)
     void inRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, PackedIds>>& out);
+    // Capture under the world's lock; resolve on the existing update thread WITHOUT that lock. A ticket owns
+    // its immutable inputs, including copies of edit layers. Completion never overwrites a subsequent upload/edit.
+    struct RangeRead {
+        struct Entry { Key3 key; PackedIds words; uint32_t hash = 0; uint8_t flags = 0; };
+        struct Index { Key3 key; uint64_t offset; uint32_t bytes, hash; uint8_t flags; };
+        struct Region {
+            std::string path;
+            uint64_t bytes = 0, key = 0, revision = 0;
+            bool scanned = false;
+            std::vector<Index> index;
+        };
+        struct Layer { Key3 key; EditLayer value; std::string path; };
+        uint64_t epoch = 0, serial = 0;
+        std::shared_ptr<const uint64_t> lease;
+        uint32_t genVersion = 0;
+        int x0 = 0, z0 = 0, x1 = 0, z1 = 0;
+        bool outsideKeep = false;  // an explicit section lookup, as get(), also reads outside retention
+        std::vector<Region> regions;
+        std::vector<Layer> layers;
+        std::vector<Entry> loaded;
+        std::unordered_set<Key3, Key3Hash> known;
+        std::unordered_map<uint64_t, uint64_t> regionRevisions;
+        bool complete = true;
+        bool needsIo() const {
+            return !layers.empty() || std::any_of(regions.begin(), regions.end(), [](const auto& r) {
+                return !r.scanned || !r.index.empty();
+            });
+        }
+    };
+    RangeRead readRange(int sx0, int sz0, int sx1, int sz1, bool outsideKeep = false);
+    static void resolveRange(RangeRead& read);
+    bool completeRange(const RangeRead& read);
+    void memoryInRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, PackedIds>>& out) const;
+    void changed(const Key3& k);
     // over budget, or outside `keep` regions (of 256 blocks) of the camera's: the farthest go (cold, dropped)
     // Plans the spill (which sections leave warm) and returns at once; drainSpills does the disk work in slices.
     // Nothing here writes a file: the caller holds the world's lock, which the render thread also takes.
@@ -106,6 +140,7 @@ public:
     void flush();
 
 private:
+    friend struct SectionStoreTestAccess;
     struct Rec {
         PackedIds words;
         uint32_t hash = 0;
@@ -138,6 +173,11 @@ private:
     std::unordered_map<uint64_t, uint64_t> dltBytes_;  // (a region's .dlt file length, its live bytes: compaction)
     std::unordered_map<uint64_t, uint64_t> dltLive_;
     Stats st_;
+    uint64_t epoch_ = 0, serial_ = 0;
+    std::unordered_map<Key3, uint64_t, Key3Hash> changed_;
+    std::vector<std::weak_ptr<const uint64_t>> reads_;
+    std::unordered_map<uint64_t, uint64_t> regionRevisions_;
+    uint64_t regionSerial_ = 0;
     static uint64_t regionKey(int sx, int sz);
     std::string regionPath(uint64_t rk, const char* ext = "sec") const;
     ColdRegion& coldRegion(uint64_t rk);       // (scanned from its file on first use)

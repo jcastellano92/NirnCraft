@@ -117,3 +117,27 @@ shade binary by128 bytes but remains2048 bytes above the unchanged935168-byte ca
 uses a homogeneous stone fixture to distinguish L1/2 palette and face-mean behavior; no brightness tuning or
 performance claim is authorized by the failed resource gate. Higher boundaries, jitter and lit-game review remain
 open. The independent Terra reviewer continues to maintain the full stage matrix and inspect every new receipt.
+
+## Frame-pacing integration (2026-10-27)
+
+The frame-only main-base candidate `50756e6a` passed its explicit `588a6aba` check-tier gate: seven items, zero
+blocking/known failures or missing items. Its own native run preserves all six cold reads and zero of 4096 return-hit
+differences. Fresh Windows/Linux packages load at ABI 0.17 with 166 exports and source
+`5d91ba49176f0493835649e4ee7cbbe657086ef7b55f09fc9a04cf507462457c`. Java reports 353 tests, zero failures/errors,
+19 opt-in skips; jar SHA256 `3dfb4e518ed804539b003aa8d33e75368803fea9356d1a3ee5c9bb3615d33a22`.
+This integrates off-lock versioned section snapshots and isolated build/harness paths, with no route-speed claim.
+The original 41.23/90.06 ms route remains the last measured baseline; stage 1 and driver-resource limits remain open.
+
+The separate native allocation control at Vulkan checkpoint `9b5cb214` completed 263 generated/durable tiles,
+zero failures or queued writes, matching all eight saved fingerprint components. Its four destruction boundaries
+were observed with the child alive; post-context private memory was 175353856 bytes and peak job memory 6.01 GiB.
+This own-device, empty-overlay, neutral-material control omits Minecraft and the near workload; live growth remains
+unexplained. A later byte-identical ingest UUID has unknown provenance and is not a second verified client run.
+
+Current assignments: Terra implements generator/context/overlay lifetime barriers in `generator-lifecycle`; normal
+reload must not block rendering, and shutdown must drain every owner before the shared device is destroyed. The
+packet is unbuilt/unverified and must not ship. Sol investigates measured feature-pipeline setup latency in
+`feature-pipeline-cache`, starting with bounded independent caches for the 19 attached-feature pipelines. It must
+prove same-candidate cold/warm output and fingerprint agreement before any benefit or integration claim. Seam work
+is preserved and parked while these confirmed ownership and loading issues advance. The independent reviewer
+continues to check all packets and the full stage matrix; the parent objective remains active.

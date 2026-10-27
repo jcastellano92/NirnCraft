@@ -74,7 +74,12 @@ bool readBytes(const std::string& path, uint64_t offset, uint32_t n, std::vector
     FILE* f = std::fopen(path.c_str(), "rb");
     if (!f) return false;
     out.resize(n);
-    bool ok = std::fseek(f, long(offset), SEEK_SET) == 0 && std::fread(out.data(), 1, n, f) == n;
+#ifdef _WIN32
+    bool ok = _fseeki64(f, static_cast<__int64>(offset), SEEK_SET) == 0;
+#else
+    bool ok = fseeko(f, static_cast<off_t>(offset), SEEK_SET) == 0;
+#endif
+    ok = ok && std::fread(out.data(), 1, n, f) == n;
     std::fclose(f);
     return ok;
 }
@@ -125,6 +130,8 @@ std::string SectionStore::regionPath(uint64_t rk, const char* ext) const {
 }
 
 void SectionStore::configure(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBudget, uint64_t coldBudget) {
+    ++epoch_;  // an out-of-lock read of the old world/cache identity can never be admitted
+    reads_.clear(); changed_.clear(); regionRevisions_.clear();
     flush();  // (the layers changed so far: to the directory they belong to)
     warmBudget_ = warmBudget;
     coldBudget_ = coldBudget;
@@ -262,6 +269,7 @@ bool SectionStore::writeCold(const Key3& k, const Rec& r) {
     uint32_t h[HEAD] = {COLD_MAGIC, uint32_t(k.x), uint32_t(k.y), uint32_t(k.z), KIND_WHOLE | uint32_t(r.flags) << 8, r.hash, 0,
                         EditLayer::MIXED, genVersion_, uint32_t(a.size()), 0};
     uint64_t at = 0, add = 0;
+    regionRevisions_[rk] = ++regionSerial_;
     if (!appendRecord(regionPath(rk), h, a, none, cr.fileBytes, at, add)) {
         if (std::getenv("ATLAS_STORE_DEBUG")) std::fprintf(stderr, "store: cannot append %s\n", regionPath(rk).c_str());
         return false;
@@ -337,6 +345,7 @@ void SectionStore::writeLayer(const Key3& k, const PackedIds& words) {
                         l.baseHash, l.baseUni, genVersion_, uint32_t(a.size()), uint32_t(b.size())};
     uint64_t& fileBytes = dltBytes_[rk];
     uint64_t at = 0, add = 0;
+    regionRevisions_[rk] = ++regionSerial_;
     if (!appendRecord(regionPath(rk, "dlt"), h, a, b, fileBytes, at, add)) return;
     l.fbOffset = at + pad4(uint32_t(a.size()));
     l.fbBytes = uint32_t(b.size());
@@ -352,6 +361,7 @@ void SectionStore::writeLayer(const Key3& k, const PackedIds& words) {
 }
 
 void SectionStore::compactLayers(uint64_t rk) {
+    regionRevisions_[rk] = ++regionSerial_;
     // the region's layers into a new file: their deltas from memory, their fallbacks copied (a layer changed since its
     // record: its edits now, still dirty: written again whole with its section when that goes)
     std::string path = regionPath(rk, "dlt"), tmp = path + ".tmp";
@@ -410,6 +420,7 @@ void SectionStore::flush() {
 }
 
 void SectionStore::compact(uint64_t rk, ColdRegion& cr) {
+    regionRevisions_[rk] = ++regionSerial_;
     // the live records into a new file (the dead ones: sections written again since)
     std::string path = regionPath(rk), tmp = path + ".tmp";
     FILE* in = std::fopen(path.c_str(), "rb");
@@ -466,11 +477,13 @@ void SectionStore::coldBudget() {
             auto w = warm_.find(k);
             if (w != warm_.end()) w->second.onDisk = false;
         }
+        regionRevisions_[lru->first] = ++regionSerial_;
         cold_.erase(lru);
     }
 }
 
 void SectionStore::put(const Key3& k, PackedIds words, uint32_t hash, uint8_t flags) {
+    changed(k);
     if (!words) return;
     erase(k);
     uint64_t b = uint64_t(words->size()) * 4;
@@ -555,10 +568,195 @@ bool SectionStore::meta(const Key3& k, uint32_t& hash, uint8_t& flags) {
 }
 
 void SectionStore::erase(const Key3& k) {
+    changed(k);  // even when only cold holds it: an incoming raw upload supersedes any read ticket
     auto it = warm_.find(k);
     if (it == warm_.end()) return;
     warmBytes_ -= uint64_t(it->second.words ? it->second.words->size() : 0) * 4;
     warm_.erase(it);
+}
+
+void SectionStore::memoryInRange(int sx0, int sz0, int sx1, int sz1,
+                               std::vector<std::pair<Key3, PackedIds>>& out) const {
+    for (const auto& [k, r] : warm_)
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, r.words);
+}
+
+void SectionStore::changed(const Key3& k) {
+    ++serial_;
+    bool reading = std::any_of(reads_.begin(), reads_.end(), [](const auto& weak) { return !weak.expired(); });
+    if (reading) changed_[k] = serial_;
+    else { changed_.clear(); reads_.clear(); }
+}
+
+SectionStore::RangeRead SectionStore::readRange(int sx0, int sz0, int sx1, int sz1, bool outsideKeep) {
+    RangeRead read;
+    read.epoch = epoch_; read.serial = serial_; read.genVersion = genVersion_;
+    uint64_t oldest = serial_;
+    reads_.erase(std::remove_if(reads_.begin(), reads_.end(), [&](const auto& weak) {
+        if (auto serial = weak.lock()) { oldest = std::min(oldest, *serial); return false; }
+        return true;
+    }), reads_.end());
+    for (auto it = changed_.begin(); it != changed_.end();)
+        it = it->second <= oldest ? changed_.erase(it) : std::next(it);
+    read.lease = std::make_shared<const uint64_t>(serial_);
+    reads_.push_back(read.lease);
+    read.x0 = sx0; read.z0 = sz0; read.x1 = sx1; read.z1 = sz1; read.outsideKeep = outsideKeep;
+    if (sx0 >= sx1 || sz0 >= sz1) return read;
+    auto kept = [&](int rx, int rz) { return outsideKeep || keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_); };
+    for (const auto& [k, r] : warm_)
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) {
+            read.known.insert(k);
+            read.loaded.push_back({k, r.words, r.hash, r.flags});
+        }
+    if (!dir_.empty()) {
+        for (const auto& [rk, cr] : cold_) {
+            int rx = int32_t(uint32_t(rk >> 32)), rz = int32_t(uint32_t(rk));
+            if (rx < fdivs(sx0, 16) || rx > fdivs(sx1 - 1, 16) || rz < fdivs(sz0, 16) || rz > fdivs(sz1 - 1, 16) ||
+                !kept(rx, rz) || !cr.fileBytes) continue;
+            RangeRead::Region region;
+            region.path = regionPath(rk); region.bytes = cr.fileBytes; region.key = rk;
+            region.revision = regionRevisions_[rk]; region.scanned = cr.scanned;
+            if (cr.scanned) for (const auto& [k, loc] : cr.recs)
+                if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1 && !read.known.count(k))
+                    region.index.push_back({k, loc.offset, loc.bytes, loc.hash, loc.flags});
+            read.regions.push_back(std::move(region));
+            read.regionRevisions[rk] = regionRevisions_[rk];
+        }
+    }
+    for (const auto& [k, l] : layers_)
+        if (!warm_.count(k) && k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1 &&
+            kept(fdivs(k.x, 16), fdivs(k.z, 16)) && (l->selfContained() || (!l->baseKnown && l->fbBytes)))
+        {
+            uint64_t rk = regionKey(k.x, k.z);
+            read.layers.push_back({k, *l, regionPath(rk, "dlt")});
+            read.regionRevisions[rk] = regionRevisions_[rk];
+        }
+    return read;
+}
+
+void SectionStore::resolveRange(RangeRead& read) {
+    // No SectionStore/World object is accessed here. Appends, compaction and edits may proceed concurrently;
+    // the content hash and completion's epoch/per-key serial reject replaced or stale records.
+    std::unordered_map<Key3, RangeRead::Entry, Key3Hash> found;
+    auto decode = [&](const std::string& path, const RangeRead::Index& loc) {
+        std::vector<uint8_t> bytes;
+        PackedIds words;
+        if (readBytes(path, loc.offset, loc.bytes, bytes)) words = decodeWords(bytes);
+        if (words) {
+            uint16_t ids[4096]; unpackSection(words->data(), ids);
+            if (sectionHash(ids) != loc.hash) words.reset();
+        }
+        if (words) found[loc.key] = {loc.key, std::move(words), loc.hash, loc.flags};
+        else { found.erase(loc.key); read.complete = false; }
+    };
+    for (auto& region : read.regions) {
+        if (region.scanned) {
+            for (const auto& loc : region.index) decode(region.path, loc);
+            continue;
+        }
+        std::unordered_map<Key3, RangeRead::Index, Key3Hash> index;
+        FILE* f = std::fopen(region.path.c_str(), "rb");
+        if (!f) { read.complete = false; continue; }
+        uint64_t at = 0;
+        uint32_t h[HEAD];
+        while (at < region.bytes) {
+            if (at + HEAD * 4 > region.bytes || std::fread(h, 4, HEAD, f) != HEAD ||
+                h[0] != COLD_MAGIC || h[9] > MAX_PAYLOAD || h[10] > MAX_PAYLOAD) { read.complete = false; break; }
+            uint64_t next = at + uint64_t(HEAD) * 4 + pad4(h[9]) + pad4(h[10]);
+            if (next > region.bytes) { read.complete = false; break; }  // an incomplete tail is never an AIR section
+            Key3 k{0, int32_t(h[1]), int32_t(h[2]), int32_t(h[3])};
+            if (h[8] == read.genVersion && (h[4] & 0xFFu) == KIND_WHOLE)
+                index[k] = {k, at + HEAD * 4, h[9], h[5], uint8_t(h[4] >> 8)};
+            if (h[8] == read.genVersion && (h[4] & 0xFFu) == KIND_WHOLE && k.x >= read.x0 && k.x < read.x1 &&
+                k.z >= read.z0 && k.z < read.z1 && !read.known.count(k)) {
+                std::vector<uint8_t> bytes(h[9]);
+                PackedIds words;
+                if (std::fread(bytes.data(), 1, bytes.size(), f) == bytes.size()) words = decodeWords(bytes);
+                if (words) {
+                    uint16_t ids[4096];
+                    unpackSection(words->data(), ids);
+                    if (sectionHash(ids) != h[5]) words.reset();
+                }
+                if (words) found[k] = {k, std::move(words), h[5], uint8_t(h[4] >> 8)};
+                else { found.erase(k); read.complete = false; }
+            }
+            at = next;
+#ifdef _WIN32
+            if (_fseeki64(f, static_cast<__int64>(at), SEEK_SET) != 0) { read.complete = false; break; }
+#else
+            if (fseeko(f, static_cast<off_t>(at), SEEK_SET) != 0) { read.complete = false; break; }
+#endif
+        }
+        std::fclose(f);
+        region.index.reserve(index.size());
+        for (const auto& [k, loc] : index) region.index.push_back(loc);
+    }
+    for (const auto& l : read.layers) {
+        if (found.count(l.key)) continue;
+        PackedIds words;
+        if (l.value.selfContained()) {
+            uint16_t ids[4096];
+            std::fill(ids, ids + 4096, uint16_t(l.value.baseUni));
+            l.value.apply(ids);
+            words = std::make_shared<const std::vector<uint32_t>>(packSection(ids));
+        } else {
+            std::vector<uint8_t> bytes;
+            if (readBytes(l.path, l.value.fbOffset, l.value.fbBytes, bytes)) words = decodeWords(bytes);
+        }
+        if (words) {
+            uint16_t ids[4096]; unpackSection(words->data(), ids);
+            found[l.key] = {l.key, std::move(words), sectionHash(ids), uint8_t(EDITED | (l.value.baseLost ? BASE_LOST : 0))};
+        } else read.complete = false;
+    }
+    read.loaded.reserve(found.size());
+    for (auto& [k, entry] : found) read.loaded.push_back(std::move(entry));
+}
+
+bool SectionStore::completeRange(const RangeRead& read) {
+    if (read.epoch != epoch_ || !read.complete) return false;
+    auto inRead = [&](int rx, int rz) {
+        return rx >= fdivs(read.x0, 16) && rx <= fdivs(read.x1 - 1, 16) &&
+               rz >= fdivs(read.z0, 16) && rz <= fdivs(read.z1 - 1, 16) &&
+               (read.outsideKeep || keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_));
+    };
+    for (const auto& [rk, region] : cold_)
+        if (region.fileBytes && inRead(int32_t(uint32_t(rk >> 32)), int32_t(uint32_t(rk))) &&
+            !read.regionRevisions.count(rk)) return false;  // a new region appeared inside the captured range
+    for (const auto& [k, layer] : layers_)
+        if (!warm_.count(k) && k.x >= read.x0 && k.x < read.x1 && k.z >= read.z0 && k.z < read.z1 &&
+            inRead(fdivs(k.x, 16), fdivs(k.z, 16)) && (layer->selfContained() || (!layer->baseKnown && layer->fbBytes)) &&
+            !read.regionRevisions.count(regionKey(k.x, k.z))) return false;
+    for (const auto& [rk, revision] : read.regionRevisions)
+        if (regionRevisions_[rk] != revision) return false;
+    for (const auto& region : read.regions) {
+        auto it = cold_.find(region.key);
+        if (it == cold_.end()) return false;
+        ColdRegion& current = it->second;
+        current.lastUse = ++clock_;
+        if (!region.scanned && !current.scanned) {
+            current.scanned = true;
+            current.recs.clear(); current.liveBytes = 0;
+            for (const auto& loc : region.index) {
+                current.recs[loc.key] = {loc.offset, loc.bytes, loc.hash, loc.flags};
+                current.liveBytes += uint64_t(HEAD) * 4 + pad4(loc.bytes);
+            }
+        }
+    }
+    bool complete = read.complete;
+    for (const auto& entry : read.loaded) {
+        auto change = changed_.find(entry.key);
+        if (change != changed_.end() && change->second > read.serial) {
+            if (!warm_.count(entry.key)) complete = false;
+            continue;
+        }
+        if (warm_.count(entry.key)) continue;
+        Rec r;
+        r.words = entry.words; r.hash = entry.hash; r.flags = entry.flags; r.onDisk = true;
+        warmBytes_ += uint64_t(r.words->size()) * 4;
+        warm_[entry.key] = std::move(r);
+        st_.coldHits++;
+    }
+    return complete;
 }
 
 void SectionStore::inRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, PackedIds>>& out) {
@@ -596,6 +794,7 @@ void SectionStore::inRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::
 
 void SectionStore::drop(std::unordered_map<Key3, Rec, Key3Hash>::iterator it) {
     const Key3 k = it->first;
+    changed(k);
     const Rec& r = it->second;
     LayerPtr l = layer(k);
     if ((r.flags & REGEN) && !(r.flags & EDITED)) {

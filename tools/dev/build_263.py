@@ -1,17 +1,10 @@
 """Run the exact26.3 build with isolated Java25, Gradle and output directories."""
 from pathlib import Path
-import argparse,hashlib,os,subprocess,sys
+import argparse,os,subprocess,sys
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools'))
 from dev.process_guard import GuardBusy,process_guard
-def checkout_output(root,scratch):
-    # Preserve existing agent caches, and isolate worktrees regardless of their directory naming convention.
-    if root.parent.name=='worktrees':
-        return scratch/'wt'/root.name
-    if (root/'.git').is_file():
-        key=hashlib.sha256(os.path.normcase(str(root.resolve())).encode()).hexdigest()[:10]
-        return scratch/'wt'/(root.name+'-'+key)
-    return scratch
+from dev.buildpaths import out_dir as checkout_output
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)

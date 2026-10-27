@@ -1,0 +1,312 @@
+// CPU-only lock and snapshot regression. Uses the actual World/VoxGrid/SectionStore implementations, no renderer.
+#include <atomic>
+#include <chrono>
+#include <cstdio>
+#include <filesystem>
+#include <future>
+#include <stdexcept>
+#include <thread>
+#include "world.hpp"
+#include "voxgrid.hpp"
+#include "sectionstore.hpp"
+#include "sectionpack.hpp"
+#include "flight_recorder.hpp"
+
+// This isolated executable has no Vulkan backend or recorder. Their only World dependencies are identity and zones.
+namespace atlas { uint64_t buildHash() { return 0; } }
+namespace atlas {
+struct SectionStoreTestAccess {
+    static void compact(SectionStore& store) {
+        uint64_t region = 0;
+        auto& cold = store.coldRegion(region);
+        store.compact(region, cold);
+    }
+};
+}
+namespace atlas::fr {
+std::atomic<bool> g_enabled{false};
+uint64_t nowNs() { return uint64_t(std::chrono::steady_clock::now().time_since_epoch().count()); }
+void record(const char*, uint64_t, uint64_t, int32_t, uint32_t) {}
+}
+
+using namespace atlas;
+using namespace std::chrono_literals;
+static void check(bool value, const char* message) { if (!value) throw std::runtime_error(message); }
+static std::array<uint16_t, 4096> ids(uint16_t value) {
+    std::array<uint16_t, 4096> result;
+    result.fill(value); result[0] = uint16_t(value + 1);  // mixed, so the source is actually staged
+    return result;
+}
+static PackedIds packed(uint16_t value) { auto a = ids(value); return std::make_shared<const std::vector<uint32_t>>(packSection(a.data())); }
+static uint32_t hash(uint16_t value) { auto a = ids(value); return sectionHash(a.data()); }
+
+struct Fixture {
+    std::filesystem::path path = std::filesystem::temp_directory_path() /
+        ("atlas-frame-lock-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    Fixture() {
+        SectionStore writer;
+        writer.configure(path.string(), 42, 7, 1, 1ull << 28);
+        writer.put({0, 0, 6, 0}, packed(3), hash(3), 0);
+        writer.enforce(10000, 10000, 0);
+        while (writer.drainSpills(1000)) {}
+    }
+    ~Fixture() { std::error_code ec; std::filesystem::remove_all(path, ec); }
+    void world(World& world) { world.configureStore(path.string(), 42, 7, 1ull << 24, 1ull << 28); }
+};
+
+static void configure(VoxGrid& grid, World& world) {
+    grid.D = 8; grid.slotCap = 64; grid.coarseLevels = 0; grid.gpuRank = false;
+    grid.setWorld(&world);
+    int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world);
+}
+
+template<class Fn> static void renderWhileHeld(std::atomic<bool>& release, Fn&& work) {
+    auto render = std::async(std::launch::async, std::forward<Fn>(work));
+    bool returned = render.wait_for(250ms) == std::future_status::ready;
+    release.store(true);  // always release even on failure, so a regression cannot wedge the runner
+    render.get();
+    check(returned, "render-facing call waited behind background world/cold I/O");
+}
+
+static void heldWorld(bool gpu) {
+    World world;
+    auto a = ids(3); world.putSection(0, 6, 0, a.data());
+    world.packOnGpu.store(true);
+    world.editBlock(0, 96, 16, 11);  // a second section's edited base will arrive while the lock is held
+    VoxGrid grid;
+    grid.D = 8; grid.slotCap = 64; grid.coarseLevels = 2; grid.coarseD = 8;
+    grid.coarseCap[1] = grid.coarseCap[2] = 16; grid.gpuRank = gpu; grid.setWorld(&world);
+    int32_t first[3] = {0, 100, 0}; grid.frame(first, world);
+    std::atomic<bool> release{false}, held{false};
+    std::jthread holder([&] { world.holdLockForTest(release, held); });
+    while (!held.load()) std::this_thread::yield();
+    auto refill = std::async(std::launch::async, [&] { grid.refill(world); });
+    renderWhileHeld(release, [&] {
+        float forward[3] = {0, 0, -1}; grid.setView(forward, 0.5f, 0.01f, 0);
+        int32_t camera[3] = {16, 100, 0}; grid.frame(camera, world);
+        auto batch = grid.take(8);
+        check(batch.secs.empty(), "a snapshot source was consumed without world validation while its lock was held");
+        grid.packedResults({{{0, 0, 6, 1}, World::BASE_FETCH, hash(7), packed(7)}});
+    });
+    holder.join(); refill.get();
+    World::SectionSrc edited;
+    check(world.trySectionSource(0, 6, 1, edited) && edited.raw && edited.raw->mats[0] == 11 && edited.raw->mats[1] == 7,
+          "a deferred edited-base result was dropped instead of applied by the update thread");
+    auto resumed = grid.take(8);
+    check(!resumed.secs.empty(), "retained staging work did not resume after the world lock released");
+}
+
+static void coldEdit(bool move) {
+    Fixture fixture;
+    World world; fixture.world(world);
+    VoxGrid grid; configure(grid, world);
+    std::atomic<bool> release{false}, held{false};
+    world.sectionReadBarrierForTest(&release, &held);
+    auto refill = std::async(std::launch::async, [&] { grid.refill(world); });
+    auto until = std::chrono::steady_clock::now() + 2s;
+    while (!held.load() && std::chrono::steady_clock::now() < until) std::this_thread::yield();
+    if (!held.load()) { release.store(true); refill.get(); check(false, "fixture did not reach a cold read"); }
+    renderWhileHeld(release, [&] {
+        grid.setView(0, -1);
+        auto changed = ids(9);
+        auto section = world.putSection(0, 6, 0, changed.data());  // world lock must be free during cold I/O
+        grid.put(0, 6, 0, VgIds(section, &section->mats));
+        if (move) grid.forceReplace();
+        int32_t camera[3] = {move ? 4096 : 0, 100, 0}; grid.frame(camera, world);
+        grid.take(8);
+    });
+    refill.get();
+    world.sectionReadBarrierForTest(nullptr, nullptr);
+    grid.refill(world);
+    World::SectionSrc current;
+    check(world.trySectionSource(0, 6, 0, current) && current.raw && current.raw->mats[1] == 9,
+          "cold completion replaced an edit with stale disk IDs");
+    if (move) check(grid.stats().ox > 200, "old refill moved the grid back to its prior window");
+    else {
+        grid.forceReplace(); int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world); grid.refill(world);
+        auto batch = grid.take(8);
+        bool newest = false, old = false;
+        for (const auto& section : batch.secs) if (section) { newest |= (*section)[1] == 9; old |= (*section)[1] == 3; }
+        for (const auto& words : batch.packs) if (words) {
+            uint16_t decoded[4096]; unpackSection(words->data(), decoded); newest |= decoded[1] == 9; old |= decoded[1] == 3;
+        }
+        check(newest && !old, "frame staged stale/absent IDs after concurrent edit");
+    }
+}
+
+static void revisionAndReset() {
+    World world;
+    auto a = ids(3); world.putSection(0, 6, 0, a.data());
+    World::SectionSnapshot snapshot;
+    check(world.snapshotSections(-1, -1, 1, 1, false, snapshot), "memory snapshot failed");
+    auto b = ids(7); world.putSection(0, 6, 0, b.data());
+    bool applied = false;
+    check(!world.applySections(snapshot, [&] { applied = true; }) && !applied, "stale source revision published");
+    Fixture fixture;
+    SectionStore store; store.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
+    auto read = store.readRange(-1, -1, 1, 1); SectionStore::resolveRange(read);
+    check(!read.loaded.empty(), "cold ticket did not load a record");
+    store.erase({0, 0, 6, 0});
+    check(!store.completeRange(read) && !store.peek({0, 0, 6, 0}), "ticket resurrected an invalidated source");
+    auto beforeReset = store.readRange(-1, -1, 1, 1); SectionStore::resolveRange(beforeReset);
+    store.configure("", 43, 8, 1ull << 24, 1ull << 28);
+    check(!store.completeRange(beforeReset), "ticket from a different world identity was admitted");
+}
+
+static void missingEditedBase() {
+    Fixture fixture;
+    {
+        SectionStore store; store.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
+        auto layer = store.makeLayer({0, 1, 6, 0});
+        layer->set(7, 11);  // cold edit layer with neither a resident base nor a whole fallback
+        store.writeLayer({0, 1, 6, 0}, nullptr);
+    }
+    World world; fixture.world(world);
+    VoxGrid grid; grid.D = 8; grid.slotCap = 1; grid.coarseLevels = 0; grid.gpuRank = true; grid.setWorld(&world);
+    int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world); grid.refill(world); grid.take(1);
+    auto section = std::make_shared<const std::array<uint16_t, 4096>>(ids(5));
+    grid.put(1, 6, 0, section); grid.take(1);  // pool full: this source now waits in host standby
+    uint32_t c0 = uint32_t((6 - VG_MIN_SY) * 8 * 8), c1 = c0 + 1;
+    grid.rankResults({c1}, {c0}, 0, 0);
+    grid.take(1);
+    auto wanted = grid.takeGpuWanted();
+    check(std::any_of(wanted.begin(), wanted.end(), [](const auto& k) { return k[0] == 0 && k[1] == 1 && k[2] == 6 && k[3] == 0; }),
+          "a cold edit layer's missing base was not requested from the GPU generator");
+    auto waiting = grid.residency().gpuWaiting;
+    std::atomic<bool> release{false}, held{false};
+    std::jthread holder([&] { world.holdLockForTest(release, held); });
+    while (!held.load()) std::this_thread::yield();
+    uint64_t offset = 0;
+    int32_t position[3] = {1, 6, 0}; uint8_t accepted = 255;
+    size_t count = grid.ingestGpu(1, &offset, position, 1, &accepted);  // bookkeeping only: no GPU buffer accessed
+    auto retained = grid.residency().gpuWaiting;
+    release.store(true); holder.join();
+    check(count == 0 && accepted == 0 && waiting > 0 && retained == waiting,
+          "a rejected GPU delivery removed its standby request while the world lock was busy");
+}
+
+static void destructiveColdChange() {
+    Fixture fixture;
+    SectionStore store; store.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
+    auto read = store.readRange(-1, -1, 1, 1);
+    check(!read.regions.empty(), "no region captured for truncation test");
+    std::filesystem::resize_file(read.regions.front().path, 12);
+    SectionStore::resolveRange(read);
+    check(!read.complete && !store.completeRange(read) && !store.peek({0, 0, 6, 0}),
+          "a truncated cold scan was treated as a completed/empty range");
+}
+
+static void coldMutationTickets() {
+    Fixture fixture;
+    SectionStore store; store.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
+    auto read = store.readRange(-1, -1, 2, 1); SectionStore::resolveRange(read);
+    check(!read.loaded.empty(), "append test did not capture existing data");
+    store.put({0, 1, 6, 0}, packed(7), hash(7), 0);
+    store.enforce(10000, 10000, 0);
+    while (store.drainSpills(1000)) {}
+    check(!store.completeRange(read), "a new key appended after capture was treated as a complete old range");
+    SectionStore again; again.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
+    auto compacted = again.readRange(-1, -1, 2, 1); SectionStore::resolveRange(compacted);
+    SectionStoreTestAccess::compact(again);
+    check(!again.completeRange(compacted), "a pre-compaction ticket was admitted after file replacement");
+    SectionStore evict; evict.configure(fixture.path.string(), 42, 7, 1ull << 24, 1);
+    auto evicted = evict.readRange(-1, -1, 2, 1); SectionStore::resolveRange(evicted);
+    evict.enforce(0, 0, 2);  // no warm work: directly enforces the one-byte disk budget
+    check(!evict.completeRange(evicted) && !evict.peek({0, 0, 6, 0}), "ticket resurrected a budget-evicted region");
+    {
+        Fixture other;
+        SectionStore fresh; fresh.configure(other.path.string(), 42, 7, 1, 1ull << 28);
+        auto beforeNewRegion = fresh.readRange(0, 0, 32, 1); SectionStore::resolveRange(beforeNewRegion);
+        fresh.put({0, 16, 6, 0}, packed(9), hash(9), 0);
+        fresh.enforce(0, 0, 2);
+        while (fresh.drainSpills(1000)) {}
+        check(!fresh.completeRange(beforeNewRegion), "a new cold region inside the snapshot range was missed");
+    }
+}
+
+static void coldUpdateCompatibility() {
+    Fixture fixture;
+    {
+        World world; fixture.world(world);
+        double away[3] = {20000, 100, 0}; double ms = 0;
+        world.update(away, 0, &ms);
+        auto outside = world.sectionSource(0, 6, 0);
+        check(outside.packed && !outside.raw, "explicit cold section lookup incorrectly obeyed range retention");
+        uint16_t decoded[4096]; unpackSection(outside.packed->data(), decoded);
+        check(decoded[1] == 3, "explicit outside-retention cold lookup returned wrong IDs");
+    }
+    for (bool first : {true, false}) {
+        World world; fixture.world(world);
+        VoxGrid grid; grid.D = 8; grid.slotCap = 64; grid.coarseLevels = 2; grid.coarseD = 8;
+        grid.coarseCap[1] = grid.coarseCap[2] = 16; grid.setWorld(&world);
+        double centre[3] = {0, 100, 0}; double away[3] = {20000, 100, 0}; double ms = 0;
+        int32_t farCamera[3] = {20000, 100, 0}, camera[3] = {0, 100, 0};
+        world.update(away, 0, &ms);
+        if (!first) { grid.frame(farCamera, world); grid.take(64); }
+        auto prior = grid.stats();
+        std::atomic<bool> release{false}, held{false};
+        world.sectionReadBarrierForTest(&release, &held);
+        auto update = std::async(std::launch::async, [&] {
+            // Same order as atlas_update: new retention centre, anticipate next frame, refill current window.
+            world.update(centre, 0, &ms); grid.prepare(world, centre); grid.refill(world);
+        });
+        auto until = std::chrono::steady_clock::now() + 2s;
+        while (!held.load() && std::chrono::steady_clock::now() < until) std::this_thread::yield();
+        if (!held.load()) { release.store(true); update.get(); check(false, "update prefetch did not reach cold I/O"); }
+        check(grid.stats().ox == prior.ox, "update preparation moved the render-owned grid window");
+        renderWhileHeld(release, [&] { grid.setView(0, -1); grid.frame(farCamera, world); grid.take(64); });
+        update.get(); world.sectionReadBarrierForTest(nullptr, nullptr);
+        // There is deliberately no second update after the camera moves (also the first actual centre frame).
+        grid.frame(camera, world);
+        auto batch = grid.take(64);
+        bool found = false;
+        for (const auto& words : batch.packs) if (words) {
+            uint16_t decoded[4096]; unpackSection(words->data(), decoded); found |= decoded[1] == 3;
+        }
+        check(found, "first render after update/jump did not stage the cold packed section");
+    }
+}
+
+static void publicationEdit(bool reset) {
+    World world;
+    VoxGrid grid; grid.D = 16; grid.slotCap = 256; grid.coarseLevels = 0; grid.setWorld(&world);
+    float forward[3] = {0, 0, -1}; grid.setView(forward, -1, 0, 0);
+    int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world); grid.take(256);
+    int id = 20;
+    for (int z = -5; z < 5; z++) for (int x = -7; x < 7; x++) {
+        auto a = ids(uint16_t(id++)); world.putSection(x, 6, z, a.data());
+    }
+    World::SectionSnapshot before;
+    check(world.snapshotSections(-8, -8, 8, 8, false, before) && before.entries.size() == 140,
+          "publication test must cross the 128-section boundary");
+    auto key = before.entries.front().first;
+    uint16_t stale = before.entries.front().second.raw->mats[1];
+    std::atomic<bool> release{false}, held{false};
+    grid.publishBarrierForTest(&release, &held); grid.forceReplace();
+    auto publisher = std::async(std::launch::async, [&] { grid.frame(camera, world); });
+    auto until = std::chrono::steady_clock::now() + 2s;
+    while (!held.load() && std::chrono::steady_clock::now() < until) std::this_thread::yield();
+    if (!held.load()) { release.store(true); publisher.get(); check(false, "publication did not reach its slice barrier"); }
+    auto replacement = ids(600);
+    world.putSection(key.x, key.y, key.z, replacement.data());  // deliberately no grid.put: consume must revalidate
+    if (reset) {
+        grid.forceReplace();
+        int32_t far[3] = {4096, 100, 0}; grid.frame(far, world);
+    }
+    auto batch = grid.take(256);
+    bool old = false, newest = false;
+    for (const auto& source : batch.secs) if (source) { old |= (*source)[1] == stale; newest |= (*source)[1] == 600; }
+    release.store(true); publisher.get(); grid.publishBarrierForTest(nullptr, nullptr);
+    check(!old && (reset || newest), "take consumed an old source published before a concurrent World edit");
+    if (!reset) check(grid.stats().freshColumns > 0, "failed later-slice validation discarded remaining refill work");
+}
+
+int main() {
+    try {
+        std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
+        heldWorld(false); heldWorld(true); coldEdit(false); coldEdit(true); revisionAndReset(); missingEditedBase(); destructiveColdChange(); coldMutationTickets();
+        publicationEdit(false); publicationEdit(true); coldUpdateCompatibility();
+        std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
+        return 0;
+    } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }
+}

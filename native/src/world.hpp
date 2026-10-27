@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <thread>
 #include <memory>
 #include <mutex>
@@ -219,8 +220,20 @@ public:
     // the real sections of columns [sx0, sx1) x [sz0, sz1) (the GPU's level-0 grid, voxgrid.hpp, re-reads them when
     // its window moves; the cold tier's read back); one section's ids (false: none); one section as held (or none)
     void sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out);
+    struct SectionSnapshot {
+        uint64_t revision = 0;
+        std::vector<std::pair<Key3, SectionSrc>> entries;
+    };
+    // wait=true is the existing update thread: cold I/O runs outside mu_. The render path only tries memory.
+    bool snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep = false);
+    // The caller holds its grid lock; never wait for the world. Validation and publication are one operation.
+    bool applySections(const SectionSnapshot& snapshot, const std::function<void()>& apply) const;
+    bool trySectionSource(int sx, int sy, int sz, SectionSrc& out);
+    bool trySectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out);
+    bool tryLayerNeed(const Key3& k, int& need);
     bool sectionMats(int sx, int sy, int sz, uint16_t out[4096]);
     SectionSrc sectionSource(int sx, int sy, int sz);
+    bool resolveSectionSource(int sx, int sy, int sz, SectionSrc& out);  // update thread; false means retry, not absent
     // the sections of a box [x0, x1) x [y0, y1) x [z0, z1) by direct lookups (small boxes: a coarse chunk's)
     void sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out);
     // The host's tiers (step 5's residency): uploads are packed on the GPU (the grid's batches: packOnGpu, set by the
@@ -255,7 +268,9 @@ public:
     void setGenFingerprint(uint64_t fp);
     class GenCache* genCache() { return genCache_.get(); }
     void takeBaseWanted(std::vector<Key3>& out);
+    void takeGridMade(Made& out);
     void baseUniform(const Key3& k, uint16_t id, Made& made);
+    bool tryBaseUniform(const Key3& k, uint16_t id, Made& made);
     // 0: no layer; 1: a layer whose section the host holds (a GPU base must not replace it); 2: a layer waiting for a base
     int layerNeed(const Key3& k);
     std::atomic<size_t> layerCount{0};  // (none: no lookups on the hot paths)
@@ -376,6 +391,7 @@ public:
     bool tryInfo(StoreStats& ws, void* tiers, size_t& skipped, bool groups, GroupStats& g, CoarseStats& c) const;
     // (tests) holds mu_ until release is set, as an update's commit or a spill slice does for a while
     void holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held) const;
+    void sectionReadBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held);
 
     using CubeMap = std::unordered_map<Key3, std::shared_ptr<const CoarseCube>, Key3Hash>;
 
@@ -400,6 +416,9 @@ private:
     void repack(const int centreRegion[MAX_LODS][2]);
 
     mutable std::mutex mu_;
+    uint64_t sectionRevision_ = 0;
+    const std::atomic<bool>* readReleaseForTest_ = nullptr;
+    std::atomic<bool>* readHeldForTest_ = nullptr;
     // immutable once published: builders hold snapshots while uploads replace entries (copy on write)
     std::unordered_map<Key3, std::shared_ptr<const Tile>, Key3Hash> tiles_;
     std::unordered_map<Key3, std::shared_ptr<const Structures>, Key3Hash> structures_;
@@ -424,6 +443,8 @@ private:
     std::shared_ptr<const Section> layerOver(const Key3& k, Section& s, uint8_t& flags);
     void commitSection(const Key3& k, std::shared_ptr<Section> s, uint8_t flags);  // caller holds mu_
     void baseIn(const Key3& k, const uint16_t* base, Made* made);                   // caller holds mu_
+    bool baseNeedsIo(const Key3& k, const uint16_t* base) const;
+    Made gridMade_;
     std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;

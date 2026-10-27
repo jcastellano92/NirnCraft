@@ -370,6 +370,7 @@ std::vector<std::array<int32_t, 4>> VoxGrid::takeGpuWanted() {
 
 void VoxGrid::forceReplace() {
     std::lock_guard<std::mutex> lock(mu_);
+    ++windowRevision_;
     centred_ = false;
     for (int k = 1; k <= activeCoarse_; k++) lv_[k].centred = false;
 }
@@ -485,6 +486,21 @@ void VoxGrid::dropOutside() {
     for (auto it = wantedAt_.begin(); it != wantedAt_.end();) it = out(it->first) ? wantedAt_.erase(it) : std::next(it);
     for (auto it = gpuUniformHint_.begin(); it != gpuUniformHint_.end();)
         it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuUniformHint_.erase(it);
+    auto outsideAll = [&](const Key& key) {
+        if (inWindow(key.x, key.y, key.z)) return false;
+        for (int k = 1; k <= activeCoarse_; k++) {
+            const Level& L = lv_[k];
+            if (L.centred && L.inWindow(fdiv(key.x, L.span()), fdiv(key.z, L.span()))) return false;
+        }
+        return true;
+    };
+    for (auto it = inputRevision_.begin(); it != inputRevision_.end();)
+        it = outsideAll(it->first) ? inputRevision_.erase(it) : std::next(it);
+    for (auto it = lookupWanted_.begin(); it != lookupWanted_.end();)
+        it = outsideAll(*it) ? lookupWanted_.erase(it) : std::next(it);
+    for (auto it = worldSources_.begin(); it != worldSources_.end();)
+        it = outsideAll(*it) ? worldSources_.erase(it) : std::next(it);
+
 }
 
 int64_t VoxGrid::viewDist(int64_t dx, int64_t dz) const {
@@ -506,10 +522,11 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         bool level0 = centred_ && inWindow(sx, sy, sz);
         uint32_t uni = uniform ? uniform[i] : VG_NOT_UNIFORM;
         if (uni != VG_NOT_UNIFORM && uni > 0xFFFFu) uni = VG_NOT_UNIFORM;  // (ids are 16 bits)
-        if (level0) gpuStandby_.erase({sx, sy, sz});
         // (an edited section: the host's copy stands, the generator's base never replaces it; or the layer waits for
         // this base: packed on the GPU at its build, the edits applied on the host)
-        int need = world_ ? world_->layerNeed({0, sx, sy, sz}) : 0;
+        int need = 0;
+        if (world_ && !world_->tryLayerNeed({0, sx, sy, sz}, need)) continue;
+        if (level0) gpuStandby_.erase({sx, sy, sz});
         if (need == 1) level0 = false;
         if (need == 2 && level0) baseFetch_.insert({sx, sy, sz});
         if (level0 && uni == VG_NOT_UNIFORM && slotOf_[phys(sx, sy, sz)] == ~0u) {
@@ -530,6 +547,8 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         }
         if (!level0 && !levels) continue;  // (outside every window, or before the first frame: not taken)
         Key key{sx, sy, sz};
+        inputRevision_[key] = ++inputSerial_;
+        worldSources_.erase(key);
         if (accepted) accepted[i] = 1;
         n++;
         // the levels that will hold it (it is let go, takeGpuDropped, once none does)
@@ -667,6 +686,8 @@ void VoxGrid::putSrc(int sx, int sy, int sz, VgSrc a) {
         if (L.centred && L.inWindow(fdiv(sx, s), fdiv(sz, s)) && sy >= VG_MIN_SY && (sy - VG_MIN_SY) / s < L.H) levels |= 1u << k;
     }
     if (!level0 && !levels) return;
+    inputRevision_[{sx, sy, sz}] = ++inputSerial_;
+    worldSources_.erase({sx, sy, sz});
     // (one entry a section whatever its source: the newest ids replace what waited)
     standby_.erase({sx, sy, sz});
     gpuStandby_.erase({sx, sy, sz});
@@ -727,7 +748,7 @@ VoxGrid::Stats VoxGrid::statsLocked() const {
 
 void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     if (!enabled) return;
-    std::lock_guard<std::mutex> lock(mu_);
+    std::unique_lock<std::mutex> lock(mu_);
     camSx_ = fdiv(camBlock[0], 16);
     camSz_ = fdiv(camBlock[2], 16);
     for (int i = 0; i < 3; i++) camB_[i] = camBlock[i];
@@ -753,7 +774,7 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     if (!centred_ || std::abs(camSx_ - cx) > FOLLOW || std::abs(camSz_ - cz) > FOLLOW) shift(camSx_ - D / 2, camSz_ - D / 2, world);
     // (placed, or a jump past the whole window: read here at once, a few ms this one frame, nothing of the window known;
     // a shift's strips are the update thread's, here only when it has not come for half a second)
-    if (freshColumns_ && (freshColumns_ == uint32_t(D * D) || stats_.frames - stats_.lastShiftFrame > 30)) refillLocked(world, false);
+    bool readNow = freshColumns_ && (freshColumns_ == uint32_t(D * D) || stats_.frames - stats_.lastShiftFrame > 30);
     // the coarse levels follow too; placed (or a jump) they read the world here at once when its lock is free
     camSy_ = fdiv(camBlock[1], 16);
     if (coarseLevels > 0 && !laidOut_) layOut();
@@ -763,16 +784,49 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
         placeLevel(L, camSx_, camSz_);
         placed |= L.freshCount == uint32_t(L.D * L.D);
     }
-    if (placed) refillCoarse(world, false);
+    lock.unlock();
+    if (readNow || placed) refillSnapshot(world, false);
+}
+
+void VoxGrid::prepare(World& world, const double centre[3]) {
+    int x0 = 0, z0 = 0, x1 = 0, z1 = 0;
+    bool needed = false;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (!enabled) return;
+        int sx = int(std::floor(centre[0] / 16)), sz = int(std::floor(centre[2] / 16));
+        auto window = [&](int ox, int oz, int side, int span) {
+            if (!needed) { x0 = ox * span; z0 = oz * span; x1 = (ox + side) * span; z1 = (oz + side) * span; }
+            else { x0 = std::min(x0, ox * span); z0 = std::min(z0, oz * span);
+                   x1 = std::max(x1, (ox + side) * span); z1 = std::max(z1, (oz + side) * span); }
+            needed = true;
+        };
+        if (!centred_ || std::abs(sx - (ox_ + D / 2)) > FOLLOW || std::abs(sz - (oz_ + D / 2)) > FOLLOW)
+            window(sx - D / 2, sz - D / 2, D, 1);
+        int levels = std::clamp(coarseLevels, 0, VG_LEVELS - 1);
+        for (int k = 1; k <= levels; ++k) {
+            int span = 1 << k, cx = fdiv(sx, span), cz = fdiv(sz, span), follow = std::max(1, 8 >> k);
+            const Level& level = lv_[k];
+            if (!laidOut_ || !level.centred || std::abs(cx - (level.ox + level.D / 2)) > follow ||
+                std::abs(cz - (level.oz + level.D / 2)) > follow)
+                window(cx - coarseD / 2, cz - coarseD / 2, coarseD, span);
+        }
+    }
+    if (needed) {
+        World::SectionSnapshot snapshot;
+        world.snapshotSections(x0, z0, x1, z1, true, snapshot);  // ticket I/O without either shared lock
+    }
 }
 
 void VoxGrid::refill(World& world) {
     if (!enabled) return;
-    std::lock_guard<std::mutex> lock(mu_);
-    if (freshColumns_) refillLocked(world, true);
-    bool fresh = false;
-    for (int k = 1; k <= activeCoarse_; k++) fresh |= lv_[k].freshCount > 0;
-    if (fresh) refillCoarse(world, true);
+    World::Made made;
+    world.takeGridMade(made);  // existing update thread, no grid lock
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        for (const auto& [k, sec] : made) requestHostRefill(k.x, k.y, k.z);
+    }
+    refillSnapshot(world, true);
 }
 
 // ---- the coarse levels' books ----------------------------------------------------------------------------------
@@ -865,6 +919,7 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
     int follow = std::max(1, 8 >> L.k);  // (chunks: 4 at level 1, then 2, then 1)
     int nox = ccx - L.D / 2, noz = ccz - L.D / 2;
     if (L.centred && std::abs(ccx - (L.ox + L.D / 2)) <= follow && std::abs(ccz - (L.oz + L.D / 2)) <= follow) return;
+    ++windowRevision_;
     size_t n = size_t(L.D) * L.H * L.D;
     // (the generator's chunks the window gives up, held or still waiting: listed to give again when it returns)
     auto letGo = [&](uint32_t c) {
@@ -936,61 +991,120 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
     L.centred = true;
 }
 
-void VoxGrid::refillCoarse(World& world, bool wait) {
-    // the union of the levels' windows with columns to read (the sections the world still holds there)
-    int x0 = INT_MAX, z0 = INT_MAX, x1 = INT_MIN, z1 = INT_MIN;
-    for (int k = 1; k <= activeCoarse_; k++) {
-        const Level& L = lv_[k];
-        if (!L.freshCount) continue;
-        int s = L.span();
-        x0 = std::min(x0, L.ox * s), z0 = std::min(z0, L.oz * s);
-        x1 = std::max(x1, (L.ox + L.D) * s), z1 = std::max(z1, (L.oz + L.D) * s);
+void VoxGrid::requestHostRefill(int sx, int sy, int sz) {
+    bool changed = lookupWanted_.insert({sx, sy, sz}).second;
+    if (centred_ && inWindow(sx, sy, sz)) {
+        size_t col = physCol(sx, sz);
+        if (!colFresh_[col]) colFresh_[col] = 1, freshColumns_++, changed = true;
     }
-    if (x0 > x1) return;
-    std::vector<std::pair<Key3, World::SectionSrc>> secs;
-    if (wait) world.sectionsIn(x0, z0, x1, z1, secs);
-    else if (!world.trySectionsIn(x0, z0, x1, z1, secs)) return;
-    for (auto& [key, sec] : secs) {
-        uint32_t levels = 0;
-        for (int k = 1; k <= std::min(4, activeCoarse_); k++) {  // (levels 5-6: made from the level below)
-            const Level& L = lv_[k];
-            if (!L.freshCount) continue;
-            int s = L.span(), cx = fdiv(key.x, s), cz = fdiv(key.z, s);
-            if (!L.inWindow(cx, cz) || key.y < VG_MIN_SY || (key.y - VG_MIN_SY) / s >= L.H) continue;
-            if (L.fresh[size_t(pmod(cz, L.D)) * L.D + size_t(pmod(cx, L.D))]) levels |= 1u << k;
-        }
-        if (!levels) continue;
-        CPending& p = cpending_[{key.x, key.y, key.z}];
-        if (gpuRef_.count({key.x, key.y, key.z})) continue;  // (the GPU's own, newer, waiting)
-        if (p.ids.gpu()) p.ids = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};  // (an upload since is newer)
-        p.levels |= levels;
+    for (int k = 1; k <= std::min(4, activeCoarse_); k++) {
+        Level& level = lv_[k];
+        int span = level.span(), cx = fdiv(sx, span), cz = fdiv(sz, span);
+        if (!level.centred || !level.inWindow(cx, cz)) continue;
+        size_t col = size_t(pmod(cz, level.D)) * level.D + size_t(pmod(cx, level.D));
+        if (!level.fresh[col]) level.fresh[col] = 1, level.freshCount++, changed = true;
     }
-    for (int k = 1; k <= activeCoarse_; k++) {
-        Level& L = lv_[k];
-        if (!L.freshCount) continue;
-        std::fill(L.fresh.begin(), L.fresh.end(), uint8_t(0));
-        L.freshCount = 0;
-    }
+    if (changed) ++windowRevision_;
 }
 
-void VoxGrid::refillLocked(World& world, bool wait) {
-    // the world's sections of the columns the window entered (shared, not copied); on the render thread only when the
-    // world's lock is free (never waiting for an update building regions), on the update thread always (refill)
-    std::vector<std::pair<Key3, World::SectionSrc>> secs;
-    if (wait) world.sectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs);
-    else if (!world.trySectionsIn(ox_, oz_, ox_ + D, oz_ + D, secs)) return;
-    for (auto& [k, s] : secs) {
-        if (!inWindow(k.x, k.y, k.z) || !colFresh_[physCol(k.x, k.z)]) continue;
-        if (!pending_.count({k.x, k.y, k.z}))  // (an upload since is newer)
-            pending_[{k.x, k.y, k.z}] = s.raw ? VgSrc{VgIds(s.raw, &s.raw->mats), nullptr} : VgSrc{nullptr, s.packed};
+bool VoxGrid::refreshWorldSource(const Key& key, VgSrc& source) {
+    if (!worldSources_.count(key)) return true;
+    World::SectionSrc current;
+    if (!world_ || !world_->trySectionSource(key.x, key.y, key.z, current) || !current) {
+        requestHostRefill(key.x, key.y, key.z);
+        return false;
     }
-    std::fill(colFresh_.begin(), colFresh_.end(), uint8_t(0));
-    freshColumns_ = 0;
-    stats_.refills++;
-    stats_.lastRefillFrame = stats_.frames;
+    source = current.raw ? VgSrc{VgIds(current.raw, &current.raw->mats), nullptr} : VgSrc{nullptr, current.packed};
+    return true;
+}
+
+void VoxGrid::refillSnapshot(World& world, bool wait) {
+    int x0 = INT_MAX, z0 = INT_MAX, x1 = INT_MIN, z1 = INT_MIN;
+    uint64_t window, input;
+    std::vector<Key> wanted;
+    const std::atomic<bool>* publishRelease;
+    std::atomic<bool>* publishHeld;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (!wait && !lookupWanted_.empty()) return;
+        if (freshColumns_) x0 = ox_, z0 = oz_, x1 = ox_ + D, z1 = oz_ + D;
+        for (int k = 1; k <= activeCoarse_; k++) {
+            const Level& level = lv_[k];
+            if (!level.freshCount) continue;
+            int span = level.span();
+            x0 = std::min(x0, level.ox * span); z0 = std::min(z0, level.oz * span);
+            x1 = std::max(x1, (level.ox + level.D) * span); z1 = std::max(z1, (level.oz + level.D) * span);
+        }
+        if (x0 >= x1 || z0 >= z1) return;
+        window = windowRevision_; input = inputSerial_;
+        publishRelease = publishReleaseForTest_; publishHeld = publishHeldForTest_;
+        if (wait) wanted.assign(lookupWanted_.begin(), lookupWanted_.end());
+    }
+    // Cache/standby lookups, cold reads and decoding are all existing update-thread work, with no grid lock.
+    for (const Key& key : wanted) {
+        World::SectionSrc source;
+        if (!world.resolveSectionSource(key.x, key.y, key.z, source)) return;
+    }
+    World::SectionSnapshot snapshot;
+    if (!world.snapshotSections(x0, z0, x1, z1, wait, snapshot)) return;
+    std::unordered_set<Key, KeyHash> found;
+    for (const auto& [key, sec] : snapshot.entries) found.insert({key.x, key.y, key.z});
+    size_t next = 0;
+    bool paused = false;
+    do {
+        std::unique_lock<std::mutex> lock(mu_);
+        if (windowRevision_ != window) return;  // moved/reset while reading/publishing; retry work stays fresh
+        bool applied = world.applySections(snapshot, [&] {
+            size_t end = std::min(next + size_t(128), snapshot.entries.size());
+            for (; next < end; ++next) {
+                const auto& [key, sec] = snapshot.entries[next];
+                Key k{key.x, key.y, key.z};
+                auto changed = inputRevision_.find(k);
+                if ((changed != inputRevision_.end() && changed->second > input) || gpuRef_.count(k)) continue;
+                VgSrc source = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};
+                if (inWindow(k.x, k.y, k.z) && colFresh_[physCol(k.x, k.z)]) {
+                    pending_[k] = source; worldSources_.insert(k);
+                }
+                uint32_t levels = 0;
+                for (int level = 1; level <= std::min(4, activeCoarse_); level++) {
+                    const Level& L = lv_[level];
+                    int span = L.span(), cx = fdiv(k.x, span), cz = fdiv(k.z, span);
+                    if (L.freshCount && L.inWindow(cx, cz) && k.y >= VG_MIN_SY && (k.y - VG_MIN_SY) / span < L.H &&
+                        L.fresh[size_t(pmod(cz, L.D)) * L.D + size_t(pmod(cx, L.D))]) levels |= 1u << level;
+                }
+                if (levels) { CPending& p = cpending_[k]; p.ids = source; p.levels |= levels; worldSources_.insert(k); }
+            }
+            if (next != snapshot.entries.size()) return;
+            for (const Key& key : wanted) {
+                auto changed = inputRevision_.find(key);
+                if (changed != inputRevision_.end() && changed->second > input) continue;
+                lookupWanted_.erase(key);
+                // An actual absent source is forgotten only after the background read resolved, never on try-lock miss.
+                if (!found.count(key)) standby_.erase(key);
+            }
+            if (freshColumns_) {
+                std::fill(colFresh_.begin(), colFresh_.end(), uint8_t(0)); freshColumns_ = 0;
+                stats_.refills++; stats_.lastRefillFrame = stats_.frames;
+            }
+            for (int k = 1; k <= activeCoarse_; k++) {
+                Level& L = lv_[k];
+                std::fill(L.fresh.begin(), L.fresh.end(), uint8_t(0)); L.freshCount = 0;
+            }
+        });
+        if (!applied) return;  // failed revision/try-lock validation never consumes fresh work
+        lock.unlock();
+        if (next < snapshot.entries.size()) {
+            if (!paused && publishRelease && publishHeld) {
+                paused = true; publishHeld->store(true);
+                while (!publishRelease->load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            std::this_thread::yield();
+        }
+    } while (next < snapshot.entries.size());
 }
 
 void VoxGrid::shift(int nox, int noz, World& world) {
+    ++windowRevision_;
     size_t n = size_t(D) * H * D;
     if (!centred_ || std::abs(nox - ox_) >= D || std::abs(noz - oz_) >= D) {
         // placed (or a jump past the whole window): every chunk unknown, every column read again
@@ -1277,16 +1391,17 @@ void VoxGrid::take0(VgBatch& b, int maxSections) {
             auto it = pending_.find(k);
             if (it == pending_.end()) continue;
             ids = it->second;
+            if (!refreshWorldSource(k, ids)) continue;
             onGpu = ids.gpu();  // (ingestGpu's: their ids on the GPU)
         } else if (cand.from == 1) {
             auto it = standby_.find(k);
             if (it == standby_.end()) continue;
             if (!canTake(cand.p) && slotOf_[c] == ~0u) continue;
             // (its ids from the world's tiers: raw, packed warm, or read back from the cold tier; gone: forgotten)
-            World::SectionSrc src = world_ ? world_->sectionSource(k.x, k.y, k.z) : World::SectionSrc{};
-            if (!src) {
-                standby_.erase(it);
-                continue;
+            World::SectionSrc src;
+            if (!world_ || !world_->trySectionSource(k.x, k.y, k.z, src) || !src) {
+                requestHostRefill(k.x, k.y, k.z);
+                continue;  // busy/cold is not absent: the existing update thread resolves it
             }
             ids = src.raw ? VgSrc{VgIds(src.raw, &src.raw->mats), nullptr} : VgSrc{nullptr, src.packed};
         } else {
@@ -1571,6 +1686,7 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
     }
     rankEvicts_.clear();
     // 2. what it admits: nearest first, into the free slots (its ids from the world's tiers; a GPU one asked for)
+    std::vector<uint32_t> retryAdmits;
     for (uint32_t c : rankAdmits_) {
         if (built >= maxSections) break;  // (the rest: the next lists hold them again)
         if (c >= n) continue;
@@ -1606,17 +1722,19 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             setCand(c, 0);  // (a flag the books no longer hold: the cell's columns moved, it came since)
             continue;
         }
-        World::SectionSrc src = world_ ? world_->sectionSource(sx, sy, sz) : World::SectionSrc{};
-        if (!src) {
-            standby_.erase(it);
-            if (world_ && world_->layerNeed({0, sx, sy, sz}) == 2) {
-                // (an edited section whose layer is on disk: its base generated again first, ingestGpu)
+        World::SectionSrc src;
+        bool memoryReady = world_ && world_->trySectionSource(sx, sy, sz, src);
+        if (!memoryReady || !src) {
+            int need = 0;
+            if (memoryReady && world_->tryLayerNeed({0, sx, sy, sz}, need) && need == 2) {
+                standby_.erase(it);
                 gpuStandby_[k] = 1;
                 baseFetch_.insert(k);
                 reportWanted({0, sx, sy, sz});
                 setCand(c, 2);
             } else {
-                setCand(c, 0);
+                requestHostRefill(sx, sy, sz);
+                retryAdmits.push_back(c);
             }
             continue;
         }
@@ -1626,7 +1744,7 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
         standby_.erase(it);
         setCand(c, 0);
     }
-    rankAdmits_.clear();
+    rankAdmits_.swap(retryAdmits);
     // 3. the new sections
     static const bool topAir = [] {  // ATLAS_VOXGRID_TOPAIR=0: above a column's top section stays UNLOADED
         const char* e = std::getenv("ATLAS_VOXGRID_TOPAIR");
@@ -1640,6 +1758,7 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
     for (auto it = pending_.begin(); it != pending_.end() && done < share;) {
         Key k = it->first;
         Ids ids = it->second;
+        if (!refreshWorldSource(k, ids)) { ++it; continue; }
         bool onGpu = ids.gpu();
         uint32_t c = phys(k.x, k.y, k.z);
         uint32_t uni = VG_NOT_UNIFORM;
@@ -1659,9 +1778,13 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             continue;
         }
         done++;
-        if (uni != VG_NOT_UNIFORM && onGpu && world_ && baseFetch_.erase(k)) {
-            // (an edit layer's base of one id: no pack needed; the layer's section replaces it next batch)
-            world_->baseUniform(Key3{0, k.x, k.y, k.z}, uint16_t(uni), made);
+        if (uni != VG_NOT_UNIFORM && onGpu && world_ && baseFetch_.count(k)) {
+            if (!world_->tryBaseUniform(Key3{0, k.x, k.y, k.z}, uint16_t(uni), made)) {
+                requestHostRefill(k.x, k.y, k.z);
+                ++it;
+                continue;  // retain the GPU reference and edits until their base can be applied
+            }
+            baseFetch_.erase(k);
         }
         if (uni != VG_NOT_UNIFORM) {
             freeSlot(c);
@@ -1736,14 +1859,14 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
             if (slot != ~0u && !slotCpu_[slot]) {
                 b.packJobs.push_back({k3, World::BASE_FETCH, VG_POOL_SRC | slot});
             } else if (slot == ~0u && state_[c] == VG_EMPTY) {
-                world_->baseUniform(k3, 0, made);  // (air: above the column's top, or the generator's air)
+                done = world_->tryBaseUniform(k3, 0, made);
             } else if (slot == ~0u && state_[c] == VG_UNIFORM) {
-                world_->baseUniform(k3, uniId_[c], made);
+                done = world_->tryBaseUniform(k3, uniId_[c], made);
             } else {
                 done = false;  // (a GPU section waiting: at its build; a cell not known yet: later)
             }
             if (done) baseFetch_.erase(k);
-            else baseFetch_.insert(k);
+            else { baseFetch_.insert(k); requestHostRefill(k.x, k.y, k.z); }
         }
     }
     for (auto& [k3, s] : made) putLocked(k3.x, k3.y, k3.z, VgIds(s, &s->mats));
@@ -1976,20 +2099,26 @@ void VoxGrid::coarseReadmit(VgBatch& b) {
                 lost.push_back(c);  // (no slot would take it now: no sections asked for, nothing made again; later)
                 continue;
             }
-            L.lost[c] = 0;
             if (k >= 5) {
+                L.lost[c] = 0;
                 if (!L.downDirty[c]) L.downDirty[c] = 1, L.downList.push_back(c);
                 continue;
             }
             int s = L.span();
             std::vector<std::pair<Key3, World::SectionSrc>> secs;
             int y0 = VG_MIN_SY + cy * s, y1 = y0 + s;
-            world_->sectionsInBox(cx * s, y0, cz * s, cx * s + s, y1, cz * s + s, secs);
+            if (!world_->trySectionsInBox(cx * s, y0, cz * s, cx * s + s, y1, cz * s + s, secs)) {
+                lost.push_back(c);
+                coarseRankDue_ = true;
+                continue;
+            }
+            L.lost[c] = 0;
             for (auto& [key, sec] : secs) {
                 if (key.y < y0 || key.y >= y1) continue;
                 CPending& p = cpending_[{key.x, key.y, key.z}];
                 if (p.ids.gpu() && !gpuRef_.count({key.x, key.y, key.z}))
                     p.ids = sec.raw ? VgSrc{VgIds(sec.raw, &sec.raw->mats), nullptr} : VgSrc{nullptr, sec.packed};
+                if (!p.ids.gpu()) worldSources_.insert({key.x, key.y, key.z});
                 p.levels |= 1u << k;
             }
             for (int dz = 0; dz < s; dz++)
@@ -2120,6 +2249,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     int sectionLevels = std::min(4, activeCoarse_);
     for (auto& [dist, key] : order) {
         auto pit = cpending_.find(key);
+        if (!refreshWorldSource(key, pit->second.ids)) continue;
         CPending p = std::move(pit->second);
         cpending_.erase(pit);
         bool onGpu = p.ids.gpu();  // (ingestGpu's: taken as having blocks unless the caller said it is one id)

@@ -978,10 +978,6 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
     ATLAS_TRY
     ATLAS_ZONE("api:update");
     double ms = 0;
-    // the level-0 grid: the columns its window entered read from the world here when the render thread could not (its
-    // lock busy); what it gave up is the CPU's level 0 again only on the CPU backend (on a device the grid's coarse
-    // levels answer there: no CPU level 0 near)
-    ctx->voxgrid.refill(ctx->world);
     {
         std::vector<Key3> rel = ctx->voxgrid.takeReleased();
         if (!rel.empty() && !ctx->backend->onDevice()) ctx->world.gridReleased(rel);
@@ -996,6 +992,10 @@ ATLAS_API AtlasStatus atlas_update(AtlasContext* ctx, const double centre[3], do
         ATLAS_ZONE("world:update");
         ctx->world.update(centre, budgetMs, &ms);
     }
+    // Update first establishes the new retention centre. Read a future camera window on this thread before its
+    // first frame; frame() only tries memory and must never have to perform a cold read on a jump/reload.
+    ctx->voxgrid.prepare(ctx->world, centre);
+    ctx->voxgrid.refill(ctx->world);
     ctx->stats.lastBuildMs = ms;
     // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
     // a lost device stages nothing (the render thread reports the loss)

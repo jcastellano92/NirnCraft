@@ -119,6 +119,13 @@ rebuilt against the existing glibc-2.28 sysroot and loaded successfully in WSL; 
 newest required symbol. This is build/load evidence, not cross-vendor rendering acceptance. The harness now retains
 full check logs, streams TRACE progress and preserves partial timeout evidence, including owned-tree cleanup.
 
+Frame-pacing integration (2026-10-27): the main-base candidate moves cold section reads/decode outside terrain/grid
+locks and applies immutable snapshots only while their source revisions remain valid. Its native cold revisit keeps
+all six disk reads and zero of 4096 return-hit differences. Both packaged platforms load at ABI 0.17/166 exports;
+Java has 353 tests, zero failures/errors and 19 opt-in skips. The explicit-base check-tier gate passes all seven
+planned items with nothing missing. This is correctness and lock-ownership evidence, not a new route measurement.
+The shared-Vulkan/lifetime/cache experiments remain isolated; no stage target is relaxed or marked complete.
+
 First integrated scripted-route baseline (2026-10-26, main `4e407ed5`): 2560×1440 RTX 3090, 4,950 measured frames,
 ten captures (the harness excludes 100 capture-overhead frames). **FAIL:** p99 41.23 ms, worst 90.06 ms, 11 frames
 over 50 ms. Recorder evidence includes generator queue delays and a 68.7-ms `api:setView` CPU stall alongside a

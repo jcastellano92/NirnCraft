@@ -503,10 +503,12 @@ void World::setGenFingerprint(uint64_t fp) {
     {
         fr::LockZone lock(mu_, "wait:world.mu(setGenFingerprint#1)", "hold:world.mu(setGenFingerprint#1)");
         if (genFp_ == fp) return;
+        ++sectionRevision_;
         genFp_ = fp;
         root = storeRoot_;
     }
     genCache_->configure(root, fp);
+    { std::lock_guard<std::mutex> lock(mu_); ++sectionRevision_; }
 }
 
 namespace {
@@ -568,6 +570,7 @@ std::shared_ptr<const Section> World::layerOver(const Key3& k, Section& s, uint8
 }
 
 void World::commitSection(const Key3& k, std::shared_ptr<Section> s, uint8_t flags) {
+    ++sectionRevision_;
     sections_[k] = s;
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(k);  // (World::digest)
     markSectionDirty(k.x, k.y, k.z);
@@ -598,7 +601,8 @@ void World::baseIn(const Key3& k, const uint16_t* base, Made* made) {
 }
 
 void World::takeBaseWanted(std::vector<Key3>& out) {
-    fr::LockZone lock(mu_, "wait:world.mu(takeBaseWanted#1)", "hold:world.mu(takeBaseWanted#1)");
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return;
     out.swap(baseWanted_);
     baseWanted_.clear();
     baseWantedN = 0;
@@ -608,6 +612,38 @@ void World::baseUniform(const Key3& k, uint16_t id, Made& made) {
     fr::LockZone lock(mu_, "wait:world.mu(baseUniform#1)", "hold:world.mu(baseUniform#1)");
     std::vector<uint16_t> ids(4096, id);
     baseIn(k, ids.data(), &made);
+}
+
+bool World::baseNeedsIo(const Key3& k, const uint16_t* base) const {
+    auto layer = store_->layer(k);
+    if (!layer || sections_.count(k) || store_->has(k)) return false;
+    if (layer->replaced || layer->baseLost) return true;
+    return layer->baseKnown && sectionHash(base) != layer->baseHash && layer->fbBytes;
+}
+
+bool World::tryBaseUniform(const Key3& k, uint16_t id, Made& made) {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;
+    uint16_t ids[4096]; std::fill(ids, ids + 4096, id);
+    if (baseNeedsIo(k, ids)) return false;
+    baseIn(k, ids, &made);
+    return true;
+}
+
+void World::takeGridMade(Made& out) {
+    std::lock_guard<std::mutex> lock(mu_);  // existing update thread only, never under the grid lock
+    drainInbox();
+    out.swap(gridMade_);
+}
+
+bool World::tryLayerNeed(const Key3& k, int& need) {
+    need = 0;
+    if (!layerCount.load(std::memory_order_relaxed)) return true;
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;
+    LayerPtr layer = store_->layer(k);
+    if (layer) need = layer->replaced || layer->baseLost || layer->selfContained() || sections_.count(k) || store_->has(k) ? 1 : 2;
+    return true;
 }
 
 int World::layerNeed(const Key3& k) {
@@ -643,14 +679,85 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
     return s;
 }
 
+bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep) {
+    out = {};
+    std::unique_lock<std::mutex> lock(mu_, std::defer_lock);
+    if (wait) lock.lock();
+    else if (!lock.try_lock()) return false;
+    auto read = store_->readRange(sx0, sz0, sx1, sz1, outsideKeep);
+    for (auto& region : read.regions) if (region.scanned)
+        region.index.erase(std::remove_if(region.index.begin(), region.index.end(), [&](const auto& loc) {
+            return sections_.count(loc.key) != 0;
+        }), region.index.end());
+    read.layers.erase(std::remove_if(read.layers.begin(), read.layers.end(), [&](const auto& layer) {
+        return sections_.count(layer.key) != 0;
+    }), read.layers.end());
+    bool complete = true;
+    if (!wait && read.needsIo()) return false;  // acquiring a try-lock never permits cold I/O on the render thread
+    if (wait && read.needsIo()) {
+        auto release = readReleaseForTest_;
+        auto held = readHeldForTest_;
+        lock.unlock();
+        if (release && held) {
+            held->store(true);
+            while (!release->load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        SectionStore::resolveRange(read);
+        lock.lock();
+        read.loaded.erase(std::remove_if(read.loaded.begin(), read.loaded.end(), [&](const auto& entry) {
+            return sections_.count(entry.key) != 0;
+        }), read.loaded.end());
+        complete = store_->completeRange(read);
+        ++sectionRevision_;
+    }
+    for (const auto& [k, sec] : sections_)
+        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.entries.emplace_back(k, SectionSrc{sec, nullptr});
+    std::vector<std::pair<Key3, PackedIds>> warm;
+    store_->memoryInRange(sx0, sz0, sx1, sz1, warm);
+    for (auto& [k, words] : warm)
+        if (!sections_.count(k)) out.entries.emplace_back(k, SectionSrc{nullptr, std::move(words)});
+    out.revision = sectionRevision_;
+    return complete;
+}
+
+bool World::applySections(const SectionSnapshot& snapshot, const std::function<void()>& apply) const {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock() || sectionRevision_ != snapshot.revision) return false;
+    apply();
+    return true;
+}
+
+void World::sectionReadBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held) {
+    std::lock_guard<std::mutex> lock(mu_);
+    readReleaseForTest_ = release;
+    readHeldForTest_ = held;
+}
+
 void World::sectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
-    fr::LockZone lock(mu_, "wait:world.mu(sectionsIn#1)", "hold:world.mu(sectionsIn#1)");
-    for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
-    std::vector<std::pair<Key3, PackedIds>> packed;
-    store_->inRange(sx0, sz0, sx1, sz1, packed);
-    for (auto& [k, w] : packed)
-        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
+    SectionSnapshot snapshot;
+    snapshotSections(sx0, sz0, sx1, sz1, true, snapshot);
+    out.insert(out.end(), snapshot.entries.begin(), snapshot.entries.end());
+}
+
+bool World::trySectionSource(int sx, int sy, int sz, SectionSrc& out) {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;
+    auto it = sections_.find({0, sx, sy, sz});
+    out = it != sections_.end() ? SectionSrc{it->second, nullptr} : SectionSrc{nullptr, store_->peek({0, sx, sy, sz})};
+    return true;
+}
+
+bool World::trySectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1,
+                            std::vector<std::pair<Key3, SectionSrc>>& out) {
+    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
+    if (!lock.owns_lock()) return false;
+    for (int z = z0; z < z1; z++) for (int x = x0; x < x1; x++) for (int y = y0; y < y1; y++) {
+        Key3 k{0, x, y, z};
+        auto it = sections_.find(k);
+        if (it != sections_.end()) out.emplace_back(k, SectionSrc{it->second, nullptr});
+        else if (PackedIds words = store_->peek(k)) out.emplace_back(k, SectionSrc{nullptr, std::move(words)});
+    }
+    return true;
 }
 
 void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::vector<std::pair<Key3, SectionSrc>>& out) {
@@ -668,13 +775,41 @@ void World::sectionsInBox(int x0, int y0, int z0, int x1, int y1, int z1, std::v
             }
 }
 
+bool World::resolveSectionSource(int sx, int sy, int sz, SectionSrc& out) {
+    out = {};
+    Key3 key{0, sx, sy, sz};
+    auto current = [&] {
+        if (auto it = sections_.find(key); it != sections_.end()) { out = {it->second, nullptr}; return true; }
+        if (PackedIds words = store_->peek(key)) { out = {nullptr, std::move(words)}; return true; }
+        return false;
+    };
+    std::unique_lock<std::mutex> lock(mu_);
+    if (current()) return true;
+    lock.unlock();
+    SectionSnapshot snapshot;
+    bool complete = snapshotSections(sx, sz, sx + 1, sz + 1, true, snapshot, true);
+    lock.lock();
+    if (current()) return true;
+    if (!complete) return false;
+    uint64_t revision = sectionRevision_;
+    lock.unlock();
+    PackedIds words = genCache_->on() ? genCache_->section(key) : nullptr;
+    lock.lock();
+    if (current()) return true;
+    if (sectionRevision_ != revision) return false;  // identity/edit changed during I/O: retain the request
+    if (words) {
+        uint16_t ids[4096]; unpackSection(words->data(), ids);
+        store_->put(key, words, sectionHash(ids), SectionStore::REGEN);
+        ++sectionRevision_;
+    }
+    out = {nullptr, words};
+    return true;
+}
+
 World::SectionSrc World::sectionSource(int sx, int sy, int sz) {
-    fr::LockZone lock(mu_, "wait:world.mu(sectionSource#1)", "hold:world.mu(sectionSource#1)");
-    auto it = sections_.find({0, sx, sy, sz});
-    if (it != sections_.end()) return {it->second, nullptr};
-    PackedIds w = store_->get({0, sx, sy, sz});
-    if (!w && genCache_->on()) w = genCache_->section({0, sx, sy, sz});  // (a generated one the cache holds: never generated again)
-    return {nullptr, w};
+    SectionSrc out;
+    resolveSectionSource(sx, sy, sz, out);
+    return out;
 }
 
 bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) {
@@ -689,14 +824,9 @@ bool World::sectionMats(int sx, int sy, int sz, uint16_t out[4096]) {
 }
 
 bool World::trySectionsIn(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, SectionSrc>>& out) {
-    std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
-    if (!lock.owns_lock()) return false;
-    for (auto& [k, s] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.emplace_back(k, SectionSrc{s, nullptr});
-    std::vector<std::pair<Key3, PackedIds>> packed;
-    store_->inRange(sx0, sz0, sx1, sz1, packed);
-    for (auto& [k, w] : packed)
-        if (!sections_.count(k)) out.emplace_back(k, SectionSrc{nullptr, w});
+    SectionSnapshot snapshot;
+    if (!snapshotSections(sx0, sz0, sx1, sz1, false, snapshot)) return false;
+    out.insert(out.end(), snapshot.entries.begin(), snapshot.entries.end());
     return true;
 }
 
@@ -745,6 +875,7 @@ void World::packedApplyOne(const PackDone& d, Made* made) {
     }
     auto m = rawMeta_.find(d.key);
     if (m == rawMeta_.end() || m->second.gen != d.gen || !d.words) return;  // (an upload since replaced it)
+    ++sectionRevision_;
     store_->put(d.key, d.words, d.hash, m->second.flags);
     sections_.erase(d.key);
     undigested_.erase(d.key);
@@ -760,24 +891,16 @@ void World::drainInbox() {
         take.swap(inbox_);
         inboxFull_.store(false, std::memory_order_release);
     }
-    packedApply(take, nullptr);
+    packedApply(take, &gridMade_);
 }
 
 void World::packedDone(const std::vector<PackDone>& done, Made* made) {
     std::unique_lock<std::mutex> lock(mu_, std::try_to_lock);
     if (!lock.owns_lock()) {
-        // busy (an update's commit, a spill slice): the render thread does not wait. What needs no `made` (the bakes and the
-        // packed sections) is applied by the next holder of the lock; a base fetch's sections go back at once, so wait
-        bool needsMade = false;
-        for (const PackDone& d : done) needsMade |= (d.gen & BASE_FETCH) != 0;
-        if (!needsMade) {
-            std::lock_guard<std::mutex> g(inboxMu_);
-            inbox_.insert(inbox_.end(), done.begin(), done.end());
-            inboxFull_.store(true, std::memory_order_release);
-            return;
-        }
-        ATLAS_ZONE_MIN("wait:world.mu(packedDone, base fetch)", 200);
-        lock.lock();
+        std::lock_guard<std::mutex> g(inboxMu_);
+        inbox_.insert(inbox_.end(), done.begin(), done.end());
+        inboxFull_.store(true, std::memory_order_release);
+        return;  // base-fetch replies return to the grid through the existing update thread too
     }
     uint64_t t1 = fr::nowNs();
     // The render thread's share: an edit's base fetch at once (its sections go back in `made`), then what waited and this
@@ -795,10 +918,21 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
         take.swap(inbox_);
         inboxFull_.store(false, std::memory_order_release);
     }
-    take.reserve(take.size() + done.size());
-    for (const PackDone& d : done) {
-        if (d.gen & BASE_FETCH) packedApplyOne(d, made);
-        else take.push_back(d);
+    std::vector<PackDone> all;
+    all.swap(take);
+    all.insert(all.end(), done.begin(), done.end());
+    take.reserve(all.size());
+    for (const PackDone& d : all) {
+        if (d.gen & BASE_FETCH) {
+            uint16_t ids[4096];
+            if (!d.words) continue;
+            unpackSection(d.words->data(), ids);
+            if (baseNeedsIo(d.key, ids)) {
+                std::lock_guard<std::mutex> g(inboxMu_);
+                inbox_.push_back(d);
+                inboxFull_.store(true, std::memory_order_release);
+            } else packedApplyOne(d, made);
+        } else take.push_back(d);
     }
     applySlice(take, 64, [&](const PackDone& d) { packedApplyOne(d, nullptr); }, [&] { return fr::nowNs() - t1 >= sliceNs; });
     if (!take.empty()) {
@@ -817,6 +951,7 @@ void World::packedDone(const std::vector<PackDone>& done, Made* made) {
 void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBytes, uint64_t coldBytes,
                            Made* made) {
     std::unique_lock<std::mutex> lock(mu_);
+    ++sectionRevision_;
     // (the cold tier's whole records carry the caller's version and the native build's: another build's are not read)
     uint64_t bh = buildHash();
     genVersion ^= uint32_t(bh) ^ uint32_t(bh >> 32);
@@ -831,6 +966,7 @@ void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVe
         lock.unlock();
         genCache_->configure(root, fp);
         lock.lock();
+        ++sectionRevision_;
     }
     layerCount = store_->layerCount();
     // (layers on disk still waiting for a base: asked of the grid again)
@@ -1034,6 +1170,8 @@ bool World::editBlock(int x, int y, int z, uint16_t mat) {
     fr::LockZone lock(mu_, "wait:world.mu(editBlock#1)", "hold:world.mu(editBlock#1)");
     int sx = floorDiv(x, 16), sy = floorDiv(y, 16), sz = floorDiv(z, 16);
     Key3 sk{0, sx, sy, sz};
+    ++sectionRevision_;
+    store_->changed(sk);
     uint32_t voxel = uint32_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)));
     auto it = sections_.find(sk);
     std::shared_ptr<Section> s;
@@ -2280,7 +2418,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
         for (auto it = sections_.begin(); it != sections_.end();) {
             int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
             if (std::abs(rx - centreRegion[0][0]) > keep || std::abs(rz - centreRegion[0][1]) > keep)
-                undigested_.erase(it->first), rawMeta_.erase(it->first), it = sections_.erase(it);
+                ++sectionRevision_, undigested_.erase(it->first), rawMeta_.erase(it->first), it = sections_.erase(it);
             else ++it;
         }
         cp("update.evict sections");
