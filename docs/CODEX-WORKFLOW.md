@@ -1,10 +1,11 @@
 # Continuing ATLAS with Codex
 
 Current ownership and measured gaps are at the top of [CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md), updated
-2026-10-27 after the retained-cache controls and failed stationary reload. Main remains GL-host/native Vulkan;
-the ABI0.19 shared-device work and GL Java lifecycle/alias candidate are isolated. The coordinator now owns the
-confirmed grid standby admission repair, Sol the terminal-close matrix, Terra the cache witness and real GPU
-regression planning, with the Terra gatekeeper read-only. Keep one heavy job across all four roles.
+2026-10-27 at12:10EDT after actual default shared-Vulkan readiness and one graceful live closure. Main remains
+GL-host/native Vulkan; the assembled ABI0.19 candidate is isolated at03a502ca. The coordinator owns adoption and
+packaging, Sol reviews memory/shutdown evidence, Terra isolates real store/feature generation memory, and the Terra
+gatekeeper independently reviews source, provenance and images. Source work continues in parallel, with one heavy
+job across all four roles. Cold memory growth and intermittent forced shutdown remain open; no stage is complete.
 
 The owner requested continued renderer development on 2026-10-26, preserving the Claude workflow that worked:
 one orchestrator, focused worktree workers, independent reviewers, a shared machine queue, and measured gates.

@@ -11,7 +11,7 @@ the renderer. No pushes are authorized.
 | Loading worker (`terra_seam`) | gpt-6.1-terra | Fix loading/cache latency and isolate generation/capture allocation ownership | Real finer-horizon completion and near fairness, per-coordinate cache attribution, bounded actual store-stage workload | loading-cache-latency; cache witness preserved; Crafter implementation remains isolated with unverified runtime tests |
 | Independent gatekeeper (`renderer_gatekeeper`) | gpt-6.1-terra | Verify evidence against the complete stage0-5 requirements and catch regressions | Maintain requirement/evidence/gap matrix; independent image/diff verdicts; reject insufficient coverage, stale artifacts or narrow checks used as broad acceptance | Read-only tracked source; own reports under E:/NirnCraft-scratch/codex-gatekeeper-evidence |
 
-## Direct Vulkan candidate checkpoint (2026-10-27,11:50EDT)
+## Direct Vulkan candidate checkpoint (2026-10-27,12:10EDT)
 
 Accepted main remains at42132fa6 with GL-host/native Vulkan. The isolated candidate now includes default-on shared
 Vulkan, Vulkan-first pack/development defaults, the reviewed ABI0.19 lifetime implementation and existing main
@@ -28,7 +28,15 @@ then exceeded the sampled24GiB-job reserve: peak22.71GiB, forced cleanup. This i
 Warm diagnostic replay `live-20261027-114700-292044` reached ready and produced both captures at peak13.56GiB, but
 also required forced cleanup. Its verified Minecraft VMA/native/driver/heap counters have different scopes and do
 not attribute the earlier cold private-memory growth. Two independent checks confirmed restored settings, no lease
-and no matching client/launcher; they do not establish graceful native retirement. Main integration stays pending.
+and no matching client/launcher; they do not establish graceful native retirement.
+
+Warm replay `live-20261027-120320-976347` reached full readiness and both captures, then closed the client and
+launcher without force (peak12.65GiB,94.66s). Independent postchecks confirm restored settings, absent processes
+and lease, and unchanged source/packages. Enabled NMT summaries were captured at startup/precleanup; no shutdown
+thread dump was needed. Different cache workload prevents attributing the previous intermittent forced closures.
+Cold memory growth remains open. Precleanup NMT tracks3454646KB committed, not all process-private memory.
+Independent visual review finds different camera positions/eyes in the pair and visible distant banding/speckle
+and a tan patch; this is no equivalence or visual-stage pass. Main integration stays pending.
 
 The earlier GL reload's72.86-second ready observation used a30-second stalled finer gate with21 tiles outstanding.
 It was not a complete horizon. The candidate now retains the real count and alternates bounded finer-horizon work
