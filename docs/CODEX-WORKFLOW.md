@@ -7,7 +7,8 @@ The renderer's goals and order remain [ATLAS-PLAN.md](ATLAS-PLAN.md), not a new 
 ## Instructions and roles
 
 Codex enters through [AGENTS.md](../AGENTS.md). Project roles live in `.codex/agents/`: `stage_worker`,
-`renderer_reviewer`, and `visual_reviewer`. The project config permits one active child alongside the orchestrator.
+`renderer_reviewer`, and `visual_reviewer`. The owner expanded the project on 2026-10-26 to three assigned workers alongside the orchestrator.
+The current goals, ownership and gates are in [CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md).
 The owner chose `gpt-6.1-terra` for gatekeeping and focused work, and `gpt-6.1-sol` with high effort for deeper
 renderer review. These choices are explicit in the role files; no Claude aliases are translated into model names.
 If a client cannot select a custom role, the orchestrator passes the corresponding instructions in the task.
@@ -147,3 +148,11 @@ The original feature adds 16 bytes/thread local memory and 16,640 bytes driver b
 smaller helper interface preserved exact colors but increased those costs further and was rejected. Both variants
 remain isolated. The next paired experiment ports face means into the lean stage, whose smooth blend still used
 palette colors; no shader feature from these experiments is integrated into main.
+
+
+## Owner-approved parallel expansion (2026-10-26)
+
+The owner requested additional concurrent agents. The project cap is now three child threads plus the coordinator;
+this supersedes the previous one-child policy. See [CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md) for assigned goals,
+measurable gates and isolated ownership. One-heavy-job scheduling remains enforced by the coordinator. The config
+counts child threads excluding the primary, as documented in the official [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).

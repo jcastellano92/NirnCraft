@@ -13,8 +13,8 @@ below apply to every session and agent.
 
 ## Resources (every session and agent; ATLAS-STATUS.md, after the 2026-10-20 machine lock-up)
 
-* **One heavy job at a time**: native builds, Gradle, offline renders and the game never run together. Agents run
-  one or two at a time, not four.
+* **Owner expansion (2026-10-26):** three source/review workers may run alongside the coordinator. The coordinator grants one heavy-job window at a time; see CODEX-AGENT-GOALS.md.
+* **One heavy job at a time**: native builds, Gradle, offline renders and the game never run together. The coordinator and up to three workers may inspect/edit/review concurrently; only one heavy job runs.
 * **Every heavy job goes through the shared lock**: `py -3 E:/NirnCraft-scratch/locks/heavy.py "<agent>: <what>" --
   <command>` (builds, tests and offline renders share 3 slots; `--exclusive` only for the game client and runs whose timings
   matter, since a pending exclusive job holds every new job back;

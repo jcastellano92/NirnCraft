@@ -13,7 +13,9 @@ choose checks. Weather, world expansion and later renderer stages stay parked un
 ## Coordination
 
 The owner requests the existing orchestrator/worker/reviewer workflow. Use focused subagents when useful, with
-at most one active child alongside the orchestrator. Parallel reading is fine; heavy jobs share the machine queue.
+up to three active children alongside the orchestrator (owner expansion, 2026-10-26).
+Parallel source work and review are encouraged. Only one heavy build/test/GPU job runs at a time: workers report
+ready jobs to the orchestrator and wait for a queue window; GPU-only exclusivity does not serialize CPU builds.
 Give each task its stage, owned files, a concrete question, gate and expected evidence. A reviewer is read-only.
 Use `.codex/agents/` roles when supported; otherwise include their instructions in the delegated task explicitly.
 The owner chose Terra for gatekeeping and Sol for higher reasoning: `gpt-6.1-terra` for the gatekeeper, visual
