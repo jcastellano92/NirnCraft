@@ -19,6 +19,7 @@ JCMD = Path(os.environ['JAVA25_HOME']) / 'bin/jcmd.exe' if os.environ.get('JAVA2
 sys.path.insert(0, str(HERE))
 import game
 import atlas_static
+import probe_visuals
 import atlas_tools
 import process_memory
 import probe_flags
@@ -314,7 +315,9 @@ def route_comparison(evidence, deadline):
         if deadline - time.monotonic() < 125:
             raise TimeoutError('at least 125 work seconds required for the original 92-second route')
         atlas_tools.wait_alive = bounded_alive
-        data = atlas_tools.fly_route(SimpleNamespace(game=RouteGame()), {'timeout': deadline - time.monotonic() - 10})
+        route_tag = 'atlasroute_' + Path(evidence).name.rsplit('-', 1)[-1]
+        probe_visuals.journal(evidence, [route_tag + '_c%02d' % i for i in range(1, 11)])
+        data = atlas_tools.fly_route(SimpleNamespace(game=RouteGame()), {'timeout': deadline - time.monotonic() - 10}, tag=route_tag)
         (folder / 'raw-report.json').write_text(json.dumps(data, indent=2), encoding='utf-8')
         metrics, fails = atlas_tools.summarize(data)
         if data.get('ticks') != 1840 or data.get('display', {}).get('framebufferW') != 2560 or data.get('display', {}).get('framebufferH') != 1440:
@@ -440,7 +443,8 @@ def worker(evidence, deadline):
                 break
             if remaining < 8:
                 raise RuntimeError('deadline before ' + name + ' capture')
-            scene = {'id': 'vk-probe-' + name, 'timeout': min(remaining - 2, 30)}
+            scene = {'id': 'vk-probe-' + name + '-' + evidence.name.rsplit('-', 1)[-1], 'timeout': min(remaining - 2, 30)}
+            probe_visuals.journal(evidence, ['h-' + scene['id'] + '-vanilla'])
             shot, rec, _, extra = game.capture(scene, 'vanilla',
                 [f'visit {px} {z} 3 {atlas_tools.HEADING} 6 clear']
                 + (['try time set 6000'] if resource_reload else []) + ['hud on', 'wait 10'],
@@ -831,11 +835,21 @@ def main():
     ap.add_argument('--worker', nargs=2, metavar=('EVIDENCE', 'DEADLINE'), help=argparse.SUPPRESS)
     ap.add_argument('--close-worker', action='store_true', help=argparse.SUPPRESS)
     ap.add_argument('--snapshot-worker', metavar='EVIDENCE', help=argparse.SUPPRESS)
+    ap.add_argument('--visual-worker', nargs=2, metavar=('EVIDENCE', 'DEADLINE'), help=argparse.SUPPRESS)
     args = ap.parse_args()
     if not args.route_comparison and args.limit > 240: ap.error('limits above 240 require --route-comparison')
     if args.route_comparison and (args.transport != 'shared' or args.resource_reload or args.memory_diagnostics or args.jvm_native_diagnostics or args.fresh_generator_cache):
         ap.error('--route-comparison requires shared transport, kept cache and diagnostics/reload off')
     if args.resource_reload and args.transport != 'gl': ap.error('--resource-reload requires --transport gl')
+    if args.visual_worker:
+        evidence, end = Path(args.visual_worker[0]), float(args.visual_worker[1])
+        while time.monotonic() < end and not (evidence / 'visual-stop').exists():
+            try: probe_visuals.recover(evidence, game.SHOTS)
+            except Exception as exc: print('visual recovery unverified:', type(exc).__name__, flush=True)
+            time.sleep(1)
+        try: probe_visuals.recover(evidence, game.SHOTS)
+        except Exception as exc: print('visual recovery unverified:', type(exc).__name__, flush=True)
+        return 0
     if args.close_worker:
         game.close()
         return 0
@@ -914,9 +928,11 @@ def main():
             result['jcmd_observations'].append(observation)
             return observation
         child = None
+        visual = None
         safe_release = False
         options.write_bytes(b''.join(lines))
         try:
+            visual = subprocess.Popen([sys.executable, '-u', __file__, '--visual-worker', str(evidence), str(deadline - 8)], env=env)
             child = subprocess.Popen([sys.executable, '-u', __file__, '--worker', str(evidence), str(work_deadline)], env=env)
             last = next_sample = 0
             while child.poll() is None and time.monotonic() < work_deadline:
@@ -973,6 +989,15 @@ def main():
         except Exception as exc:
             result['cleanup_error'] = str(exc)
         try:
+            (evidence / 'visual-stop').touch()
+            if visual:
+                try: visual.wait(timeout=budget(deadline, 4, 2))
+                except (subprocess.TimeoutExpired, TimeoutError):
+                    visual.kill(); visual.wait(timeout=budget(deadline, 1, 1))
+                    result['visual_error'] = 'visual helper exceeded cleanup budget'
+        except Exception as exc:
+            result['visual_error'] = str(exc)
+        try:
             bounded_snapshot(evidence, deadline, result)
         except Exception as exc:
             result['snapshot_error'] = str(exc)
@@ -981,6 +1006,13 @@ def main():
         print('UNVERIFIED supervisor receipt', evidence / 'supervisor-receipt.json', flush=True)
         return 2
     finally:
+        # Only the helper created by this supervisor; never leave it behind on an unexpected exception.
+        if 'visual' in locals() and visual is not None and visual.poll() is None:
+            try:
+                visual.kill()
+                visual.wait(timeout=1)
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                print('UNVERIFIED visual helper reap failed:', type(exc).__name__, flush=True)
         if safe_release: game.drop_lease()
 
 

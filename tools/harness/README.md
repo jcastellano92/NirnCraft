@@ -394,3 +394,18 @@ says queued behind the generator, and on a launch that never reached ready.
 still for 4 s) instead of Sodium's built chunks, which do not exist when atlas draws everything. The route reads atlas_info
 on a sampler thread once per route second, so the reading never lengthens a frame. A worktree without a native build uses
 the shipped `atlas_core.dll` when the manifest says it is current for these sources (no accidental native build).
+
+The bounded `atlas_vulkan_probe.py` also preserves visual evidence while its worker runs. It journals unique
+capture tags before requesting the normal before/after views or ten route captures. A separate bounded helper
+copies completed, fresh PNG/metadata pairs into `visual-originals/`, records their SHA-256 hashes in
+`visual-index.json`, and updates `visual-sheet.jpg` with separate recovered/missing labels. `TRACE visual evidence`
+announces changed evidence so the coordinator can hand the current sheet and originals to the Terra visual reviewer
+before the job finishes. The helper can recover a saved capture even if the action worker fails before returning it.
+It does not request extra screenshots, capture the desktop, or bypass the loading action queue.
+
+The index remains `INCREMENTAL_UNVERIFIED`; a populated sheet does not establish readiness, parity or clean shutdown.
+Original images stay at full resolution. Retained files are rehashed, incomplete/stale pairs are rejected, and failed
+or missing sheets are retried. Seventy-one CPU probe tests pass, including recovery after worker failure, partial
+route progress, altered evidence, corrupt PNGs and sheet-write retry (`1027-141340`). The historical replay at
+`E:/NirnCraft-scratch/codex-vulkan-evidence/historical-visual-replay-133613/` contains one recovered image and one
+missing step from the failed 13:36 run; it is explicitly historical manual recovery, not a new live pass.
