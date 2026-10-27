@@ -514,6 +514,9 @@ private:
     // the in-window sections known but not resident: CPU ones by their ids, GPU ones by key (asked for again)
     std::unordered_map<Key, uint8_t, KeyHash> standby_;  // (host sections: their ids from World::sectionSource)
     std::unordered_map<Key, uint8_t, KeyHash> gpuStandby_;  // (1: asked for already)
+    // Newly ingested standby sections have no pending level-0 job to register their GPU ranking flag.
+    // World keys survive a window shift; only these changes, not the whole standby map, are drained by take0Gpu.
+    std::unordered_set<Key, KeyHash> gpuCandDirty_;
     std::vector<std::array<int32_t, 4>> gpuWanted_;
     // (the reports, bounded: a consumer that never takes them loses the oldest, never memory)
     void reportDropped(const std::array<int32_t, 4>& r);

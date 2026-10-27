@@ -185,6 +185,75 @@ static void missingEditedBase() {
           "a rejected GPU delivery removed its standby request while the world lock was busy");
 }
 
+// The last variant leaves an older host pending entry at the same key: its flag update must not race the new
+// GPU candidate in one dispatch. The dirty change survives and is registered in the following batch instead.
+enum class StandbyChange { None, InitialClear, RetainedShift, Jump, HostReplace, UniformReplace, NoCoarse, FlagConflict };
+static void gpuStandbyCandidate(StandbyChange change) {
+    std::printf("TRACE begin GPU standby candidate case %d\n", int(change));
+    World world;
+    VoxGrid grid;
+    grid.D = 8; grid.slotCap = change == StandbyChange::FlagConflict ? 1 : 64;
+    grid.coarseLevels = change == StandbyChange::NoCoarse ? 0 : 1; grid.coarseD = 8;
+    grid.coarseCap[1] = 16; grid.gpuRank = true; grid.setWorld(&world);
+    const float forward[3] = {1, 0, 0};
+    grid.setView(forward, 0.5f, 0.1f, 0);  // level 0 reaches 20 blocks, not section x=3
+    int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world);
+    if (change != StandbyChange::InitialClear) grid.take(8);
+    if (change == StandbyChange::FlagConflict) {
+        grid.put(0, 6, 0, std::make_shared<const std::array<uint16_t, 4096>>(ids(3)));
+        grid.take(8);  // fill the sole slot, so the older pending source will emit a waiting flag
+        grid.put(3, 6, 0, std::make_shared<const std::array<uint16_t, 4096>>(ids(5)));
+    }
+    uint64_t offset = 0;
+    int32_t position[3] = {3, 6, 0}; uint8_t accepted = 0;
+    const size_t expected = change == StandbyChange::NoCoarse ? 0 : 1;
+    check(grid.ingestGpu(1, &offset, position, 1, &accepted) == expected && accepted == expected,
+          "standby fixture did not accept the GPU section into its coarse level");
+    check(grid.residency().gpuWaiting == 1, "out-of-reach GPU section did not enter standby");
+    const uint32_t cell = uint32_t((6 - VG_MIN_SY) * 8 * 8 + 3);
+    auto hasCandidate = [&](const VgBatch& batch) {
+        return std::find(batch.cand.begin(), batch.cand.end(), std::pair<uint32_t, uint32_t>{cell, 2}) != batch.cand.end();
+    };
+    if (change == StandbyChange::RetainedShift) {
+        camera[0] = 80; grid.frame(camera, world);  // shift five columns; section x=3 remains in the window
+        auto vacated = grid.take(8);
+        check(!vacated.clear && !vacated.jobs.empty() && vacated.cand.empty(),
+              "incremental shift fixture did not exercise the column-only early return");
+    } else if (change == StandbyChange::Jump) {
+        camera[0] = 4096; grid.frame(camera, world);
+    } else if (change == StandbyChange::HostReplace) {
+        grid.put(3, 6, 0, std::make_shared<const std::array<uint16_t, 4096>>(ids(7)));
+    } else if (change == StandbyChange::UniformReplace) {
+        uint32_t uniform = 0;
+        check(grid.ingestGpu(1, &offset, position, 1, &accepted, &uniform) == 1,
+              "uniform replacement fixture did not accept its delivery");
+    } else if (change == StandbyChange::FlagConflict) {
+        auto conflicting = grid.take(8);
+        check(!hasCandidate(conflicting) &&
+              std::count_if(conflicting.cand.begin(), conflicting.cand.end(), [&](const auto& c) { return c.first == cell; }) == 1,
+              "dirty GPU candidate raced an existing update to the same physical cell");
+    }
+    auto batch = grid.take(8);  // bookkeeping only: no fake GPU buffer is dereferenced
+    if (change == StandbyChange::Jump || change == StandbyChange::HostReplace || change == StandbyChange::UniformReplace) {
+        check(!hasCandidate(batch) && grid.residency().gpuWaiting == 0,
+              "stale standby candidate survived a window jump or replacement");
+        check(!hasCandidate(grid.take(8)) && grid.takeGpuWanted().empty(),
+              "removed standby candidate was revived by a later batch");
+        return;
+    }
+    check(hasCandidate(batch),
+          "ingested GPU standby section was never registered as a GPU ranking candidate");
+    check(batch.rank.on, "new GPU standby candidate did not schedule ranking");
+    check(!hasCandidate(grid.take(8)), "unchanged standby candidate was re-emitted every batch");
+    grid.setView(forward, 0.5f, 0, 0);  // unbounded footprint grows the reach without a timed sleep
+    grid.frame(camera, world);
+    grid.rankResults({cell}, {}, 255, 0);  // host plumbing only; actual GPU ranking is a separate gate
+    grid.take(8);
+    auto wanted = grid.takeGpuWanted();
+    check(wanted.size() == 1 && wanted[0] == std::array<int32_t, 4>{0, 3, 6, 0},
+          "ranked GPU standby section was not requested after reach grew");
+}
+
 static void destructiveColdChange() {
     Fixture fixture;
     SectionStore store; store.configure(fixture.path.string(), 42, 7, 1ull << 24, 1ull << 28);
@@ -306,6 +375,9 @@ int main() {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
         heldWorld(false); heldWorld(true); coldEdit(false); coldEdit(true); revisionAndReset(); missingEditedBase(); destructiveColdChange(); coldMutationTickets();
         publicationEdit(false); publicationEdit(true); coldUpdateCompatibility();
+        for (auto change : {StandbyChange::None, StandbyChange::InitialClear, StandbyChange::RetainedShift,
+                            StandbyChange::Jump, StandbyChange::HostReplace, StandbyChange::UniformReplace,
+                            StandbyChange::NoCoarse, StandbyChange::FlagConflict}) gpuStandbyCandidate(change);
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

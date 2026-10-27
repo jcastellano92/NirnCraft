@@ -483,6 +483,7 @@ void VoxGrid::dropOutside() {
     auto out = [&](const Key& k) { return !inWindow(k.x, k.y, k.z); };
     for (auto it = standby_.begin(); it != standby_.end();) it = out(it->first) ? standby_.erase(it) : std::next(it);
     for (auto it = gpuStandby_.begin(); it != gpuStandby_.end();) it = out(it->first) ? gpuStandby_.erase(it) : std::next(it);
+    for (auto it = gpuCandDirty_.begin(); it != gpuCandDirty_.end();) it = out(*it) ? gpuCandDirty_.erase(it) : std::next(it);
     for (auto it = wantedAt_.begin(); it != wantedAt_.end();) it = out(it->first) ? wantedAt_.erase(it) : std::next(it);
     for (auto it = gpuUniformHint_.begin(); it != gpuUniformHint_.end();)
         it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuUniformHint_.erase(it);
@@ -526,7 +527,10 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
         // this base: packed on the GPU at its build, the edits applied on the host)
         int need = 0;
         if (world_ && !world_->tryLayerNeed({0, sx, sy, sz}, need)) continue;
-        if (level0) gpuStandby_.erase({sx, sy, sz});
+        if (level0) {
+            gpuStandby_.erase({sx, sy, sz});
+            gpuCandDirty_.erase({sx, sy, sz});
+        }
         if (need == 1) level0 = false;
         if (need == 2 && level0) baseFetch_.insert({sx, sy, sz});
         if (level0 && uni == VG_NOT_UNIFORM && slotOf_[phys(sx, sy, sz)] == ~0u) {
@@ -536,6 +540,7 @@ size_t VoxGrid::ingestGpu(uint64_t buffer, const uint64_t* offsets, const int32_
             bool asked = wantedAt_.count({sx, sy, sz}) != 0;  // (asked for: a slot was made for it)
             if (p >= 1e29f || (!asked && slotsUsed_ >= slotCap && freeSlots_.empty() && p > cutoff_)) {
                 gpuStandby_[{sx, sy, sz}] = 0;
+                if (gpuRank) gpuCandDirty_.insert({sx, sy, sz});
                 level0 = false;
             }
         }
@@ -691,6 +696,7 @@ void VoxGrid::putSrc(int sx, int sy, int sz, VgSrc a) {
     // (one entry a section whatever its source: the newest ids replace what waited)
     standby_.erase({sx, sy, sz});
     gpuStandby_.erase({sx, sy, sz});
+    gpuCandDirty_.erase({sx, sy, sz});
     gpuUniformHint_.erase({sx, sy, sz});
     if (level0) pending_[{sx, sy, sz}] = a;
     if (levels) {
@@ -1124,6 +1130,7 @@ void VoxGrid::shift(int nox, int noz, World& world) {
         pending_.clear();
         standby_.clear();
         gpuStandby_.clear();
+        gpuCandDirty_.clear();
         vacated_.clear();
         clearPending_ = true;
         stats_.jumps++;
@@ -1872,6 +1879,22 @@ void VoxGrid::take0Gpu(VgBatch& b, int maxSections) {
     for (auto& [k3, s] : made) putLocked(k3.x, k3.y, k3.z, VgIds(s, &s->mats));
     for (uint32_t c : touched) jobAt_[c] = ~0u;
     // 5. this batch's ranking on the GPU (after its jobs: the words it reads are this batch's)
+    if (!gpuCandDirty_.empty()) {
+        // A delivery rejected by level 0 can still feed coarse levels, without entering pending_. Register its
+        // waiting flag here. Keep changes across the vacated-column-only batch and avoid two writes to one cell
+        // in vgCandMain: if this batch already updates it, recheck the authoritative books next batch instead.
+        std::unordered_set<uint32_t> changed;
+        for (const auto& cand : b.cand) changed.insert(cand.first);
+        for (auto it = gpuCandDirty_.begin(); it != gpuCandDirty_.end();) {
+            const Key& k = *it;
+            if (inWindow(k.x, k.y, k.z) && gpuStandby_.count(k) && slotOf_[phys(k.x, k.y, k.z)] == ~0u) {
+                uint32_t c = phys(k.x, k.y, k.z);
+                if (changed.count(c)) { ++it; continue; }
+                setCand(c, 2);
+            }
+            it = gpuCandDirty_.erase(it);
+        }
+    }
     b.rank.on = !standby_.empty() || !gpuStandby_.empty();
     // predicted motion (the residency priority's fourth term): the lists come back RANK_LAG frames after they are made,
     // so the view they rank for is where the camera will be by then: the eye moved on by its velocity, the cone widened
