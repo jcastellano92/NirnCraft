@@ -683,4 +683,80 @@ class PreparedNativeTests(unittest.TestCase):
                     self.assertFalse(probe.game.prepared_native('digest', sources))
 
 
+class GlReceiptTests(unittest.TestCase):
+    def test_saved_coarse_bake_log_extracts_real_parts_and_missing_is_unknown(self):
+        line = "[27Oct2026 08:10:13.545] [atlas coarse bake/INFO] [com.nirncraft.NirnCraft/]: atlas coarse bake: the cache set's key: build cac47eaf36f7a839 program 1e4e3aa669661cdb ingest b7372337063bdd00 map b9b4f36c48aec7ae extra de033c0000000003 stages c2e892498a31c612 (17) whole 1e5dc6eb8bdd05c3"
+        parts = probe.fingerprint_observations(line)[0]['parts']
+        self.assertEqual(parts['ingest'], 'b7372337063bdd00')
+        self.assertEqual(parts['whole'], '1e5dc6eb8bdd05c3')
+        self.assertEqual(parts['stage_count'], 17)
+        self.assertIsNone(probe.fingerprint_observations("atlas coarse bake: the cache set's key: build cac47eaf36f7a839")[0]['parts']['ingest'])
+        self.assertEqual(probe.fingerprint_observations('unrelated'), [])
+
+    def test_readiness_latch_survives_later_negative_sample(self):
+        result = {'checks': {}}
+        probe.latch_ready(result, 'ready_gpu_profile_observed', 'ready{ok} atlasMs=1.25', 124.1)
+        result['checks']['latest_ready_gpu_profile_observed'] = False
+        self.assertTrue(result['checks']['ready_gpu_profile_observed'])
+        self.assertEqual(result['readiness_observation']['profile'], 'ready{ok} atlasMs=1.25')
+        self.assertFalse(result['checks']['latest_ready_gpu_profile_observed'])
+
+    def test_pose_requires_existing_player_and_backs_up_before_change(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); evidence = root / 'evidence'; evidence.mkdir()
+            with self.assertRaises(RuntimeError): probe.prepare_gl_pose([], evidence)
+            player = root / 'player.dat'; player.write_bytes(b'old-data')
+            def update(path, *pose):
+                self.assertEqual((evidence / 'player-before/0.dat').read_bytes(), b'old-data')
+                self.assertEqual(probe.json.loads((evidence / 'player-pose.json').read_text())['files'][0]['state'], 'BACKED_UP')
+                Path(path).write_bytes(b'new-data')
+                return (1.0, 2.0, 3.0)
+            with patch.object(probe.atlas_tools, 'set_player_pose', side_effect=update):
+                poses = probe.prepare_gl_pose([player], evidence)
+            self.assertEqual(poses[0]['old_position'], [1.0, 2.0, 3.0])
+            self.assertEqual(player.read_bytes(), b'new-data')
+            self.assertTrue((evidence / 'player-pose.json').exists())
+
+
+class SavedPoseNbtTests(unittest.TestCase):
+    @staticmethod
+    def player(rotation=True, wrong_rotation=False):
+        import gzip, struct
+        tag = lambda name, kind, count, data: b'\x09' + struct.pack('>H', len(name)) + name.encode() + bytes([kind]) + struct.pack('>i', count) + data
+        body = tag('Pos', 6, 3, struct.pack('>ddd', 10, 20, 30))
+        if rotation:
+            body += tag('Rotation', 6 if wrong_rotation else 5, 2,
+                        struct.pack('>dd', 1, 2) if wrong_rotation else struct.pack('>ff', 1, 2))
+        return gzip.compress(b'\x0a\x00\x00' + body + b'\x00')
+
+    def test_valid_nbt_roundtrips_both_position_and_rotation(self):
+        import gzip, struct
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / 'player.dat'; p.write_bytes(self.player())
+            old = probe.atlas_tools.set_player_pose(p, -149.5, 200, 260.5, -90, 0)
+            raw = gzip.decompress(p.read_bytes())
+            self.assertEqual(old, (10, 20, 30))
+            self.assertIn(struct.pack('>ddd', -149.5, 200, 260.5), raw)
+            self.assertIn(struct.pack('>ff', -90, 0), raw)
+
+    def test_missing_or_malformed_rotation_leaves_original_bytes(self):
+        with tempfile.TemporaryDirectory() as d:
+            for name, raw in [('missing', self.player(False)), ('wrong', self.player(True, True))]:
+                p = Path(d) / name; p.write_bytes(raw)
+                with self.assertRaises(ValueError): probe.atlas_tools.set_player_pose(p, 1, 2, 3, 4, 5)
+                self.assertEqual(p.read_bytes(), raw)
+
+    def test_partial_failure_leaves_backups_and_incomplete_manifest(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); evidence = root / 'evidence'; evidence.mkdir()
+            first = root / 'a.dat'; second = root / 'b.dat'
+            first.write_bytes(self.player()); bad = self.player(False); second.write_bytes(bad)
+            with self.assertRaises(ValueError): probe.prepare_gl_pose([first, second], evidence)
+            rec = probe.json.loads((evidence / 'player-pose.json').read_text())
+            self.assertEqual(rec['state'], 'INCOMPLETE')
+            self.assertEqual([x['state'] for x in rec['files']], ['UPDATED_AND_VERIFIED', 'BACKED_UP'])
+            self.assertEqual((evidence / 'player-before/1.dat').read_bytes(), bad)
+            self.assertEqual(second.read_bytes(), bad)
+
+
 if __name__ == '__main__': unittest.main()

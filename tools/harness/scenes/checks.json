@@ -94,6 +94,7 @@
       "inputs": [
         "tools/harness/atlas_vulkan_probe.py",
         "tools/harness/test_atlas_vulkan_probe.py",
+        "tools/harness/atlas_tools.py",
         "tools/harness/probe_flags.py",
         "tools/harness/process_memory.py",
         "tools/dev/agent_job.py"

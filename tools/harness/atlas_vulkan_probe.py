@@ -80,6 +80,59 @@ def gl_ready_gpu_profile_observed(fresh_log, profile):
     return gl_path_observed(fresh_log, profile) and atlas_static.ready_sample(profile)
 
 
+def fingerprint_observations(fresh_log):
+    result = []
+    for line in fresh_log.splitlines():
+        if "atlas coarse bake: the cache set's key:" not in line and 'gen fingerprint ' not in line:
+            continue
+        fields = {name: None for name in ('build', 'program', 'ingest', 'map', 'extra', 'stages', 'whole', 'stage_count')}
+        for name in ('build', 'program', 'ingest', 'map', 'extra', 'stages', 'whole'):
+            match = re.search(r'\b' + name + r'\s+([0-9a-fA-F]{16})\b', line)
+            if match: fields[name] = match.group(1).lower()
+        count = re.search(r'\bstages\s+[0-9a-fA-F]{16}\s+\((\d+)\)', line)
+        if count: fields['stage_count'] = int(count.group(1))
+        result.append({'line': line, 'parts': fields})
+    return result
+
+
+def latch_ready(result, key, profile, elapsed):
+    result['checks'][key] = True
+    result['readiness_observation'] = {'key': key, 'profile': profile, 'elapsed_seconds': round(elapsed, 2)}
+
+
+def prepare_gl_pose(files, evidence):
+    if not files: raise RuntimeError('kept world has no existing player')
+    evidence = Path(evidence)
+    backup = evidence / 'player-before'; backup.mkdir()
+    manifest = evidence / 'player-pose.json'
+    record = {'state': 'INCOMPLETE', 'files': []}
+    def save():
+        game.lw.atomic(manifest, json.dumps(record, indent=2).encode('utf-8'))
+    save()
+    x, z, _ = atlas_tools.START
+    try:
+        for index, f in enumerate(files):
+            raw = Path(f).read_bytes()
+            before = backup / (str(index) + '.dat')
+            game.lw.atomic(before, raw)
+            entry = {'file': str(f), 'backup': str(before), 'state': 'BACKED_UP',
+                     'new_position': [x + 0.5, 200.0, z + 0.5],
+                     'new_yaw': atlas_tools.HEADING, 'new_pitch': 0.0}
+            record['files'].append(entry)
+            save()  # recovery information exists before the first byte of this player is changed
+            old = atlas_tools.set_player_pose(f, x + 0.5, 200.0, z + 0.5, atlas_tools.HEADING, 0.0)
+            entry['old_position'] = list(old)
+            entry['state'] = 'UPDATED_AND_VERIFIED'
+            save()
+        record['state'] = 'COMPLETE'
+        save()
+    except Exception as exc:
+        record['error'] = str(exc)
+        save()
+        raise
+    return record['files']
+
+
 def cache_inventory(game_dir):
     """Metadata only, called while the client is closed; never prune or modify cached data."""
     root = Path(game_dir) / 'atlas-cache'
@@ -220,7 +273,7 @@ def worker(evidence, deadline):
                 ready = bool(atlas_static.ready_sample(line) and re.search(r'delivered=[1-9]\d*', line))
                 key = 'ready_and_delivered'
             if ready:
-                result['checks'][key] = True
+                latch_ready(result, key, line, time.monotonic() - start)
                 break
             time.sleep(5)
         if not result['checks'].get('ready_gpu_profile_observed' if transport == 'gl' else 'ready_and_delivered'):
@@ -256,8 +309,8 @@ def worker(evidence, deadline):
         joined = '\n'.join(samples)
         fresh_text = fresh_bytes.decode('utf-8', errors='replace')
         if transport == 'gl':
-            result['checks']['ready_gpu_profile_observed'] = bool(samples) and gl_ready_gpu_profile_observed(fresh_text, samples[-1])
-        result['generator_fingerprint_lines'] = [line for line in fresh_text.splitlines() if 'gen fingerprint ' in line]
+            result['checks']['latest_ready_gpu_profile_observed'] = bool(samples) and gl_ready_gpu_profile_observed(fresh_text, samples[-1])
+        result['generator_fingerprint_observations'] = fingerprint_observations(fresh_text)
         result['cached_chunk_observations'] = [int(n) for n in re.findall(r'cached chunks (\d+)', joined)]
         result['checks'].update({
             'minecraft_vulkan_shared_path': bool(re.search(r'on Minecraft.s Vulkan backend, path VK_SHARED', raw)),
@@ -636,13 +689,18 @@ def main():
             raise RuntimeError('refusing to launch with an existing Prism process')
         if args.jvm_native_diagnostics: reject_existing_native_tracking(game.lw.INSTANCE / 'instance.cfg')
         game.assert_prepared()
-        if not atlas_tools.player_files(game):
+        player_files = atlas_tools.player_files(game)
+        if not player_files:
             raise RuntimeError('kept world has no existing player')
         evidence = EVIDENCE_ROOT / datetime.now().strftime('live-%Y%m%d-%H%M%S-%f')
         evidence.mkdir(parents=True, exist_ok=False)
         baseline = memory_sample(evidence, phase='before-launch')
         require_live_memory_policy(baseline)
         record_cache_inventory(evidence, 'before')
+        if args.transport == 'gl':
+            if clients(budget(deadline, 5, 70)) or launcher_processes(budget(deadline, 3, 70)):
+                raise RuntimeError('client or launcher appeared before pose update')
+            prepare_gl_pose(player_files, evidence)
         options = game.GAME / 'options.txt'
         lines = options.read_bytes().splitlines(keepends=True)
         hits = [i for i, line in enumerate(lines) if line.startswith(b'preferredGraphicsBackend:')]
