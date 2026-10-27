@@ -134,10 +134,23 @@ were observed with the child alive; post-context private memory was 175353856 by
 This own-device, empty-overlay, neutral-material control omits Minecraft and the near workload; live growth remains
 unexplained. A later byte-identical ingest UUID has unknown provenance and is not a second verified client run.
 
-Current assignments: Terra implements generator/context/overlay lifetime barriers in `generator-lifecycle`; normal
-reload must not block rendering, and shutdown must drain every owner before the shared device is destroyed. The
-packet is unbuilt/unverified and must not ship. Sol investigates measured feature-pipeline setup latency in
-`feature-pipeline-cache`, starting with bounded independent caches for the 19 attached-feature pipelines. It must
-prove same-candidate cold/warm output and fingerprint agreement before any benefit or integration claim. Seam work
-is preserved and parked while these confirmed ownership and loading issues advance. The independent reviewer
-continues to check all packets and the full stage matrix; the parent objective remains active.
+The lifecycle packet `cb001a1d` passes 385 Java tests (zero failures/errors, 19 opt-in skips) and its explicit-base
+three-item offline gate. It is assembled as `811ea789` in the isolated Vulkan candidate; its fresh build is running.
+Actual Minecraft reload/device shutdown and terrain during a pending copy remain unverified. It is not on main.
+Terra now owns guarded temporary probe-flag restoration in `probe-flag-cleanup`; failures must retain ownership
+and permit a journaled retry after verified client closure. Main has the tested frame-pacing fix at `b2ea31dd`.
+
+Sol's feature-pipeline experiment completed a fresh-miss/warm-hit/fresh-miss sequence with the same compiled
+candidate: feature setup 48577.626 / 135.131 / 46997.300 ms. All three runs persisted 263 tiles, had zero failed or
+queued writes, observed four live cleanup boundaries, and preserved all eight candidate fingerprint components.
+All 78158 encoded records agree with the original baseline. Nineteen fixed cache slots total 4380540 bytes.
+This supports an attached-feature setup benefit, not a world-generation, frame-time or live-startup result.
+The first pair's misleading `fingerprintMatchesSavedRun` label is preserved in raw receipts and corrected in a
+separate hash-linked summary: candidate consistency is true; equality to the old saved build/whole is false.
+Full native/kernel gates, actual corrupt-cache fallback and production integration remain pending.
+
+Sol next investigates the generator-cache retention race in a separate `cache-lifetime` worktree: delayed detached
+deletion can target a set reopened by a live context. Protect active sets and keep retention bounded; never bypass
+producer identities. The test instance currently holds 155580920 bytes of cache, not gigabytes of process RAM.
+Seam work remains preserved and parked. The independent Terra reviewer checks all packets and the full stage
+matrix; the parent objective and all failed renderer targets remain active.

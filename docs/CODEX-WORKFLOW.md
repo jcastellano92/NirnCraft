@@ -189,7 +189,15 @@ Stable late VMA/renderer observations do not attribute the unexplained private-m
 historical time-of-day-only cache keys from current-run fingerprint observations; its 14 CPU regressions pass.
 An earlier combined reporting shell lost its exit-code check; the direct checked rerun above succeeded independently.
 
-Next: the Sol worker prepares a bounded offline generator-input control using the exact saved ingest/program/map/
-feature bytes and fresh scratch cache. Placeholder render materials and absent Minecraft/near workloads must be
-named in its evidence. The coordinator separately builds the main-base frame-pacing candidate; it remains isolated
-until its own package and integration checks pass. Source edits and review continue in parallel, with one heavy job.
+The completed generator control and main frame-pacing merge are recorded in
+[CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md). The native control did not reproduce the live memory growth;
+Minecraft, shared transport, near generation and real overlay payloads remain outside its scope. Current workers
+prepare temporary probe-flag restoration, feature pipeline caching and active-cache deletion protection. The
+coordinator prepares the lifecycle candidate for a bounded host-copy allocation control before another shared run.
+Source edits and independent review continue in parallel, with one heavy job.
+
+Cache identities remain conservative: renderer shaders are excluded from the native generator hash, but the
+entire feature engine and Java overlay producer files still participate. Infrastructure-only edits in those files
+can therefore invalidate a bake. Preserve that safe invalidation until a finer dependency scheme is proved; identical
+sampled output is evidence, not permission to remove an entire producer file from its identity. Development retention
+keeps three versions, while actual same-version relaunch and zero-regeneration revisit still require live evidence.
