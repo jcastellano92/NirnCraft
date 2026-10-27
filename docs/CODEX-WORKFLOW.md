@@ -216,3 +216,7 @@ deletion or serialize same-key writers. Joining cleanup does not bound arbitrary
 whole-producer hashing intentionally invalidates the previous generator set once; the new native generator hash
 is `cac47eaf36f7a839`. This checkpoint does not integrate the shared-Vulkan Java lifecycle/diagnostic packets or
 establish live cache revisit, full startup, frame-time, driver-resource or renderer stage acceptance.
+
+Merged as `d6913ad2` after independent source/package, XML and gate review. The recovery tag
+`before-cache-integration-2026-10-27` pins prior main `68ce5eef` and is protected from tag-pruning fetches.
+Post-merge engine/package comparison with the tested candidate is exact; no new route or Vulkan pass follows.

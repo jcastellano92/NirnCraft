@@ -199,4 +199,33 @@ Sol's cache lease packet passes11 actual Windows IO/process scenarios and the ex
 Its first Linux attempt stopped before compilation because system g++ was missing; an existing project compiler
 was located, with a nonroot ext4 rerun pending. No production lease integration is accepted yet. The pipeline-only
 main-base candidate has a fresh217-second Windows prebuild; all83 production SPIR-V files are byte-identical to
-accepted main. Native correctness, Linux packages, Java and the main-base gate still precede its eventual merge.
+accepted main. At that checkpoint native correctness, Linux packages, Java and the main-base gate still preceded merge.
+
+## Cache maintenance accepted on main (2026-10-27)
+
+Main `d6913ad2` merges the independent accepted-renderer cache candidate. Protected local tag
+`before-cache-integration-2026-10-27` preserves preceding main `68ce5eef`; exact negative fetch protection also
+preserves the original and frame-pacing recovery tags. No push occurred. Post-merge comparison differs from the
+tested candidate only in this goals document: every engine/build/test source and packaged byte agrees.
+
+The combined main-base source passes native/kernel2 checks, all83 shader bytes unchanged, both standard Windows
+cache suites,11 ownership scenarios,6/6 cold reads and0/4096 return-hit differences. Fresh Linux package uses at
+most GLIBC2.27 and static C++ runtimes; both platforms load at ABI0.17/166 from source076af4d670e6. Registered Linux
+cache CTest3/3 and same-helper root/nonroot22 ownership scenarios pass. Java353/0 failures/errors/19 opt-in skips;
+jar `ee62663f41f23cf4b557c11036fbb6b086784551ff9e0035996df45495153e7d`. Explicit main-base gate6/6 passes, no
+blocking/known failures or missing items. Current native generator hash `cac47eaf36f7a839` intentionally starts a
+new version once; no identity bypass. Legacy/manual deletion and concurrent same-key writers remain excluded;
+small lease files remain and arbitrary filesystem cleanup latency is not bounded by this evidence.
+
+Main retains the accepted GL-host/native-Vulkan architecture. Shared-device Java lifecycle and deterministic
+alias/diagnostic packets remain isolated. No new route, zero-regeneration relaunch, seam, driver-budget, full
+startup or renderer stage pass is claimed. The parent objective stays active.
+
+The shorter shared diagnostic `live-20261027-024309-012661` captured the render thread inside Minecraft's
+`vkDestroyDevice` at shutdown; one snapshot does not prove its cause. NMT was explicitly disabled in all three
+actual jcmd responses, so the environment request yielded no allocation attribution. Owned launcher retirement
+before final restoration now passed actual post-job independent checks twice: original marker/properties/backend,
+no lease and no matching Java/Prism process. A fixed raw NMT option inside the reversible owned JVM marker passes
+45 CPU tests and its offline gate with the existing Crafter UI debt; actual enabled Minecraft NMT remains pending.
+Sol now prepares a populated-generator shutdown witness for a concrete near/far slab ownership gap, without
+claiming it explains the live memory growth. All previous failed receipts are preserved.
