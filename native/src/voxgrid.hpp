@@ -255,13 +255,13 @@ public:
         return t;
     }
     std::string refineInfo() const {
-        char b[352];
+        char b[224];
         {
             std::lock_guard<std::mutex> lock(mu_);
             size_t lost = 0, given = 0;
             for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size(), given += cgiven_[k].size();
             std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,\"wantedReasked\":%llu,", lost,
-                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_, (unsigned long long)reasked_, rankCut_, rankWaitBest_, rankAdmits_.size(), rankEvicts_.size(), gpuWanted_.size());
+                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_, (unsigned long long)reasked_);
         }
         return std::string(b) + coverageJson();  // (its own lock)
     }
@@ -420,7 +420,9 @@ public:
         int levels = 1;
         LevelInfo lv[VG_LEVELS];
         size_t coarseLost = 0, coarseGiven = 0;
-        uint64_t wantedAgain = 0, wantedHeld = 0;
+        uint64_t wantedAgain = 0, wantedHeld = 0, wantedReasked = 0;
+        uint32_t rankCut = 0, rankWaitBest = 0;  // (the GPU ranking's last cut-off and nearest waiting, buckets)
+        size_t rankAdmits = 0, rankEvicts = 0, wantedPending = 0;  // (its last lists; asks not yet taken by the generator)
         Coverage cov;
         uint32_t slotsUsed[VG_LEVELS] = {}, slotCap[VG_LEVELS] = {};  // level 0 and the coarse pools
         std::chrono::steady_clock::time_point covAt{};

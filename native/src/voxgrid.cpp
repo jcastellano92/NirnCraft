@@ -282,6 +282,12 @@ VoxGrid::InfoSnap VoxGrid::infoSnap() const {
     }
     s.wantedAgain = wantedAgain_;
     s.wantedHeld = wantedHeld_;
+    s.wantedReasked = reasked_;
+    s.rankCut = rankCut_;
+    s.rankWaitBest = rankWaitBest_;
+    s.rankAdmits = rankAdmits_.size();
+    s.rankEvicts = rankEvicts_.size();
+    s.wantedPending = gpuWanted_.size();
     auto now = std::chrono::steady_clock::now();
     if (prev.valid && prev.covAt != std::chrono::steady_clock::time_point{} && now - prev.covAt < std::chrono::milliseconds(1500)) {
         s.cov = prev.cov;
@@ -297,9 +303,10 @@ VoxGrid::InfoSnap VoxGrid::infoSnap() const {
 }
 
 std::string VoxGrid::refineJson(const InfoSnap& s) {
-    char b[200];
+    char b[420];
     std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", s.coarseLost, s.coarseGiven,
-                  (unsigned long long)s.wantedAgain, (unsigned long long)s.wantedHeld);
+                  (unsigned long long)s.wantedAgain, (unsigned long long)s.wantedHeld, (unsigned long long)s.wantedReasked, s.rankCut, s.rankWaitBest,
+                  s.rankAdmits, s.rankEvicts, s.wantedPending);
     const Coverage& c = s.cov;
     int active = s.levels - 1;
     std::string o = std::string(b) + "\"coverage\":{\"farReach\":" + std::to_string(int(c.reach)) + ",\"nearHoles\":" + std::to_string(c.nearHoles) +
