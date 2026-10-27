@@ -370,6 +370,31 @@ static void publicationEdit(bool reset) {
     if (!reset) check(grid.stats().freshColumns > 0, "failed later-slice validation discarded remaining refill work");
 }
 
+// A stationary reload replaces the generator: its answer to an earlier ask never comes. Level 0 must keep asking while
+// the GPU's ranking keeps admitting the waiting section, never stall with the section in standby and no request.
+static void unansweredAskIsRepeated() {
+    World world;
+    VoxGrid grid;
+    grid.D = 8; grid.slotCap = 64; grid.coarseLevels = 1; grid.coarseD = 8;
+    grid.coarseCap[1] = 16; grid.gpuRank = true; grid.setWorld(&world);
+    const float forward[3] = {1, 0, 0};
+    grid.setView(forward, 0.5f, 0.1f, 0);
+    int32_t camera[3] = {0, 100, 0}; grid.frame(camera, world); grid.take(8);
+    uint64_t offset = 0; int32_t position[3] = {3, 6, 0}; uint8_t accepted = 0;
+    check(grid.ingestGpu(1, &offset, position, 1, &accepted) == 1, "fixture delivery not taken");
+    grid.take(8);
+    grid.setView(forward, 0.5f, 0, 0);
+    grid.frame(camera, world);
+    const uint32_t cell = uint32_t((6 - VG_MIN_SY) * 8 * 8 + 3);
+    size_t asks = 0;
+    for (int i = 0; i < 3 * 240; i++) {
+        grid.rankResults({cell}, {}, 255, 0);  // the GPU keeps admitting it
+        grid.take(8);
+        asks += grid.takeGpuWanted().size();
+    }
+    check(asks >= 2, "an unanswered GPU ask was never repeated: the section waits in standby with no request");
+}
+
 int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
@@ -378,6 +403,7 @@ int main() {
         for (auto change : {StandbyChange::None, StandbyChange::InitialClear, StandbyChange::RetainedShift,
                             StandbyChange::Jump, StandbyChange::HostReplace, StandbyChange::UniformReplace,
                             StandbyChange::NoCoarse, StandbyChange::FlagConflict}) gpuStandbyCandidate(change);
+        unansweredAskIsRepeated();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }
