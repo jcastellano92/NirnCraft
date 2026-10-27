@@ -806,4 +806,92 @@ class SavedPoseNbtTests(unittest.TestCase):
             self.assertEqual(second.read_bytes(), bad)
 
 
+class RouteComparisonTests(unittest.TestCase):
+    def test_timing_mode_is_opt_in_and_rejects_diagnostics_or_max_quality(self):
+        original = {'keep': 'yes', 'NIRNCRAFT_ATLAS_PROBE_ROUTE': '1'}
+        self.assertNotIn('NIRNCRAFT_ATLAS_PROBE_ROUTE', probe.route_environment(original, False))
+        self.assertEqual(original['NIRNCRAFT_ATLAS_PROBE_ROUTE'], '1')
+        self.assertEqual(probe.route_environment({}, True)['NIRNCRAFT_ATLAS_PROBE_ROUTE'], '1')
+        for env in ({'VK_INSTANCE_LAYERS': 'VK_LAYER_KHRONOS_validation'}, {'ATLAS_MEMORY_DIAGNOSTICS': '1'},
+                    {'NIRNCRAFT_HARNESS_JVM': 'nirncraft.autotest=true'},
+                    {'NIRNCRAFT_HARNESS_JVM': 'nirncraft.quality.adaptive=false'},
+                    {'JAVA_TOOL_OPTIONS': '-XX:NativeMemoryTracking=summary'},
+                    {'NIRNCRAFT_HARNESS_JVM': 'nirncraft.atlas.memoryDiagnostics=true'}):
+            with self.subTest(env=env), self.assertRaises(RuntimeError): probe.route_environment(env, True)
+
+    def test_cli_does_not_extend_ordinary_probe_or_allow_route_cache_reset(self):
+        for args in (['--limit', '299'], ['--route-comparison', '--fresh-generator-cache'],
+                     ['--route-comparison', '--memory-diagnostics'], ['--route-comparison', '--transport', 'host']):
+            with patch.object(sys, 'argv', [probe.__file__, *args]), patch.object(probe.game, 'take_lease') as lease:
+                with self.assertRaises(SystemExit): probe.main()
+                lease.assert_not_called()
+        with patch.object(sys, 'argv', [probe.__file__, '--close-worker']), patch.object(probe.game, 'close') as close:
+            self.assertEqual(probe.main(), 0)
+            close.assert_called_once()
+
+    def test_insufficient_remaining_time_writes_refusal_without_starting_route(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(probe.atlas_tools, 'fly_route') as fly:
+            row = probe.route_comparison(d, time.monotonic() + 124)
+            fly.assert_not_called()
+            self.assertEqual('UNVERIFIED', row['state'])
+            self.assertIn('125 work seconds', row['error'])
+            self.assertEqual(row, probe.json.loads((Path(d) / 'route/receipt.json').read_text()))
+
+    def test_real_route_action_failure_does_not_recover_or_relaunch(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); shots = root / 'shots'; shots.mkdir()
+            with patch.object(probe.game, 'GAME', root), patch.object(probe.game, 'SHOTS', shots), \
+                 patch.object(probe.game, 'ensure_visible'), patch.object(probe.game, 'log_mark', return_value=0), \
+                 patch.object(probe.atlas_tools, 'wait_alive', return_value=0), \
+                 patch.object(probe.game.lw, 'processes', return_value=[]), \
+                 patch.object(probe.game, 'actions', side_effect=RuntimeError('deliberate route action failure')) as actions, \
+                 patch.object(probe.game, 'recover') as recover, patch.object(probe.game, 'launch') as launch:
+                row = probe.route_comparison(root, time.monotonic() + 140)
+            self.assertEqual('UNVERIFIED', row['state'])
+            self.assertIn('deliberate route action failure', row['error'])
+            recover.assert_not_called(); launch.assert_not_called()
+            self.assertLessEqual(actions.call_args.kwargs['timeout'], 130)
+            self.assertEqual(row, probe.json.loads((root / 'route/receipt.json').read_text()))
+
+    @staticmethod
+    def raw_route(root, count=10):
+        shots = []
+        for i in range(count):
+            shot = root / f'capture{i}.png'; shot.write_bytes(b'captured fixture bytes'); shots.append(str(shot))
+        return {'ticks': 1840, 'display': {'framebufferW': 2560, 'framebufferH': 1440},
+                'load': {'ready': True}, 'shots': shots, 'captures': [{} for _ in shots],
+                'total': {'frame': {'n': 5000, 'p99': 55.0, 'max': 100.0}}}
+
+    def test_completed_route_preserves_standard_failures_and_reports_relative_observation(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); raw = self.raw_route(root)
+            metrics = {'absentMetrics': [], 'frames': 5000, 'p99': 55.0, 'max': 100.0}
+            fails = ['p99 frame 55 > 20', 'max frame 100 > 50']
+            with patch.object(probe.atlas_tools, 'fly_route', return_value=raw), \
+                 patch.object(probe.atlas_tools, 'summarize', return_value=(metrics, fails)):
+                row = probe.route_comparison(root, time.monotonic() + 140)
+            self.assertEqual('OBSERVED_ROUTE_COMPARISON', row['state'])
+            self.assertEqual(fails, row['standardGateFails'])
+            self.assertEqual({'p99': 20.0, 'max': 50.0}, {k: row['standardBar'][k] for k in ('p99', 'max')})
+            self.assertFalse(row['relative']['p99AtOrBelowHistorical'])
+            self.assertFalse(row['relative']['maxAtOrBelowHistorical'])
+            self.assertEqual(10, len(row['screenshots']))
+            self.assertEqual(raw, probe.json.loads((root / 'route/raw-report.json').read_text()))
+            self.assertEqual(row, probe.json.loads((root / 'route/receipt.json').read_text()))
+            self.assertTrue(all((root / 'route' / Path(p).name).exists() for p in raw['shots']))
+
+    def test_missing_capture_or_invalid_metric_cannot_be_a_complete_observation(self):
+        for failure in ('capture', 'metric', 'resolution', 'loading'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as d:
+                root = Path(d); raw = self.raw_route(root, 9 if failure == 'capture' else 10)
+                if failure == 'metric': raw['total']['frame']['p99'] = float('nan')
+                if failure == 'resolution': raw['display']['framebufferW'] = 1280
+                if failure == 'loading': raw['load']['ready'] = False
+                with patch.object(probe.atlas_tools, 'fly_route', return_value=raw), \
+                     patch.object(probe.atlas_tools, 'summarize', return_value=({'absentMetrics': []}, [])):
+                    row = probe.route_comparison(root, time.monotonic() + 140)
+                self.assertEqual('UNVERIFIED', row['state'])
+                self.assertNotIn('relative', row)
+
+
 if __name__ == '__main__': unittest.main()

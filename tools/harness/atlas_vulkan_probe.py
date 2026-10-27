@@ -9,6 +9,7 @@ import sys
 import time
 import zipfile
 import uuid
+from types import SimpleNamespace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -269,6 +270,84 @@ def transport_environment(env, transport):
     return env
 
 
+def route_environment(env, enabled):
+    env = dict(env)
+    env.pop('NIRNCRAFT_ATLAS_PROBE_ROUTE', None)
+    if not enabled: return env
+    for key in ('VK_INSTANCE_LAYERS', 'NIRNCRAFT_ATLAS_PROBE_JVM_NMT', 'ATLAS_MEMORY_DIAGNOSTICS', 'NIRNCRAFT_ATLAS_DUMP'):
+        if env.get(key): raise RuntimeError('route timing requires diagnostics off: ' + key)
+    require_route_flags({}, ' '.join(env.get(key, '') for key in ('JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS', '_JAVA_OPTIONS')))
+    flags = dict(item.split('=', 1) for item in env.get('NIRNCRAFT_HARNESS_JVM', '').split(',') if '=' in item)
+    require_route_flags(flags)
+    env['NIRNCRAFT_ATLAS_PROBE_ROUTE'] = '1'
+    return env
+
+
+def require_route_flags(flags, raw=''):
+    for key, value in (('nirncraft.autotest', 'true'), ('nirncraft.quality.adaptive', 'false'),
+                       ('nirncraft.atlas.memoryDiagnostics', 'true')):
+        if flags.get(key) == value or re.search(r'-D' + re.escape(key) + '=' + value + r'(?:\s|"|$)', raw):
+            raise RuntimeError('route comparison must retain adaptive product settings: ' + key)
+    if '-XX:NativeMemoryTracking' in raw or flags.get('nirncraft.atlas.dump'):
+        raise RuntimeError('route timing requires native tracking/input dumping off')
+
+
+def route_comparison(evidence, deadline):
+    """Run the original route inside this worker; the existing supervisor owns the absolute work deadline."""
+    folder = Path(evidence) / 'route'; folder.mkdir()
+    result = {'state': 'UNVERIFIED', 'standardBar': dict(atlas_tools.BAR),
+              'scope': 'Historical route comparison; independent image review required, no transport-only attribution.'}
+    original_wait = atlas_tools.wait_alive
+    class RouteGame:
+        def __getattr__(self, key): return getattr(game, key)
+        def actions(self, lines, timeout=900):
+            remaining = deadline - time.monotonic() - 10
+            if remaining <= 0: raise TimeoutError('route action budget expired')
+            return game.actions(lines, timeout=min(timeout, remaining))
+        def recover(self, scene):
+            pass  # fly_route rethrows its original failure; never relaunch within this owned probe.
+    def bounded_alive(g, limit=420):
+        remaining = deadline - time.monotonic() - 110
+        if remaining <= 0: raise TimeoutError('insufficient time before route heartbeat')
+        return original_wait(g, limit=min(limit, remaining, 12))
+    try:
+        if deadline - time.monotonic() < 125:
+            raise TimeoutError('at least 125 work seconds required for the original 92-second route')
+        atlas_tools.wait_alive = bounded_alive
+        data = atlas_tools.fly_route(SimpleNamespace(game=RouteGame()), {'timeout': deadline - time.monotonic() - 10})
+        (folder / 'raw-report.json').write_text(json.dumps(data, indent=2), encoding='utf-8')
+        metrics, fails = atlas_tools.summarize(data)
+        if data.get('ticks') != 1840 or data.get('display', {}).get('framebufferW') != 2560 or data.get('display', {}).get('framebufferH') != 1440:
+            raise RuntimeError('route incomplete or actual framebuffer differs from 2560x1440')
+        if metrics.get('absentMetrics') or not data.get('load', {}).get('ready'):
+            raise RuntimeError('route renderer/loading evidence incomplete')
+        shots = data.get('shots', [])
+        if len(shots) != 10 or len(data.get('captures', [])) != 10 or len(set(shots)) != 10:
+            raise RuntimeError('all ten route captures required')
+        count = data.get('total', {}).get('frame', {}).get('n')
+        if type(count) is not int or count <= 0:
+            raise RuntimeError('measured route frames missing')
+        for name in ('p99', 'max'):
+            value = data.get('total', {}).get('frame', {}).get(name)
+            if not isinstance(value, (float, int)) or not 0 < value < float('inf'):
+                raise RuntimeError('invalid measured route ' + name)
+        for shot in shots:
+            source = Path(shot)
+            shutil.copy2(source, folder / source.name)
+        raw = data['total']['frame']
+        result.update(state='OBSERVED_ROUTE_COMPARISON', metrics=metrics, standardGateFails=fails,
+                      originalBaseline={'p99': 41.2348, 'max': 90.0575, 'frames': 4950},
+                      relative={'p99Ratio': raw['p99'] / 41.2348, 'maxRatio': raw['max'] / 90.0575,
+                                'p99AtOrBelowHistorical': raw['p99'] <= 41.2348, 'maxAtOrBelowHistorical': raw['max'] <= 90.0575},
+                      screenshots=[Path(p).name for p in shots], rawReport='raw-report.json')
+    except Exception as exc:
+        result['error'] = str(exc)
+    finally:
+        atlas_tools.wait_alive = original_wait
+        (folder / 'receipt.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+    return result
+
+
 def worker(evidence, deadline):
     evidence = Path(evidence)
     groups = json.loads((HERE / 'scenes/groups.json').read_text(encoding='utf-8'))
@@ -280,9 +359,11 @@ def worker(evidence, deadline):
     start = time.monotonic()
     transport = os.environ.get('NIRNCRAFT_ATLAS_PROBE_TRANSPORT', 'shared')
     resource_reload = os.environ.get('NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD') == '1'
+    route = os.environ.get('NIRNCRAFT_ATLAS_PROBE_ROUTE') == '1'
     if resource_reload and transport != 'gl': raise RuntimeError('resource reload requires GL transport')
     result = {'state': 'UNVERIFIED', 'evidence': str(evidence),
               'resource_reload_requested': resource_reload,
+              'route_comparison_requested': route,
               'transport_requested': os.environ.get('NIRNCRAFT_ATLAS_PROBE_TRANSPORT', 'shared'),
               'requested_generator_cache_root': requested_cache,
               'checks': {}, 'unsupported': [
@@ -300,6 +381,7 @@ def worker(evidence, deadline):
     game.launch = bounded_launch
     original_flags_writer = game._set_group_flags
     def journaled_flags(jvm):
+        if route: require_route_flags(jvm)
         if transport == 'shared' and 'nirncraft.atlas.vkSharedSync' in jvm:
             raise RuntimeError('shared probe requires the product transport default, not a group override')
         probe_flags.guard_before_write(game.lw.INSTANCE / 'instance.cfg', game.FLAGS_FILE, evidence)
@@ -332,6 +414,9 @@ def worker(evidence, deadline):
                 key = 'ready_gpu_profile_observed'
             else:
                 ready = bool(atlas_static.ready_sample(line) and re.search(r'delivered=[1-9]\d*', line))
+                if route:
+                    ready = ready and bool(re.search(r'Using graphics backend Vulkan\b', live_text, re.I)) and \
+                        '"onMinecraftDevice":true' in line and '"interop":"vulkan shared device (zero-copy)"' in line
                 key = 'ready_and_delivered'
             if ready:
                 latch_ready(result, key, line, time.monotonic() - start)
@@ -339,6 +424,10 @@ def worker(evidence, deadline):
             time.sleep(5)
         if not result['checks'].get('ready_gpu_profile_observed' if transport == 'gl' else 'ready_and_delivered'):
             raise RuntimeError('no fresh ready GPU profile before deadline')
+        if route:
+            result['route_comparison'] = route_comparison(evidence, deadline)
+            if result['route_comparison']['state'] != 'OBSERVED_ROUTE_COMPARISON':
+                raise RuntimeError('route comparison incomplete: ' + result['route_comparison'].get('error', 'missing evidence'))
         for name, px in [('before', x), ('after', x if resource_reload else x + 2)]:
             if resource_reload and name == 'after':
                 prior_keys = fingerprint_observations(latest.read_text(encoding='utf-8', errors='replace'))
@@ -346,6 +435,9 @@ def worker(evidence, deadline):
                 next_keys = result['resource_reload_observation']['fingerprints']
                 result['checks']['resource_reload_stable_fingerprint'] = bool(prior_keys and next_keys) and prior_keys[-1]['parts'] == next_keys[-1]['parts']
             remaining = int(deadline - time.monotonic())
+            if route and remaining < 18:
+                result['optional_probe_captures_omitted_for_deadline'] = True
+                break
             if remaining < 8:
                 raise RuntimeError('deadline before ' + name + ' capture')
             scene = {'id': 'vk-probe-' + name, 'timeout': min(remaining - 2, 30)}
@@ -725,7 +817,8 @@ def cleanup_clients(deadline, started_wall, seen, ack, env, result, diagnostic=N
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--limit', type=int, default=240, choices=range(90, 241), metavar='SECONDS')
+    ap.add_argument('--limit', type=int, default=240, choices=range(90, 300), metavar='SECONDS')
+    ap.add_argument('--route-comparison', action='store_true', help='run the original 92-second 1440p route after readiness; --limit 299 recommended')
     ap.add_argument('--memory-diagnostics', action='store_true',
                     help='sample MC VMA/JVM and native heap estimates, and save exact generator inputs; not a timing run')
     ap.add_argument('--jvm-native-diagnostics', action='store_true',
@@ -739,6 +832,9 @@ def main():
     ap.add_argument('--close-worker', action='store_true', help=argparse.SUPPRESS)
     ap.add_argument('--snapshot-worker', metavar='EVIDENCE', help=argparse.SUPPRESS)
     args = ap.parse_args()
+    if not args.route_comparison and args.limit > 240: ap.error('limits above 240 require --route-comparison')
+    if args.route_comparison and (args.transport != 'shared' or args.resource_reload or args.memory_diagnostics or args.jvm_native_diagnostics or args.fresh_generator_cache):
+        ap.error('--route-comparison requires shared transport, kept cache and diagnostics/reload off')
     if args.resource_reload and args.transport != 'gl': ap.error('--resource-reload requires --transport gl')
     if args.close_worker:
         game.close()
@@ -749,6 +845,7 @@ def main():
     if args.worker:
         return worker(args.worker[0], float(args.worker[1]))
     launch_environment = native_diagnostic_environment(os.environ, args.jvm_native_diagnostics)
+    launch_environment = route_environment(launch_environment, args.route_comparison)
     start = time.monotonic()
     started_wall = time.time()
     deadline = start + args.limit
@@ -762,6 +859,11 @@ def main():
         if launcher_processes(budget(deadline, 3, 70)):
             raise RuntimeError('refusing to launch with an existing Prism process')
         if args.jvm_native_diagnostics: reject_existing_native_tracking(game.lw.INSTANCE / 'instance.cfg')
+        if args.route_comparison:
+            config = (game.lw.INSTANCE / 'instance.cfg').read_bytes()
+            marker = probe_flags.block(config)
+            if marker is not None: config = config.replace(marker, b'', 1)
+            require_route_flags({}, config.decode(errors='replace'))
         game.assert_prepared()
         player_files = atlas_tools.player_files(game)
         if not player_files:
@@ -771,7 +873,7 @@ def main():
         baseline = memory_sample(evidence, phase='before-launch')
         require_live_memory_policy(baseline)
         record_cache_inventory(evidence, 'before')
-        if args.transport == 'gl':
+        if args.transport == 'gl' or args.route_comparison:
             if clients(budget(deadline, 5, 70)) or launcher_processes(budget(deadline, 3, 70)):
                 raise RuntimeError('client or launcher appeared before pose update')
             prepare_gl_pose(player_files, evidence)
@@ -800,6 +902,7 @@ def main():
         env['NIRNCRAFT_HARNESS_DEADLINE'] = str(work_deadline)
         result = {'state': 'UNVERIFIED', 'evidence': str(evidence), 'forced_cleanup': False,
                   'transport_requested': args.transport,
+                  'route_comparison_requested': args.route_comparison,
                   'requested_generator_cache_root': str(generator_cache) if generator_cache is not None else None,
                   'jvm_native_diagnostics_requested': args.jvm_native_diagnostics,
                   'jcmd_observations': [],
