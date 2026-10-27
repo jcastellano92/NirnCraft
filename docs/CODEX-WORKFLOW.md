@@ -1,5 +1,11 @@
 # Continuing ATLAS with Codex
 
+Current ownership and measured gaps are at the top of [CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md), updated
+2026-10-27 after the retained-cache controls and failed stationary reload. Main remains GL-host/native Vulkan;
+the ABI0.19 shared-device work and GL Java lifecycle/alias candidate are isolated. The coordinator now owns the
+confirmed grid standby admission repair, Sol the terminal-close matrix, Terra the cache witness and real GPU
+regression planning, with the Terra gatekeeper read-only. Keep one heavy job across all four roles.
+
 The owner requested continued renderer development on 2026-10-26, preserving the Claude workflow that worked:
 one orchestrator, focused worktree workers, independent reviewers, a shared machine queue, and measured gates.
 The renderer's goals and order remain [ATLAS-PLAN.md](ATLAS-PLAN.md), not a new roadmap.

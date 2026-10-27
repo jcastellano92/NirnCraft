@@ -6,10 +6,33 @@ the renderer. No pushes are authorized.
 
 | Owner | Model | Goal | Measurable gate | Workspace / ownership |
 |---|---|---|---|---|
-| Coordinator | Current session | Finish direct Vulkan integration and combine accepted work | Fresh prepared ABI0.18 jar; bounded Minecraft VK_SHARED run with delivered frames, independently reviewed captures and subsequent draws; resize/relaunch; matched route measurements before performance claims | vulkan-recovery; Java/Vulkan integration, common harness, docs, packaging and main integration |
-| Renderer worker (`sol_review`) | gpt-6.1-sol, high | Reduce the measured feature-pipeline startup delay using bounded reusable driver caches | Same-candidate cold/warm setup, all eight fingerprints and exact generated output agree; actual 19 cache hits, unchanged SPIR-V/resources and safe corruption fallback; no memory-cap increase | feature-pipeline-cache; attached feature pipelines, cache IO helper and focused offline pair oracle. Earlier frame-pacing and allocation-control packets are frozen. |
-| Lifecycle worker (`terra_seam`) | gpt-6.1-terra | Drain generator, bake, overlay, readers and startup owners before native/context/device destruction | Exactly-once release, nonblocking normal retirement, real shutdown barrier before shared-device close; blocked-owner/failure regressions, full build and later actual reload/shutdown gates | generator-lifecycle; Java ownership controller and targeted native-binding callers. Seam experiments stay preserved in seam-parallel; all six boundary/jitter targets remain open. |
+| Coordinator | Current session | Repair confirmed grid standby admission, then finish measured reload/route evaluation | CPU RED/GREEN, actual GPU ranking, native/packages/gate, same-camera reload and fresh1440p route; thresholds unchanged | grid-standby-admission: VoxGrid/frame-lock; main-ingest-stability: GL Java/lifecycle; main integration and packaging |
+| Renderer worker (`sol_review`) | gpt-6.1-sol, high | Prove checked shared-device shutdown with failed drains and in-flight work | ABI0.19/176; normal/failure/deadline matrix, reattach/cancel compatibility, both native packages, Java bindings and live shutdown | shared-device-audit; native terminal close and Java callers/tests. Focused cases pass; integration pending. |
+| Cache worker (`terra_seam`) | gpt-6.1-terra | Attribute cache misses by coordinate and assist actual GPU standby regression | Bounded witness/immutable inspector with unchanged producer identity; real rank-to-request proof | cache-revisit-witness owns diagnostics; GPU fixture planning read-only pending assignment. Seam variants remain parked. |
 | Independent gatekeeper (`renderer_gatekeeper`) | gpt-6.1-terra | Verify evidence against the complete stage0-5 requirements and catch regressions | Maintain requirement/evidence/gap matrix; independent image/diff verdicts; reject insufficient coverage, stale artifacts or narrow checks used as broad acceptance | Read-only tracked source; own reports under E:/NirnCraft-scratch/codex-gatekeeper-evidence |
+
+## Current checkpoint (2026-10-27,09:42EDT)
+
+Main remains GL-host/native Vulkan at ABI0.17/166, source076af4d670e6. Routine relaunch preserves caches unless
+explicit `--cold`. A matched retained-cache GL pair reached readiness in89.53s then65.98s; the second ready profile
+reused1007 chunks but generated82. This misses the under2-second, zero-regeneration target. Both runs closed without
+force; independent post-job checks confirmed restored settings and no owned client/lease.
+
+The isolated GL candidate has372 passing Java tests (19 opt-in skips). Stationary reload initially stalled at
+spawn0/441 because a replacement generator at an unchanged camera never initialized its follow origin. Repair
+`15920d9a` progresses to436/441, but the reload still times out with31 GPU standby sections and no requests. No
+after-reload capture or reload pass exists. Confirmed missing grid candidate registration is repaired locally at
+`27acb1ad`: real CPU RED before the fix, eight lifecycle cases GREEN after it, independent source review clear.
+Actual GPU ranking, packages and live readiness still need proof; readiness has not been relaxed.
+
+Isolated ABI0.19 work reproduces/repairs two retained buffers/two allocations at external device close. Checked
+normal drain, producer refusal, consumer timeout/retry and an actual admitted scene upload surviving terminal sealing
+pass focused native tests. This is not full Minecraft Vulkan acceptance or attribution of process-memory growth.
+The cache witness gate executes16 passing checks plus existing Crafter UI debt, classified as new by that worktree
+and returning rc1; that failed verdict is preserved. No witness install/live acceptance is claimed.
+
+The last route remains p99 41.23ms/worst90.06ms against20/50. No seam, driver-budget, content or renderer stage
+target is newly complete. Actual rendering/reload evidence and a fresh route take priority over further tooling.
 
 ## Early checkpoint evidence and gaps (before parallel repairs)
 
