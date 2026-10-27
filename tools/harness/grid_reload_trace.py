@@ -51,6 +51,9 @@ def main():
     profile = game.GAME / 'atlas-profile.log'
     offset = profile.stat().st_size if profile.exists() else 0
     game.assert_prepared()
+    if cold:
+        if game.running(): game.close()
+        print('TRACE cold: atlas cache wiped (%d files)' % atlas_tools.wipe_cache(game), flush=True)
     os.environ['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
     game.ensure('atlas', groups)
     x, z, _ = atlas_tools.START
