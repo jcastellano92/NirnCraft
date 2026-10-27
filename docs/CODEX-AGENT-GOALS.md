@@ -11,7 +11,7 @@ the renderer. No pushes are authorized.
 | Loading worker (`terra_seam`) | gpt-6.1-terra | Fix loading/cache latency and isolate generation/capture allocation ownership | Real finer-horizon completion and near fairness, per-coordinate cache attribution, bounded actual store-stage workload | loading-cache-latency; cache witness preserved; Crafter implementation remains isolated with unverified runtime tests |
 | Independent gatekeeper (`renderer_gatekeeper`) | gpt-6.1-terra | Verify evidence against the complete stage0-5 requirements and catch regressions | Maintain requirement/evidence/gap matrix; independent image/diff verdicts; reject insufficient coverage, stale artifacts or narrow checks used as broad acceptance | Read-only tracked source; own reports under E:/NirnCraft-scratch/codex-gatekeeper-evidence |
 
-## Direct Vulkan candidate checkpoint (2026-10-27,12:10EDT)
+## Direct Vulkan candidate checkpoint (2026-10-27,12:37EDT)
 
 Accepted main remains at42132fa6 with GL-host/native Vulkan. The isolated candidate now includes default-on shared
 Vulkan, Vulkan-first pack/development defaults, the reviewed ABI0.19 lifetime implementation and existing main
@@ -37,6 +37,27 @@ thread dump was needed. Different cache workload prevents attributing the previo
 Cold memory growth remains open. Precleanup NMT tracks3454646KB committed, not all process-private memory.
 Independent visual review finds different camera positions/eyes in the pair and visible distant banding/speckle
 and a tan patch; this is no equivalence or visual-stage pass. Main integration stays pending.
+
+The existing saved-input control now also exercises441 near chunks,263 coarse tiles and64 post-horizon chunks.
+All phases finish, cached coarse tiles are durable, four cleanup boundaries are observed, and its child exits0
+at peak6.61GiB (`generator-memory-control-20261027-121323-8b785119`,153.64s). All15 focused CPU checks execute.
+This own-device/neutral-palette/empty-overlay control does not reproduce full shared-device Minecraft memory.
+Actual generator-cache-cold replay `live-20261027-121731-859112` reaches full readiness and both captures, but
+still needs forced shutdown (peak18.62GiB, no memory guard stop). Its current0.19 shutdown thread is inside
+Minecraft `vkDestroyDevice`, after encoder retirement, graphics-queue idle and VMA destruction at the snapshot.
+
+SDK object-lifetime validation is now proven active in actual Minecraft, using explicit independent file logging.
+Startup-abort run `live-20261027-122854-805138` reports `VUID-vkDestroyDevice-device-05137`:679 live child objects;
+the first10 are device-memory handles, not proof all679 have that type. The worker aborted pre-readiness on a
+transient heartbeat PermissionError. Natural process exit under validation does not establish correct device
+destruction (the callback can abort an invalid call). Owner attribution remains open. A focused harness correction
+now treats unavailable ready/heartbeat snapshots as pending within the existing deadline;16 CPU checks pass.
+Full-workload validation with an untruncated object list is in progress; no native fix or migration pass is claimed.
+
+Parallel UI source is preserved as `33e66f80` on `codex-crafter-menu`: independent review clear after exact fixture
+state restoration; full Java355 tests, zero failures/errors,19 opt-in skips, including both actual menu tests.
+Real-world container selftest, UI evidence and integration gate remain pending. The opt-in coordinate-cache witness
+port is separately prepared in `cache-revisit-019`; unbuilt/unintegrated, with no new cache acceptance.
 
 The earlier GL reload's72.86-second ready observation used a30-second stalled finer gate with21 tiles outstanding.
 It was not a complete horizon. The candidate now retains the real count and alternates bounded finer-horizon work
