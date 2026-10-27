@@ -44,6 +44,26 @@ class ProcessRegionTests(unittest.TestCase):
         committed = sum(v['committedBytes'] for v in snap['totals'].values())
         self.assertGreater(committed, 1 << 20)
 
+    def test_allocation_bases_aggregate_fragmented_commit_and_buckets_count_small_regions(self):
+        k = c.WinDLL('kernel32', use_last_error=True)
+        k.VirtualAlloc.restype = c.c_void_p
+        k.VirtualAlloc.argtypes = [c.c_void_p, c.c_size_t, c.c_ulong, c.c_ulong]
+        k.VirtualFree.argtypes = [c.c_void_p, c.c_size_t, c.c_ulong]
+        mib = 1 << 20
+        base = k.VirtualAlloc(None, 96 * mib, 0x2000, 0x04)  # one reservation
+        self.assertTrue(base)
+        self.addCleanup(k.VirtualFree, base, 0, 0x8000)
+        for i in range(0, 96, 2):  # commit every other MiB: 48 separate 1 MiB regions
+            self.assertTrue(k.VirtualAlloc(base + i * mib, mib, 0x1000, 0x04))
+        snap = process_regions.snapshot(os.getpid(), min_region=64 * mib)
+        mine = [a for a in snap['byAllocation'] if a['allocBase'] == base]
+        self.assertEqual(1, len(mine), snap['byAllocation'][:5])
+        self.assertEqual(48 * mib, mine[0]['committedBytes'])
+        self.assertEqual(48, mine[0]['regions'])
+        small = snap['sizeBuckets']['1-16MiB']
+        self.assertGreaterEqual(small['regions'], 48)
+        self.assertGreaterEqual(small['committedBytes'], 48 * mib)
+
     def test_missing_process_reports_error_not_exception(self):
         self.assertIn('error', process_regions.snapshot(0xFFFFFFF0))
 

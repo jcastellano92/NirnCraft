@@ -13,6 +13,8 @@ from functools import lru_cache
 MEM_COMMIT = 0x1000
 TYPES = {0x20000: 'private', 0x40000: 'mapped', 0x1000000: 'image'}
 PAGE = 4096
+# private committed regions by size (a leak made of many mid-size blocks never shows in 'largest')
+BUCKETS = [('<1MiB', 1 << 20), ('1-16MiB', 16 << 20), ('16-256MiB', 256 << 20), ('>=256MiB', 1 << 62)]
 
 
 class MemInfo(c.Structure):
@@ -78,6 +80,8 @@ def snapshot(pid, min_region=256 << 20, top=12):
     try:
         totals = {}
         big = []
+        allocs = {}
+        buckets = {name: {'regions': 0, 'committedBytes': 0} for name, _ in BUCKETS}
         address = 0
         info = MemInfo()
         while k.VirtualQueryEx(h, address, c.byref(info), c.sizeof(info)):
@@ -88,6 +92,15 @@ def snapshot(pid, min_region=256 << 20, top=12):
                 t['committedBytes'] += size
                 t['regions'] += 1
                 t['largestBytes'] = max(t['largestBytes'], size)
+                if kind == 'private':
+                    a = allocs.setdefault(int(info.allocBase), {'allocBase': int(info.allocBase), 'committedBytes': 0, 'regions': 0})
+                    a['committedBytes'] += size
+                    a['regions'] += 1
+                    for name, limit in BUCKETS:
+                        if size < limit:
+                            buckets[name]['regions'] += 1
+                            buckets[name]['committedBytes'] += size
+                            break
                 if size >= min_region:
                     big.append({'base': int(info.base), 'size': size, 'type': kind, 'protect': int(info.protect)})
             address = int(info.base) + size
@@ -95,9 +108,10 @@ def snapshot(pid, min_region=256 << 20, top=12):
                 break
         big.sort(key=lambda r: -r['size'])
         big = big[:top]
+        by_alloc = sorted(allocs.values(), key=lambda a: -a['committedBytes'])[:top]
         for r in big:
             r['residentBytes'] = resident_bytes(h, r['base'], r['size'], p)
-        return {'pid': int(pid), 'epoch': time.time(), 'totals': totals, 'largest': big, 'minRegionBytes': min_region,
+        return {'pid': int(pid), 'epoch': time.time(), 'totals': totals, 'largest': big, 'byAllocation': by_alloc, 'sizeBuckets': buckets, 'minRegionBytes': min_region,
                 'elapsedSeconds': round(time.time() - started, 3)}
     finally:
         k.CloseHandle(h)
@@ -110,7 +124,8 @@ def summarize(snap):
     parts = ['%s %s in %d' % (kind, mib(v['committedBytes']), v['regions']) for kind, v in sorted(snap['totals'].items())]
     big = ['%s %s (resident %s)' % (r['type'], mib(r['size']), mib(r['residentBytes']) if r['residentBytes'] is not None else '?')
            for r in snap['largest']]
-    return 'committed: ' + '; '.join(parts) + ' | largest: ' + ', '.join(big)
+    buckets = ', '.join('%s %s in %d' % (n, mib(v['committedBytes']), v['regions']) for n, v in snap.get('sizeBuckets', {}).items())
+    return 'committed: ' + '; '.join(parts) + ' | private by size: ' + buckets + ' | largest: ' + ', '.join(big)
 
 
 if __name__ == '__main__':
