@@ -453,7 +453,7 @@ private:
     void begin() {
         vkResetCommandBuffer(cmd_, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(cmd_, &bi);
     }
 

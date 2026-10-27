@@ -522,8 +522,7 @@ public:
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (closeFence_) vkDestroyFence(dev_, closeFence_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
-            if (reloadThread_.joinable()) reloadThread_.join();  // a shader reload still building
-            if (farSplitThread_.joinable()) farSplitThread_.join();  // (the split frames' far kernel still building)
+            finishBackgroundWork();
             if (farSplitPipe_) vkDestroyPipeline(dev_, farSplitPipe_, nullptr);
             if (farSplitShader_) vkDestroyShaderModule(dev_, farSplitShader_, nullptr);
             if (leanPipe_) vkDestroyPipeline(dev_, leanPipe_, nullptr);
@@ -759,8 +758,7 @@ public:
             smci.pCode = atlas_farsplit_spv;
             if (vkCreateShaderModule(dev_, &smci, nullptr, &farSplitShader_) == VK_SUCCESS) {
                 pipeprog::split.store(1);
-                auto job = admitWork();
-                farSplitThread_ = std::thread([this, job = std::move(job)] {
+                farSplitThread_ = std::thread([this] {
                     VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
                     cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
                     cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
@@ -913,6 +911,10 @@ public:
     }
 
     bool supportsTerminalClose() const override { return adopted_; }
+    void finishBackgroundWork() override {
+        if (reloadThread_.joinable()) reloadThread_.join();
+        if (farSplitThread_.joinable()) farSplitThread_.join();
+    }
     bool stagedSceneReadyForTest(uint64_t revision) override {
         std::unique_lock<std::mutex> scene(sceneMu_, std::try_to_lock);
         if (!scene.owns_lock() || staged_ < 0 || copies_[staged_].revision != revision) return false;
@@ -1555,7 +1557,7 @@ public:
         VkCommandBuffer cb = spliceCmd_[ri];
         vkResetCommandBuffer(cb, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(cb, &bi);
         // Minecraft's earlier work on its images (the last frame's samples, a clear) before the copies write them
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -1900,7 +1902,7 @@ private:
         copies_[0].uploading = false;
         vkResetCommandBuffer(cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(cmd, &bi);
         VkImageMemoryBarrier b{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
         b.image = noiseImg_;
@@ -2725,9 +2727,8 @@ private:
         reloadStamp_ = stamp;
         reloadDone_.store(false);
         reloadBusy_.store(true, std::memory_order_release);
-        auto job = admitWork();
-        if (!job) { reloadBusy_.store(false); return; }
-        reloadThread_ = std::thread([this, base, job = std::move(job)] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
+        if (closeState() != CloseState::Open) { reloadBusy_.store(false); return; }
+        reloadThread_ = std::thread([this, base] { buildReload(base); reloadDone_.store(true, std::memory_order_release); });
         if (waitReload) hotReload();  // (the swap, after the build)
     }
 
@@ -3063,7 +3064,11 @@ private:
     void begin(Slot& s) {
         vkResetCommandBuffer(s.cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        // NVIDIA's Windows Vulkan driver (nvoglv64.dll) queues background compute shader specialization on a
+        // BelowNormal worker thread during vkCmdDispatch unless VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT is set.
+        // Because nvoglv64 zeroes initial compute compile times, that worker can hold the device's specialization
+        // SRWLock shared for minutes in nvgpucomp64.dll while vkDestroyDevice blocks on AcquireSRWLockExclusive.
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(s.cmd, &bi);
         s.gt.begin(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);  // (after the GL-ready wait, like the frame query below)
         if (s.query) {
@@ -3878,7 +3883,7 @@ public:
         VkCommandBuffer cmd = copies_[0].uploadCmd;
         vkResetCommandBuffer(cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(cmd, &bi);
         vkCmdCopyBuffer(cmd, src, peek_.buf, uint32_t(regions.size()), regions.data());
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -3946,7 +3951,7 @@ public:
         VkCommandBuffer cmd = copies_[0].uploadCmd;
         vkResetCommandBuffer(cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(cmd, &bi);
         VkBufferCopy rc{0, 0, bytes};
         vkCmdCopyBuffer(cmd, shared_[B_SUNMAP].buf, sunReadback_.buf, 1, &rc);
@@ -4330,7 +4335,7 @@ private:
             if (bytes[i]) std::memcpy(static_cast<char*>(c.staging.map) + offset[i], src[i], size_t(bytes[i]));
         vkResetCommandBuffer(c.uploadCmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
         vkBeginCommandBuffer(c.uploadCmd, &bi);
         for (uint32_t i : SCENE_BINDINGS) {
             if (!bytes[i]) continue;

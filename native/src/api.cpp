@@ -1417,8 +1417,11 @@ ATLAS_API AtlasStatus atlas_vk_prepare_close(AtlasContext* ctx) {
         if (lock.try_lock()) break;
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+    const auto bgStart = std::chrono::steady_clock::now();
+    backend.finishBackgroundWork();
+    const auto drainDeadline = deadline + (std::chrono::steady_clock::now() - bgStart);
     std::string err;
-    Backend::CloseDrain drained = backend.drainForClose(deadline, err);
+    Backend::CloseDrain drained = backend.drainForClose(drainDeadline, err);
     if (drained != Backend::CloseDrain::Ok) {
         std::fprintf(stderr, "[atlas] incomplete terminal close: %s\n", err.c_str());
         return failClose(drained == Backend::CloseDrain::Timeout ? ATLAS_ERR_TIMEOUT : ATLAS_ERR_GPU,

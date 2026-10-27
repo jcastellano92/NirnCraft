@@ -12,6 +12,20 @@ public:
     const char* name() const override { return "admission-test"; }
     bool render(const atlas::FrameInputs&, atlas::FrameTargets&, double*, std::string&) override { return true; }
     bool stageScene(const atlas::PackedScene&, const WorkTicket& ticket) override { return ticket.belongsTo(this); }
+    void startBackgroundCompile() {
+        bgThread_ = std::thread([this] {
+            while (!releaseBg_.load()) std::this_thread::yield();
+            bgDone_.store(true);
+        });
+    }
+    void releaseBackgroundCompile() { releaseBg_.store(true); }
+    bool backgroundDone() const { return bgDone_.load(); }
+    void finishBackgroundWork() override {
+        if (bgThread_.joinable()) bgThread_.join();
+    }
+private:
+    std::thread bgThread_;
+    std::atomic<bool> releaseBg_{false}, bgDone_{false};
 };
 }
 int main() {
@@ -71,6 +85,18 @@ int main() {
         backend.injectCloseFault(4);
         CHECK(!backend.consumeCloseFault(5));
         CHECK(backend.consumeCloseFault(4) && !backend.consumeCloseFault(4));
+    }
+    {
+        // Background pipeline compiles do not hold caller admission tickets (which have a 5 s close timeout),
+        // and finishBackgroundWork joins them before terminal device teardown.
+        TestBackend backend;
+        backend.startBackgroundCompile();
+        CHECK(backend.activeWork() == 0);
+        backend.sealWork();
+        CHECK(backend.activeWork() == 0 && !backend.backgroundDone());
+        backend.releaseBackgroundCompile();
+        backend.finishBackgroundWork();
+        CHECK(backend.backgroundDone());
     }
     if (failures) return 1;
     std::puts("TRACE close admission regression: PASS (nested ticket, producer lifetime, seal race, retirement, one-shot refusal)");

@@ -172,6 +172,7 @@ public:
     void producerStopped() { activeProducers_.fetch_sub(1); }
     void markDrained() { closeState_.store(CloseState::Drained); }
     virtual bool supportsTerminalClose() const { return false; }
+    virtual void finishBackgroundWork() {}
     virtual CloseDrain drainForClose(std::chrono::steady_clock::time_point, std::string&) { return CloseDrain::Error; }
     virtual void holdCloseLockForTest(uint32_t, uint32_t, std::atomic<bool>& held) { held.store(true); }
     virtual bool stagedSceneReadyForTest(uint64_t) { return false; }
