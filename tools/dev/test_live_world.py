@@ -35,6 +35,32 @@ versionRange="[26.3.0.90,26.4)"
 }
 
 
+class StatusSnapshotTest(unittest.TestCase):
+    def test_locked_startup_snapshot_stays_pending_then_recovers(self):
+        for name in ('ready', 'heartbeat'):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as folder:
+                dev = Path(folder); (dev / 'outbox').mkdir(); (dev / 'inbox').mkdir()
+                (dev / 'outbox/ready').write_text('7\n')
+                (dev / 'outbox/heartbeat').write_text('alive')
+                original_read = Path.read_text
+                locked = [True]
+                def read_snapshot(path, *args, **kwargs):
+                    if path == dev / 'outbox' / name and locked[0]:
+                        locked[0] = False
+                        raise PermissionError('server is replacing the snapshot')
+                    return original_read(path, *args, **kwargs)
+                current = live.time.time()
+                with patch.object(live, 'DEV', dev), patch.object(live, 'processes', return_value=[{'pid': 7}]), \
+                     patch.object(live, 'read_json', return_value={'pid': 7, 'updated': current * 1000}), \
+                     patch.object(Path, 'read_text', autospec=True, side_effect=read_snapshot):
+                    first = live.status()
+                    self.assertFalse(first['serverReady'])
+                    self.assertEqual('', first['serverHeartbeat'])
+                    second = live.status()
+                    self.assertTrue(second['serverReady'])
+                    self.assertEqual('alive', second['serverHeartbeat'])
+
+
 class LaunchBudgetTest(unittest.TestCase):
     def test_ordinary_calls_keep_existing_limits(self):
         with patch.dict(live.os.environ, {}, clear=True):

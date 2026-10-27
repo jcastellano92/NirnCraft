@@ -172,15 +172,21 @@ def status():
     live["fresh"] = age < 15 and any(p["pid"] == live.get("pid") for p in procs)
     heartbeat = DEV / "outbox/heartbeat"
     ready = DEV / "outbox/ready"
-    lines = ready.read_text().splitlines() if ready.exists() else []
+    try:
+        lines = ready.read_text().splitlines()
+        heartbeat_text = heartbeat.read_text().strip()
+        server_fresh = time.time() - heartbeat.stat().st_mtime < 15
+    except (FileNotFoundError, PermissionError):
+        # The server replaces these files while startup polls them. An unavailable snapshot is pending;
+        # the caller's existing deadline/poll loop retries without accepting stale readiness.
+        lines, heartbeat_text, server_fresh = [], "", False
     ready_pid = int(lines[0]) if lines and lines[0].isdigit() else None
-    server_fresh = heartbeat.exists() and time.time() - heartbeat.stat().st_mtime < 15
     return {"instance": str(INSTANCE), "diagnosticOnly": INSTANCE_NAME == DIAGNOSTIC_NAME,
             "fullPackAcceptance": False, "running": bool(procs), "processes": procs,
             "client": live, "remoteConnected": bool(live.get("fresh") and live.get("connected")
                 and live.get("worldLoaded") and live.get("isMemoryConnection") is False),
             "serverReady": not live.get("remote", False) and server_fresh and any(p["pid"] == ready_pid for p in procs),
-            "serverHeartbeat": heartbeat.read_text().strip() if heartbeat.exists() else "",
+            "serverHeartbeat": heartbeat_text,
             "inbox": sorted(p.name for p in (DEV / "inbox").glob("*.cmd"))}
 
 
