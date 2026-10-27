@@ -85,6 +85,83 @@ public final class AtlasClient {
         }
     }
     private static volatile AtlasNative.Context ctx;  // (volatile: the info thread reads it, AtlasInfo)
+
+    /**
+     * NeoForge's early loading screen (earlydisplay) hands over a RenderPearlRenderBackend whose close() frees
+     * its pipelines and host ByteBuffer but leaves SimpleBufferBuilder.gpuBuffer ("shared_error") and
+     * ELSRenderBackend.screenSizeUbo ("ScreenSize UBO") open when VulkanDevice.close() destroys the device.
+     */
+    static void closeEarlyDisplayAtShutdown() {
+        try {
+            Class<?> cls = Class.forName("net.neoforged.fml.loading.EarlyLoadingScreenController");
+            Object controller = cls.getMethod("current").invoke(null);
+            closeEarlyDisplayBuffers(controller);
+        } catch (ClassNotFoundException ignored) {
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("atlas: could not inspect earlydisplay controller at shutdown", e);
+        }
+    }
+
+    static void closeEarlyDisplayBuffers(Object controller) {
+        if (controller == null) return;
+        java.lang.reflect.Field futureField = findDeclaredField(controller.getClass(), "rendererFuture");
+        if (futureField == null) return;
+        Throwable failure = null;
+        try {
+            futureField.setAccessible(true);
+            if (!(futureField.get(controller) instanceof java.util.concurrent.Future<?> future)
+                    || !future.isDone() || future.isCancelled()) return;
+            Object screen = future.get();
+            if (screen == null) return;
+            java.lang.reflect.Field builderField = findDeclaredField(screen.getClass(), "bufferBuilder");
+            if (builderField != null) {
+                builderField.setAccessible(true);
+                Object builder = builderField.get(screen);
+                if (builder != null) {
+                    java.lang.reflect.Field gpuField = findDeclaredField(builder.getClass(), "gpuBuffer");
+                    if (gpuField != null) {
+                        gpuField.setAccessible(true);
+                        if (gpuField.get(builder) instanceof AutoCloseable gpuBuffer) {
+                            try {
+                                gpuBuffer.close();
+                                gpuField.set(builder, null);
+                            } catch (Throwable t) { failure = t; }
+                        }
+                    }
+                }
+            }
+            java.lang.reflect.Field backendField = findDeclaredField(screen.getClass(), "backend");
+            if (backendField != null) {
+                backendField.setAccessible(true);
+                Object backend = backendField.get(screen);
+                if (backend != null) {
+                    java.lang.reflect.Field uboField = findDeclaredField(backend.getClass(), "screenSizeUbo");
+                    if (uboField != null) {
+                        uboField.setAccessible(true);
+                        if (uboField.get(backend) instanceof AutoCloseable ubo) {
+                            try { ubo.close(); }
+                            catch (Throwable t) {
+                                if (failure == null) failure = t;
+                                else if (failure != t) failure.addSuppressed(t);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            if (failure == null) failure = t;
+            else if (failure != t) failure.addSuppressed(t);
+        }
+        if (failure != null) throw new IllegalStateException("atlas: could not close earlydisplay GPU buffers", failure);
+    }
+
+    private static java.lang.reflect.Field findDeclaredField(Class<?> type, String name) {
+        for (Class<?> c = type; c != null && c != Object.class; c = c.getSuperclass()) {
+            try { return c.getDeclaredField(name); }
+            catch (NoSuchFieldException ignored) {}
+        }
+        return null;
+    }
     private record ContextReaders(AtlasNative.Context context, AtlasMaterials materials, AtlasReleaseGate gate) {}
     private static volatile ContextReaders infoReaders;
     record InfoLease(AtlasNative.Context context, AtlasMaterials materials, AtlasReleaseGate.Lease lease) implements AutoCloseable {
@@ -375,7 +452,7 @@ public final class AtlasClient {
             }
             var resources = new ShutdownResources(AtlasNearPass::closeAtShutdown, AtlasSky::closeAtShutdown,
                     AtlasMeter::closeAtShutdown, AtlasAir::closeAtShutdown, AtlasTargets::closeAtShutdown,
-                    com.nirncraft.render.quality.QualityClient::closeAtShutdown);
+                    com.nirncraft.render.quality.QualityClient::closeAtShutdown, AtlasClient::closeEarlyDisplayAtShutdown);
             for (;;) {
                 try { resources.close(); break; }
                 catch (Throwable failure) {

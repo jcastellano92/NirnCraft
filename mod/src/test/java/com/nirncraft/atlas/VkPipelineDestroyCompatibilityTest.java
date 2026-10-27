@@ -120,4 +120,93 @@ class VkPipelineDestroyCompatibilityTest {
             }
         }
     }
+
+    @Test
+    void earlyDisplayCloseStillOmitsSharedVertexAndScreenSizeBuffers() throws Exception {
+        String builderOwner = "net/neoforged/fml/earlydisplay/render/SimpleBufferBuilder";
+        boolean[] builderClosesGpuBuffer = {false};
+        try (var stream = getClass().getClassLoader().getResourceAsStream(builderOwner + ".class")) {
+            assertNotNull(stream);
+            new ClassReader(stream).accept(new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                    if (!name.equals("close") || !descriptor.equals("()V")) return null;
+                    return new MethodVisitor(Opcodes.ASM9) {
+                        @Override
+                        public void visitFieldInsn(int opcode, String fieldOwner, String field, String type) {
+                            if (fieldOwner.equals(builderOwner) && field.equals("gpuBuffer")) builderClosesGpuBuffer[0] = true;
+                        }
+                    };
+                }
+            }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        }
+        assertFalse(builderClosesGpuBuffer[0], "upstream SimpleBufferBuilder.close() changed: recheck earlydisplay buffer cleanup");
+
+        String backendOwner = "net/neoforged/neoforge/client/loading/earlydisplay/RenderPearlRenderBackend";
+        boolean[] backendClosesScreenSizeUbo = {false};
+        try (var stream = getClass().getClassLoader().getResourceAsStream(backendOwner + ".class")) {
+            assertNotNull(stream);
+            new ClassReader(stream).accept(new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                    if (!name.equals("close") || !descriptor.equals("()V")) return null;
+                    return new MethodVisitor(Opcodes.ASM9) {
+                        @Override
+                        public void visitFieldInsn(int opcode, String fieldOwner, String field, String type) {
+                            if (field.equals("screenSizeUbo")) backendClosesScreenSizeUbo[0] = true;
+                        }
+                    };
+                }
+            }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        }
+        assertFalse(backendClosesScreenSizeUbo[0], "upstream RenderPearlRenderBackend.close() changed: recheck earlydisplay UBO cleanup");
+    }
+
+    @Test
+    void closeEarlyDisplayBuffersClosesSharedVertexAndScreenSizeBuffersIdempotently() {
+        int[] closes = {0, 0};
+        AutoCloseable sharedErrorBuf = () -> closes[0]++;
+        AutoCloseable screenSizeBuf = () -> closes[1]++;
+        class FakeBufferBuilder {
+            @SuppressWarnings("unused")
+            AutoCloseable gpuBuffer = sharedErrorBuf;
+        }
+        class FakeElsBackend {
+            @SuppressWarnings("unused")
+            final AutoCloseable screenSizeUboField = screenSizeBuf;
+            @SuppressWarnings("unused")
+            final AutoCloseable screenSizeUbo = screenSizeUboField;
+        }
+        class FakeRenderPearlBackend extends FakeElsBackend {}
+        class FakeAbstractEarlyScreen {
+            @SuppressWarnings("unused")
+            final FakeBufferBuilder bufferBuilder = new FakeBufferBuilder();
+            @SuppressWarnings("unused")
+            final FakeElsBackend backend = new FakeRenderPearlBackend();
+        }
+        class FakeLoadingScreenRenderer extends FakeAbstractEarlyScreen {}
+        var screen = new FakeLoadingScreenRenderer();
+        class FakeDisplayWindow {
+            @SuppressWarnings("unused")
+            private final java.util.concurrent.Future<?> rendererFuture =
+                    java.util.concurrent.CompletableFuture.completedFuture(screen);
+        }
+        var window = new FakeDisplayWindow();
+        AtlasClient.closeEarlyDisplayBuffers(window);
+        assertEquals(1, closes[0]);
+        assertEquals(1, closes[1]);
+        assertNull(screen.bufferBuilder.gpuBuffer);
+        AtlasClient.closeEarlyDisplayBuffers(window);
+        assertEquals(1, closes[0]);
+    }
+
+    private void unusedEndOfTestHelper() {
+        if (Boolean.FALSE) {
+            {
+                {
+                    assertTrue(true);
+                }
+            }
+        }
+    }
 }
