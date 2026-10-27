@@ -156,3 +156,26 @@ The owner requested additional concurrent agents. The project cap is now three c
 this supersedes the previous one-child policy. See [CODEX-AGENT-GOALS.md](CODEX-AGENT-GOALS.md) for assigned goals,
 measurable gates and isolated ownership. One-heavy-job scheduling remains enforced by the coordinator. The config
 counts child threads excluding the primary, as documented in the official [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
+
+
+## Live job classification, memory and cache accounting (2026-10-26)
+
+Passing loop/why alone did not classify labels containing only `client` as live. This omitted live gating and
+left the16 GiB build cap in force, producing the21:55 PowerShell OOM near world readiness. agent_job now adds
+an explicit game label to declared middle/outer jobs and rejects an undeclared Vulkan probe. Live jobs retain
+the existing24 GiB scheduler allowance; it is diagnostic headroom, not a renderer memory target.
+
+A py/launcher inner Windows job hid the actual cap from QueryInformationJobObject(NULL). The shared scheduler's
+existing cap job now has a unique random name and exports NIRNCRAFT_HEAVY_JOB_NAME only after successful create/
+set/assign. The read-only sampler opens that exact job with QUERY access and closes every query/process handle.
+The sampler rejects discovered client PIDs outside the named capped group. No second scheduler/job or higher cap was added. The pre-patch scheduler is preserved in the gatekeeper evidence
+folder as heavy-before-named-job-20261026-222227.py; the current machine helper lives in the existing locks folder.
+A real CPU test through nested py verifies16 GiB cap, complete membership including the child and25 sampling
+rounds without handle growth. Machines without this handoff fail the probe preflight; do not relax the guard.
+
+Memory evidence distinguishes private committed CPU bytes, resident working set, Java heap and Vulkan device
+allocations. Sample every5 seconds, before launch and after cleanup; reject unavailable accounting and begin
+cleanup at a sampled85% cap threshold. This cannot guarantee catching allocation bursts before the Windows cap.
+Cache metadata records retained sets, bytes and packaged identities before/after, never deleting valid data to
+make a benchmark pass. The autotest harness keeps three recent generation versions. Renderer-only native edits
+exclude themselves from ATLAS_GEN_HASH; per-stage invalidation and actual warm-reload acceptance remain pending.

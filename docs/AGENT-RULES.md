@@ -18,7 +18,7 @@ below apply to every session and agent.
 * **Every heavy job goes through the shared lock**: `py -3 E:/NirnCraft-scratch/locks/heavy.py "<agent>: <what>" --
   <command>` (builds, tests and offline renders share 3 slots; `--exclusive` only for the game client and runs whose timings
   matter, since a pending exclusive job holds every new job back;
-  every job and its children capped at 16 GB, `--mem-gb N`). Start it with the Bash tool's `run_in_background` and
+  build jobs and children capped at16 GiB; recognized live game jobs use the existing24 GiB allowance; `--mem-gb N`). Start it with the Bash tool's `run_in_background` and
   keep working. It writes a timestamped log per job (`locks/logs/`) and a ledger (`locks/jobs.jsonl`: wait, run, rc,
   peak memory, phase times); `py -3 E:/NirnCraft-scratch/locks/watch.py --report` shows where time went.
 * **Every test and long job is traceable**: it prints `TRACE begin <phase>` / `TRACE end <phase>` around each phase,
