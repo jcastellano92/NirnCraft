@@ -473,7 +473,7 @@ Status values: `done`, `in progress`, `next`, `blocked (why)`, `not started`. "G
 
 | Phase | Status | Where (worktree / commit) | Gate result | Updated |
 | --- | --- | --- | --- | --- |
-| Infinite ATLAS renderer continuation | in progress | `atlas-render`; quality/cache recovery and frame-pacing candidate `50756e6a` integrated; direct host Vulkan isolated | Java: 353 tests, 0 failures/errors, 19 opt-in skips. Frame snapshot/native cold revisit: 6/6 reads, 0/4096 changed hits. Fresh ABI 0.17/166 exports on both platforms; explicit-base check gate 7/7. Production driver budgets still fail. Last 1440p route remains p99 41.23 ms/worst 90.06 ms; new route, seams, live Vulkan memory/lifecycle and revisit/gallery gates pending. | 2026-10-27 |
+| Infinite ATLAS renderer continuation | in progress | `atlas-render`; frame snapshots plus cache maintenance candidate `c298d1c4`; shared host Vulkan isolated | Java353/0 failures/errors/19 opt-in skips. Native/kernel2 pass; 6/6 cold reads,0/4096 changed hits. Cache ownership Windows11 and Linux22 scenarios; registered Linux cache CTest3/3. Fresh ABI0.17/166 on both platforms, source076af4d670e6; explicit-base cache gate6/6. All83 shader binaries unchanged. Component pipeline setup reuse verified separately; no live-startup/FPS claim. Driver budgets still fail; last1440p route p99 41.23ms/worst90.06ms. Seams, memory/lifecycle and live revisit/gallery remain open. | 2026-10-27 |
 | P1 road plan | done | 464c430 | roadplan_lint 0; 6 failed trail links (R1b) | 2026-10-13 |
 | P2 terrain obeys plan | done | 7b0816c | 95.5% bed columns exact | 2026-10-13 |
 | P3 paint and crossings | done | 5d0ffe7 | p3_corridors all zeros; legacy measure 11 gaps in settlement zones (P5/R1b) | 2026-10-13 |

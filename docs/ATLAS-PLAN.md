@@ -124,7 +124,20 @@ locks and applies immutable snapshots only while their source revisions remain v
 all six disk reads and zero of 4096 return-hit differences. Both packaged platforms load at ABI 0.17/166 exports;
 Java has 353 tests, zero failures/errors and 19 opt-in skips. The explicit-base check-tier gate passes all seven
 planned items with nothing missing. This is correctness and lock-ownership evidence, not a new route measurement.
-The shared-Vulkan/lifetime/cache experiments remain isolated; no stage target is relaxed or marked complete.
+The shared-Vulkan and Java lifetime experiments remain isolated; no stage target is relaxed or marked complete.
+
+Cache maintenance integration (2026-10-27): nineteen attached-feature pipelines now use fixed, bounded disk slots
+validated against shader and device/driver identity; incompatible or corrupt data rebuilds safely. Separate
+same-code controls measured feature setup at48.58s cold,0.135s cached and47.00s on a fresh miss, with identical
+encoded outputs. This is component setup evidence, not a live-startup or frame-rate claim. Generator-cache pruning
+now needs an exclusive OS lease; active readers retain shared leases, stale reads/writes fail closed and cleanup
+workers are joined. Development keeps three versions, with active/uncertain sets retained for safety. Small lease
+files remain intentionally; legacy writers/manual deletion and same-key multiwriter serialization are excluded.
+Both packaged platforms load at ABI0.17/166 from source076af4d670e6; native/kernel checks pass, all83 shaders are
+byte-identical to accepted main, Linux cache CTest3/3 and Java353 tests pass (19 opt-in skips). The six-item
+explicit-base check gate passes with no missing items. Current conservative producer hashing starts one new cache
+set (`ATLAS_GEN_HASH=cac47eaf36f7a839`); never bypass this identity to claim reuse. Live revisit, seams, driver budgets
+and the route remain open.
 
 First integrated scripted-route baseline (2026-10-26, main `4e407ed5`): 2560×1440 RTX 3090, 4,950 measured frames,
 ten captures (the harness excludes 100 capture-overhead frames). **FAIL:** p99 41.23 ms, worst 90.06 ms, 11 frames
