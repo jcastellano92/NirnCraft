@@ -879,6 +879,25 @@ class RouteComparisonTests(unittest.TestCase):
         with patch.object(sys, 'argv', [probe.__file__, *args]), \
                 patch.object(probe.game, 'take_lease', side_effect=KeyError('reached')):
             with self.assertRaises(KeyError): probe.main()
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); evidence = root / 'ev'; evidence.mkdir(); game_dir = root / 'game'; game_dir.mkdir()
+            (root / 'instance.cfg').write_bytes(b'JvmArgs=\'-Xmx4G\'\n')
+            flags_file = root / 'flags.properties'; flags_file.write_bytes(b'')
+            probe_flags.snapshot(root / 'instance.cfg', flags_file, evidence)
+            def invoke_writer(group, groups):
+                probe.game._set_group_flags({'nirncraft.atlas.vkProbe': 'false', 'nirncraft.atlas.memoryDiagnostics': 'true'})
+                raise RuntimeError('reached_after_writer')
+            env = {'NIRNCRAFT_ATLAS_PROBE_ROUTE': '1', 'NIRNCRAFT_ATLAS_ROUTE_CONTROL': 'no-captures,keep-window',
+                   'ATLAS_MEMORY_DIAGNOSTICS': '1'}
+            with patch.object(probe.game.lw, 'INSTANCE', root), patch.object(probe.game, 'FLAGS_FILE', flags_file), \
+                 patch.object(probe.game, 'GAME', game_dir), patch.object(probe.game, 'assert_prepared'), \
+                 patch.object(probe.game, 'ensure', side_effect=invoke_writer), patch.object(probe.game, 'launch'), \
+                 patch.object(probe.game, '_set_group_flags', wraps=probe.game._set_group_flags), \
+                 patch.object(probe.atlas_static, 'profile_lines', return_value=[]), \
+                 patch.dict(probe.os.environ, env, clear=False):
+                self.assertEqual(probe.worker(evidence, time.monotonic() + 10), 2)
+            receipt = probe.json.loads((evidence / 'worker-receipt.json').read_text())
+            self.assertEqual(receipt['error'], 'reached_after_writer')
 
     def test_cli_does_not_extend_ordinary_probe_or_allow_route_cache_reset(self):
         for args in (['--limit', '299'], ['--route-comparison', '--fresh-generator-cache'],

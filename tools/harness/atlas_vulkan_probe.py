@@ -412,7 +412,9 @@ def worker(evidence, deadline):
     game.launch = bounded_launch
     original_flags_writer = game._set_group_flags
     def journaled_flags(jvm):
-        if route: require_route_flags(jvm, attribution=bool(args.memory_diagnostics and args.route_control))
+        if route:
+            attribution = bool(os.environ.get('NIRNCRAFT_ATLAS_ROUTE_CONTROL') and os.environ.get('ATLAS_MEMORY_DIAGNOSTICS') == '1')
+            require_route_flags(jvm, attribution=attribution)
         if transport == 'shared' and 'nirncraft.atlas.vkSharedSync' in jvm:
             raise RuntimeError('shared probe requires the product transport default, not a group override')
         probe_flags.guard_before_write(game.lw.INSTANCE / 'instance.cfg', game.FLAGS_FILE, evidence)
