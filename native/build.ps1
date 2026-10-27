@@ -30,6 +30,10 @@ if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
     py -3 -I (Join-Path $here 'tools\export_cloud_noise.py') $repo | Out-Host
 }
 if (-not $NoTest) {
+    & (Join-Path $build "$Config\atlas_pipeline_cache_io_test.exe")
+    if ($LASTEXITCODE) { throw 'pipeline cache IO tests failed' }
+    & (Join-Path $build "$Config\atlas_cache_lifetime_test.exe")
+    if ($LASTEXITCODE) { throw 'cache lifetime ownership tests failed' }
     & (Join-Path $build "$Config\atlas_cache_test.exe")
     if ($LASTEXITCODE) { throw 'cache recovery tests failed' }
     & (Join-Path $build "$Config\atlas_frame_lock_test.exe")

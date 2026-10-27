@@ -27,6 +27,7 @@
 #include "world.hpp"  // Key3
 
 namespace atlas {
+class CacheSetLease;
 
 class GenCache {
 public:
@@ -88,6 +89,9 @@ public:
     void flush();  // (waits for the queue: tests, shutdown)
     // (tests) holds mu_ until release is set, as a thread of the writer would while it scans a region file
     void holdLockForTest(const std::atomic<bool>& release, std::atomic<bool>& held);
+    void pruneBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held);
+    void readBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held);
+    void admissionSignalForTest(std::atomic<bool>* admitted);
 
 private:
     struct Loc {
@@ -130,13 +134,23 @@ private:
     // write of the writer's thread that Windows stretched to seconds held every thread that asked the cache anything,
     // the render thread's atlas_info and its packedDone among them.
     std::mutex mu_;
+    std::mutex configureMu_;  // serialize lifetime transitions; never held by ordinary readers/writers
     std::condition_variable cv_, idle_, scanCv_;
     int scanning_ = 0;  // (regions being scanned now: configure waits for none)
+    int regionWaiters_ = 0;  // references waiting for a scan must leave before configure clears its nodes
     Stats snap_;        // (stats(): what the last caller that got mu_ saw)
     std::mutex snapMu_;
     std::deque<Job> queue_;
     bool stop_ = false, busy_ = false;
     std::thread writer_;
+    std::thread pruner_;  // moved under mu_, joined with mu_ let go; never detached
+    using Lease = std::shared_ptr<CacheSetLease>;
+    Lease lease_;  // local read tickets keep this OS lease alive across out-of-lock IO/reconfigure
+    const std::atomic<bool>* pruneRelease_ = nullptr;
+    std::atomic<bool>* pruneHeld_ = nullptr;
+    const std::atomic<bool>* readRelease_ = nullptr;
+    std::atomic<bool>* readHeld_ = nullptr;
+    std::atomic<bool>* admitted_ = nullptr;
     std::atomic<bool> on_{false};
     std::string dir_;
     uint64_t fp_ = 0;
@@ -154,14 +168,14 @@ private:
     std::vector<std::filesystem::path> oldSets_;  // (other sets in the root: deleted at this one's first write)
     void dropOldSets();  // (caller holds mu_)
     void eraseFarTile(Region& r, int lod, int tx, int tz);  // (caller holds mu_)
-    void invalidateChunk(const Key3& k, const Loc& failed, bool header = false);
+    void invalidateChunk(const Key3& k, const Loc& failed, const Lease& lease, bool header = false);
     std::string regionPath(uint64_t rk) const;
     // (caller holds l on mu_) the region, its file's index read on first use: l is let go while the file is read, so
     // anything may have changed on return; the reference stays (nodes of regions_ do not move; configure waits for scans)
     Region& region(std::unique_lock<std::mutex>& l, uint64_t rk);
     void scanFile(const std::string& path, Region& r);  // (no lock: fills a region that no other thread touches)
     void writerLoop();
-    bool readBytes(uint64_t rk, const Loc& l, std::vector<uint8_t>& out);
+    bool readBytes(uint64_t rk, const Loc& l, std::vector<uint8_t>& out, const Lease& lease);
 };
 
 }  // namespace atlas

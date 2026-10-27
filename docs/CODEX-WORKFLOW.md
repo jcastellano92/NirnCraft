@@ -201,3 +201,18 @@ entire feature engine and Java overlay producer files still participate. Infrast
 can therefore invalidate a bake. Preserve that safe invalidation until a finer dependency scheme is proved; identical
 sampled output is evidence, not permission to remove an entire producer file from its identity. Development retention
 keeps three versions, while actual same-version relaunch and zero-regeneration revisit still require live evidence.
+
+## Accepted-base cache maintenance checkpoint (2026-10-27)
+
+The source and packages at `c298d1c4` combine bounded attached-feature pipeline reuse and active generator-cache
+protection on the accepted GL-host/Vulkan-core source. Fresh Windows/Linux ABI0.17/166 packages share source
+`076af4d670e6973fd055245e9f3a8b361c437126e87d7c54c03179d90573f0e9`. All83 shader binaries match the accepted
+baseline. Windows native/kernel checks pass, including both cache suites and the original cold-return oracle;
+Linux registered cache CTest3/3 and Java353 tests pass (0 failures/errors,19 opt-in skips). The explicit b41724ca
+check-tier gate passes6/6 with no known/blocking failures or missing items (`1027-032247`,91s).
+
+The pruner skips active or uncertain sets and retains small lock files; it does not protect against legacy or manual
+deletion or serialize same-key writers. Joining cleanup does not bound arbitrary filesystem latency. Current
+whole-producer hashing intentionally invalidates the previous generator set once; the new native generator hash
+is `cac47eaf36f7a839`. This checkpoint does not integrate the shared-Vulkan Java lifecycle/diagnostic packets or
+establish live cache revisit, full startup, frame-time, driver-resource or renderer stage acceptance.

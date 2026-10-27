@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <charconv>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
@@ -9,6 +10,7 @@
 
 #include "sectioncodec.hpp"
 #include "sectionpack.hpp"
+#include "cache_set_lease.hpp"
 
 namespace atlas {
 
@@ -86,6 +88,7 @@ bool decodeHeader(const std::vector<uint8_t>& in, uint32_t* info) {
 GenCache::GenCache() { writer_ = std::thread([this] { writerLoop(); }); }
 
 GenCache::~GenCache() {
+    std::lock_guard<std::mutex> transition(configureMu_);
     flush();
     {
         std::unique_lock<std::mutex> l(mu_);
@@ -93,6 +96,7 @@ GenCache::~GenCache() {
     }
     cv_.notify_all();
     if (writer_.joinable()) writer_.join();
+    if (pruner_.joinable()) pruner_.join();  // no cache mutex held; lease_ still protects the configured set
 }
 
 uint64_t GenCache::regionOf(int cx, int cz) { return uint64_t(uint32_t(fdiv(cx, 32))) << 32 | uint32_t(fdiv(cz, 32)); }
@@ -140,68 +144,118 @@ bool decodeKinds(const std::vector<uint8_t>& in, std::vector<uint32_t>& k) {
 }  // namespace
 
 void GenCache::configure(const std::string& root, uint64_t fingerprint) {
-    flush();
+    std::lock_guard<std::mutex> transition(configureMu_);
+    // Admission precedes joining old cleanup: a queued A prune must see a returning A owner, not delete it first.
+    // An exclusive prune already in progress can refuse admission. That request becomes cache-off, never old-FP data.
+    auto target = root.empty() || !fingerprint ? nullptr : CacheSetLease::acquire(root, fingerprint);
     std::unique_lock<std::mutex> l(mu_);
-    if (!root.empty() && fingerprint && root + "#" + std::to_string(fingerprint) == dir_ + "#" + std::to_string(fp_) &&
-        on_.load())
-        return;
-    scanCv_.wait(l, [&] { return scanning_ == 0; });  // (a reader still holds a reference into a region)
+    for (;;) {
+        idle_.wait(l, [&] { return queue_.empty() && !busy_; });
+        scanCv_.wait(l, [&] { return scanning_ == 0 && regionWaiters_ == 0; });
+        // A producer may have queued work while the scan wait let mu_ go. Observe both drains atomically.
+        if (queue_.empty() && !busy_) break;
+    }
+    if (target && on_ && fp_ == fingerprint && dir_ == target->set().string()) return;
+    if (target && admitted_) admitted_->store(true);
+    auto priorLease = std::move(lease_);  // independent read tickets may retain this after configure returns
+    auto priorPruner = std::move(pruner_);
+    oldSets_.clear();
     regions_.clear();
+    fresh_.clear();
     dataBytes_ = 0;
     on_ = false;
-    fp_ = fingerprint;
+    fp_ = 0;
     dir_.clear();
     st_ = Stats{};
-    if (root.empty() || !fingerprint) return;
-    char sub[48];
-    std::snprintf(sub, sizeof sub, "/gen-%016llx", (unsigned long long)fingerprint);
+    l.unlock();
+    if (priorPruner.joinable()) priorPruner.join();
+    if (!target) return;  // prior set remains on disk; pending destructive candidates were discarded
     std::error_code ec;
-    std::filesystem::create_directories(root + sub, ec);
+    std::filesystem::create_directories(target->set(), ec);
     if (ec) return;
-    dir_ = root + sub;
-    for (auto& e : std::filesystem::directory_iterator(dir_, ec))
-        if (e.path().extension() == ".gch") st_.fileBytes += uint64_t(e.file_size(ec));
-    on_ = true;
+    uint64_t fileBytes = 0;
+    for (std::filesystem::directory_iterator it(target->set(), ec), end; !ec && it != end; it.increment(ec)) {
+        const auto& e = *it;
+        if (e.path().extension() == ".gch") fileBytes += uint64_t(e.file_size(ec));
+        if (ec) return;
+    }
+    if (ec) return;
     // (another generator's or build's sets: never read again; deleted in the background, the world's folder does not
     // grow with every build)
     std::vector<std::pair<std::filesystem::file_time_type, std::filesystem::path>> others;
-    for (auto& e : std::filesystem::directory_iterator(root, ec))
-        if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != sub + 1)
-            others.push_back({e.last_write_time(ec), e.path()});
+    bool pruneSafe = true;
+    for (std::filesystem::directory_iterator it(target->root(), ec), end; !ec && it != end; it.increment(ec)) {
+        const auto& e = *it;
+        if (e.is_directory(ec) && e.path().filename().string().rfind("gen-", 0) == 0 && e.path().filename() != target->set().filename()) {
+            auto stamp = e.last_write_time(ec);
+            if (!ec) others.push_back({stamp, e.path()});
+        }
+        if (ec) { pruneSafe = false; break; }
+    }
+    if (ec) pruneSafe = false;
     // In development (a file `keep-gen-sets` in the cache's root, its text the number of sets to keep, 3 if empty: the test
     // harness writes it) the newest sets by last use stay beside this one, so builds and worktrees that alternate on one
     // instance do not delete each other's bakes. A player's cache keeps this set alone.
     size_t keep = 0;
     {
-        std::ifstream kf(std::filesystem::path(root).parent_path() / "keep-gen-sets");
-        if (kf) {
+        auto keepPath = std::filesystem::path(root).parent_path() / "keep-gen-sets";
+        bool exists = std::filesystem::exists(keepPath, ec);
+        if (ec) pruneSafe = false;
+        if (exists) {
+            if (!std::filesystem::is_regular_file(keepPath, ec) || ec) pruneSafe = false;
+            std::ifstream kf(keepPath);
             int n = 0;
-            kf >> n;
+            if (!kf) pruneSafe = false;
+            else { kf >> n; if (kf.bad() || (kf.fail() && !kf.eof())) pruneSafe = false; }
             keep = size_t(n > 0 ? n : 3) - 1;  // (this set is one of them)
         }
     }
     std::sort(others.begin(), others.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
     std::vector<std::filesystem::path> old;
-    for (size_t i = keep; i < others.size(); i++) old.push_back(others[i].second);
+    if (pruneSafe) for (size_t i = keep; i < others.size(); i++) old.push_back(others[i].second);
+    l.lock();
+    lease_ = std::move(target);
+    dir_ = lease_->set().string();
+    fp_ = fingerprint;
+    st_.fileBytes = fileBytes;
     oldSets_ = std::move(old);  // (deleted once this set has written something: a set opened for a moment, while the
                                 // generator was being put together or taken apart, must not delete the real one)
+    on_ = true;
 }
 
 void GenCache::dropOldSets() {
-    if (oldSets_.empty()) return;
+    if (oldSets_.empty() || pruner_.joinable()) return;
     std::vector<std::filesystem::path> old;
     old.swap(oldSets_);
-    std::thread([old] {
-        std::error_code e2;
-        for (auto& p : old) std::filesystem::remove_all(p, e2);
-    }).detach();
+    auto release = pruneRelease_; auto held = pruneHeld_;
+    pruner_ = std::thread([old = std::move(old), release, held] {
+        if (release && held) {
+            held->store(true);
+            while (!release->load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        for (const auto& p : old) {
+            std::string name = p.filename().string();
+            uint64_t fp = 0;
+            if (name.size() != 20 || name.rfind("gen-", 0) != 0) continue;
+            auto parsed = std::from_chars(name.data() + 4, name.data() + name.size(), fp, 16);
+            if (parsed.ec != std::errc{} || parsed.ptr != name.data() + name.size() || !fp) continue;
+            auto exclusive = CacheSetLease::acquire(p.parent_path(), fp, true, false);
+            if (!exclusive || exclusive->set().filename() != p.filename()) continue;
+            std::error_code ec;
+            if (std::filesystem::is_symlink(exclusive->set(), ec) || ec) continue;
+            std::filesystem::remove_all(exclusive->set(), ec);  // exclusive held across the whole delete; errors retain remainder
+        }
+    });
 }
 
 GenCache::Region& GenCache::region(std::unique_lock<std::mutex>& l, uint64_t rk) {
     for (;;) {
         Region& r = regions_[rk];
         if (r.scanning) {  // (another thread reads the file: wait for it, then look again)
+            ++regionWaiters_;
             scanCv_.wait(l);
+            --regionWaiters_;
+            scanCv_.notify_all();
             continue;
         }
         if (r.scanned) return r;
@@ -283,11 +337,14 @@ void GenCache::eraseFarTile(Region& r, int lod, int tx, int tz) {
 
 void GenCache::forgetFarTile(int lod, int tx, int tz) {
     if (!on()) return;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return; lease = lease_; }
     Job j;
     j.type = 5;
     j.k = Key3{lod, tx, 0, tz};
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return;
         eraseFarTile(region(l, farRegionOf(lod, tx, tz)), lod, tx, tz);  // (known no more at once; the tombstone follows in the queue)
         queue_.push_back(std::move(j));
     }
@@ -296,12 +353,15 @@ void GenCache::forgetFarTile(int lod, int tx, int tz) {
 
 void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
     if (!on()) return;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return; lease = lease_; }
     Job j;
     j.isChunk = true;
     j.k = Key3{0, cx, 0, cz};
     j.info.assign(info, info + INFO_WORDS);
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return;
         fresh_.insert(chunkKey(cx, cz));
         queue_.push_back(std::move(j));
         st_.queued = queue_.size();
@@ -311,12 +371,15 @@ void GenCache::putChunk(int cx, int cz, const uint32_t* info) {
 
 void GenCache::putSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash) {
     if (!on() || !words) return;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return; lease = lease_; }
     Job j;
     j.k = k;
     j.words = std::move(words);
     j.hash = hash;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return;
         queue_.push_back(std::move(j));
         st_.queued = queue_.size();
     }
@@ -467,16 +530,19 @@ void GenCache::flush() {
     idle_.wait(l, [&] { return queue_.empty() && !busy_; });
 }
 
-bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out) {
+bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out, const Lease& lease) {
     // (a region's file read whole on its first read: one open a region, not one a record; a record written since lies
     // past that copy: read alone. The copies within a budget, the least recently read dropped. The file is read with mu_
     // let go; two threads that read it at once keep one of the copies)
     std::shared_ptr<std::vector<uint8_t>> data;
     std::string path;
     bool load = false;
+    const std::atomic<bool>* release = nullptr; std::atomic<bool>* held = nullptr;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || !lease || lease != lease_) return false;
         Region& r = region(l, rk);
+        release = readRelease_; held = readHeld_;
         path = regionPath(rk);
         if (r.data) {
             r.dataUse = ++dataClock_;
@@ -484,6 +550,10 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
         } else {
             load = true;
         }
+    }
+    if (release && held) {
+        held->store(true);
+        while (!release->load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     if (load) {
         auto d = std::make_shared<std::vector<uint8_t>>();
@@ -497,6 +567,7 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
         std::fclose(f);
         d->resize(got);
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return false;
         Region& r = region(l, rk);
         if (!r.data) {
             r.data = d;
@@ -515,19 +586,22 @@ bool GenCache::readBytes(uint64_t rk, const Loc& loc, std::vector<uint8_t>& out)
     }
     if (data->size() >= loc.offset + loc.bytes) {
         out.assign(data->begin() + ptrdiff_t(loc.offset), data->begin() + ptrdiff_t(loc.offset + loc.bytes));
-        return true;
+        std::unique_lock<std::mutex> l(mu_);
+        return on_ && lease == lease_;
     }
     FILE* f = std::fopen(path.c_str(), "rb");
     if (!f) return false;
     out.resize(loc.bytes);
     bool ok = std::fseek(f, long(loc.offset), SEEK_SET) == 0 && std::fread(out.data(), 1, out.size(), f) == out.size();
     std::fclose(f);
-    return ok;
+    std::unique_lock<std::mutex> l(mu_);
+    return ok && on_ && lease == lease_;
 }
 
 bool GenCache::hasChunk(int cx, int cz) {
     if (!on()) return false;
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_) return false;
     return region(l, regionOf(cx, cz)).chunks.count(chunkKey(cx, cz)) != 0;
 }
 
@@ -535,6 +609,7 @@ bool GenCache::forget(int cx, int cz) {
     if (!on()) return false;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_) return false;
         if (!fresh_.erase(chunkKey(cx, cz))) return false;  // (from disk, or never: kept)
         Region& r = region(l, regionOf(cx, cz));
         r.chunks.erase(chunkKey(cx, cz));
@@ -552,6 +627,7 @@ bool GenCache::forget(int cx, int cz) {
 bool GenCache::complete(int cx, int cz) {
     if (!on()) return false;
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_) return false;
     Region& r = region(l, regionOf(cx, cz));
     auto it = r.chunks.find(chunkKey(cx, cz));
     if (it == r.chunks.end()) return false;
@@ -560,9 +636,10 @@ bool GenCache::complete(int cx, int cz) {
     return true;
 }
 
-void GenCache::invalidateChunk(const Key3& k, const Loc& failed, bool header) {
+void GenCache::invalidateChunk(const Key3& k, const Loc& failed, const Lease& lease, bool header) {
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || !lease || lease != lease_) return;
         Region& r = region(l, regionOf(k.x, k.z));
         Loc current;
         if (header) {
@@ -590,12 +667,15 @@ void GenCache::invalidateChunk(const Key3& k, const Loc& failed, bool header) {
 bool GenCache::readSection(const Key3& k, std::shared_ptr<const std::vector<uint32_t>>& words) {
     words.reset();
     if (!on() || k.lod != 0 || k.y < -4 || k.y >= 36) return false;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return false; lease = lease_; }
     uint32_t info[INFO_WORDS];
     if (!chunk(k.x, k.z, info)) return false;
     uint32_t kind = info[4 + (k.y + 4) * 4 + 2];
-    if (kind == KIND_AIR) return true;
+    if (kind == KIND_AIR) { std::unique_lock<std::mutex> l(mu_); return on_ && lease == lease_; }
     if (kind != KIND_BLOCKS) return false;
     words = section(k);
+    { std::unique_lock<std::mutex> l(mu_); if (!on_ || lease != lease_) { words.reset(); return false; } }
     return words != nullptr;
 }
 
@@ -603,8 +683,10 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
     if (!on()) return false;
     uint64_t rk = regionOf(cx, cz);
     Loc loc;
+    Lease lease;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_) return false;
         Region& r = region(l, rk);
         auto it = r.chunks.find(chunkKey(cx, cz));
         if (it == r.chunks.end()) {
@@ -612,13 +694,15 @@ bool GenCache::chunk(int cx, int cz, uint32_t* info) {
             return false;
         }
         loc = it->second.loc;
+        lease = lease_;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b) || !decodeHeader(b, info)) {
-        invalidateChunk(Key3{0, cx, 0, cz}, loc, true);
+    if (!readBytes(rk, loc, b, lease) || !decodeHeader(b, info)) {
+        invalidateChunk(Key3{0, cx, 0, cz}, loc, lease, true);
         return false;
     }
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_ || lease != lease_) return false;
     Region& r = region(l, rk);
     for (int s = 0; s < 40; s++)
         if (info[4 + s * 4 + 2] == KIND_BLOCKS && !r.secs.count(Key3{0, cx, s - 4, cz})) {
@@ -634,16 +718,19 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     if (!on()) return nullptr;
     uint64_t rk = regionOf(k.x, k.z);
     Loc loc;
+    Lease lease;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_) return nullptr;
         Region& r = region(l, rk);
         auto it = r.secs.find(k);
         if (it == r.secs.end()) return nullptr;
         loc = it->second;
+        lease = lease_;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b)) {
-        invalidateChunk(k, loc);
+    if (!readBytes(rk, loc, b, lease)) {
+        invalidateChunk(k, loc, lease);
         return nullptr;
     }
     auto t0 = std::chrono::steady_clock::now();
@@ -651,14 +738,16 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
     if (!decodeChecked(b, ids)) {
         {
             std::unique_lock<std::mutex> l(mu_);
+            if (!on_ || lease != lease_) return nullptr;
             st_.hashErrors++;
         }
-        invalidateChunk(k, loc);
+        invalidateChunk(k, loc, lease);
         return nullptr;
     }
     auto w = std::make_shared<const std::vector<uint32_t>>(packSection(ids));
     double ms = msSince(t0);
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_ || lease != lease_) return nullptr;
     st_.decodeMs += ms;
     st_.sectionReads++;
     return w;
@@ -666,6 +755,8 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::section(const Key3& k) {
 
 void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& kinds, bool standIn) {
     if (!on()) return;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return; lease = lease_; }
     Job j;
     j.type = 2;
     j.standIn = standIn;
@@ -673,6 +764,7 @@ void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& 
     j.info = kinds;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return;
         queue_.push_back(std::move(j));
     }
     cv_.notify_one();
@@ -680,6 +772,8 @@ void GenCache::putFarTile(int lod, int tx, int tz, const std::vector<uint32_t>& 
 
 void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32_t>> words, uint32_t hash, bool standIn) {
     if (!on() || !words) return;
+    Lease lease;
+    { std::unique_lock<std::mutex> l(mu_); if (!on_) return; lease = lease_; }
     Job j;
     j.type = 3;
     j.standIn = standIn;
@@ -688,6 +782,7 @@ void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32
     j.hash = hash;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return;
         queue_.push_back(std::move(j));
     }
     cv_.notify_one();
@@ -696,6 +791,7 @@ void GenCache::putCoarse(const Key3& k, std::shared_ptr<const std::vector<uint32
 bool GenCache::farKnown(int lod, int tx, int tz) {
     if (!on()) return false;
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_) return false;
     Region& r = region(l, farRegionOf(lod, tx, tz));
     auto it = r.tiles.find(tileKey(tx, tz));
     if (it == r.tiles.end()) return false;
@@ -706,7 +802,10 @@ bool GenCache::farKnown(int lod, int tx, int tz) {
 bool GenCache::farStandIn(int lod, int tx, int tz) {
     if (!farKnown(lod, tx, tz)) return false;
     std::unique_lock<std::mutex> l(mu_);
-    return !region(l, farRegionOf(lod, tx, tz)).tiles[tileKey(tx, tz)].trueData;
+    if (!on_) return false;
+    auto& r = region(l, farRegionOf(lod, tx, tz));
+    auto tile = r.tiles.find(tileKey(tx, tz));
+    return tile != r.tiles.end() && !tile->second.trueData;
 }
 
 bool GenCache::farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds) {
@@ -717,13 +816,22 @@ bool GenCache::farTile(int lod, int tx, int tz, std::vector<uint32_t>& kinds) {
     }
     uint64_t rk = farRegionOf(lod, tx, tz);
     Loc loc;
+    Lease lease;
     {
         std::unique_lock<std::mutex> l(mu_);
-        loc = region(l, rk).tiles[tileKey(tx, tz)].loc;
+        if (!on_) return false;
+        auto& r = region(l, rk);
+        auto tile = r.tiles.find(tileKey(tx, tz));
+        if (tile == r.tiles.end()) return false;
+        auto baked = r.baked.find(tileKey(tx, tz));
+        if (tile->second.mixed && (baked == r.baked.end() || baked->second < tile->second.mixed)) return false;
+        loc = tile->second.loc;
+        lease = lease_;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b) || !decodeKinds(b, kinds)) return false;
+    if (!readBytes(rk, loc, b, lease) || !decodeKinds(b, kinds)) return false;
     std::unique_lock<std::mutex> l(mu_);
+    if (!on_ || lease != lease_) return false;
     st_.farHits++;
     return true;
 }
@@ -732,22 +840,28 @@ std::shared_ptr<const std::vector<uint32_t>> GenCache::coarse(const Key3& k) {
     if (!on()) return nullptr;
     uint64_t rk = farRegionOf(k.lod, tdiv(k.x), tdiv(k.z));
     Loc loc;
+    Lease lease;
     {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_) return nullptr;
         Region& r = region(l, rk);
         auto it = r.coarse.find(k);
         if (it == r.coarse.end()) return nullptr;
         loc = it->second;
+        lease = lease_;
     }
     std::vector<uint8_t> b;
-    if (!readBytes(rk, loc, b)) return nullptr;
+    if (!readBytes(rk, loc, b, lease)) return nullptr;
     uint16_t ids[4096];
     if (!decodeChecked(b, ids)) {
         std::unique_lock<std::mutex> l(mu_);
+        if (!on_ || lease != lease_) return nullptr;
         st_.hashErrors++;
         return nullptr;
     }
-    return std::make_shared<const std::vector<uint32_t>>(packSection(ids));
+    auto words = std::make_shared<const std::vector<uint32_t>>(packSection(ids));
+    std::unique_lock<std::mutex> l(mu_);
+    return on_ && lease == lease_ ? words : nullptr;
 }
 
 GenCache::Stats GenCache::stats() {
@@ -770,6 +884,16 @@ void GenCache::holdLockForTest(const std::atomic<bool>& release, std::atomic<boo
     std::lock_guard<std::mutex> l(mu_);
     held.store(true);
     while (!release.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void GenCache::pruneBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held) {
+    std::lock_guard<std::mutex> l(mu_); pruneRelease_ = release; pruneHeld_ = held;
+}
+void GenCache::readBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held) {
+    std::lock_guard<std::mutex> l(mu_); readRelease_ = release; readHeld_ = held;
+}
+void GenCache::admissionSignalForTest(std::atomic<bool>* admitted) {
+    std::lock_guard<std::mutex> l(mu_); admitted_ = admitted;
 }
 
 }  // namespace atlas
