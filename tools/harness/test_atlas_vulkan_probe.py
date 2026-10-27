@@ -315,7 +315,10 @@ class SupervisorChecks(unittest.TestCase):
             evidence_root = base / 'evidence'
             class FinishedWorker:
                 def poll(self): return 0
+            launch_owners = []
             def start_worker(args, env):
+                properties = dict(part.split('=', 1) for part in env['NIRNCRAFT_HARNESS_JVM'].split(','))
+                launch_owners.append(properties['nirncraft.atlas.probeOwner'])
                 Path(env['NIRNCRAFT_HARNESS_LAUNCH_ACK_FILE']).write_text('{"state":"prevented"}')
                 return FinishedWorker()
             def closed(deadline, started, seen, ack, env, result, diagnostic=None):
@@ -333,6 +336,9 @@ class SupervisorChecks(unittest.TestCase):
                 self.assertEqual(probe.main(), 2)
                 drop.assert_not_called()
             receipt = probe.json.loads(next(evidence_root.glob('*/supervisor-receipt.json')).read_text())
+            self.assertTrue(launch_owners)
+            self.assertTrue(all(owner == receipt['probe_owner'] for owner in launch_owners))
+            self.assertEqual(str(probe.uuid.UUID(receipt['probe_owner'])), receipt['probe_owner'])
             self.assertIn('changed after restoration', receipt['cleanup_error'])
             self.assertNotIn('launcher_absent_before_after_restore', receipt)
 

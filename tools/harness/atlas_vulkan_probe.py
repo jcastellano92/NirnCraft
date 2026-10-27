@@ -905,7 +905,8 @@ def main():
         guard = LauncherGuard(ack, started_wall, Path(os.environ['LOCALAPPDATA']) / 'Programs/PrismLauncher/prismlauncher.exe')
         lines[hits[0]] = forced
         env = reload_environment(transport_environment(launch_environment, args.transport), args.transport, args.resource_reload)
-        env['NIRNCRAFT_HARNESS_JVM'] += ',nirncraft.atlas.probeOwner=' + uuid.uuid4().hex
+        probe_owner = str(uuid.uuid4())
+        env['NIRNCRAFT_HARNESS_JVM'] += ',nirncraft.atlas.probeOwner=' + probe_owner
         env['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
         env = diagnostic_environment(env, evidence, args.memory_diagnostics)
         env, generator_cache = fresh_cache_environment(env, evidence, args.fresh_generator_cache)
@@ -915,6 +916,7 @@ def main():
         work_deadline = deadline - 60
         env['NIRNCRAFT_HARNESS_DEADLINE'] = str(work_deadline)
         result = {'state': 'UNVERIFIED', 'evidence': str(evidence), 'forced_cleanup': False,
+                  'probe_owner': probe_owner,
                   'transport_requested': args.transport,
                   'route_comparison_requested': args.route_comparison,
                   'requested_generator_cache_root': str(generator_cache) if generator_cache is not None else None,
