@@ -135,10 +135,12 @@ This own-device, empty-overlay, neutral-material control omits Minecraft and the
 unexplained. A later byte-identical ingest UUID has unknown provenance and is not a second verified client run.
 
 The lifecycle packet `cb001a1d` passes 385 Java tests (zero failures/errors, 19 opt-in skips) and its explicit-base
-three-item offline gate. It is assembled as `811ea789` in the isolated Vulkan candidate; its fresh build is running.
-Actual Minecraft reload/device shutdown and terrain during a pending copy remain unverified. It is not on main.
-Terra now owns guarded temporary probe-flag restoration in `probe-flag-cleanup`; failures must retain ownership
-and permit a journaled retry after verified client closure. Main has the tested frame-pacing fix at `b2ea31dd`.
+three-item offline gate. The isolated Vulkan candidate now includes a compiled unified no-output fallback: retained
+opaque meshes use the existing vanilla-light resolve when no far target was delivered. Its fresh build also passes
+385 tests; actual terrain/transition images and pending-copy behavior remain unverified. It is not on main.
+The combined offline gate has 16 passes and one independently verified existing Crafter-menu coverage failure,
+zero new failures or missing items. Do not invent a vanilla UI exemption to hide this existing debt.
+Main has the tested frame-pacing fix at `b2ea31dd`; recovered shared Vulkan remains isolated.
 
 Sol's feature-pipeline experiment completed a fresh-miss/warm-hit/fresh-miss sequence with the same compiled
 candidate: feature setup 48577.626 / 135.131 / 46997.300 ms. All three runs persisted 263 tiles, had zero failed or
@@ -147,10 +149,35 @@ All 78158 encoded records agree with the original baseline. Nineteen fixed cache
 This supports an attached-feature setup benefit, not a world-generation, frame-time or live-startup result.
 The first pair's misleading `fingerprintMatchesSavedRun` label is preserved in raw receipts and corrected in a
 separate hash-linked summary: candidate consistency is true; equality to the old saved build/whole is false.
-Full native/kernel gates, actual corrupt-cache fallback and production integration remain pending.
+The packet is frozen at `772db4b1`. Full native/kernel checks report two passes with no native failures/skips;
+the standard cache-IO hook ran. Actual recovery from one corrupted copied tree slot rebuilt that slot, reused the
+other 18, saved all 19 and preserved the same durable/output/cleanup proofs. Original slots were unchanged.
+Packaged Linux, near-feature execution and live startup remain pending; this component is not on main.
 
 Sol next investigates the generator-cache retention race in a separate `cache-lifetime` worktree: delayed detached
 deletion can target a set reopened by a live context. Protect active sets and keep retention bounded; never bypass
 producer identities. The test instance currently holds 155580920 bytes of cache, not gigabytes of process RAM.
 Seam work remains preserved and parked. The independent Terra reviewer checks all packets and the full stage
 matrix; the parent objective and all failed renderer targets remain active.
+
+## Same-candidate transport allocation controls (2026-10-27)
+
+The first host-copy control used the lifecycle/fallback jar SHA256
+`4d687f0d247a66ab9439902558c2e87dd1f7555922207bcc16f8764c85bc4035` and native source441f9422.
+Actual log/core information confirms Minecraft Vulkan `VK_HOST` with a separate native device. Its unique scratch
+generator cache preserves every existing world cache. It stopped without readiness or images at172 seconds,
+near403/441; maximum Java private13339254784 bytes, maximum job13623369728 bytes. Client closure needed no force.
+This is not a renderer/memory pass, and the prior S3 run is not a matched workload/source comparison.
+
+Exact ingest bytes match the earlier selected actual dump (`b7372337063bdd00`), while the cleanup edit to Java
+OverlayLive legitimately changes the current conservative producer identity: extra `de033c0000000003`, whole
+`2c9b977e73653acb`. It is not a same-key revisit. The host allocation report remains UNVERIFIED because one
+profile sample exceeds the unchanged3-second Windows alignment tolerance; unmatched data stay excluded.
+
+The host run's strict cleanup caught Prism's lossy INI rewrite of backslashes in the diagnostic JVM path. The
+client and backend were closed/restored, but flag restoration refused the changed marker and retained the lease.
+A separate exact-hash/owner-guarded recovery restored the original marker and authoritative properties, verified
+no client and released the lease; raw failure receipts are unchanged. The normal path now uses forward slashes
+(`45811574`), passes31 CPU tests including the real group writer, and preserves strict conflict refusal. Actual
+Prism round-trip behavior still needs the next live run. A same-engine-candidate fresh-cache shared-device arm
+is running under the original240-second/24GiB policy and85% sampled reserve; no cap or budget was raised.
