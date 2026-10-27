@@ -335,6 +335,13 @@ target_link_libraries(atlas_tests PRIVATE atlas_core Threads::Threads)
 add_executable(atlas_cache_test tests/cache_test.cpp src/gencache.cpp)
 target_include_directories(atlas_cache_test PRIVATE src include)
 target_link_libraries(atlas_cache_test PRIVATE Threads::Threads)
+add_executable(atlas_cache_lifetime_test tests/cache_lifetime_test.cpp src/gencache.cpp)
+target_include_directories(atlas_cache_lifetime_test PRIVATE src include)
+target_link_libraries(atlas_cache_lifetime_test PRIVATE Threads::Threads)
+if(NOT MSVC)
+  # The standard root->unprivileged runner cannot rely on a compiler owner's private runtime directory.
+  target_link_options(atlas_cache_lifetime_test PRIVATE -static-libstdc++ -static-libgcc)
+endif()
 
 # Host lock/snapshot regression: real terrain bookkeeping, no renderer, generated shaders or GPU context.
 add_executable(atlas_frame_lock_test tests/frame_lock_test.cpp src/world.cpp src/voxgrid.cpp src/sectionstore.cpp
@@ -607,6 +614,12 @@ target_link_libraries(atlas_pipeline_cache_io_test PRIVATE Threads::Threads)
 add_test(NAME atlas_pipeline_cache_io_test COMMAND atlas_pipeline_cache_io_test)
 add_test(NAME atlas_tests COMMAND atlas_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 add_test(NAME atlas_cache_test COMMAND atlas_cache_test)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_test(NAME atlas_cache_lifetime_test COMMAND bash "${CMAKE_SOURCE_DIR}/tests/run_cache_lifetime.sh"
+           "$<TARGET_FILE:atlas_cache_lifetime_test>")
+else()
+  add_test(NAME atlas_cache_lifetime_test COMMAND atlas_cache_lifetime_test)
+endif()
 add_test(NAME atlas_frame_lock_test COMMAND atlas_frame_lock_test)
 
 # offline lab for the shader pack's screen passes over an atlas-rendered scene (Windows, GL compatibility context)
