@@ -179,3 +179,17 @@ cleanup at a sampled85% cap threshold. This cannot guarantee catching allocation
 Cache metadata records retained sets, bytes and packaged identities before/after, never deleting valid data to
 make a benchmark pass. The autotest harness keeps three recent generation versions. Renderer-only native edits
 exclude themselves from ATLAS_GEN_HASH; per-stage invalidation and actual warm-reload acceptance remain pending.
+
+The 23:46 allocator probe on October 26 reached the sampled reserve again. It did not reach readiness or create
+comparison images. The exact client eventually exited after forced cleanup and the backend option was restored.
+The scoped, timestamp-aligned report is
+`E:/NirnCraft-scratch/codex-vulkan-evidence/live-20261026-234612-649339/memory-report-20261027-000426-201efcb1/summary.json`.
+It separates private commit, heap, Minecraft VMA, raw renderer resources and overlapping driver heap estimates.
+Stable late VMA/renderer observations do not attribute the unexplained private-memory growth. The report excludes
+historical time-of-day-only cache keys from current-run fingerprint observations; its 14 CPU regressions pass.
+An earlier combined reporting shell lost its exit-code check; the direct checked rerun above succeeded independently.
+
+Next: the Sol worker prepares a bounded offline generator-input control using the exact saved ingest/program/map/
+feature bytes and fresh scratch cache. Placeholder render materials and absent Minecraft/near workloads must be
+named in its evidence. The coordinator separately builds the main-base frame-pacing candidate; it remains isolated
+until its own package and integration checks pass. Source edits and review continue in parallel, with one heavy job.

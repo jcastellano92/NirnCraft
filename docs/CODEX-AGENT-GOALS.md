@@ -85,3 +85,35 @@ Each worker records its assigned objective, current evidence, pending command an
 report and sends results as they become reviewable. Waiting for a GPU slot is explicit, not a passing result. The
 coordinator advances the live integration lane while other lanes prepare code and oracles, then rotates queue windows.
 The active parent goal and all stage targets remain unchanged.
+
+## Current checkpoint (2026-10-27)
+
+Main renderer source remains `ca3c6c20`; main HEAD `162d96e5` also contains workflow/evidence fixes. The separate
+Vulkan candidate `6e599502` combines the reviewed synchronous S3 lifecycle, repaired off-lock section snapshots,
+deterministic visual aliases, exact ingest dumps and opt-in allocation diagnostics. Nothing in this checkpoint
+establishes route speed, completed Vulkan migration or stage acceptance. S4 asynchronous submission stays parked.
+
+The combined candidate passes the two native harness items, including the original six cold reads with zero of4096
+return-hit differences, plus kernel budgets. Fresh Windows/Linux packages load at ABI0.18 with175 exports and source
+hash `441f942240832171784e2a3faf4dc834bc5668005e3d05122ba78dacaa806c5e`. Java build passes363 tests with19 opt-in skips.
+Driver-resource limits still fail independently of those SPIR-V budget checks.
+
+The properly gated allocator probe `live-20261026-234612-649339` stopped at the existing sampled memory reserve,
+before readiness or captures. Java private commit reached21.39GiB and the whole job peaked22.04GiB; closure required
+force, and eventual PID disappearance/backend restoration were independently confirmed. This is not a graceful
+shutdown result. Late process growth occurred while Minecraft VMA stayed near423MB live/569MB reserved, renderer
+allocations near3.66GB and retired-buffer counters zero in the observed samples. JVM committed heap stayed below
+2.75GB. These overlapping ownership views do not explain process-private growth and must never be summed into a
+CPU attribution. Root and Sol now trace unmanaged CPU/generator/driver ownership before another live attempt.
+
+The probe saved one byte-validated ingest attempt:1099014 words, FNV `b7372337063bdd00`, matching its final logged
+generation key `ce0d929d66b6b20e`. This is one run; deterministic aliases still need a matching repeat/reload and
+zero-regeneration revisit. Keep all valid cache data and the three development sets. Renderer-only changes must
+preserve generation identity; actual generator changes must invalidate dependent content. Per-stage invalidation
+remains a separate open requirement, never an excuse to bypass fingerprints.
+
+Seam CSE preserves all614981 measured hits and every14745600 linear RGBA byte of the cube capture. It reduces the
+shade binary by128 bytes but remains2048 bytes above the unchanged935168-byte cap. It stays isolated. Terra now
+uses a homogeneous stone fixture to distinguish L1/2 palette and face-mean behavior; no brightness tuning or
+performance claim is authorized by the failed resource gate. Higher boundaries, jitter and lit-game review remain
+open. The independent Terra reviewer continues to maintain the full stage matrix and inspect every new receipt.
