@@ -44,7 +44,9 @@ def shoot(name):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith('--')]\r\n    watch = int(args[0]) if args else 150\r\n    cold = '--cold' in sys.argv  # wipe the test instance's atlas cache first (atlas_tools.wipe_cache), like route --cold
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    watch = int(args[0]) if args else 150
+    cold = '--cold' in sys.argv  # wipe the test instance's atlas cache first (atlas_tools.wipe_cache), like route --cold
     groups = json.loads((HERE / 'scenes/groups.json').read_text(encoding='utf-8'))
     profile = game.GAME / 'atlas-profile.log'
     offset = profile.stat().st_size if profile.exists() else 0
