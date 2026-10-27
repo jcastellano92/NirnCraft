@@ -14,6 +14,7 @@ from pathlib import Path
 import struct
 import subprocess
 import time
+import threading
 import uuid
 
 import atlas_memory_report as oracle
@@ -94,10 +95,10 @@ def require_policy(row):
     if process_memory.pressure(row): raise RuntimeError('job already reached its sampled 85% reserve')
 
 
-def command(tool, inputs, destination, native_seconds):
+def command(tool, inputs, destination, native_seconds, store=False):
     expected = inputs['expectedFingerprint']
-    return [str(tool), inputs['dump'], str(destination / 'cache'), 'mode=bake', 'control=memory', 'feat=1',
-            'first=6', 'last=3', 'lod2=0', 'expectTiles=263', 'x=4096.5', 'y=522', 'z=4096.5', 'seed=1234',
+    return [str(tool), inputs['dump'], str(destination / 'cache'), 'mode=' + ('storecontrol' if store else 'bake'), 'control=memory', 'feat=1',
+            'first=6', 'last=3', 'lod2=0', 'expectTiles=263', ('x=-149.5' if store else 'x=4096.5'), 'y=522', ('z=260.5' if store else 'z=4096.5'), 'seed=1234',
             'fp=' + str(int(expected['extra'], 16)), 'minx=-15360', 'minz=-5120', 'maxx=12800', 'maxz=16384', 'margin=0',
             'w=64', 'h=36', 'bg=1', 'bgcap=16.7', 'ingest=' + inputs['ingest']['binary'],
             'ingestWords=' + str(inputs['ingest']['words']), 'ingestFnv=' + inputs['ingest']['fnv64'],
@@ -116,7 +117,7 @@ def matched_parts(events, expected):
         return False
 
 
-def assess(events, snapshots, expected, returncode, stopped):
+def assess(events, snapshots, expected, returncode, stopped, store=False):
     completed = [e for e in events if e.get('phase') == 'levels']
     phase = completed[-1] if len(completed) == 1 else {}
     required = ('tiles', 'made', 'known', 'failed', 'durable', 'queued')
@@ -126,6 +127,10 @@ def assess(events, snapshots, expected, returncode, stopped):
                          s.get('namedChildObserved') is True for s in snapshots)
                for name in ('after-feature-destroy', 'after-overlay-destroy', 'after-generator-destroy', 'after-context-destroy')}
     inputs_match = matched_parts(events, expected)
+    if store:
+        for name, count in (("near441", 441), ("post64", 64)):
+            matches = [e for e in events if e.get('phase') == name]
+            complete = complete and len(matches) == 1 and matches[0].get('requested') == count and matches[0].get('completed') == count and all(oracle.integer(matches[0].get(k)) and matches[0][k] > 0 for k in ('nonair_sections', 'accepted_sections', 'store_stage_runs', 'rendered_frames'))
     ready = not stopped and returncode == 0 and complete and inputs_match and all(cleanup.values())
     return {'state': 'COMPLETED_CONTROL' if ready else 'UNVERIFIED', 'expectedTiles': EXPECTED_TILES,
             'actualTiles': phase.get('tiles'), 'madeTiles': phase.get('made'), 'knownTiles': phase.get('known'),
@@ -133,6 +138,20 @@ def assess(events, snapshots, expected, returncode, stopped):
             'fingerprintMatchesSavedRun': inputs_match, 'cleanupBoundarySamples': cleanup,
             'childRc': returncode, 'stopReason': stopped,
             'scope': 'Generator-input/stage-graph control with EMPTY overlay payloads and neutral palette; not full live reproduction, memory fix, visual parity or performance acceptance.'}
+
+
+def start_owned_watchdog(proc, deadline):
+    """Kill only the Popen child if the absolute deadline expires, even when sampling blocks."""
+    fired = threading.Event()
+    def terminate():
+        if proc.poll() is None:
+            fired.set()
+            try: proc.kill()
+            except OSError: pass
+    timer = threading.Timer(max(0.0, deadline - time.monotonic()), terminate)
+    timer.daemon = True
+    timer.start()
+    return timer, fired
 
 
 def stop_owned(proc, cancel, deadline, on_poll=None):
@@ -155,7 +174,7 @@ def stop_owned(proc, cancel, deadline, on_poll=None):
     return proc.poll() is not None
 
 
-def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sample):
+def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sample, store=False):
     if not oracle.number(seconds) or not 30 <= seconds <= 180: raise ValueError('control bound must be 30..180 seconds')
     start = time.monotonic(); deadline = start + seconds
     inputs = prepare_inputs(evidence, manifest)
@@ -169,12 +188,13 @@ def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sam
     provenance = artifact_provenance(tool)
     destination = Path(evidence) / ('generator-memory-control-' + time.strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:8])
     destination.mkdir(); (destination / 'cache').mkdir()
-    argv = command(tool, inputs, destination, max(1, int(deadline - time.monotonic() - 25)))
+    argv = command(tool, inputs, destination, max(1, int(deadline - time.monotonic() - 25)), store)
     (destination / 'inputs.json').write_text(json.dumps({**inputs, 'command': argv, 'toolCapabilities': capabilities,
                                                        'artifactProvenance': provenance}, indent=2) + '\n')
     env = dict(os.environ); env['ATLAS_MEMORY_DIAGNOSTICS'] = '1'
     proc, events, snapshots, stopped, phase = None, [], [], None, 'before-child'
     closed = False
+    watchdog = None; watchdog_fired = threading.Event()
     pending = b''; log_position = 0
     def record_memory(label, marker=None):
         row = sample([proc.pid] if proc else ()); row['phase'] = label
@@ -218,6 +238,7 @@ def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sam
         with (destination / 'tool.log').open('wb', buffering=0) as log:
             flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             proc = subprocess.Popen(argv, stdout=log, stderr=subprocess.STDOUT, env=env, creationflags=flags)
+            watchdog, watchdog_fired = start_owned_watchdog(proc, deadline - 3)
             with (destination / 'tool.log').open('rb') as reader:
                 next_sample = 0.0
                 while proc.poll() is None:
@@ -241,11 +262,19 @@ def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sam
                 while read_events(reader, False): pass
         try: record_memory('after-child-cleanup')
         except (OSError, RuntimeError, ValueError): pass
+    if watchdog is not None: watchdog.cancel()
+    if watchdog_fired.is_set(): stopped = (stopped + '; ' if stopped else '') + 'owned-child watchdog expired'
     try: final_provenance = artifact_provenance(tool)
     except OSError: final_provenance = None
     if final_provenance != provenance:
         stopped = (stopped + '; ' if stopped else '') + 'source/executable provenance changed or became unavailable'
-    result = assess(events, snapshots, inputs['expectedFingerprint'], proc.returncode if proc else None, stopped)
+    try: final_inputs = prepare_inputs(evidence, manifest)
+    except (OSError, ValueError): final_inputs = None
+    if final_inputs != inputs:
+        stopped = (stopped + '; ' if stopped else '') + 'saved input provenance changed or became unavailable'
+    result = assess(events, snapshots, inputs['expectedFingerprint'], proc.returncode if proc else None, stopped, store)
+    if store:
+        result['scope'] = 'Saved generator/ingest inputs and real stages; EMPTY overlay payloads and neutral palette, 441-near/coarse/post64 control; not full Minecraft or rendering parity.'
     result.update(output=str(destination), elapsedSeconds=time.monotonic() - start, childClosed=closed,
                   memoryCapBytes=CAP_BYTES, cleanupReserveSeconds=15,
                   artifactProvenance=provenance, finalArtifactProvenance=final_provenance,
@@ -265,8 +294,9 @@ def main(argv=None):
     parser.add_argument('--tool', type=Path, default=ROOT / 'native/build/Release/gen_bake_tool.exe')
     parser.add_argument('--ingest', help='one ingest.json path relative to generator-dump')
     parser.add_argument('--seconds', type=float, default=180)
+    parser.add_argument('--store-control', action='store_true')
     args = parser.parse_args(argv)
-    try: result = run(args.evidence, args.tool, manifest=args.ingest, seconds=args.seconds)
+    try: result = run(args.evidence, args.tool, manifest=args.ingest, seconds=args.seconds, store=args.store_control)
     except (OSError, RuntimeError, ValueError) as error: parser.exit(2, 'UNVERIFIED (no control accepted): ' + str(error) + '\n')
     return 0 if result['state'] == 'COMPLETED_CONTROL' else 2
 

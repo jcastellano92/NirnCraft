@@ -66,6 +66,36 @@ class GeneratorMemoryTest(unittest.TestCase):
             self.assertIn('EMPTY overlay', data['scope'])
             self.assertIn('live overlay recording', data['scope'])
 
+    def test_store_control_requires_both_completed_near_phases(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder); fixture(root); data = control.prepare_inputs(root)
+            args = control.command(root / 'tool.exe', data, root / 'out', 150, True)
+            self.assertIn('mode=storecontrol', args)
+            self.assertIn('x=-149.5', args); self.assertIn('z=260.5', args)
+            expected = data['expectedFingerprint']; events = complete_events(expected)
+            snapshots = [{'phase': p, 'observedWhileChildRunning': True, 'namedChildObserved': True} for p in
+                         ('after-feature-destroy', 'after-overlay-destroy', 'after-generator-destroy', 'after-context-destroy')]
+            near = [{'phase': name, 'requested': n, 'completed': n, 'nonair_sections': 1,
+                     'accepted_sections': 1, 'store_stage_runs': 1, 'rendered_frames': 1} for name, n in (('near441', 441), ('post64', 64))]
+            self.assertEqual('COMPLETED_CONTROL', control.assess(events + near, snapshots, expected, 0, None, True)['state'])
+            for bad in (near[:1], [near[0], dict(near[1], completed=63)], [near[0], dict(near[1], store_stage_runs=0)]):
+                self.assertEqual('UNVERIFIED', control.assess(events + bad, snapshots, expected, 0, None, True)['state'])
+
+    def test_owned_watchdog_fires_while_sampling_is_blocked(self):
+        import threading
+        class Child:
+            def __init__(self): self.killed = threading.Event()
+            def poll(self): return 1 if self.killed.is_set() else None
+            def kill(self): self.killed.set()
+        child = Child()
+        timer, fired = control.start_owned_watchdog(child, time.monotonic() + 0.05)
+        try:
+            # Represents a sampler waiting independently of the watchdog thread.
+            self.assertTrue(child.killed.wait(1.0))
+            self.assertTrue(fired.is_set())
+        finally:
+            timer.cancel()
+
     def test_capability_probe_accepts_only_explicit_pre_vulkan_contract(self):
         caps = {'generatorMemoryControl': 1, 'explicitIngestValidation': 1}
         for result in (subprocess.CompletedProcess([], 2, '', 'usage'),

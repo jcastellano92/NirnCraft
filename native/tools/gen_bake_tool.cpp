@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cerrno>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -21,6 +22,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <set>
 #include <tuple>
@@ -61,6 +63,46 @@ static std::string arg(int argc, char** argv, const char* key, const char* def) 
     for (int i = 3; i < argc; i++)
         if (std::strncmp(argv[i], key, n) == 0 && argv[i][n] == '=') return argv[i] + n + 1;
     return def;
+}
+
+// Explicit ingest is a generator-input control, not a Minecraft renderer capture. The Python launcher validates
+// ingest.json; recheck the same binary/count/hash here before creating a Vulkan context (no JSON parser duplicated).
+static bool checkedIngest(int argc, char** argv, std::vector<uint32_t>& words, uint32_t& maxMaterial, std::string& error) {
+    std::string path = arg(argc, argv, "ingest", "");
+    if (path.empty()) return true;
+    auto number = [&](const char* key, int base, uint64_t& out) {
+        std::string value = arg(argc, argv, key, "");
+        if (value.empty() || value[0] == '-') return false;
+        char* end = nullptr;
+        errno = 0;
+        out = std::strtoull(value.c_str(), &end, base);
+        return !errno && end == value.c_str() + value.size();
+    };
+    uint64_t count = 0, expected = 0;
+    if (!number("ingestWords", 10, count) || count < 2 || count > UINT32_MAX || !number("ingestFnv", 16, expected)) {
+        error = "explicit ingest requires manifest-validated ingestWords and ingestFnv";
+        return false;
+    }
+    std::error_code ec;
+    uint64_t size = std::filesystem::file_size(path, ec);
+    if (ec || size != count * 4) { error = "explicit ingest byte length mismatch"; return false; }
+    words.resize(size_t(count));
+    std::vector<uint8_t> bytes(size_t(count * 4));
+    std::ifstream input(path, std::ios::binary);
+    if (!input.read(reinterpret_cast<char*>(bytes.data()), std::streamsize(bytes.size()))) { error = "explicit ingest read failed"; return false; }
+    for (size_t i = 0; i < words.size(); ++i)
+        words[i] = uint32_t(bytes[i * 4]) | uint32_t(bytes[i * 4 + 1]) << 8 | uint32_t(bytes[i * 4 + 2]) << 16 | uint32_t(bytes[i * 4 + 3]) << 24;
+    uint64_t states = words[0], biomes = words[1], start = 2 + 2 * states + 2 * biomes;
+    if (!states || !biomes || states > INT32_MAX || biomes > INT32_MAX || start + states * biomes != count) {
+        error = "explicit ingest header/layout mismatch";
+        return false;
+    }
+    uint64_t hash = 1469598103934665603ull;
+    for (uint32_t word : words) for (int byte = 0; byte < 4; ++byte) hash = (hash ^ ((word >> (byte * 8)) & 255u)) * 1099511628211ull;
+    if (hash != expected) { error = "explicit ingest FNV mismatch"; return false; }
+    for (size_t i = size_t(start); i < words.size(); ++i) maxMaterial = std::max(maxMaterial, words[i]);
+    if (maxMaterial > 65535) { error = "explicit ingest material ID exceeds the renderer's uint16 domain"; return false; }
+    return true;
 }
 
 // the bytes of the far files by level under dir (every gen-* set below it)
@@ -556,7 +598,33 @@ static int viewsMode(AtlasContext* ctx, AtlasGen* g, int argc, char** argv) {
     return 0;
 }
 
+// The memory control waits for the actual cache drain under its existing deadline. Legacy modes retain 400 polls.
+template <class Ready, class Expired, class Tick>
+static bool drainCache(bool control, Ready ready, Expired expired, Tick tick) {
+    for (int i = 0; control || i < 400; ++i) {
+        if (expired()) return false;
+        if (ready()) return true;
+        tick();
+    }
+    return false;
+}
+
 int main(int argc, char** argv) {
+    if (argc == 2 && std::strcmp(argv[1], "--capabilities") == 0) {
+        std::printf("{\"generatorMemoryControl\":1,\"explicitIngestValidation\":1}\n");
+        return 0;  // no files loaded and no Vulkan object created
+    }
+    if (argc == 2 && std::strcmp(argv[1], "--test-control-drain") == 0) {
+        // Exercise the actual drain used below without files, a clock sleep, or Vulkan. A delayed writer exceeds
+        // the old 400 polls; the same loop must still stop when the existing work deadline is reached.
+        int delayed = 0, deadline = 0, legacy = 0;
+        bool completed = drainCache(true, [&] { return delayed >= 405; }, [] { return false; }, [&] { ++delayed; });
+        bool expired = drainCache(true, [&] { return deadline >= 405; }, [&] { return deadline >= 200; }, [&] { ++deadline; });
+        bool old = drainCache(false, [] { return false; }, [] { return false; }, [&] { ++legacy; });
+        std::printf("{\"delayedCompleted\":%s,\"delayedPolls\":%d,\"deadlineCompleted\":%s,\"deadlinePolls\":%d,\"legacyCompleted\":%s,\"legacyPolls\":%d}\n",
+                    completed ? "true" : "false", delayed, expired ? "true" : "false", deadline, old ? "true" : "false", legacy);
+        return completed && delayed == 405 && !expired && deadline == 200 && !old && legacy == 400 ? 0 : 1;
+    }
     if (argc < 3) {
         std::fprintf(stderr, "gen_bake_tool <dump dir> <cache dir> [mode=bake|load] [x= z= seed= fp= lod2= bg= bgcap=]\n");
         return 2;
@@ -569,13 +637,61 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "no prog.bin / map.bin in %s\n", dump.c_str());
         return 2;
     }
+    const bool memoryControl = arg(argc, argv, "control", "") == "memory";
+    std::vector<uint32_t> ing;
+    uint32_t maxMaterial = 0;
+    std::string ingestError;
+    if (!checkedIngest(argc, argv, ing, maxMaterial, ingestError)) {
+        std::fprintf(stderr, "ingest refused before Vulkan creation: %s\n", ingestError.c_str());
+        return 2;
+    }
+    const bool explicitIngest = !ing.empty();
+    if ((mode == "storecontrol" && !memoryControl) || (memoryControl && (!explicitIngest || (mode != "bake" && mode != "storecontrol") || arg(argc, argv, "lod2", "0") != "0"))) {
+        std::fprintf(stderr, "memory control requires explicit ingest, mode=bake and lod2=0\n");
+        return 2;
+    }
     if (!arg(argc, argv, "pipes", "").empty()) atlas_set_pipeline_cache(arg(argc, argv, "pipes", "").c_str());
     double t0 = nowMs();
+    double controlSeconds = std::atof(arg(argc, argv, "controlSeconds", "150").c_str());
+    const std::string cancelPath = arg(argc, argv, "controlCancel", "");
+    auto expired = [&] {
+        if (!memoryControl) return false;
+        std::error_code ec;
+        bool canceled = !cancelPath.empty() && std::filesystem::exists(cancelPath, ec);
+        return canceled || bool(ec) || !std::isfinite(controlSeconds) || controlSeconds <= 0 || controlSeconds > 180 ||
+               nowMs() - t0 >= controlSeconds * 1000.0;
+    };
+    if (expired()) { std::fprintf(stderr, "memory control canceled/expired before Vulkan creation\n"); return 2; }
     AtlasContext* ctx = nullptr;
+    AtlasGen* g = nullptr;
+    AtlasFeat* attachedFeat = nullptr;
+    AtlasOvl* attachedOverlay = nullptr;
+    auto mark = [&](const char* phase) {
+        if (!memoryControl) return;
+        auto stamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        std::printf("{\"controlPhase\":\"%s\",\"epochMillis\":%lld,\"elapsedMs\":%.0f,\"core\":%s}\n", phase,
+                    (long long)stamp, nowMs() - t0, ctx ? atlas_info(ctx) : "null");
+        std::fflush(stdout);
+        // Diagnostic only: let the existing external process sampler observe each cleanup boundary before exit.
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    };
+    struct Cleanup {
+        std::function<void()> action;
+        bool done = false;
+        void close() { if (!done) { done = true; action(); } }
+        ~Cleanup() { close(); }
+    } cleanup{[&] {
+        if (attachedFeat) { mark("before-feature-destroy"); atlas_feat_set_overlays(attachedFeat, nullptr); atlas_feat_destroy(attachedFeat); attachedFeat = nullptr; mark("after-feature-destroy"); }
+        if (attachedOverlay) { mark("before-overlay-destroy"); atlas_ovl_destroy(attachedOverlay); attachedOverlay = nullptr; mark("after-overlay-destroy"); }
+        if (g) { atlas_gen_destroy(g); g = nullptr; mark("after-generator-destroy"); }
+        if (ctx) { atlas_destroy(ctx); ctx = nullptr; mark("after-context-destroy"); }
+    }};
+    mark("before-context");
     if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
         std::fprintf(stderr, "no Vulkan context\n");
         return 1;
     }
+    mark("context-created");
     // mode=pipes (the inner loop's prewarm, beside a running bench): the context's pipelines built (ATLAS_SHADER_DIR's
     // reloaded kernels too, with ATLAS_SHADER_WAIT=1) into the pipeline cache (pipes=) and the driver's own, then out:
     // the next bench's context loads them at once. CPU work (the driver's compile), no frame drawn
@@ -596,28 +712,30 @@ int main(int argc, char** argv) {
         atlas_update(ctx, cam, 0);
         for (int i = 0; i < 2; i++) atlas_render(ctx, &f, &o);
         std::printf("{\"pipes\":true,\"ms\":%.0f}\n", nowMs() - t0);
-        atlas_destroy(ctx);
+        cleanup.close();
         return 0;
     }
-    std::vector<AtlasMaterial> mats(256, AtlasMaterial{{0.5f, 0.5f, 0.5f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
+    std::vector<AtlasMaterial> mats(std::max(256u, maxMaterial), AtlasMaterial{{0.5f, 0.5f, 0.5f}, 0.9f, 0, ATLAS_CLASS_TERRAIN});
     if (mode == "views")  // (the stand-in ids told apart: earthy colours of their own)
         for (size_t i = 1; i < mats.size(); i++) {
             uint32_t h = uint32_t(i) * 2654435761u;
             float t = float(h & 255u) / 255.0f, u = float((h >> 8) & 255u) / 255.0f;
             mats[i].albedo[0] = 0.25f + 0.35f * t, mats[i].albedo[1] = 0.3f + 0.3f * u, mats[i].albedo[2] = 0.2f + 0.2f * t * u;
         }
-    atlas_set_materials(ctx, 1, mats.data(), uint32_t(mats.size()));
-    AtlasGen* g = nullptr;
+    AtlasStatus materialStatus = atlas_set_materials(ctx, 1, mats.data(), uint32_t(mats.size()));
+    if (memoryControl && materialStatus != ATLAS_OK) return 1;
     if (atlas_gen_create_for(ctx, &g) != ATLAS_OK) {
         std::fprintf(stderr, "no generator on the context's device\n");
         return 1;
     }
     const uint32_t IDS = 4096, BIOMES = 128;
-    std::vector<uint32_t> ing{IDS, BIOMES};
-    for (uint32_t i = 0; i < IDS; i++) ing.push_back(i), ing.push_back(i == 0 ? 1u : 2u);
-    for (uint32_t b = 0; b < BIOMES; b++) ing.push_back(0x7FB24Du), ing.push_back(0x59AE30u);
-    for (uint32_t b = 0; b < BIOMES; b++)
-        for (uint32_t i = 0; i < IDS; i++) ing.push_back(i == 0 ? 0u : 1u + i % 255u);
+    if (!explicitIngest) {
+        ing = {IDS, BIOMES};
+        for (uint32_t i = 0; i < IDS; i++) ing.push_back(i), ing.push_back(i == 0 ? 1u : 2u);
+        for (uint32_t b = 0; b < BIOMES; b++) ing.push_back(0x7FB24Du), ing.push_back(0x59AE30u);
+        for (uint32_t b = 0; b < BIOMES; b++)
+            for (uint32_t i = 0; i < IDS; i++) ing.push_back(i == 0 ? 0u : 1u + i % 255u);
+    }
     if (atlas_gen_set_program(g, prog.data(), uint32_t(prog.size())) != ATLAS_OK ||
         atlas_gen_set_map(g, map.data(), uint32_t(map.size())) != ATLAS_OK ||
         atlas_gen_set_ingest(g, ing.data(), uint32_t(ing.size())) != ATLAS_OK) {
@@ -634,22 +752,37 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "store_enable: %s\n", atlas_gen_last_error(g));
             return 1;
         }
-        AtlasFeat* feat = nullptr;
         double a0 = nowMs();
-        if (atlas_feat_attach(g, fw.data(), uint32_t(fw.size()), g2f.data(), uint32_t(g2f.size()), f2g.data(), uint32_t(f2g.size()), &feat) !=
+        if (atlas_feat_attach(g, fw.data(), uint32_t(fw.size()), g2f.data(), uint32_t(g2f.size()), f2g.data(), uint32_t(f2g.size()), &attachedFeat) !=
             ATLAS_OK) {
             std::fprintf(stderr, "feat_attach: %s\n", atlas_gen_last_error(g));
             return 1;
         }
         std::fprintf(stderr, "decoration attached in %.0f ms\n", nowMs() - a0);
     }
-    atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
-    if (cache != "-") atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0);
+    if (memoryControl) {
+        // Real 7 batch + 7 store stages, as the live attachment, with no fabricated callbacks or fingerprints.
+        // The saved inputs do not contain the live overlay block/street/road/tape payloads; these remain EMPTY.
+        if (atlas_ovl_create_for_gen(g, &attachedOverlay) != ATLAS_OK ||
+            (attachedFeat && atlas_feat_set_overlays(attachedFeat, attachedOverlay) != ATLAS_OK)) return 2;
+    }
+    AtlasStatus fpStatus = atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
+    AtlasStatus cacheStatus = cache != "-" ? atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0) : ATLAS_OK;
+    if (memoryControl && (fpStatus != ATLAS_OK || cacheStatus != ATLAS_OK)) return 2;
+    if (memoryControl) {
+        uint64_t parts[8] = {};
+        if (atlas_gen_fingerprint_parts(g, parts) != ATLAS_OK) return 2;
+        std::printf("{\"controlInputs\":\"saved generator binaries plus real stage graph\",\"palette\":\"neutral placeholder, no Minecraft material/brick tables\","
+                    "\"overlayData\":\"EMPTY block/street/road/tape payloads; no live overlay recording\","
+                    "\"nearChunks\":%d,\"ingestWords\":%zu,\"maxMaterialId\":%u,\"materialTableEntries\":%zu,\"parts\":[", mode == "storecontrol" ? 441 : 0, ing.size(), maxMaterial, mats.size());
+        for (int i = 0; i < 8; ++i) std::printf("%s\"%016llx\"", i ? "," : "", (unsigned long long)parts[i]);
+        std::printf("]}\n"); std::fflush(stdout);
+    }
+    mark("generator-configured");
     double tReady = nowMs();
     if (mode == "views") {
         int r = viewsMode(ctx, g, argc, argv);
-        atlas_gen_destroy(g);
-        atlas_destroy(ctx);
+        cleanup.close();
         return r;
     }
     AtlasFrame f{};
@@ -663,19 +796,22 @@ int main(int argc, char** argv) {
     f.maxDistance = 4000;
     f.sunDir[1] = 1;
     f.lodBias = 1;
+    if (memoryControl) f.flags = ATLAS_FRAME_SHADOWS | ATLAS_FRAME_ATMOS | ATLAS_FRAME_SKY | ATLAS_FRAME_NEAR_LIGHT | ATLAS_FRAME_PRIMARY_NEAR_LIT;
     std::vector<uint32_t> color(size_t(FW) * FH);
     AtlasFrameOutput out{color.data(), nullptr, nullptr};
     double centre[3] = {x, f.cameraPos[1], z};
     // bg=1: a thread renders the frames from the first bake step on (the game's cadence, bgcap ms a frame), their wall times
     // kept; else the main thread renders one frame between steps
-    std::atomic<bool> bgOn{false}, bgStop{false};
+    std::atomic<bool> bgOn{false}, bgStop{false}, renderFailed{false};
+    std::atomic<uint64_t> renderedFrames{0};
     std::vector<float> bgMs;
     std::thread bgThread;
     double bgCap = std::atof(arg(argc, argv, "bgcap", "16.7").c_str());
     bool bgWanted = arg(argc, argv, "bg", "0") != "0";
     auto renderMain = [&]() {
         if (bgOn) std::this_thread::sleep_for(std::chrono::milliseconds(2));
-        else atlas_render(ctx, &f, &out);
+        else if (atlas_render(ctx, &f, &out) != ATLAS_OK) { if (memoryControl) renderFailed = true; }
+        else ++renderedFrames;
     };
     auto startBg = [&] {
         if (!bgWanted || bgOn) return;
@@ -686,7 +822,8 @@ int main(int argc, char** argv) {
             AtlasFrameOutput o2{img.data(), nullptr, nullptr};
             while (!bgStop) {
                 auto a = std::chrono::steady_clock::now();
-                atlas_render(ctx, &f, &o2);
+                if (atlas_render(ctx, &f, &o2) != ATLAS_OK) { if (memoryControl) renderFailed = true; break; }
+                ++renderedFrames;
                 double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count();
                 bgMs.push_back(float(ms));
                 if (bgCap > ms) std::this_thread::sleep_for(std::chrono::microseconds(int64_t((bgCap - ms) * 1000.0)));
@@ -711,9 +848,10 @@ int main(int argc, char** argv) {
                       size_t(std::count_if(v.begin(), v.end(), [](float q) { return q > 25.0f; })));
         return b;
     };
-    atlas_update(ctx, centre, 0);
-    for (int i = 0; i < 4; i++) atlas_render(ctx, &f, &out);  // (the grid placed: its windows)
+    if (atlas_update(ctx, centre, 0) != ATLAS_OK && memoryControl) renderFailed = true;
+    for (int i = 0; i < 4; i++) if (atlas_render(ctx, &f, &out) != ATLAS_OK && memoryControl) renderFailed = true;
     double tPlaced = nowMs();
+    mark("windows-placed");
 
     AtlasGenBakeSpec spec{};
     spec.minX = std::atoi(arg(argc, argv, "minx", "-15360").c_str());  // TamrielMap.MIN_X
@@ -734,6 +872,12 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "bake_begin: %s\n", atlas_gen_last_error(g));
             return 1;
         }
+        if (memoryControl && info.total != uint32_t(std::atoi(arg(argc, argv, "expectTiles", "263").c_str()))) {
+            std::fprintf(stderr, "control tile plan mismatch: expected %s actual %u\n", arg(argc, argv, "expectTiles", "263").c_str(), info.total);
+            atlas_gen_bake_end(g);
+            return 2;
+        }
+        mark("coarse-begin");
         std::printf("{\"phase\":\"%s begin\",\"tiles\":%u,\"known\":%u}\n", name, info.total, info.knownTotal);
         std::fflush(stdout);
         double p0 = nowMs(), lastNote = p0;
@@ -745,11 +889,14 @@ int main(int argc, char** argv) {
         double lastProgress = nowMs();
         int curLod = first;
         for (;;) {
+            if (expired() || renderFailed) {
+                mark("control-canceled-or-deadline"); stopBg(); atlas_gen_bake_end(g); return 3;
+            }
             AtlasStatus s = atlas_gen_bake_step(g, 2, &info);
             steps++;
             if (s != ATLAS_OK) {
                 std::fprintf(stderr, "bake_step: %s\n", atlas_gen_last_error(g));
-                break;
+                stopBg(); atlas_gen_bake_end(g); return 3;
             }
             for (int k = 1; k <= 6; k++)
                 if (info.made[k] + info.failed[k] != lastMade[k]) {
@@ -779,17 +926,21 @@ int main(int argc, char** argv) {
                 std::printf("{\"progress\":\"%s\",\"made\":%u,\"failed\":%u,\"of\":%u,\"queued\":%u,\"s\":%.1f}\n", name, info.madeTotal,
                             info.failedTotal, info.total, info.queued, (lastNote - p0) / 1000);
                 std::fflush(stdout);
+                mark("coarse-progress");
             }
         }
         double tDone = nowMs();
         // (the last packs come back with the next frames; the cache writes them)
-        for (int i = 0; i < 400; i++) {
-            atlas_gen_bake_info(g, &info);
-            if (info.durable >= info.madeTotal && info.queued == 0) break;
+        bool infoFailed = false;
+        bool drained = drainCache(memoryControl, [&] {
+            if (atlas_gen_bake_info(g, &info) != ATLAS_OK) { infoFailed = true; return false; }
+            return info.durable >= info.madeTotal && info.queued == 0;
+        }, [&] { return expired() || bool(renderFailed) || infoFailed; }, [&] {
             renderMain();
             frames++;
             if (!bgOn) std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+        });
+        if (memoryControl && !drained) { mark("control-canceled-or-deadline"); stopBg(); atlas_gen_bake_end(g); return 3; }
         double tDurable = nowMs();
         std::string fr = stopBg();
         AtlasGenCacheStats cs{};
@@ -798,10 +949,10 @@ int main(int argc, char** argv) {
         farBytes(cache, bytes);
         AtlasGenPaceStats ps{};
         atlas_gen_pace_stats(g, &ps);
-        std::printf("{\"phase\":\"%s\",\"tiles\":%u,\"known\":%u,\"made\":%u,\"failed\":%u,\"durable\":%u,\"makeMs\":%.0f,"
+        std::printf("{\"phase\":\"%s\",\"tiles\":%u,\"known\":%u,\"made\":%u,\"failed\":%u,\"durable\":%u,\"queued\":%u,\"makeMs\":%.0f,"
                     "\"madeS\":%.2f,\"durableS\":%.2f,\"steps\":%zu,\"busySteps\":%zu,\"frames\":%zu,"
                     "\"perLevel\":[",
-                    name, info.total, info.knownTotal, info.madeTotal, info.failedTotal, info.durable, info.makeMs, (tDone - p0) / 1000,
+                    name, info.total, info.knownTotal, info.madeTotal, info.failedTotal, info.durable, info.queued, info.makeMs, (tDone - p0) / 1000,
                     (tDurable - p0) / 1000, steps, busySteps, frames);
         for (int k = 1; k <= 6; k++)
             std::printf("%s{\"lod\":%d,\"tiles\":%u,\"made\":%u,\"failed\":%u,\"s\":%.2f}", k > 1 ? "," : "", k, info.tiles[k], info.made[k],
@@ -813,10 +964,77 @@ int main(int argc, char** argv) {
                     subs, jsonBytes(bytes).c_str(), (unsigned long long)cs.farWrites, cs.encodeMs, ps.duty, ps.waitedMs, ps.farWaitedMs,
                     ps.maxSubmissionMs, fr.c_str());
         std::fflush(stdout);
+        mark("coarse-complete");
+        if (memoryControl && (info.failedTotal || info.madeTotal + info.knownTotal != info.total || info.durable < info.madeTotal || info.queued)) return 3;
         return 0;
     };
 
     int rc = 0;
+    if (mode == "storecontrol") {
+        const double deadline = t0 + controlSeconds * 1000.0;
+        std::printf("{\"phase\":\"setup\",\"overlay\":\"empty real stages; not Minecraft content\",\"feature\":\"real dump\",\"ingest\":\"real dump\"}\n");
+        std::fflush(stdout);
+        auto near = [&](int count, int firstX, int firstZ, int width, const char* name) -> int {
+            uint64_t framesBefore = renderedFrames.load();
+            uint64_t madeBefore=0, runsBefore=0, packsBefore=0;
+            atlas_gen_store_counters(g, &madeBefore, &runsBefore, &packsBefore);
+            std::set<std::pair<int,int>> completed;
+            uint64_t nonair = 0, accepted = 0, calls = 0;
+            std::map<std::pair<int,int>, std::vector<int32_t>> patches;
+            for (int i = 0; i < count; ++i) {
+                int cx = firstX + i % width, cz = firstZ + i / width;
+                auto& batch = patches[{int(std::floor(cx / 8.0)), int(std::floor(cz / 8.0))}];
+                batch.push_back(cx); batch.push_back(cz);
+            }
+            for (const auto& entry : patches) {
+                const auto& batch = entry.second;
+                std::set<std::pair<int,int>> expected;
+                for (size_t i = 0; i < batch.size(); i += 2) expected.insert({batch[i], batch[i+1]});
+                bool submitted = false;
+                while (!expected.empty() && !expired() && !renderFailed && nowMs() < deadline) {
+                    int32_t outXZ[128]{}; uint32_t n = 0, flags[64]{}, info[64 * 164]{};
+                    uint32_t amount = submitted ? 0u : uint32_t(batch.size() / 2);
+                    AtlasStatus status = atlas_gen_run_store(g, amount ? batch.data() : nullptr, amount, outXZ, &n, nullptr, flags, info, nullptr);
+                    submitted = true; ++calls;
+                    if (status != ATLAS_OK || n > 64) { std::fprintf(stderr, "store run failed: %s\n", atlas_gen_last_error(g)); return 1; }
+                    uint64_t masks[64]{};
+                    for (uint32_t i = 0; i < n; ++i) {
+                        if (!expected.count({outXZ[2*i], outXZ[2*i+1]}) || flags[i]) return 1;
+                        bool started = false;
+                        for (int k = 0; k < 40; ++k) {
+                            uint32_t kind = info[i * 164 + 4 + k * 4 + 2];
+                            if (kind == 2 || (kind == 0 && !started)) continue;
+                            started = true; masks[i] |= uint64_t(1) << k; ++nonair;
+                        }
+                    }
+                    uint64_t requested[64]{}; std::copy(masks, masks+n, requested);
+                    uint32_t sent = 0;
+                    if (n && atlas_gen_ingest(g, masks, &sent, nullptr) != ATLAS_OK) return 1;
+                    accepted += sent;
+                    for (uint32_t i = 0; i < n; ++i) {
+                        if (requested[i] & ~masks[i]) return 1;
+                        expected.erase({outXZ[2*i],outXZ[2*i+1]});
+                        completed.insert({outXZ[2*i],outXZ[2*i+1]});
+                    }
+                    renderMain();
+                }
+                if (!expected.empty()) { std::fprintf(stderr, "%s deadline with %zu incomplete\n", name, expected.size()); return 1; }
+            }
+            uint64_t made=0, runs=0, packs=0; atlas_gen_store_counters(g, &made, &runs, &packs);
+            char subs[6000]{}; atlas_gen_sub_stats(g, subs, sizeof subs, 1);
+            std::printf("{\"phase\":\"%s\",\"requested\":%d,\"completed\":%zu,\"nonair_sections\":%llu,\"accepted_sections\":%llu,\"store_calls\":%llu,\"store_stage_runs\":%llu,\"rendered_frames\":%llu,\"subs\":\"%s\"}\n", name, count, completed.size(), (unsigned long long)nonair, (unsigned long long)accepted, (unsigned long long)calls, (unsigned long long)(runs - runsBefore), (unsigned long long)(renderedFrames.load() - framesBefore), subs);
+            std::fflush(stdout);
+            return !renderFailed && completed.size() == size_t(count) && nonair && accepted && runs > runsBefore && renderedFrames.load() > framesBefore ? 0 : 1;
+        };
+        startBg(); mark("near-begin");
+        rc = near(441, -20, 6, 21, "near441");
+        mark("near-complete");
+        if (!rc && !expired() && nowMs() < deadline) rc = phase(6, 3, "levels");
+        if (!rc && !expired() && nowMs() < deadline) { startBg(); mark("post-begin"); rc = near(64, 1, 12, 8, "post64"); mark("post-complete"); }
+        if (renderFailed || expired() || nowMs() >= deadline) rc = 1;
+        std::printf("{\"phase\":\"finish\",\"ok\":%s}\n", rc ? "false" : "true"); std::fflush(stdout);
+    }
+
     if (mode == "l0") {
         // level 0 of a block of chunks around (x, z), terrain only (no decoration stages): ms per chunk by pass, the share of
         // the sections that are air / shell (reach a coarse voxel's vote from above or the side) / buried (blocks wholly
@@ -891,13 +1109,14 @@ int main(int argc, char** argv) {
     } else if (mode == "bake") {
         int first = std::atoi(arg(argc, argv, "first", "6").c_str()), last = std::atoi(arg(argc, argv, "last", "3").c_str());
         std::printf("{\"setupMs\":%.0f,\"placedMs\":%.0f}\n", tReady - t0, tPlaced - tReady);
+        if (memoryControl) startBg();
         if (first >= last) rc = phase(first, last, "levels");
         if (rc == 0 && arg(argc, argv, "lod2", "0") != "0") {
             atlas_gen_pace_boost(g, 0);  // (after control the bake is paced by the frames)
             startBg();
             rc = phase(2, 2, "level2");
         }
-    } else {
+    } else if (mode == "load") {
         // the boot load: every tile that covers a coarse level's window, nearest first, from the cache
         AtlasGenBakeInfo info{};
         spec.lodFirst = 6;
@@ -947,7 +1166,6 @@ int main(int argc, char** argv) {
                     tiles, served, chunks, taken, lMs, fMs);
     }
     stopBg();
-    atlas_gen_destroy(g);
-    atlas_destroy(ctx);
+    cleanup.close();
     return rc;
 }
