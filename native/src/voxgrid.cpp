@@ -304,7 +304,7 @@ VoxGrid::InfoSnap VoxGrid::infoSnap() const {
 
 std::string VoxGrid::refineJson(const InfoSnap& s) {
     char b[420];
-    std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,", s.coarseLost, s.coarseGiven,
+    std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,\"wantedReasked\":%llu,\"rankCut\":%u,\"rankWaitBest\":%u,\"rankAdmits\":%zu,\"rankEvicts\":%zu,\"wantedPending\":%zu,", s.coarseLost, s.coarseGiven,
                   (unsigned long long)s.wantedAgain, (unsigned long long)s.wantedHeld, (unsigned long long)s.wantedReasked, s.rankCut, s.rankWaitBest,
                   s.rankAdmits, s.rankEvicts, s.wantedPending);
     const Coverage& c = s.cov;
