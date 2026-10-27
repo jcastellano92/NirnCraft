@@ -71,6 +71,31 @@ class ProcessGuardTest(unittest.TestCase):
             legacy = root / ".claude" / "worktrees" / "previous-agent"
             self.assertEqual(scratch / "wt" / "previous-agent", build.checkout_output(legacy, scratch))
 
+    def test_build_runtime_paths_isolate_arbitrary_worktrees(self):
+        paths = load("buildpaths")
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder); scratch = root / "scratch"
+            trees = [root / "codex-worktrees" / "first" / "render", root / "codex-worktrees" / "second" / "render"]
+            for tree in trees:
+                tree.mkdir(parents=True)
+                (tree / ".git").write_text("gitdir: fixture")
+            outputs = [paths.out_dir(tree, scratch) for tree in trees]
+            self.assertEqual(2, len(set(outputs)))
+            for tree, out in zip(trees, outputs):
+                self.assertEqual(scratch / "wt", out.parent)
+                self.assertTrue(out.name.startswith("render-"))
+                self.assertEqual(out / "build", paths.build_dir(tree, scratch))
+                self.assertEqual(build.checkout_output(tree, scratch), out)
+
+    def test_build_runtime_paths_preserve_main_and_legacy_caches(self):
+        paths = load("buildpaths")
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder); scratch=root/"scratch"; main=root/"main"
+            main.mkdir(); (main/".git").mkdir()
+            self.assertEqual(scratch, paths.out_dir(main, scratch))
+            legacy=root/".claude"/"worktrees"/"previous-agent"
+            self.assertEqual(scratch/"wt"/"previous-agent", paths.out_dir(legacy, scratch))
+
     def contender(self, lock, owner="contender"):
         return subprocess.run([sys.executable, "-I", "-c", WORKER, str(TOOLS), str(lock), owner, "try"],
                               capture_output=True, text=True, timeout=5)
@@ -175,7 +200,7 @@ class ProcessGuardTest(unittest.TestCase):
             root = Path(folder)
             log = root / "build.log"
             log.write_text("preserve previous log")
-            with self.holder(root / ".native-build.lock"), \
+            with self.holder(build.checkout_output(build.ROOT, root.resolve()) / ".native-build.lock"), \
                     patch.dict(os.environ, {"NIRNCRAFT_263_SCRATCH": str(root), "NIRNCRAFT_JAVA25_HOME": str(root / "java")}), \
                     patch.object(sys, "argv", ["build_263.py", "--log", str(log), "build"]), \
                     patch.object(build.subprocess, "call") as call, contextlib.redirect_stderr(io.StringIO()) as errors:
@@ -187,11 +212,12 @@ class ProcessGuardTest(unittest.TestCase):
     def test_build_holds_guard_through_synchronous_subprocess_and_returns_its_status(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            lock = root / ".native-build.lock"
+            output = build.checkout_output(build.ROOT, root.resolve())
+            lock = output / ".native-build.lock"
 
             def fake_gradle(args, **kwargs):
                 self.assert_busy(lock, os.getpid())
-                self.assertIn("-PnirncraftBuildDir=" + str(root.resolve() / "build"), args)
+                self.assertIn("-PnirncraftBuildDir=" + str(output / "build"), args)
                 kwargs["stdout"].write(b"mock build output")
                 return 9
 
@@ -206,6 +232,7 @@ class ProcessGuardTest(unittest.TestCase):
             root = Path(folder).resolve()
             env = {"NIRNCRAFT_263_SCRATCH": str(root), "NIRNCRAFT_JAVA25_HOME": str(root / "java"),
                    "JAVA_HOME": "parent java", "GRADLE_USER_HOME": "parent gradle", "DEBUG": "parent debug"}
+            output = build.checkout_output(build.ROOT, root)
             for options, tasks, offline in (([], ["build"], False),
                                              (["--offline", "--", "compileJava", "test"], ["compileJava", "test"], True)):
                 with self.subTest(offline=offline), patch.dict(os.environ, env), \
@@ -217,8 +244,8 @@ class ProcessGuardTest(unittest.TestCase):
                     if offline:
                         expected.append("--offline")
                     expected += ["--console=plain", "-Dorg.gradle.jvmargs=-Xmx3G",
-                                 "-PnirncraftBuildDir=" + str(root / "build"),
-                                 "--project-cache-dir", str(root / "project-cache")]
+                                 "-PnirncraftBuildDir=" + str(output / "build"),
+                                 "--project-cache-dir", str(output / "project-cache")]
                     self.assertEqual(expected, args)
                     child = call.call_args.kwargs
                     self.assertEqual(build.ROOT / "mod", child["cwd"])
