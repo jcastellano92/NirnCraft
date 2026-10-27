@@ -19,6 +19,7 @@ one-page report. Results: .work/harness/atlas/route/<stamp>/ (report.html, repor
 import gzip
 import json
 import math
+import os
 import shutil
 import struct
 import time
@@ -84,8 +85,15 @@ def run(runner, s, v, fp):
 def route_spec(scene=None):
     if scene and scene.get("collide"):
         return {"tag": TAG, "heading": HEADING, "phases": COLLIDE_PHASES, "captures": [], "uncap": False, "collide": True}
-    return {"tag": TAG, "heading": HEADING, "phases": PHASES, "captures": CAPTURES, "uncap": True,
+    spec = {"tag": TAG, "heading": HEADING, "phases": PHASES, "captures": CAPTURES, "uncap": True,
             "window": list(WINDOW)}
+    # Memory attribution only (atlas_vulkan_probe --route-control): isolate the capture readbacks / the 1440p resize.
+    control = {c for c in os.environ.get("NIRNCRAFT_ATLAS_ROUTE_CONTROL", "").split(",") if c}
+    if control - {"no-captures", "keep-window"}:
+        raise ValueError("unknown NIRNCRAFT_ATLAS_ROUTE_CONTROL: " + ",".join(sorted(control)))
+    if "no-captures" in control: spec["captures"] = []
+    if "keep-window" in control: del spec["window"]
+    return spec
 
 
 def wipe_cache(g):

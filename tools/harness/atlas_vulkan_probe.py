@@ -293,9 +293,10 @@ def transport_environment(env, transport):
     return env
 
 
-def route_environment(env, enabled):
+def route_environment(env, enabled, control=None):
     env = dict(env)
     env.pop('NIRNCRAFT_ATLAS_PROBE_ROUTE', None)
+    env.pop('NIRNCRAFT_ATLAS_ROUTE_CONTROL', None)
     if not enabled: return env
     for key in ('VK_INSTANCE_LAYERS', 'NIRNCRAFT_ATLAS_PROBE_JVM_NMT', 'ATLAS_MEMORY_DIAGNOSTICS', 'NIRNCRAFT_ATLAS_DUMP'):
         if env.get(key): raise RuntimeError('route timing requires diagnostics off: ' + key)
@@ -303,6 +304,7 @@ def route_environment(env, enabled):
     flags = dict(item.split('=', 1) for item in env.get('NIRNCRAFT_HARNESS_JVM', '').split(',') if '=' in item)
     require_route_flags(flags)
     env['NIRNCRAFT_ATLAS_PROBE_ROUTE'] = '1'
+    if control: env['NIRNCRAFT_ATLAS_ROUTE_CONTROL'] = control
     return env
 
 
@@ -338,16 +340,18 @@ def route_comparison(evidence, deadline):
             raise TimeoutError('at least 125 work seconds required for the original 92-second route')
         atlas_tools.wait_alive = bounded_alive
         route_tag = 'atlasroute_' + Path(evidence).name.rsplit('-', 1)[-1]
-        probe_visuals.journal(evidence, [route_tag + '_c%02d' % i for i in range(1, 11)])
+        control = set(filter(None, os.environ.get('NIRNCRAFT_ATLAS_ROUTE_CONTROL', '').split(',')))
+        if 'no-captures' not in control: probe_visuals.journal(evidence, [route_tag + '_c%02d' % i for i in range(1, 11)])
         data = atlas_tools.fly_route(SimpleNamespace(game=RouteGame()), {'timeout': deadline - time.monotonic() - 10}, tag=route_tag)
         (folder / 'raw-report.json').write_text(json.dumps(data, indent=2), encoding='utf-8')
         metrics, fails = atlas_tools.summarize(data)
-        if data.get('ticks') != 1840 or data.get('display', {}).get('framebufferW') != 2560 or data.get('display', {}).get('framebufferH') != 1440:
+        keep = 'keep-window' in control
+        if data.get('ticks') != 1840 or (not keep and (data.get('display', {}).get('framebufferW') != 2560 or data.get('display', {}).get('framebufferH') != 1440)):
             raise RuntimeError('route incomplete or actual framebuffer differs from 2560x1440')
         if metrics.get('absentMetrics') or not data.get('load', {}).get('ready'):
             raise RuntimeError('route renderer/loading evidence incomplete')
         shots = data.get('shots', [])
-        if len(shots) != 10 or len(data.get('captures', [])) != 10 or len(set(shots)) != 10:
+        if 'no-captures' not in control and (len(shots) != 10 or len(data.get('captures', [])) != 10 or len(set(shots)) != 10):
             raise RuntimeError('all ten route captures required')
         count = data.get('total', {}).get('frame', {}).get('n')
         if type(count) is not int or count <= 0:
@@ -360,7 +364,7 @@ def route_comparison(evidence, deadline):
             source = Path(shot)
             shutil.copy2(source, folder / source.name)
         raw = data['total']['frame']
-        result.update(state='OBSERVED_ROUTE_COMPARISON', metrics=metrics, standardGateFails=fails,
+        result.update(state='OBSERVED_ROUTE_MEMORY_CONTROL' if control else 'OBSERVED_ROUTE_COMPARISON', control=sorted(control), metrics=metrics, standardGateFails=fails,
                       originalBaseline={'p99': 41.2348, 'max': 90.0575, 'frames': 4950},
                       relative={'p99Ratio': raw['p99'] / 41.2348, 'maxRatio': raw['max'] / 90.0575,
                                 'p99AtOrBelowHistorical': raw['p99'] <= 41.2348, 'maxAtOrBelowHistorical': raw['max'] <= 90.0575},
@@ -451,7 +455,7 @@ def worker(evidence, deadline):
             raise RuntimeError('no fresh ready GPU profile before deadline')
         if route:
             result['route_comparison'] = route_comparison(evidence, deadline)
-            if result['route_comparison']['state'] != 'OBSERVED_ROUTE_COMPARISON':
+            if result['route_comparison']['state'] not in ('OBSERVED_ROUTE_COMPARISON', 'OBSERVED_ROUTE_MEMORY_CONTROL'):
                 raise RuntimeError('route comparison incomplete: ' + result['route_comparison'].get('error', 'missing evidence'))
         for name, px in [('before', x), ('after', x if resource_reload else x + 2)]:
             if resource_reload and name == 'after':
@@ -844,6 +848,8 @@ def cleanup_clients(deadline, started_wall, seen, ack, env, result, diagnostic=N
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--limit', type=int, default=240, choices=range(90, 300), metavar='SECONDS')
+    ap.add_argument('--route-control', choices=['no-captures', 'keep-window', 'no-captures,keep-window'],
+                    help='memory attribution only, with --route-comparison: drop the ten captures and/or the 1440p resize; never a comparison pass')
     ap.add_argument('--route-comparison', action='store_true', help='run the original 92-second 1440p route after readiness; --limit 299 recommended')
     ap.add_argument('--memory-diagnostics', action='store_true',
                     help='sample MC VMA/JVM and native heap estimates, and save exact generator inputs; not a timing run')
@@ -859,6 +865,7 @@ def main():
     ap.add_argument('--snapshot-worker', metavar='EVIDENCE', help=argparse.SUPPRESS)
     ap.add_argument('--visual-worker', nargs=2, metavar=('EVIDENCE', 'DEADLINE'), help=argparse.SUPPRESS)
     args = ap.parse_args()
+    if args.route_control and not args.route_comparison: ap.error('--route-control requires --route-comparison')
     if not args.route_comparison and args.limit > 240: ap.error('limits above 240 require --route-comparison')
     if args.route_comparison and (args.transport != 'shared' or args.resource_reload or args.memory_diagnostics or args.jvm_native_diagnostics or args.fresh_generator_cache):
         ap.error('--route-comparison requires shared transport, kept cache and diagnostics/reload off')
@@ -881,7 +888,7 @@ def main():
     if args.worker:
         return worker(args.worker[0], float(args.worker[1]))
     launch_environment = native_diagnostic_environment(os.environ, args.jvm_native_diagnostics)
-    launch_environment = route_environment(launch_environment, args.route_comparison)
+    launch_environment = route_environment(launch_environment, args.route_comparison, args.route_control)
     start = time.monotonic()
     started_wall = time.time()
     deadline = start + args.limit

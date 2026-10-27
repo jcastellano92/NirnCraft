@@ -522,6 +522,28 @@ class SupervisorChecks(unittest.TestCase):
             probe.memory_sample(folder, [7])
             snap.assert_not_called()
             self.assertFalse((Path(folder) / 'regions.jsonl').exists())
+    def test_route_memory_controls_only_change_the_route_spec_when_requested(self):
+        base = probe.atlas_tools.route_spec()
+        self.assertEqual(10, len(base['captures']))
+        self.assertIn('window', base)
+        with patch.dict(probe.os.environ, {'NIRNCRAFT_ATLAS_ROUTE_CONTROL': 'no-captures'}):
+            spec = probe.atlas_tools.route_spec()
+            self.assertEqual([], spec['captures'])
+            self.assertEqual(base['window'], spec['window'])
+        with patch.dict(probe.os.environ, {'NIRNCRAFT_ATLAS_ROUTE_CONTROL': 'no-captures,keep-window'}):
+            spec = probe.atlas_tools.route_spec()
+            self.assertEqual([], spec['captures'])
+            self.assertNotIn('window', spec)
+        with patch.dict(probe.os.environ, {'NIRNCRAFT_ATLAS_ROUTE_CONTROL': 'bogus'}):
+            with self.assertRaises(ValueError):
+                probe.atlas_tools.route_spec()
+
+    def test_route_control_cli_is_memory_attribution_only(self):
+        env = probe.route_environment({}, True, control='no-captures')
+        self.assertEqual('no-captures', env['NIRNCRAFT_ATLAS_ROUTE_CONTROL'])
+        self.assertNotIn('NIRNCRAFT_ATLAS_ROUTE_CONTROL', probe.route_environment({}, True))
+        self.assertNotIn('NIRNCRAFT_ATLAS_ROUTE_CONTROL',
+                         probe.route_environment({'NIRNCRAFT_ATLAS_ROUTE_CONTROL': 'x'}, True))
     def test_exhausted_snapshot_budget_does_not_spawn_helper(self):
         with patch.object(probe.subprocess, 'Popen') as start:
             with self.assertRaises(TimeoutError):
