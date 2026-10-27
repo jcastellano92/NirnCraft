@@ -108,8 +108,11 @@ def main():
     if '--validation' in sys.argv:
         enable_validation(out)
     if game.running(): game.close()
-    if '--cold' in sys.argv:  # wipe the test instance's atlas cache first: the coarse bake is still running at shutdown
-        print('TRACE cold: atlas cache wiped (%d files)' % atlas_tools.wipe_cache(game), flush=True)
+    if '--cold' in sys.argv:  # a private empty cache dir (never wipes the shared test-instance cache): the bake is still running at shutdown
+        root = (out / 'generated-cache').resolve(); root.mkdir(exist_ok=True)
+        (root / 'keep-gen-sets').write_text('3\n', encoding='utf-8')
+        os.environ['NIRNCRAFT_HARNESS_JVM'] = ','.join(filter(None, [os.environ.get('NIRNCRAFT_HARNESS_JVM', ''), 'nirncraft.atlas.cacheDir=' + root.as_posix()]))
+        print('TRACE cold: private cache', root, flush=True)
     original = set_backend(mode)
 
     summary = {'mode': mode, 'shots': []}
