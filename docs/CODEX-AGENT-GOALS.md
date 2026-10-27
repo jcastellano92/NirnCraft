@@ -179,5 +179,24 @@ client and backend were closed/restored, but flag restoration refused the change
 A separate exact-hash/owner-guarded recovery restored the original marker and authoritative properties, verified
 no client and released the lease; raw failure receipts are unchanged. The normal path now uses forward slashes
 (`45811574`), passes31 CPU tests including the real group writer, and preserves strict conflict refusal. Actual
-Prism round-trip behavior still needs the next live run. A same-engine-candidate fresh-cache shared-device arm
-is running under the original240-second/24GiB policy and85% sampled reserve; no cap or budget was raised.
+Prism round-trip behavior still needs live verification. The same-engine-candidate shared arm below used the
+original240-second/24GiB policy and85% sampled reserve; no cap or budget was raised.
+
+The shared arm `live-20261027-020352-028632` reached terrain readiness, then triggered the reserve and required
+forced process cleanup. Maximum named Java private was23398342656 bytes; job peak24127135744 bytes (22.47GiB).
+The scoped report `memory-report-20261027-021608-fde5da1a` is OBSERVED, not a memory/renderer pass. Its ingest bytes
+and all final fingerprint parts match the new host arm. Thus the current identity was stable across two actual
+starts, but each used a deliberately fresh cache: no cross-launch reuse or zero-regeneration claim follows.
+
+The shared supervisor claimed successful flag restoration, but independent post-job inspection found the probe
+marker back in instance.cfg. Properties/backend were original and all processes were absent. The writer is not
+proved. A second guarded recovery after launcher exit restored/rechecked the exact original marker and retained
+the raw premature-success receipt. Further live runs are parked until launcher ownership/exit is verified before
+final restoration. JVM native-memory/thread diagnostics pass34 CPU tests plus an actual owned tiny-JVM jcmd
+smoke; actual Prism inheritance and stalled Minecraft diagnostics remain unverified.
+
+Sol's cache lease packet passes11 actual Windows IO/process scenarios and the existing torn/corrupt cache suite.
+Its first Linux attempt stopped before compilation because system g++ was missing; an existing project compiler
+was located, with a nonroot ext4 rerun pending. No production lease integration is accepted yet. The pipeline-only
+main-base candidate has a fresh217-second Windows prebuild; all83 production SPIR-V files are byte-identical to
+accepted main. Native correctness, Linux packages, Java and the main-base gate still precede its eventual merge.
