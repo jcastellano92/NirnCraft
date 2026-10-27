@@ -45,12 +45,15 @@ public final class AtlasCollide {
      */
     public static JsonObject compare(int[] expected) {
         JsonObject o = new JsonObject();
-        AtlasNative.Context ctx = AtlasClient.testContext();
-        AtlasMaterials mats = AtlasClient.testMaterials();
-        if (ctx == null || mats == null) {
+        var lease = AtlasClient.acquireInfoContext();
+        AtlasMaterials mats = lease == null ? null : lease.materials();
+        if (lease == null || mats == null) {
+            if (lease != null) lease.close();
             o.addProperty("error", "atlas is not running");
             return o;
         }
+        try (lease) {
+        AtlasNative.Context ctx = lease.context();
         int n = expected.length / 4;
         int[] xyz = new int[n * 3];
         for (int i = 0; i < n; i++) {
@@ -91,6 +94,7 @@ public final class AtlasCollide {
         o.addProperty("unloaded", unloaded);
         o.add("samples", samples);
         return o;
+        }
     }
 
     private static boolean same(int wantNearId, int mat, Map<Integer, Integer> index) {

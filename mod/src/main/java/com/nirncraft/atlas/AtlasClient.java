@@ -62,12 +62,125 @@ public final class AtlasClient {
 
     private static AtlasNative lib;
     private static volatile AtlasNative.Context ctx;  // (volatile: the info thread reads it, AtlasInfo)
+    private record ContextReaders(AtlasNative.Context context, AtlasMaterials materials, AtlasReleaseGate gate) {}
+    private static volatile ContextReaders infoReaders;
+    record InfoLease(AtlasNative.Context context, AtlasMaterials materials, AtlasReleaseGate.Lease lease) implements AutoCloseable {
+        @Override public void close() { lease.close(); }
+    }
     private static volatile AtlasMaterials materials;  // (atlas-info: the exact ids' use)
     private static Path libPath;  // the loaded core (the client generator binds its own calls there)
     private static volatile AtlasClientGen clientGen;  // -Dnirncraft.atlas.clientGen=true: atlas generates the near field
     private static final Object CLIENT_GEN_LOCK = new Object();
     private static volatile Thread clientGenStart;  // (its start's thread: stop() releases the context after it)
+    private static volatile java.util.concurrent.atomic.AtomicReference<Throwable> clientGenStartFailure;
+    private static volatile java.util.concurrent.atomic.AtomicBoolean clientGenStartupFailed;
     private static volatile int clientGenEpoch;  // (stop: a generator still starting on its thread is closed when it arrives)
+    private static final java.util.List<ReleaseTicket> releases = new java.util.ArrayList<>(); // render thread only
+    private static boolean retirementRequested;
+    private static ContextReaders retiringReaders;
+    private static java.util.concurrent.CompletableFuture<Void> previousRelease = java.util.concurrent.CompletableFuture.completedFuture(null);
+
+    /** One context generation owns its workers and its interop resources until both sides have retired. */
+    static final class ReleaseTicket {
+        final AtlasNative.Context context;
+        final Thread starter;
+        final java.util.concurrent.atomic.AtomicReference<Throwable> startFailure;
+        final AtlasClientGen generator;
+        final AtlasFarField far;
+        final java.util.concurrent.CompletableFuture<Void> farExited;
+        final java.util.concurrent.CompletableFuture<Object[]> build;
+        final AtlasReleaseGate readers;
+        final java.util.function.Consumer<java.util.function.Consumer<Throwable>> closeFar;
+        final Runnable drainGenerator;
+        final Runnable renderDetach;
+        final Runnable closeContext;
+        final java.util.concurrent.CompletableFuture<Void> done = new java.util.concurrent.CompletableFuture<>();
+        final java.util.concurrent.CompletableFuture<Void> renderDone = new java.util.concurrent.CompletableFuture<>();
+        volatile boolean ready;
+        volatile Throwable failure;
+
+        ReleaseTicket(AtlasNative.Context context, Thread starter,
+                      java.util.concurrent.atomic.AtomicReference<Throwable> startFailure, AtlasClientGen generator,
+                      AtlasFarField far, java.util.concurrent.CompletableFuture<Void> farExited,
+                      java.util.concurrent.CompletableFuture<Object[]> build, AtlasReleaseGate readers) {
+            this.context = context; this.starter = starter; this.startFailure = startFailure;
+            this.generator = generator; this.far = far; this.farExited = farExited; this.build = build; this.readers = readers;
+            this.closeFar = far == null ? callback -> callback.accept(null) : far::closeTracked;
+            this.drainGenerator = generator == null ? () -> {} : generator::awaitStop;
+            this.renderDetach = context == null ? () -> {} : context::glDetach;
+            this.closeContext = context == null ? () -> {} : context::close;
+        }
+
+        /** Injection seam for offline ordering and failure tests; production uses the captured owners above. */
+        ReleaseTicket(Thread starter, java.util.concurrent.CompletableFuture<Void> farExited, AtlasReleaseGate readers,
+                      java.util.function.Consumer<java.util.function.Consumer<Throwable>> closeFar,
+                      Runnable drainGenerator, Runnable renderDetach,
+                      Runnable closeContext) {
+            this.context = null; this.starter = starter; this.startFailure = null;
+            this.generator = null; this.far = null; this.farExited = farExited; this.build = null; this.readers = readers;
+            this.closeFar = closeFar; this.drainGenerator = drainGenerator; this.renderDetach = renderDetach; this.closeContext = closeContext;
+        }
+
+        void pumpRender() {
+            if (!ready || renderDone.isDone() || failure != null) return;
+            try {
+                renderDetach.run();
+                renderDone.complete(null);
+            } catch (Throwable t) {
+                failure = t;
+                done.completeExceptionally(t);
+                com.nirncraft.NirnCraft.LOGGER.error("atlas: GL detach failed; context ownership retained", t);
+            }
+        }
+
+        void launch() {
+            Thread release = new Thread(() -> {
+                boolean interrupted = false;
+                try {
+                    closeFar.accept(failure -> {
+                        if (failure == null) farExited.complete(null);
+                        else farExited.completeExceptionally(failure);
+                    });
+                    farExited.join();
+                    if (starter != null) {
+                        while (starter.isAlive()) {
+                            try { starter.join(); }
+                            catch (InterruptedException e) { interrupted = true; }
+                        }
+                    }
+                    if (startFailure != null && startFailure.get() != null)
+                        throw new IllegalStateException("generator startup did not release safely", startFailure.get());
+                    if (readers != null) interrupted |= readers.awaitDrained();
+                    drainGenerator.run();
+                    if (build != null) {
+                        Object[] made;
+                        try { made = build.join(); }
+                        catch (java.util.concurrent.CompletionException failedBuild) { made = null; }
+                        if (made != null && made[0] != null) ((AtlasNative.Context) made[0]).close();
+                    }
+                    ready = true;
+                    renderDone.join();
+                    closeContext.run();
+                    done.complete(null);
+                } catch (Throwable t) {
+                    failure = t;
+                    done.completeExceptionally(t);
+                    com.nirncraft.NirnCraft.LOGGER.error("atlas: context release failed; device ownership retained", t);
+                } finally {
+                    if (interrupted) Thread.currentThread().interrupt();
+                }
+            }, "atlas context release");
+            release.setDaemon(true);
+            release.start();
+        }
+    }
+
+    /** Called on the owning render thread; a failed ticket remains visible to shutdown. */
+    private static void pumpReleases() {
+        for (ReleaseTicket ticket : releases) ticket.pumpRender();
+        releases.removeIf(ticket -> ticket.done.isDone() && !ticket.done.isCompletedExceptionally());
+    }
+
     private static boolean cpuBackend;  // ctx runs on the CPU backend (no usable Vulkan device, or forced)
     // (start) the context being made on its thread: [context, on the CPU]; when it began
     private static volatile java.util.concurrent.CompletableFuture<Object[]> ctxBuild;
@@ -77,6 +190,9 @@ public final class AtlasClient {
     private static boolean farThisFrame;  // atlas drew this frame (its targets hold it): the near pass composites them
     private static boolean nearLitThisFrame;  // and lit the near pass's pixels (ATLAS_FRAME_NEAR_LIGHT)
     private static AtlasFarField farField;
+    private static java.util.concurrent.CompletableFuture<Void> farGenerationExited;
+    private static Object startedModels;
+    private static final java.util.concurrent.atomic.AtomicBoolean modelsReloaded = new java.util.concurrent.atomic.AtomicBoolean();
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
     private static final WeatherFeed WEATHER = new AtlasWeatherFeed();
     private static final AtlasQuality quality = new AtlasQuality();
@@ -141,6 +257,11 @@ public final class AtlasClient {
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasFallback.FEATURE,
                 () -> AtlasFallback.register(e)));
         NeoForge.EVENT_BUS.addListener(AtlasClient::afterOpaque);
+        modBus.addListener((net.neoforged.neoforge.client.event.AddClientReloadListenersEvent e) -> {
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("nirncraft", "atlas_looks");
+            e.addListener(id, (net.minecraft.server.packs.resources.ResourceManagerReloadListener) manager -> modelsReloaded.set(true));
+            e.addDependency(net.neoforged.neoforge.client.resources.VanillaClientListeners.LAST, id);
+        });
         AtlasRecorder.init();  // the flight recorder: client tick zone, /nirncraft-atlas-trace
         AtlasNearPass.init(modBus);
         modBus.addListener((RegisterRenderPipelinesEvent e) -> AtlasGuard.run(AtlasNearPass.FEATURE, () -> AtlasSky.register(e)));
@@ -152,6 +273,9 @@ public final class AtlasClient {
                         () -> AtlasNearPass.composite(e.getRenderPass())));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) ->
                 AtlasGuard.run("atlas client tick", Z_TICK_HOOK, () -> {
+                    pumpReleases();
+                    if (!retirementRequested && clientGenStartupFailed != null && clientGenStartupFailed.get()) stop();
+                    if (retirementRequested) stop();
                     AtlasTargets.flushClear();
                     AtlasFarField.restMs = com.nirncraft.render.quality.QualityClient.workerRestMs();
                     if (farField != null) AtlasClientSections.tick(Minecraft.getInstance());  // the loaded chunks' blocks
@@ -161,10 +285,34 @@ public final class AtlasClient {
                 }));
         AtlasClientSections.init();
         AtlasTextureClock.init(modBus);
-        NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> AtlasGuard.run("atlas shutdown", () -> {
-            if (guard != null) guard.stopped();  // a clean exit is not a crash
-            stop();
-        }));
+        NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> {
+            try { if (guard != null) guard.stopped(); } // a clean exit is not a crash
+            catch (Throwable t) { com.nirncraft.NirnCraft.LOGGER.warn("atlas: could not record clean shutdown", t); }
+            boolean interrupted = false, stopped = false;
+            long nextLog = 0;
+            while (!stopped || !releases.isEmpty()) {
+                try {
+                    if (!stopped) { stop(); stopped = !retirementRequested; }
+                    pumpReleases();
+                } catch (Throwable t) {
+                    long now = System.nanoTime();
+                    if (now >= nextLog) {
+                        com.nirncraft.NirnCraft.LOGGER.error("atlas: waiting for safe shutdown", t);
+                        nextLog = now + 5_000_000_000L;
+                    }
+                }
+                if (!stopped || !releases.isEmpty()) {
+                    long now = System.nanoTime();
+                    if (now >= nextLog) {
+                        com.nirncraft.NirnCraft.LOGGER.warn("atlas: waiting for {} context releases before device shutdown", releases.size());
+                        nextLog = now + 5_000_000_000L;
+                    }
+                    try { Thread.sleep(100); }
+                    catch (InterruptedException ignored) { interrupted = true; }
+                }
+            }
+            if (interrupted) Thread.currentThread().interrupt();
+        });
         // adaptive quality v2: measures the frame, tunes atlas and the pack to this machine (render/quality)
         AtlasGuard.run("adaptive quality", com.nirncraft.render.quality.QualityClient::init);
         com.nirncraft.render.quality.QualityClient.setColumnThreadSink(n -> {
@@ -300,10 +448,14 @@ public final class AtlasClient {
     private static void renderFarBody(LevelRenderState state, com.mojang.renderpearl.api.commands.RenderPass pass) {
         farThisFrame = false;
         nearLitThisFrame = false;
-        if (failed) return;
+        if (retirementRequested || failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null) return;
+            if (modelsReloaded.getAndSet(false) || (ctx != null && startedModels != null && startedModels != mc.getModelManager().getBlockStateModelSet())) {
+                AtlasClientSections.resetLooks();
+                if (ctx != null || ctxBuild != null) stop();
+            }
             if (suspended) {  // nothing far this frame (a pack composites the targets: they are cleared)
                 if (targets != null) targets.clear();
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
@@ -610,6 +762,9 @@ public final class AtlasClient {
     }
 
     private static boolean start(Minecraft mc) {
+        // Prior owners may still hold singleton stages or the old device interop. Keep drawing vanilla while
+        // their release runs; a failed release deliberately prevents replacement ownership.
+        if (!previousRelease.isDone() || previousRelease.isCompletedExceptionally()) return false;
         if (buildingContext()) return false;  // (its kernels still compiling on their thread: vanilla draws this frame)
         try {
             if (!decided) {
@@ -694,6 +849,7 @@ public final class AtlasClient {
             ctxBuild = null;
             reduceVanilla(mc, false);
             ctx = (AtlasNative.Context) made[0];
+            infoReaders = new ContextReaders(ctx, null, new AtlasReleaseGate());
             cpuBackend = (Boolean) made[1];
             com.nirncraft.NirnCraft.LOGGER.info("atlas: context made in {} s (its kernels built off the render thread)",
                     String.format("%.1f", (System.nanoTime() - ctxBuildStartNs) / 1e9));
@@ -766,6 +922,9 @@ public final class AtlasClient {
             // voxel path, measurements)
             groups = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.groups")) && ctx.hasShapes();
             materials = mats;
+            ContextReaders readers = infoReaders;
+            if (readers != null && readers.context() == ctx)
+                infoReaders = new ContextReaders(ctx, mats, readers.gate());
             if (groups) mats.enableShapes();  // every material's real shape and face tiles; real blocks per state
             // the same ids on every launch (the self-baking cache's fingerprint and stored materials depend on them)
             mats.persistTo(mc.gameDirectory.toPath().resolve("atlas-cache").resolve("materials.log"));
@@ -781,6 +940,7 @@ public final class AtlasClient {
             AtlasTileUpload.noDressingCanopy = AtlasClientGen.ON && mc.hasSingleplayerServer() && AtlasClientGen.STORE && AtlasClientGen.far()
                     && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
+            farGenerationExited = new java.util.concurrent.CompletableFuture<>();
             AtlasClientSections.reset();  // a new context holds no real blocks: the loaded chunks go up again
             // the structures from the plans as stages of the client generator's batches (before its program compiles)
             if (AtlasClientGen.ON && mc.hasSingleplayerServer()) AtlasOverlayLive.register(libPath, mc.getSingleplayerServer());
@@ -791,24 +951,41 @@ public final class AtlasClient {
                 Path lp = libPath;
                 AtlasNative.Context c = ctx;
                 int epoch = ++clientGenEpoch;
+                var startFailure = new java.util.concurrent.atomic.AtomicReference<Throwable>();
+                var startupFailed = new java.util.concurrent.atomic.AtomicBoolean();
+                ContextReaders startupReaders = infoReaders;
+                var startupFarExited = farGenerationExited;
+                var predecessor = previousRelease;
                 Thread t = new Thread(() -> {
                     try {
-                        AtlasClientGen g = AtlasClientGen.start(sp, lp, c, mats);
-                        if (g == null) return;
+                        predecessor.join(); // old singleton stages are gone before a new owner may prepare
                         synchronized (CLIENT_GEN_LOCK) {
-                            if (epoch != clientGenEpoch) g.close();  // (stopped meanwhile)
-                            else clientGen = g;
+                            if (epoch != clientGenEpoch) return;
                         }
+                        AtlasClientGen.start(sp, lp, c, mats, CLIENT_GEN_LOCK,
+                                () -> epoch == clientGenEpoch, g -> clientGen = g, () -> {
+                                    startupFailed.set(true);
+                                    if (startupReaders != null) {
+                                        startupReaders.gate().closeAdmission();
+                                        boolean interrupted = startupReaders.gate().awaitDrained();
+                                        if (interrupted) Thread.currentThread().interrupt();
+                                    }
+                                    startupFarExited.join();
+                                });
                     } catch (Throwable e) {
+                        startFailure.set(e);
                         com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation did not start", e);
                     }
                 }, "atlas client generator start");
                 t.setDaemon(true);
                 clientGenStart = t;
+                clientGenStartFailure = startFailure;
+                clientGenStartupFailed = startupFailed;
                 t.start();
             }
             lightBudget = -1;
             startedFor = mc.level;
+            startedModels = mc.getModelManager().getBlockStateModelSet();
             retryAt = 0;
             com.nirncraft.NirnCraft.LOGGER.info("Infinite ATLAS far field on ({} columns): {}", source instanceof AtlasExactSource
                     ? "exact" : source instanceof AtlasServerSource ? "server" : "raster", lib.buildInfo());
@@ -955,6 +1132,13 @@ public final class AtlasClient {
     /** The running context for AtlasInfo's thread. */
     static AtlasNative.Context infoContext() {
         return ctx;
+    }
+
+    static InfoLease acquireInfoContext() {
+        ContextReaders readers = infoReaders;
+        if (readers == null) return null;
+        AtlasReleaseGate.Lease lease = readers.gate().enter();
+        return lease == null ? null : new InfoLease(readers.context(), readers.materials(), lease);
     }
 
     static boolean failedForSession() {
@@ -1423,67 +1607,64 @@ public final class AtlasClient {
     /** Tears atlas down (start() brings it back with fresh tiles). The library stays loaded. */
     private static void stop() {
         AtlasMaterials m = materials;
-        if (m != null) m.flushLog();  // (the material numbering of this session: the next launch replays it)
         AtlasNative.Context c = ctx;
-        // the context goes only once the far-field worker is out of it (it may still be mid-pass after close()'s
-        // join: destroyed under it, its next atlas_update crashed the game); the GL side goes now, on this thread
-        Runnable destroyNow = () -> {
-            try {
-                if (c != null) c.close();
-            } catch (Throwable ignored) {
-                // best effort
-            }
-        };
-        // (a client generator still starting on its thread builds on this context: it closes itself when it arrives, the
-        // epoch below; the context goes only after that, on a thread of its own, never waiting on the render thread)
-        Thread starting = clientGenStart;
-        Runnable destroy = starting == null || !starting.isAlive() ? destroyNow : () -> {
-            Thread w = new Thread(() -> {
-                try {
-                    starting.join();
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-                destroyNow.run();
-            }, "atlas context release");
-            w.setDaemon(true);
-            w.start();
-        };
-        try {
-            if (farField != null) farField.stopWorker();
-        } catch (Throwable ignored) {
-            // best effort: the session continues without atlas
-        }
-        try {
-            if (targets != null) targets.close();
-        } catch (Throwable ignored) {
-            // best effort
-        }
-        try {
-            if (c != null) c.glDetach();
-        } catch (Throwable ignored) {
-            // best effort
-        }
-        try {
+        // Close admission immediately; the release worker retains context ownership until all users exit.
+        if (!retirementRequested) {
+            retirementRequested = true;
+            farThisFrame = false;
+            nearLitThisFrame = false;
             synchronized (CLIENT_GEN_LOCK) {
-                clientGenEpoch++;  // (one still starting closes itself when it arrives)
-                if (clientGen != null) {
-                    clientGen.close();
-                    clientGen = null;
-                }
+                clientGenEpoch++;
+                if (clientGen != null) clientGen.requestStop();
             }
-            if (farField != null) farField.close(destroy);  // now, or when the worker leaves
-            else destroy.run();
-        } catch (Throwable ignored) {
-            // best effort (the context is left to the worker, or leaked)
+            if (farField != null) farField.requestStop();
+            retiringReaders = infoReaders;
+            infoReaders = null;
+            if (retiringReaders != null) retiringReaders.gate().closeAdmission();
         }
+        if (m != null) m.flushLog();  // (the material numbering of this session: the next launch replays it)
+        if (targets != null) targets.close();
+        targets = null;
+        AtlasFarField oldFar = farField;
+        var oldFarExited = farGenerationExited;
+        Thread starting = clientGenStart;
+        var startFailure = clientGenStartFailure;
+        var pendingBuild = ctxBuild;
+        ContextReaders readers = retiringReaders;
+        AtlasClientGen oldGen;
+        synchronized (CLIENT_GEN_LOCK) {
+            oldGen = clientGen;
+            clientGen = null;
+        }
+        ctxBuild = null;
+        retiringReaders = null;
+        if (c != null || oldFar != null || starting != null || pendingBuild != null) {
+            ReleaseTicket ticket = new ReleaseTicket(c, starting, startFailure, oldGen, oldFar,
+                    oldFarExited == null ? new java.util.concurrent.CompletableFuture<>() : oldFarExited, pendingBuild,
+                    readers == null ? null : readers.gate());
+            releases.add(ticket);
+            previousRelease = java.util.concurrent.CompletableFuture.allOf(previousRelease, ticket.done);
+            try { ticket.launch(); }
+            catch (Throwable t) {
+                ticket.failure = t;
+                ticket.done.completeExceptionally(t);
+                com.nirncraft.NirnCraft.LOGGER.error("atlas: could not start context release; ownership retained", t);
+            }
+        }
+        clientGenStart = null;
+        clientGenStartFailure = null;
+        clientGenStartupFailed = null;
+        retirementRequested = false;
         farField = null;
+        farGenerationExited = null;
         AtlasEditsClient.clear();  // the next world's changes come from its own server
         targets = null;
         ctx = null;
         infoLogged = false;
         startedFor = null;
+        startedModels = null;
         firstFrame = true;
+        lastFrameNs = 0;
     }
 
     static GpuFormat colorFormat() {

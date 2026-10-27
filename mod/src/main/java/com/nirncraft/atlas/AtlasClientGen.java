@@ -113,6 +113,9 @@ final class AtlasClientGen implements AutoCloseable {
     static void regenerate(long[] chunkKeys) {
         AtlasClientGen c = active;
         if (c == null) return;
+        var lease = c.releaseGate.enter();
+        if (lease == null) return;
+        try (lease) {
         boolean any = false;
         int[] xz = new int[chunkKeys.length * 2];
         for (int i = 0; i < chunkKeys.length; i++) {
@@ -131,6 +134,7 @@ final class AtlasClientGen implements AutoCloseable {
             com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: regenerate: {}", e.toString());
         }
         if (any || xz.length > 0) c.wake();
+        }
     }
 
     static boolean far() {
@@ -175,6 +179,7 @@ final class AtlasClientGen implements AutoCloseable {
 
     private final List<Up> ready = new ArrayList<>();
     private final Thread worker, uploader;
+    private final AtlasReleaseGate releaseGate = new AtlasReleaseGate();
     private final List<Thread> featureWorkers = new ArrayList<>();
     // features: the generated ids of chunks near the camera (null section: air), the proto chunks over them, progress
     private final AtlasGenFeatures features;
@@ -185,6 +190,7 @@ final class AtlasClientGen implements AutoCloseable {
     private final NoiseBasedChunkGenerator generator;
     private final RandomState random;
     private volatile boolean running = true;
+    private volatile boolean published;
     // (direct, FAR) the far tiles put into the grid, per level and tile; those the grid did not take whole (outside its
     // window, its pool's cut-off) go again once the camera has moved a tile at that level
     private final Set<Long> farDone = ConcurrentHashMap.newKeySet(), farPartial = ConcurrentHashMap.newKeySet();
@@ -192,6 +198,7 @@ final class AtlasClientGen implements AutoCloseable {
     private volatile double farMs;
     private volatile boolean farOn;
     private volatile AtlasCoarseBake bake;  // (the whole-map coarse bake: run starts it, close stops it)
+    private final Object bakeStartLock = new Object();
     /** The generator makes its own pages on the device (atlas_gen_set_map took the map). */
     private volatile boolean devicePages;
     private volatile boolean terrainBusy = true;  // the window has chunks to generate: features wait (terrain first)
@@ -303,19 +310,33 @@ final class AtlasClientGen implements AutoCloseable {
         return ON ? startFor(server, library, ctx, mats) : null;
     }
 
+    static AtlasClientGen start(MinecraftServer server, Path library, AtlasNative.Context ctx, AtlasMaterials mats,
+                                Object publicationLock, java.util.function.BooleanSupplier current,
+                                java.util.function.Consumer<AtlasClientGen> accept, Runnable beforeFailedCleanup) {
+        return ON ? startFor(server, library, ctx, mats, publicationLock, current, accept, beforeFailedCleanup) : null;
+    }
+
     /**
      * The GPU decoration asked for and not to be had: never a silent fall back to the CPU's (minutes of CPU, the frame
      * rate in single figures): an error with the cause, and in dev the client generator stops.
      */
     private static void gpuDecorationFailed(String why, Throwable cause) {
         com.nirncraft.NirnCraft.LOGGER.error("atlas client generation: the GPU decoration is OFF ({}); the decoration falls back to the CPU", why, cause);
-        AtlasTileUpload.noDressingCanopy = false;  // (no far trees from it: the dressing's canopy again)
         if (DEV) throw new IllegalStateException("the GPU decoration failed (" + why + "): " + cause, cause);
     }
 
     /** As start, whatever the flag (the offline jump measure). */
     static AtlasClientGen startFor(MinecraftServer server, Path library, AtlasNative.Context ctx, AtlasMaterials mats) {
+        return startFor(server, library, ctx, mats, new Object(), () -> true, c -> {}, () -> {});
+    }
+
+    private static AtlasClientGen startFor(MinecraftServer server, Path library, AtlasNative.Context ctx, AtlasMaterials mats,
+                                           Object publicationLock, java.util.function.BooleanSupplier current,
+                                           java.util.function.Consumer<AtlasClientGen> accept, Runnable beforeFailedCleanup) {
         if (server == null || library == null) return null;
+        AtlasGenNative.Gen buildingGen = null;
+        java.lang.foreign.MemorySegment buildingStages = null;
+        AtlasClientGen buildingClient = null;
         try {
             ServerLevel ow = server.overworld();
             if (!(ow.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator g)) return null;
@@ -333,6 +354,7 @@ final class AtlasClientGen implements AutoCloseable {
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_VULKAN);
             if (gen == null) gen = nat.create(AtlasGenNative.BACKEND_CPU);
             if (gen == null) return null;
+            buildingGen = gen;
             // the decoration on the GPU (the store's stages): its program over the generator's blocks and biomes; the
             // blocks it places join the generator's program (AtlasGenProgram.addBlocks), compiled again if it lacked any
             AtlasFeatureProgram storeFp = null;
@@ -370,6 +392,7 @@ final class AtlasClientGen implements AutoCloseable {
                     long ts = System.nanoTime();
                     gen.storeEnable(STORE_SLOTS);
                     stages = gen.attachFeatures(storeFp.words, g2f, f2g);
+                    buildingStages = stages;
                     dumpWords("feat.bin", storeFp.words);
                     dumpWords("g2f.bin", g2f);
                     dumpWords("f2g.bin", f2g);
@@ -381,6 +404,10 @@ final class AtlasClientGen implements AutoCloseable {
                     com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the decoration on the GPU ({} placed features, {} slots, {} ms)",
                             storeFp.dispatched.size(), STORE_SLOTS, (System.nanoTime() - ts) / 1_000_000);
                 } catch (RuntimeException e) {
+                    if (buildingStages != null) {
+                        gen.detachFeatures(buildingStages);
+                        buildingStages = null;
+                    }
                     gpuDecorationFailed("its stages did not attach", e);
                     stages = null;
                 }
@@ -391,6 +418,7 @@ final class AtlasClientGen implements AutoCloseable {
                     attach.accept(gen, prog);
                 } catch (RuntimeException e) {
                     com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not attach", e);
+                    throw e; // an incomplete native stage must be detached before this generator can be released
                 }
             }
             // the decoration's placement mask keeps clear of the overlays' structure pieces (their boxes on the GPU)
@@ -424,25 +452,65 @@ final class AtlasClientGen implements AutoCloseable {
             c.cacheArm = cacheArm;
             c.storeOn = stages != null;
             c.featStages = stages;
+            buildingClient = c;
             if (c.storeOn && direct && com.nirncraft.atlas.server.AtlasServerMode.gpuChunks()) {
                 // the server's AtlasChunkGenerator takes its chunks from the store, on this generator's worker
                 c.serverGen = new AtlasServerGen(c, prog.blocks, c.farIds, ow);
-                com.nirncraft.atlas.server.AtlasServerFeed.bind(g, c.serverGen);
-                com.nirncraft.NirnCraft.LOGGER.info("atlas client generation: the integrated server's chunks come from the GPU store ({})",
-                        g instanceof com.nirncraft.atlas.server.AtlasChunkGenerator ? "AtlasChunkGenerator" : "this world's generator is not the atlas one: unused");
             }
-            // the far chunks carry the decoration's trees (its far stage, unless ATLAS_FEAT_FAR=0): no stand-in canopy
-            AtlasTileUpload.noDressingCanopy = stages != null && far() && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
+            boolean published = false;
+            synchronized (publicationLock) {
+                if (current.getAsBoolean()) {
+                    try {
+                        if (c.serverGen != null) com.nirncraft.atlas.server.AtlasServerFeed.bind(g, c.serverGen);
+                        AtlasTileUpload.noDressingCanopy = stages != null && far() && !"0".equals(System.getenv("ATLAS_FEAT_FAR"));
+                        AtlasOverlayLive.publish(gen);
+                        active = c;
+                        c.published = true;
+                        accept.accept(c);
+                        c.worker.start();
+                        if (ctx != null && mats != null) c.uploader.start();
+                        for (Thread t : c.featureWorkers) t.start();
+                        published = true;
+                    } catch (Throwable failure) {
+                        if (active == c) active = null;
+                        try { accept.accept(null); }
+                        catch (Throwable rollback) { failure.addSuppressed(rollback); }
+                        if (c.serverGen != null) com.nirncraft.atlas.server.AtlasServerFeed.unbind(c.serverGen);
+                        AtlasTileUpload.noDressingCanopy = false;
+                        c.requestStop();
+                        throw failure;
+                    }
+                }
+            }
+            if (!published) { beforeFailedCleanup.run(); c.close(); return null; }
             com.nirncraft.NirnCraft.LOGGER.info("atlas client generation on ({}): program {} words, {} fields, pages from the worker, radius {} chunks, "
                             + "features {} chunks on {} threads, {} ms", gen.device(), prog.words.length, prog.fields.size(),
                     RADIUS, feats == null ? 0 : FEATURE_RADIUS, feats == null ? 0 : FEATURE_THREADS, (System.nanoTime() - t0) / 1_000_000);
-            active = c;
-            c.worker.start();
-            if (ctx != null && mats != null) c.uploader.start();
-            for (Thread t : c.featureWorkers) t.start();
             return c;
         } catch (Throwable t) {
             com.nirncraft.NirnCraft.LOGGER.error("atlas client generation unavailable", t);
+            try {
+                synchronized (publicationLock) {
+                    if (buildingClient != null && active == buildingClient) {
+                        active = null;
+                        accept.accept(null);
+                        buildingClient.requestStop();
+                    }
+                }
+                beforeFailedCleanup.run();
+                if (buildingClient != null) {
+                    buildingClient.close();
+                } else if (buildingGen != null) {
+                    if (buildingStages != null) buildingGen.setFeatureOverlays(buildingStages, null);
+                    for (var detach : DETACH) detach.accept(buildingGen);
+                    if (buildingStages != null) buildingGen.detachFeatures(buildingStages);
+                    buildingGen.close();
+                }
+            } catch (Throwable cleanup) {
+                // The context owner must retain this failed startup rather than destroy its device under it.
+                cleanup.addSuppressed(t);
+                throw new IllegalStateException("atlas client generation startup cleanup failed", cleanup);
+            }
             return null;
         }
     }
@@ -487,9 +555,13 @@ final class AtlasClientGen implements AutoCloseable {
     static boolean backgroundRoom() {
         AtlasClientGen c = active;
         if (c == null) return true;
+        var lease = c.releaseGate.enter();
+        if (lease == null) return true;
+        try (lease) {
         double[] p = c.gen.paceNow();
         if (p != null && p[0] > 0.0 && (p[1] < 0.4 || p[2] < 20.0)) return false;
         return c.cameraSpeed() < BACKGROUND_SPEED;
+        }
     }
 
     static final double BACKGROUND_SPEED = Double.parseDouble(System.getProperty("nirncraft.atlas.bake.maxSpeed", "12"));
@@ -557,6 +629,13 @@ final class AtlasClientGen implements AutoCloseable {
             }
         }
         mats.flush(ctx);
+        // Component hashes identify which words changed without exposing or bypassing the native cache key.
+        com.nirncraft.NirnCraft.LOGGER.info("atlas: ingest components ids={} flags={} tints={} materials={} full={} ({} states, {} biomes)",
+                Long.toHexString(AtlasCanonicalLooks.fingerprint(w, 2, 2, n)),
+                Long.toHexString(AtlasCanonicalLooks.fingerprint(w, 3, 2, n)),
+                Long.toHexString(AtlasCanonicalLooks.fingerprint(w, tints, 1, 2 * nb)),
+                Long.toHexString(AtlasCanonicalLooks.fingerprint(w, matBase, 1, n * nb)),
+                Long.toHexString(AtlasCanonicalLooks.fingerprint(w, 0, 1, w.length)), n, nb);
         return w;
     }
 
@@ -716,16 +795,23 @@ final class AtlasClientGen implements AutoCloseable {
     static String subStats(boolean reset) {
         AtlasClientGen c = active;
         if (c == null) return null;
+        var lease = c.releaseGate.enter();
+        if (lease == null) return null;
+        try (lease) {
         try {
             return c.gen.subLine(reset);
         } catch (RuntimeException e) {
             return null;
+        }
         }
     }
 
     static String state() {
         AtlasClientGen c = active;
         if (c == null) return "clientGen{off}";
+        var lease = c.releaseGate.enter();
+        if (lease == null) return "clientGen{off}";
+        try (lease) {
         int r;
         synchronized (c.ready) {
             r = c.ready.size();
@@ -756,6 +842,7 @@ final class AtlasClientGen implements AutoCloseable {
                 c.gpuMs, c.kernelMs, c.readbackMs, c.decodeMs,
                 c.uploadMs, c.featureChunks, c.featureMs, c.features == null ? 0 : c.features.failures(),
                 since(j, c.firstUpNs), since(j, c.windowUpNs), since(j, c.windowFeaturesNs), c.firstBatch);
+        }
     }
 
     private static double since(long t0, long t) {
@@ -806,7 +893,9 @@ final class AtlasClientGen implements AutoCloseable {
         // generator's completed by the far identity (world generation and painting code)
         if (cacheArm) gen.setFingerprint((long) AtlasTileCodec.generatorIdentity().hashCode() << 32 ^ AtlasTileCodec.VERSION);
         // the whole-map coarse bake and the boot load of the far tiles (its own thread; farStep keeps the tiles it does not own)
-        if (cacheArm && farOn) bake = AtlasCoarseBake.start(gen);
+        synchronized (bakeStartLock) {
+            if (running && cacheArm && farOn) bake = AtlasCoarseBake.start(gen, releaseGate);
+        }
         if (serverGen != null) serverGen.up();
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
@@ -2210,35 +2299,72 @@ final class AtlasClientGen implements AutoCloseable {
         return new AtlasSections.Decoded(c.getPos().x(), c.getPos().z(), -4, secs, tint[0], tint[1]);
     }
 
-    @Override
-    public void close() {
-        running = false;
-        if (active == this) active = null;
-        if (bake != null) bake.stop();
-        AtlasServerGen sg = serverGen;
-        if (sg != null) {
-            com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
-            sg.close();
+    /** Close admission and request cancellation without waiting on the render thread. */
+    void requestStop() {
+        synchronized (bakeStartLock) {
+            running = false;
+            if (bake != null) bake.requestStop();
         }
+        if (active == this) active = null;
+        releaseGate.closeAdmission();
+        AtlasServerGen sg = serverGen;
+        if (sg != null) com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
         List<Thread> all = new ArrayList<>(featureWorkers);
         all.add(worker);
         all.add(uploader);
         for (Thread t : all) t.interrupt();
-        try {
-            for (Thread t : all) if (t.isAlive()) t.join(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        if (featStages != null) gen.setFeatureOverlays(featStages, null);  // (before the overlays go)
-        if (featStages != null) AtlasTileUpload.noDressingCanopy = false;
-        for (var detach : DETACH) {
-            try {
-                detach.accept(gen);
-            } catch (RuntimeException e) {
-                com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: a stage engine did not detach", e);
+    }
+
+    private boolean released;
+    private RuntimeException releaseFailure;
+
+    /** Wait on a release worker, never on the render thread. */
+    synchronized void awaitStop() {
+        if (released) return;
+        if (releaseFailure != null) throw releaseFailure;
+        boolean interrupted = false;
+        List<Thread> all = new ArrayList<>(featureWorkers);
+        all.add(worker);
+        all.add(uploader);
+        for (Thread t : all) {
+            while (t.isAlive()) {
+                try { t.join(); }
+                catch (InterruptedException e) { interrupted = true; }
             }
         }
-        if (featStages != null) gen.detachFeatures(featStages);  // (its stages off the generator, then its pipelines)
-        gen.close();
+        // The generator worker can create the bake just as cancellation begins. Once the worker is gone,
+        // the field is stable and the bake must leave before its stages or generator are released.
+        try {
+            AtlasCoarseBake b = bake;
+            if (b != null) b.requestStop();
+            interrupted |= releaseGate.awaitDrained();
+            if (b != null) b.awaitStop();
+            AtlasServerGen sg = serverGen;
+            if (sg != null) sg.close();
+            if (featStages != null) gen.setFeatureOverlays(featStages, null);  // (before the overlays go)
+            if (published && featStages != null) AtlasTileUpload.noDressingCanopy = false;
+            for (var detach : DETACH) {
+                try {
+                    detach.accept(gen);
+                } catch (RuntimeException e) {
+                    // A failed stage release may still use the generator; leave it alive and expose failure to the ticket.
+                    throw new IllegalStateException("atlas client generation: stage did not detach", e);
+                }
+            }
+            if (featStages != null) gen.detachFeatures(featStages);  // (its stages off the generator, then its pipelines)
+            gen.close();
+            released = true;
+        } catch (RuntimeException failure) {
+            releaseFailure = failure;
+            throw failure;
+        } finally {
+            if (interrupted) Thread.currentThread().interrupt();
+        }
+    }
+
+    @Override
+    public void close() {
+        requestStop();
+        awaitStop();
     }
 }

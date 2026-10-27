@@ -254,3 +254,9 @@ delay. Sol owns a narrow producer-drain/consumer-retirement ownership repair and
 Terra independently reviews. No production repair or new stage pass has been accepted. A second focused Terra
 inspection evaluates porting deterministic near-state aliases to main without shared-Vulkan dependencies, so
 equivalent traversal orders cannot unnecessarily discard valid cached world data. Heavy jobs remain serialized.
+
+## ABI 0.17 deterministic ingest candidate (2026-10-27)
+
+The isolated `codex-main-ingest-stability` candidate selects deterministic visual aliases and retains generator, far, bake, overlay, startup and context-reader owners until their release drains. Its GL interop detach is pumped on the render thread; native legacy detach is void, so internal detach failures are not observable here. Existing complete fingerprint components remain enabled; the overlay lifecycle change changes generator identity and can legitimately invalidate a cache once.
+
+Full Java build passed 372 tests, zero failures/errors, 19 opt-in skips (log `1027-074100-ingest__Java_corrected_full_build.log`); its 19 focused tests all passed. Jar SHA-256 `4d5b12bd0d4865a024348c356a8505739727e6fa19ef180623b60ec7e32f2e7e`; packaged bake inputs match `40d6c4f22688`. Explicit-base `e41568bf` check gate passed all 3 checks with zero new, known or missing results (log `1027-074447-ingest__explicit_base_check_gate.log`). Actual GL startup, reload, retirement and two-launch cache revisit remain unverified; this checkpoint is not a production acceptance or merge.

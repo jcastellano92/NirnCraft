@@ -65,6 +65,7 @@ final class AtlasCoarseBake implements Runnable {
     /** Phases: -1 off, 0 waiting for the camera and the windows, 1 making levels 3-6, 2 loaded (levels 3-6 whole), 3 level 2, 4 whole. */
     private volatile int phase;
     private final AtlasGenNative.Gen gen;
+    private final AtlasReleaseGate releaseGate;
     private final Thread thread;
     private volatile boolean running = true;
     // a tile in the grid: {window origin x, z, jumps when it was put, partial (1: the grid refused chunks), next try (ns)}
@@ -77,32 +78,49 @@ final class AtlasCoarseBake implements Runnable {
     private volatile long servedTiles, serveNs, bakeTilesLoad, bakeTilesBackground, stepNs, nearWaitNs;
     private volatile int centreX, centreZ;
 
-    private AtlasCoarseBake(AtlasGenNative.Gen gen) {
+    private AtlasCoarseBake(AtlasGenNative.Gen gen, AtlasReleaseGate releaseGate) {
         this.gen = gen;
+        this.releaseGate = releaseGate;
         thread = new Thread(this, "atlas coarse bake");
         thread.setDaemon(true);
         thread.setPriority(Thread.NORM_PRIORITY - 1);
     }
 
     /** Starts the bake on a generator whose cache is armed (AtlasClientGen.run); null when off or the library lacks it. */
-    static AtlasCoarseBake start(AtlasGenNative.Gen gen) {
+    static AtlasCoarseBake start(AtlasGenNative.Gen gen, AtlasReleaseGate releaseGate) {
         if (!ON || !gen.bakeSupported() || !gen.farIngestSupported()) return null;
-        AtlasCoarseBake b = new AtlasCoarseBake(gen);
+        AtlasCoarseBake b = new AtlasCoarseBake(gen, releaseGate);
         active = b;
         b.thread.start();
         return b;
     }
 
-    void stop() {
+    void requestStop() {
         running = false;
         if (active == this) active = null;
         thread.interrupt();
-        try {
-            thread.join(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    }
+
+    /** Only a release worker may wait here: bakeEnd must follow the actual worker exit. */
+    void awaitStop() {
+        boolean interrupted = false;
+        while (thread.isAlive()) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
         }
-        if (!thread.isAlive()) gen.bakeEnd();
+        try {
+            gen.bakeEnd();
+        } finally {
+            if (interrupted) Thread.currentThread().interrupt();
+        }
+    }
+
+    void stop() {
+        requestStop();
+        awaitStop();
     }
 
     // ---- hooks of AtlasClientGen (farStep, gridReports) ----
@@ -142,7 +160,10 @@ final class AtlasCoarseBake implements Runnable {
      */
     static boolean owns(int level, int tx, int tz, int[] win) {
         AtlasCoarseBake b = active;
-        return b != null && b.owned(level, tx, tz, win);
+        if (b == null) return false;
+        var lease = b.releaseGate.enter();
+        if (lease == null) return false;
+        try (lease) { return b.owned(level, tx, tz, win); }
     }
 
     /** (farStep's gate count) The bake's thread has put this tile into the level's window as placed now (`win`'s jumps). */
@@ -167,6 +188,9 @@ final class AtlasCoarseBake implements Runnable {
     static int[] sampleKnownTile(java.util.Random rnd) {
         AtlasCoarseBake b = active;
         if (b == null || b.phase < 2) return null;
+        var lease = b.releaseGate.enter();
+        if (lease == null) return null;
+        try (lease) {
         for (int tries = 0; tries < 40; tries++) {
             int level = LOAD_LO + rnd.nextInt(LOAD_HI - LOAD_LO + 1), span = 256 << level;
             int x0 = Math.floorDiv(MIN_X, span), x1 = Math.floorDiv(MAX_X - 1, span), z0 = Math.floorDiv(MIN_Z, span), z1 = Math.floorDiv(MAX_Z - 1, span);
@@ -174,6 +198,7 @@ final class AtlasCoarseBake implements Runnable {
             if (!b.failed.contains(key(level, tx, tz)) && b.gen.farKnown(level, tx, tz)) return new int[]{level, tx, tz};
         }
         return null;
+        }
     }
 
     /** (gridReports) The grid gave up a chunk of this tile: it is put again. */
