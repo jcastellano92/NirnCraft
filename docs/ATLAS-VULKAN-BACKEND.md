@@ -1,7 +1,7 @@
 # ATLAS on Minecraft's Vulkan backend (spike, 2026-10-26)
 
 **Decision (owner, 2026-10-26):** ATLAS moves onto Minecraft 26.3's own Vulkan backend (renderpearl). GL interop stays
-only as a fallback, and macOS is out of scope for now.
+only as a fallback. macOS remains outside the current migration gate; future Apple planning is recorded below.
 
 This plan comes from a read-only spike that read the client jar's bytecode with `javap -p -c`. **[V]** means seen in
 bytecode; **[I]** means inferred.
@@ -89,3 +89,48 @@ bytecode; **[I]** means inferred.
 4. Buffer device address and bindless descriptors, through the mixin.
 5. A low-priority generator queue, using the added queue and `global_priority`.
 6. One GPU timeline shared with Minecraft's Tracy, using `calibrated_timestamps`.
+
+## Capability checkpoint and next experiments (owner discussion, 2026-10-27)
+
+Audited candidate `21d3f61c` has rendered a world on Minecraft's shared Vulkan device, but is not yet accepted
+into main: terminal cleanup, memory and controlled baseline parity remain live gates. An available capability
+or a queue reservation is not a measured performance gain.
+
+| Capability | Implemented state |
+| --- | --- |
+| Slang | Native terrain, lighting, clouds and world-generation compute kernels already compile Slang to SPIR-V. Minecraft-facing graphics passes and the legacy pack still contain GLSL; Vulkan does not require rewriting all GLSL. |
+| Temporal reconstruction | Custom sparse near-light reconstruction/history and a separate TAA resolve exist. No DLSS/FSR/XeSS integration or accepted full-frame temporal upscaler. |
+| GPU world data | Generator-to-grid GPU transfer and GPU-resident tracing/lighting exist. Planning, cache/disk, gameplay data and synchronization still involve the CPU; there is no claim that every pass uses one identical buffer without readback. |
+| Explicit queues/synchronization | Shared-device frame and generator queues, command pools, barriers, timeline handoffs and serialized fallback exist. Actual 13:36 run reserved frame family2/index1 and generator family2/index2. |
+| Async frame delivery | Not complete: the shared copy path still waits on the CPU. S4's image ring and measured graphics/compute overlap remain work. Separate queues do not prove concurrent hardware execution. |
+| Parallel command recording | Render and generator workers exist, alongside background pipeline work; not a general multithreaded per-frame command recorder. CPU threads record command buffers; GPU execution parallelism is a separate question. |
+| Resource layouts | Native buffers, storage images and descriptor sets are independent of shader-pack conventions. Bindless descriptors and buffer-device-address are not enabled merely by sharing the device. |
+| Particles | Minecraft simulation/drawing with Atlas-aware shading. Compute simulation and GPU-driven particle dispatch remain planned. |
+| Hardware ray tracing | No acceleration-structure/ray-query/ray-tracing-pipeline implementation. Present rays traverse voxel data in ordinary compute shaders. |
+| Shadows | One orthographic near shadow map, a separate progressively refreshed far sun map and traced terrain shadow rays. Not a cascaded-shadow-map implementation. |
+| Datapack compute | World-generation data/features are data driven; kernels are repository code compiled and embedded at build time. No general datapack-supplied compute-kernel API. |
+| Apple | No supported package/test path; packaged native targets are Windows/Linux x86-64. Future Apple work needs an arm64 native build, capability/numeric-contract audit and real-device tests. |
+
+Keep a Vulkan1.2-compatible baseline and negotiate optional features at the existing device-creation hook,
+preserving Minecraft's requested features and queues. Query support, enable the required extension/feature chain
+before device creation, load the matching entry points and retain a tested fallback. A Vulkan1.4 SDK or physical
+device does not by itself enable new operations on Minecraft's already-created logical device. Promoted extension
+paths can offer newer functionality without making Vulkan1.4 mandatory; Minecraft already uses dynamic-rendering
+and synchronization2 extensions. See the [Khronos version guide](https://docs.vulkan.org/guide/latest/versions.html)
+and [feature requirements](https://docs.vulkan.org/spec/latest/chapters/features.html).
+
+Possible experiments after migration parity include measured S4 overlap without CPU frame waits, reducing the
+dominant trace/kernel cost and improving GPU data reuse, motion/disocclusion-tested temporal reconstruction,
+and a bounded GPU particle stage. These proposals do not change the stage order or authorize new feature work.
+Queue overlap must improve the complete frame/loading result, not just one queue's timer: async compute
+shares execution, register and bandwidth resources and can regress a saturated workload. Treat the suggested10%
+as a hypothesis to measure, never a promised gain; see [NVIDIA's overlap guidance](https://developer.nvidia.com/blog/advanced-api-performance-async-compute-and-overlap/).
+Optional ray queries/reflections or improved shadow-map allocation need independent quality/cost experiments;
+they do not replace the common voxel world or become migration prerequisites. A future datapack compute API should
+describe bounded, versioned stages with explicit inputs/outputs, deterministic fallback and cache fingerprints.
+
+For future Apple support, evaluate both available Vulkan-on-Metal implementations rather than fixing the plan
+to MoltenVK. Khronos's [current MoltenVK notice](https://github.com/KhronosGroup/MoltenVK) recommends KosmicKrisp
+for Apple Silicon and retains MoltenVK for Intel Macs/iOS. [Mesa's KosmicKrisp documentation](https://docs.mesa3d.org/drivers/kosmickrisp.html)
+requires Apple Silicon, Metal4 and macOS26+. Translation-layer availability is not evidence that our shaders,
+numeric requirements, queue design or Minecraft integration work there. This is future planning, not Apple support.
