@@ -6,7 +6,7 @@
 //    slots: the CPU records frame N+1 while the GPU still runs frame N.
 //  * GL path, host-copy fallback (no interop extensions, formats not exportable, or the GL context on another GPU):
 //    the same images are local to Vulkan, copied to host memory and uploaded into plain GL textures.
-// Baseline: Vulkan 1.2 + shaderInt64 (the SPIR-V is 1.5 with only the Shader and Int64 capabilities).
+// Baseline: Vulkan 1.2 with shaderInt64, shaderInt16 and shaderFloat16 required by the compiled kernels.
 #include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES, the loader is opened at run time
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -1622,6 +1622,13 @@ private:
     static std::string deviceUnfit(VkPhysicalDevice d, const VkPhysicalDeviceProperties& p, const VkPhysicalDeviceFeatures& f) {
         if (p.apiVersion < VK_API_VERSION_1_2) return "Vulkan " + apiString(p.apiVersion) + " < 1.2";
         if (!f.shaderInt64) return "no shaderInt64";
+        if (!f.shaderInt16) return "no shaderInt16";
+        if (!vkGetPhysicalDeviceFeatures2) return "cannot query shaderFloat16 support";
+        VkPhysicalDeviceShaderFloat16Int8Features half{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES};
+        VkPhysicalDeviceFeatures2 features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+        features.pNext = &half;
+        vkGetPhysicalDeviceFeatures2(d, &features);
+        if (!half.shaderFloat16) return "no shaderFloat16";
         const VkPhysicalDeviceLimits& l = p.limits;
         if (l.maxPerStageDescriptorStorageBuffers < BINDINGS - 2 || l.maxDescriptorSetStorageBuffers < BINDINGS - 2)
             return "only " + std::to_string(l.maxPerStageDescriptorStorageBuffers) + " storage buffers per stage";
@@ -1767,17 +1774,28 @@ private:
         vkGetPhysicalDeviceFeatures(phys_, &have);
         VkPhysicalDeviceFeatures feats{};
         feats.shaderInt64 = VK_TRUE;
+        if (!have.shaderInt16 || !vkGetPhysicalDeviceFeatures2) return fail(err, "cannot enable required shaderInt16/shaderFloat16 features");
+        VkPhysicalDeviceShaderFloat16Int8Features halfHave{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES};
+        VkPhysicalDeviceFeatures2 queried{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+        queried.pNext = &halfHave;
+        vkGetPhysicalDeviceFeatures2(phys_, &queried);
+        if (!halfHave.shaderFloat16) return fail(err, "cannot enable required shaderFloat16 feature");
+        feats.shaderInt16 = VK_TRUE;
+        VkPhysicalDeviceShaderFloat16Int8Features halfEnabled{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES};
+        halfEnabled.shaderFloat16 = VK_TRUE;
         feats.shaderFloat64 = have.shaderFloat64;  // the client generator's exact doubles (optional)
         float64_ = have.shaderFloat64 == VK_TRUE;
         VkDeviceCreateInfo dci{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
         dci.queueCreateInfoCount = nq;
         dci.pQueueCreateInfos = qci;
         dci.pEnabledFeatures = &feats;
+        dci.pNext = &halfEnabled;
         // (dev: ATLAS_FEAT_CLOCK=1) the decoration kernels' clock probes (a core built with CMake ATLAS_FEAT_CLOCK)
         VkPhysicalDeviceShaderClockFeaturesKHR clockF{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR};
         if (std::getenv("ATLAS_FEAT_CLOCK") && std::getenv("ATLAS_FEAT_CLOCK")[0] == '1' && has(VK_KHR_SHADER_CLOCK_EXTENSION_NAME)) {
             enable.push_back(VK_KHR_SHADER_CLOCK_EXTENSION_NAME);
             clockF.shaderSubgroupClock = VK_TRUE;
+            clockF.pNext = const_cast<void*>(dci.pNext);
             dci.pNext = &clockF;
         }
         // timeline semaphores (core 1.2, every 1.2 device has them): the client generator's submission ring

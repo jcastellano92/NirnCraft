@@ -1925,7 +1925,9 @@ private:
         if (!createRing(err)) return false;  // (the command buffers, their timestamps, the timeline semaphore)
         // the per-batch buffers (fixed: MAX_CHUNKS chunks; K up to 16 interpolated inputs); the readback holds the
         // ids, MAX_CHUNKS flags, then the section infos
-        bool ok = ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, MAX_CHUNKS * 8, true, err) &&
+        // Descriptor bindings must be valid even before setProgram installs the real program and pages.
+        bool ok = ensure(prog_, 64, false, err) && ensure(pages_, 64, false, err) &&
+                  ensure(pageIdx_, 1 << 16, true, err) && ensure(chunks_, MAX_CHUNKS * 8, true, err) &&
                   ensure(corners_, size_t(MAX_CHUNKS) * CORNERS * 16 * 4, false, err) &&
                   ensure(aq_, size_t(MAX_CHUNKS) * AQ_WORDS * 4, false, err) &&
                   ensure(blocks_, size_t(MAX_CHUNKS) * BLOCK_WORDS * 4, false, err) &&
