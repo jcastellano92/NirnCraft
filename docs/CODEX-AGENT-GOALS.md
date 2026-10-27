@@ -43,6 +43,36 @@ pending their ceiling tests. Vulkan correctness remains the integration priority
 changes need separate parity, fingerprint/rebake and world-consistency gates. The runtime has four total slots,
 so the audit uses waiting time rather than launching an additional worker or displacing independent review.
 
+## Current follow-up priorities (2026-10-26, after live memory attribution)
+
+The existing three-worker assignment remains; the seam worker now owns the focused cache-identity packet in
+cache-identity (base c5c6e117), while its unmeasured shade CSE variant stays parked in seam-parallel. The new packet
+addresses arrival-ordered visual-state aliases and emits ingest component hashes. It has not passed its build,
+reload/model, deterministic cache or performance gates; the independent reviewer has identified epoch and reload
+issues requiring repair. No ingest fingerprint bypass is allowed.
+
+Root's properly gated memory probe observed Java private commit21.33 GiB/working set12.79 GiB and stopped at the
+sampled reserve. Closure required force, then PID disappearance and backend restoration were verified; no ready
+or visual pass. Total job peak22.04 GiB, no new .NET OOM event. The existing24 GiB cap is unchanged. Root checkpoint e496435b adds backend/retired-buffer/driver-heap gauges. Windows target build, real replacement/
+release accounting in10 frames and strict3-context lit/populated-grid parity pass; opt-in query cost is recorded.
+These diagnostics do not fix the memory growth; Linux packaging and game attribution remain pending. Separate allocation owners and clean repeated lifecycle remain open.
+
+Cache identities and native generator code match between the two loaded artifacts, but ingest changed from
+b711fd8c05f48313 to888e7b3d2f1153eb, changing the generation set. The three retained cache sets are preserved;
+actual zero-regeneration revisit remains unproven. CPU footprint counters do not explain process-private memory.
+
+Frame-pacing checkpoint161c3d8e passed focused CPU tests but FAILED the original full cold-revisit tier/hit gate.
+Repair04bf3a9b preserves that oracle and passes expanded CPU tests; full native rerun now passes2 harness items, including6/6 cold reads and0/4096 return hit differences.
+Main-base candidate is isolated in frame-main-integration at811750c8 (base588a6aba); it has no Vulkan recovery
+code and still needs its own build/package/integration/live-route gates. Main has not merged it. A protected local
+tag before-frame-pacing-integration-2026-10-26 preserves588a6aba before that integration.
+The missing-budget-executable false pass is fixed: checked command returns2 for absent tool and propagates lint
+failure. The standalone configured shader manifest has114 entries; target build budgets separately check83+31.
+
+Seam cube pair preserved614981 exact hits. L0/1 matched-group mean DeltaE13.729->0.0327 with80.98/93.56% coverage,
+but maximum group4.055 remains; L1/2 mean5.244 fails, higher levels/jitter/lit game unverified. Shade driver binary
+regresses2176 bytes. The cube experiment remains isolated. Main source has no Vulkan/performance/seam integration.
+
 ## Scheduling and reporting
 
 Source editing, static analysis and independent review run concurrently in separate owned worktrees. Only ONE
