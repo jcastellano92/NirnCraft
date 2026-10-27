@@ -867,6 +867,19 @@ class RouteComparisonTests(unittest.TestCase):
                     {'NIRNCRAFT_HARNESS_JVM': 'nirncraft.atlas.memoryDiagnostics=true'}):
             with self.subTest(env=env), self.assertRaises(RuntimeError): probe.route_environment(env, True)
 
+    def test_route_control_may_add_heap_diagnostics_without_input_dump(self):
+        with self.assertRaises(RuntimeError): probe.require_route_flags({'nirncraft.atlas.memoryDiagnostics': 'true'})
+        probe.require_route_flags({'nirncraft.atlas.memoryDiagnostics': 'true'}, attribution=True)
+        with self.assertRaises(RuntimeError): probe.require_route_flags({'nirncraft.atlas.dump': 'x'}, attribution=True)
+        env = probe.diagnostic_environment({}, 'ev', True, dump=False)
+        self.assertEqual('1', env['ATLAS_MEMORY_DIAGNOSTICS'])
+        self.assertNotIn('NIRNCRAFT_ATLAS_DUMP', env)
+        self.assertIn('NIRNCRAFT_ATLAS_DUMP', probe.diagnostic_environment({}, 'ev', True))
+        args = ['--route-comparison', '--route-control', 'no-captures', '--memory-diagnostics', '--limit', '299']
+        with patch.object(sys, 'argv', [probe.__file__, *args]), \
+                patch.object(probe.game, 'take_lease', side_effect=KeyError('reached')):
+            with self.assertRaises(KeyError): probe.main()
+
     def test_cli_does_not_extend_ordinary_probe_or_allow_route_cache_reset(self):
         for args in (['--limit', '299'], ['--route-comparison', '--fresh-generator-cache'],
                      ['--route-comparison', '--memory-diagnostics'], ['--route-comparison', '--transport', 'host']):

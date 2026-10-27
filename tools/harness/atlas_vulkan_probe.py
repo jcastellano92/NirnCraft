@@ -267,7 +267,7 @@ def cache_path_logged(raw, root):
                for line in raw.splitlines() if 'self-baking cache in ' in line)
 
 
-def diagnostic_environment(env, evidence, enabled):
+def diagnostic_environment(env, evidence, enabled, dump=True):
     env = dict(env)
     if enabled:
         env['NIRNCRAFT_HARNESS_JVM'] = ','.join(filter(None, [env.get('NIRNCRAFT_HARNESS_JVM', ''),
@@ -275,7 +275,7 @@ def diagnostic_environment(env, evidence, enabled):
         env['ATLAS_MEMORY_DIAGNOSTICS'] = '1'
         # Prism/Qt INI processing consumes backslash escapes in JvmArgs. Forward slashes preserve the path in
         # both the launcher's marker and the authoritative properties file on Windows.
-        env['NIRNCRAFT_ATLAS_DUMP'] = str(Path(evidence) / 'generator-dump').replace('\\', '/')
+        if dump: env['NIRNCRAFT_ATLAS_DUMP'] = str(Path(evidence) / 'generator-dump').replace('\\', '/')
     return env
 
 
@@ -308,9 +308,11 @@ def route_environment(env, enabled, control=None):
     return env
 
 
-def require_route_flags(flags, raw=''):
+def require_route_flags(flags, raw='', attribution=False):
+    # attribution: a --route-control memory run may add the opt-in heap/VMA queries (never input dumping or NMT)
     for key, value in (('nirncraft.autotest', 'true'), ('nirncraft.quality.adaptive', 'false'),
                        ('nirncraft.atlas.memoryDiagnostics', 'true')):
+        if attribution and key == 'nirncraft.atlas.memoryDiagnostics': continue
         if flags.get(key) == value or re.search(r'-D' + re.escape(key) + '=' + value + r'(?:\s|"|$)', raw):
             raise RuntimeError('route comparison must retain adaptive product settings: ' + key)
     if '-XX:NativeMemoryTracking' in raw or flags.get('nirncraft.atlas.dump'):
@@ -410,7 +412,7 @@ def worker(evidence, deadline):
     game.launch = bounded_launch
     original_flags_writer = game._set_group_flags
     def journaled_flags(jvm):
-        if route: require_route_flags(jvm)
+        if route: require_route_flags(jvm, attribution=bool(args.memory_diagnostics and args.route_control))
         if transport == 'shared' and 'nirncraft.atlas.vkSharedSync' in jvm:
             raise RuntimeError('shared probe requires the product transport default, not a group override')
         probe_flags.guard_before_write(game.lw.INSTANCE / 'instance.cfg', game.FLAGS_FILE, evidence)
@@ -867,7 +869,7 @@ def main():
     args = ap.parse_args()
     if args.route_control and not args.route_comparison: ap.error('--route-control requires --route-comparison')
     if not args.route_comparison and args.limit > 240: ap.error('limits above 240 require --route-comparison')
-    if args.route_comparison and (args.transport != 'shared' or args.resource_reload or args.memory_diagnostics or args.jvm_native_diagnostics or args.fresh_generator_cache):
+    if args.route_comparison and (args.transport != 'shared' or args.resource_reload or (args.memory_diagnostics and not args.route_control) or args.jvm_native_diagnostics or args.fresh_generator_cache):
         ap.error('--route-comparison requires shared transport, kept cache and diagnostics/reload off')
     if args.resource_reload and args.transport != 'gl': ap.error('--resource-reload requires --transport gl')
     if args.visual_worker:
@@ -937,7 +939,7 @@ def main():
         probe_owner = str(uuid.uuid4())
         env['NIRNCRAFT_HARNESS_JVM'] += ',nirncraft.atlas.probeOwner=' + probe_owner
         env['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
-        env = diagnostic_environment(env, evidence, args.memory_diagnostics)
+        env = diagnostic_environment(env, evidence, args.memory_diagnostics, dump=not args.route_control)
         env, generator_cache = fresh_cache_environment(env, evidence, args.fresh_generator_cache)
         if generator_cache is not None: record_generator_cache_inventory(evidence, generator_cache, 'before')
         env['NIRNCRAFT_HARNESS_CANCEL_FILE'] = str(cancel)
