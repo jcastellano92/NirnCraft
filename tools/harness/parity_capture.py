@@ -62,6 +62,13 @@ def close_with_dump(out, mode, after=40):
             (out / f'{mode}-shutdown-hang-{dumps}.txt').write_text(r.stdout + r.stderr, encoding='utf-8')
             r2 = subprocess.run(['powershell', '-NoProfile', '-Command', "(Get-Process -Id %d).Threads | Sort-Object TotalProcessorTime -Descending | Select-Object Id,ThreadState,WaitReason,TotalProcessorTime,PriorityLevel | Format-Table -AutoSize | Out-String -Width 200" % pid], capture_output=True, text=True, timeout=60)
             (out / f'{mode}-shutdown-hang-{dumps}-os-threads.txt').write_text(r2.stdout + r2.stderr, encoding='utf-8')
+            busy = [ln.split()[0] for ln in r2.stdout.splitlines() if re.match(r'\s*\d+\s+Running\b', ln)]
+            top = [ln.split()[0] for ln in r2.stdout.splitlines()[3:6] if ln.strip()]
+            stacks = []
+            for tid in list(dict.fromkeys(busy + top))[:6]:
+                r3 = subprocess.run([sys.executable, str(HERE / 'native_stack.py'), str(pid), tid, '16384'], capture_output=True, text=True, timeout=60)
+                stacks.append(r3.stdout + r3.stderr)
+            (out / f'{mode}-shutdown-hang-{dumps}-native-stacks.txt').write_text('\n'.join(stacks), encoding='utf-8')
             print('TRACE shutdown hang: thread dump', dumps, 'pid', pid, flush=True)
             dumps += 1
         time.sleep(2)
