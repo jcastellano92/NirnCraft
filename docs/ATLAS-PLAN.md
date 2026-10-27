@@ -485,6 +485,12 @@ Minecraft 26.3 ships its own Vulkan backend (`com/mojang/renderpearl/backend/vul
 
 The integration plan comes from a read-only spike of the renderpearl backend (same day).
 
+Owner clarification, 2026-10-27: accept this backend migration when visuals and performance match, remain close to,
+or improve on the pre-switch baseline, with correct loading, API use and cleanup. Existing unfinished visual work
+remains follow-up renderer work; the complete north-star visual and frame-time targets are not prerequisites for
+integrating Vulkan. Identify meaningful new regressions with controlled comparisons rather than treating existing
+visual shortcomings as migration failures.
+
 ## 4b. Parked work (saved, not lost; revisit at its stage)
 
 Deferred work is saved on a branch or in this list, so it never blocks the main line and is never forgotten. A parked

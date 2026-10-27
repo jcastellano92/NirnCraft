@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import struct
 import subprocess
@@ -95,10 +96,10 @@ def require_policy(row):
     if process_memory.pressure(row): raise RuntimeError('job already reached its sampled 85% reserve')
 
 
-def command(tool, inputs, destination, native_seconds, store=False):
+def command(tool, inputs, destination, native_seconds, store=False, dirty=False):
     expected = inputs['expectedFingerprint']
-    return [str(tool), inputs['dump'], str(destination / 'cache'), 'mode=' + ('storecontrol' if store else 'bake'), 'control=memory', 'feat=1',
-            'first=6', 'last=3', 'lod2=0', 'expectTiles=263', ('x=-149.5' if store else 'x=4096.5'), 'y=522', ('z=260.5' if store else 'z=4096.5'), 'seed=1234',
+    return [str(tool), inputs['dump'], str(destination / 'cache'), 'mode=' + ('storedirty' if dirty else 'storecontrol' if store else 'bake'), 'control=memory', 'feat=1',
+            'first=6', 'last=3', 'lod2=0', 'expectTiles=263', ('x=-149.5' if store or dirty else 'x=4096.5'), 'y=522', ('z=260.5' if store or dirty else 'z=4096.5'), 'seed=1234',
             'fp=' + str(int(expected['extra'], 16)), 'minx=-15360', 'minz=-5120', 'maxx=12800', 'maxz=16384', 'margin=0',
             'w=64', 'h=36', 'bg=1', 'bgcap=16.7', 'ingest=' + inputs['ingest']['binary'],
             'ingestWords=' + str(inputs['ingest']['words']), 'ingestFnv=' + inputs['ingest']['fnv64'],
@@ -117,7 +118,7 @@ def matched_parts(events, expected):
         return False
 
 
-def assess(events, snapshots, expected, returncode, stopped, store=False):
+def assess(events, snapshots, expected, returncode, stopped, store=False, dirty=False):
     completed = [e for e in events if e.get('phase') == 'levels']
     phase = completed[-1] if len(completed) == 1 else {}
     required = ('tiles', 'made', 'known', 'failed', 'durable', 'queued')
@@ -127,6 +128,10 @@ def assess(events, snapshots, expected, returncode, stopped, store=False):
                          s.get('namedChildObserved') is True for s in snapshots)
                for name in ('after-feature-destroy', 'after-overlay-destroy', 'after-generator-destroy', 'after-context-destroy')}
     inputs_match = matched_parts(events, expected)
+    if dirty:
+        rows = [e for e in events if e.get('phase') == 'dirty1']
+        setups = [e for e in events if e.get('dirtyOverlay') is True]
+        complete = len(setups) == 1 and len(rows) == 1 and rows[0].get('requested') == rows[0].get('completed') == 1 and all(oracle.integer(rows[0].get(k)) and rows[0][k] > 0 for k in ('nonair_sections', 'accepted_sections', 'store_stage_runs', 'rendered_frames')) and isinstance(rows[0].get('info_fnv64'), str) and re.fullmatch(r'[0-9a-f]{16}', rows[0]['info_fnv64']) is not None and 'store stage 997:' in rows[0].get('subs', '')
     if store:
         for name, count in (("near441", 441), ("post64", 64)):
             matches = [e for e in events if e.get('phase') == name]
@@ -174,7 +179,7 @@ def stop_owned(proc, cancel, deadline, on_poll=None):
     return proc.poll() is not None
 
 
-def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sample, store=False):
+def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sample, store=False, dirty=False):
     if not oracle.number(seconds) or not 30 <= seconds <= 180: raise ValueError('control bound must be 30..180 seconds')
     start = time.monotonic(); deadline = start + seconds
     inputs = prepare_inputs(evidence, manifest)
@@ -188,7 +193,7 @@ def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sam
     provenance = artifact_provenance(tool)
     destination = Path(evidence) / ('generator-memory-control-' + time.strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:8])
     destination.mkdir(); (destination / 'cache').mkdir()
-    argv = command(tool, inputs, destination, max(1, int(deadline - time.monotonic() - 25)), store)
+    argv = command(tool, inputs, destination, max(1, int(deadline - time.monotonic() - 25)), store, dirty)
     (destination / 'inputs.json').write_text(json.dumps({**inputs, 'command': argv, 'toolCapabilities': capabilities,
                                                        'artifactProvenance': provenance}, indent=2) + '\n')
     env = dict(os.environ); env['ATLAS_MEMORY_DIAGNOSTICS'] = '1'
@@ -272,7 +277,11 @@ def run(evidence, tool, *, manifest=None, seconds=180, sample=process_memory.sam
     except (OSError, ValueError): final_inputs = None
     if final_inputs != inputs:
         stopped = (stopped + '; ' if stopped else '') + 'saved input provenance changed or became unavailable'
-    result = assess(events, snapshots, inputs['expectedFingerprint'], proc.returncode if proc else None, stopped, store)
+    result = assess(events, snapshots, inputs['expectedFingerprint'], proc.returncode if proc else None, stopped, store, dirty)
+    if dirty:
+        result['scope'] = 'One generated chunk with synthetic neutral block table and empty road plan; descriptor validation control, not Minecraft parity.'
+        rows = [e for e in events if e.get('phase') == 'dirty1']
+        result['dirtyInfoFnv64'] = rows[0].get('info_fnv64') if len(rows) == 1 else None
     if store:
         result['scope'] = 'Saved generator/ingest inputs and real stages; EMPTY overlay payloads and neutral palette, 441-near/coarse/post64 control; not full Minecraft or rendering parity.'
     result.update(output=str(destination), elapsedSeconds=time.monotonic() - start, childClosed=closed,
@@ -294,9 +303,11 @@ def main(argv=None):
     parser.add_argument('--tool', type=Path, default=ROOT / 'native/build/Release/gen_bake_tool.exe')
     parser.add_argument('--ingest', help='one ingest.json path relative to generator-dump')
     parser.add_argument('--seconds', type=float, default=180)
-    parser.add_argument('--store-control', action='store_true')
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--store-control', action='store_true')
+    modes.add_argument('--dirty-overlay', action='store_true')
     args = parser.parse_args(argv)
-    try: result = run(args.evidence, args.tool, manifest=args.ingest, seconds=args.seconds, store=args.store_control)
+    try: result = run(args.evidence, args.tool, manifest=args.ingest, seconds=args.seconds, store=args.store_control, dirty=args.dirty_overlay)
     except (OSError, RuntimeError, ValueError) as error: parser.exit(2, 'UNVERIFIED (no control accepted): ' + str(error) + '\n')
     return 0 if result['state'] == 'COMPLETED_CONTROL' else 2
 

@@ -646,7 +646,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     const bool explicitIngest = !ing.empty();
-    if ((mode == "storecontrol" && !memoryControl) || (memoryControl && (!explicitIngest || (mode != "bake" && mode != "storecontrol") || arg(argc, argv, "lod2", "0") != "0"))) {
+    if (((mode == "storecontrol" || mode == "storedirty") && !memoryControl) || (memoryControl && (!explicitIngest || (mode != "bake" && mode != "storecontrol" && mode != "storedirty") || arg(argc, argv, "lod2", "0") != "0"))) {
         std::fprintf(stderr, "memory control requires explicit ingest, mode=bake and lod2=0\n");
         return 2;
     }
@@ -766,6 +766,19 @@ int main(int argc, char** argv) {
         if (atlas_ovl_create_for_gen(g, &attachedOverlay) != ATLAS_OK ||
             (attachedFeat && atlas_feat_set_overlays(attachedFeat, attachedOverlay) != ATLAS_OK)) return 2;
     }
+    if (mode == "storedirty") {
+        // Minimal structurally valid neutral block table and empty road plan. The first
+        // store MBNL stage must see both tables dirty; these are not Minecraft materials.
+        if (ing.empty() || ing[0] == 0 || ing[0] > 65536) return 2;
+        std::vector<uint32_t> blocks(16 + size_t(ing[0]) * 7, 0), roads(40, 0);
+        blocks[0] = 0x4c424f41u; blocks[1] = ing[0]; blocks[8] = 7; blocks[9] = uint32_t(blocks.size()); blocks[16] = 1;
+        roads[0] = 0x44524f41u;
+        for (size_t i = 8; i < roads.size(); ++i) roads[i] = 40;
+        if (atlas_ovl_set(attachedOverlay, 0, blocks.data(), uint32_t(blocks.size())) != ATLAS_OK ||
+            atlas_ovl_set(attachedOverlay, 3, roads.data(), uint32_t(roads.size())) != ATLAS_OK) return 2;
+        std::printf("{\"dirtyOverlay\":true,\"blocks\":%u,\"roadVertices\":0,\"scope\":\"neutral synthetic table and empty road plan\"}\n", ing[0]);
+        std::fflush(stdout);
+    }
     AtlasStatus fpStatus = atlas_gen_set_fingerprint(g, std::strtoull(arg(argc, argv, "fp", "0").c_str(), nullptr, 10));
     AtlasStatus cacheStatus = cache != "-" ? atlas_set_cache(ctx, cache.c_str(), seed, 1, 0, 0) : ATLAS_OK;
     if (memoryControl && (fpStatus != ATLAS_OK || cacheStatus != ATLAS_OK)) return 2;
@@ -773,8 +786,8 @@ int main(int argc, char** argv) {
         uint64_t parts[8] = {};
         if (atlas_gen_fingerprint_parts(g, parts) != ATLAS_OK) return 2;
         std::printf("{\"controlInputs\":\"saved generator binaries plus real stage graph\",\"palette\":\"neutral placeholder, no Minecraft material/brick tables\","
-                    "\"overlayData\":\"EMPTY block/street/road/tape payloads; no live overlay recording\","
-                    "\"nearChunks\":%d,\"ingestWords\":%zu,\"maxMaterialId\":%u,\"materialTableEntries\":%zu,\"parts\":[", mode == "storecontrol" ? 441 : 0, ing.size(), maxMaterial, mats.size());
+                    "\"overlayData\":\"%s\","
+                    "\"nearChunks\":%d,\"ingestWords\":%zu,\"maxMaterialId\":%u,\"materialTableEntries\":%zu,\"parts\":[", mode == "storedirty" ? "synthetic neutral block table and empty road plan; no live overlay recording" : "EMPTY block/street/road/tape payloads; no live overlay recording", (mode == "storecontrol" ? 441 : mode == "storedirty" ? 1 : 0), ing.size(), maxMaterial, mats.size());
         for (int i = 0; i < 8; ++i) std::printf("%s\"%016llx\"", i ? "," : "", (unsigned long long)parts[i]);
         std::printf("]}\n"); std::fflush(stdout);
     }
@@ -970,16 +983,16 @@ int main(int argc, char** argv) {
     };
 
     int rc = 0;
-    if (mode == "storecontrol") {
+    if (mode == "storecontrol" || mode == "storedirty") {
         const double deadline = t0 + controlSeconds * 1000.0;
-        std::printf("{\"phase\":\"setup\",\"overlay\":\"empty real stages; not Minecraft content\",\"feature\":\"real dump\",\"ingest\":\"real dump\"}\n");
+        std::printf("{\"phase\":\"setup\",\"overlay\":\"%s\",\"feature\":\"real dump\",\"ingest\":\"real dump\"}\n", mode == "storedirty" ? "synthetic neutral blocks and empty road plan; not Minecraft content" : "empty real stages; not Minecraft content");
         std::fflush(stdout);
         auto near = [&](int count, int firstX, int firstZ, int width, const char* name) -> int {
             uint64_t framesBefore = renderedFrames.load();
             uint64_t madeBefore=0, runsBefore=0, packsBefore=0;
             atlas_gen_store_counters(g, &madeBefore, &runsBefore, &packsBefore);
             std::set<std::pair<int,int>> completed;
-            uint64_t nonair = 0, accepted = 0, calls = 0;
+            uint64_t nonair = 0, accepted = 0, calls = 0, resultHash = 1469598103934665603ull;
             std::map<std::pair<int,int>, std::vector<int32_t>> patches;
             for (int i = 0; i < count; ++i) {
                 int cx = firstX + i % width, cz = firstZ + i / width;
@@ -1000,6 +1013,10 @@ int main(int argc, char** argv) {
                     uint64_t masks[64]{};
                     for (uint32_t i = 0; i < n; ++i) {
                         if (!expected.count({outXZ[2*i], outXZ[2*i+1]}) || flags[i]) return 1;
+                        for (uint32_t word = 0; word < 164; ++word) {
+                            uint32_t v = info[i * 164 + word];
+                            for (unsigned k = 0; k < 4; ++k) { resultHash ^= (v >> (8 * k)) & 255u; resultHash *= 1099511628211ull; }
+                        }
                         bool started = false;
                         for (int k = 0; k < 40; ++k) {
                             uint32_t kind = info[i * 164 + 4 + k * 4 + 2];
@@ -1022,15 +1039,15 @@ int main(int argc, char** argv) {
             }
             uint64_t made=0, runs=0, packs=0; atlas_gen_store_counters(g, &made, &runs, &packs);
             char subs[6000]{}; atlas_gen_sub_stats(g, subs, sizeof subs, 1);
-            std::printf("{\"phase\":\"%s\",\"requested\":%d,\"completed\":%zu,\"nonair_sections\":%llu,\"accepted_sections\":%llu,\"store_calls\":%llu,\"store_stage_runs\":%llu,\"rendered_frames\":%llu,\"subs\":\"%s\"}\n", name, count, completed.size(), (unsigned long long)nonair, (unsigned long long)accepted, (unsigned long long)calls, (unsigned long long)(runs - runsBefore), (unsigned long long)(renderedFrames.load() - framesBefore), subs);
+            std::printf("{\"phase\":\"%s\",\"requested\":%d,\"completed\":%zu,\"nonair_sections\":%llu,\"accepted_sections\":%llu,\"store_calls\":%llu,\"store_stage_runs\":%llu,\"rendered_frames\":%llu,\"info_fnv64\":\"%016llx\",\"subs\":\"%s\"}\n", name, count, completed.size(), (unsigned long long)nonair, (unsigned long long)accepted, (unsigned long long)calls, (unsigned long long)(runs - runsBefore), (unsigned long long)(renderedFrames.load() - framesBefore), (unsigned long long)resultHash, subs);
             std::fflush(stdout);
             return !renderFailed && completed.size() == size_t(count) && nonair && accepted && runs > runsBefore && renderedFrames.load() > framesBefore ? 0 : 1;
         };
         startBg(); mark("near-begin");
-        rc = near(441, -20, 6, 21, "near441");
+        rc = mode == "storedirty" ? near(1, -10, 16, 1, "dirty1") : near(441, -20, 6, 21, "near441");
         mark("near-complete");
-        if (!rc && !expired() && nowMs() < deadline) rc = phase(6, 3, "levels");
-        if (!rc && !expired() && nowMs() < deadline) { startBg(); mark("post-begin"); rc = near(64, 1, 12, 8, "post64"); mark("post-complete"); }
+        if (mode == "storecontrol" && !rc && !expired() && nowMs() < deadline) rc = phase(6, 3, "levels");
+        if (mode == "storecontrol" && !rc && !expired() && nowMs() < deadline) { startBg(); mark("post-begin"); rc = near(64, 1, 12, 8, "post64"); mark("post-complete"); }
         if (renderFailed || expired() || nowMs() >= deadline) rc = 1;
         std::printf("{\"phase\":\"finish\",\"ok\":%s}\n", rc ? "false" : "true"); std::fflush(stdout);
     }

@@ -318,6 +318,9 @@ public:
             std::memset(slotRec_.map, 0xFF, size_t(storeSlots_) * 4);
         }
         uint32_t n = sb->count, r = sb->radius, w = 2 * r + 1;
+        // storeStage drained the previous submission. Finalize dirty uploads and all
+        // descriptor-backed storage before this command buffer binds the set.
+        if (!uploadDirty(err) || !ensure(chunks_, size_t(n) * CHUNK_INTS * 4 * (LAYERS + 1), Mem::Upload, err)) return false;
         for (uint32_t i = 0; i < n; i++) {
             uint32_t sl = uint32_t(sb->chunks[i * 3 + 2]);
             if (sl >= storeSlots_) return fail(err, "store slot out of range");
@@ -342,16 +345,17 @@ public:
         };
         VkCommandBuffer cmd = static_cast<VkCommandBuffer>(sb->vkCommandBuffer);
         VkBuffer blocks = reinterpret_cast<VkBuffer>(sb->blocks), map = reinterpret_cast<VkBuffer>(sb->map);
+        if (rebind_ || blocks != boundIds_ || map != boundMap_ || snapStore_.buf != boundSnap_ || mbnlStore_.buf != boundMbnl_)
+            writeSet(blocks, map, snapStore_.buf, mbnlStore_.buf);
         // the slots' chunk records (cx, cz, slot) for the mark and done passes
         std::vector<int32_t> items(size_t(n) * CHUNK_INTS, -1);
         for (uint32_t i = 0; i < n; i++) fill(i, items.data() + size_t(i) * CHUNK_INTS);
         auto small = [&](uint32_t pipe, uint32_t bit) {
             // after core's records (the layers' blocks: the dispatches run after all is recorded, on the buffer as it is
             // last written), sized for both at once (a buffer replaced after a dispatch is recorded would be gone)
-            if (!ensure(chunks_, items.size() * 4 * (LAYERS + 1), Mem::Upload, err)) return false;
             std::memcpy(static_cast<int32_t*>(chunks_.map) + items.size() * LAYERS, items.data(), items.size() * 4);
             if (rebind_ || blocks != boundIds_ || map != boundMap_ || snapStore_.buf != boundSnap_ || mbnlStore_.buf != boundMbnl_)
-                writeSet(blocks, map, snapStore_.buf, mbnlStore_.buf);
+                return fail(err, "store descriptor changed after preflight");
             touch();
             OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, ATLAS_GEN_STORE_BLOCK_WORDS, uint32_t(items.size() * LAYERS), bit};
             vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
@@ -458,7 +462,10 @@ private:
         if (!store && (!ensure(snap_, idBytes, Mem::Device, err) || !ensure(mbnl_, size_t(n) * 256 * 4, Mem::Device, err))) return false;
         std::memcpy(chunks_.map, desc.data(), chunkBytes);
         VkBuffer snap = store ? snapStore_.buf : snap_.buf, mbnl = store ? mbnlStore_.buf : mbnl_.buf;
-        if (rebind_ || blocks != boundIds_ || map != boundMap_ || snap != boundSnap_ || mbnl != boundMbnl_) writeSet(blocks, map, snap, mbnl);
+        if (rebind_ || blocks != boundIds_ || map != boundMap_ || snap != boundSnap_ || mbnl != boundMbnl_) {
+            if (store) return fail(err, "store descriptor changed after preflight");
+            writeSet(blocks, map, snap, mbnl);
+        }
         touch();
         OvlParams p{int32_t(n), int32_t(GEN_LEVELS), 0u, chunkWords, 0u, bit};
         if (layer) {

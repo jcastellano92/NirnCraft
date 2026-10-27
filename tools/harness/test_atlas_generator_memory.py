@@ -81,6 +81,19 @@ class GeneratorMemoryTest(unittest.TestCase):
             for bad in (near[:1], [near[0], dict(near[1], completed=63)], [near[0], dict(near[1], store_stage_runs=0)]):
                 self.assertEqual('UNVERIFIED', control.assess(events + bad, snapshots, expected, 0, None, True)['state'])
 
+    def test_dirty_overlay_requires_stage_output_and_identity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder); fixture(root); data = control.prepare_inputs(root); expected = data['expectedFingerprint']
+            self.assertIn('mode=storedirty', control.command(root / 'tool', data, root / 'out', 150, dirty=True))
+            snaps = [{'phase': p, 'observedWhileChildRunning': True, 'namedChildObserved': True} for p in
+                     ('after-feature-destroy', 'after-overlay-destroy', 'after-generator-destroy', 'after-context-destroy')]
+            row = {'phase': 'dirty1', 'requested': 1, 'completed': 1, 'nonair_sections': 1, 'accepted_sections': 1,
+                   'store_stage_runs': 1, 'rendered_frames': 1, 'info_fnv64': '0123456789abcdef', 'subs': 'store stage 997: n 1'}
+            inputs = complete_events(expected)[:1] + [{'dirtyOverlay': True}, row]
+            self.assertEqual('COMPLETED_CONTROL', control.assess(inputs, snaps, expected, 0, None, dirty=True)['state'])
+            for bad in (dict(row, completed=0), dict(row, subs=''), dict(row, info_fnv64=''), dict(row, info_fnv64='zzzzzzzzzzzzzzzz')):
+                self.assertEqual('UNVERIFIED', control.assess(inputs[:-1] + [bad], snaps, expected, 0, None, dirty=True)['state'])
+
     def test_owned_watchdog_fires_while_sampling_is_blocked(self):
         import threading
         class Child:
