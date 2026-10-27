@@ -41,6 +41,10 @@
 #include "atlas_feat_lake_spv.h"
 #include "atlas_feat_aux_spv.h"
 #include "atlas_feat_sapply_spv.h"
+#ifndef ATLAS_FEAT_ALONE
+#include "backend.hpp"
+#include "pipeline_cache_io.hpp"
+#endif
 
 
 using namespace atlas;
@@ -603,6 +607,60 @@ constexpr uint32_t S_HM = 0, S_INIT = 1, S_AUX = 2, S_APPLY = 3, S_FEAT = 4, S_M
 constexpr uint32_t H_PLACES = 29;  // (AtlasFeatureProgram: the settlements' table)
 constexpr uint32_t VEIN_W = 12288;  // (atlas_features.slang featVeinMain: a thread a position of an ore vein's box)
 
+struct StageCacheStats {
+    std::string load = "disabled", save = "disabled";
+    size_t loadedBytes = 0, savedBytes = 0;
+    double loadMs = 0, createMs = 0, saveMs = 0;
+};
+// A compile thread owns this handle from load to destruction. No VkPipelineCache is shared between threads.
+class StagePipelineCache {
+public:
+    StagePipelineCache(VkDevice dev, std::string path, pipeline_cache_io::Identity id, StageCacheStats& stats)
+        : dev_(dev), path_(std::move(path)), id_(id), stats_(stats) {
+        if (path_.empty()) return;
+        auto t = std::chrono::steady_clock::now();
+        try {
+            auto data = pipeline_cache_io::load(path_, id_, stats_.load);
+            VkPipelineCacheCreateInfo pc{VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};
+            pc.initialDataSize = data.size(); pc.pInitialData = data.empty() ? nullptr : data.data();
+            if (vkCreatePipelineCache(dev_, &pc, nullptr, &cache_) != VK_SUCCESS) {
+                stats_.load = "driver-rejected";
+                cache_ = VK_NULL_HANDLE;
+                pc.initialDataSize = 0; pc.pInitialData = nullptr;
+                if (vkCreatePipelineCache(dev_, &pc, nullptr, &cache_) != VK_SUCCESS) cache_ = VK_NULL_HANDLE;
+            } else stats_.loadedBytes = data.size();
+        } catch (...) { stats_.load = "io-error"; }
+        stats_.loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count();
+    }
+    ~StagePipelineCache() { if (cache_) vkDestroyPipelineCache(dev_, cache_, nullptr); }
+    StagePipelineCache(const StagePipelineCache&) = delete;
+    StagePipelineCache& operator=(const StagePipelineCache&) = delete;
+    VkPipelineCache handle() const { return cache_; }
+    void save() {
+        if (!cache_) return;
+        auto t = std::chrono::steady_clock::now();
+        stats_.save = "unavailable";
+        try {
+            size_t bytes = 0;
+            if (vkGetPipelineCacheData(dev_, cache_, &bytes, nullptr) == VK_SUCCESS && bytes <= pipeline_cache_io::MAX_BYTES) {
+                std::vector<uint8_t> data(bytes);
+                if (vkGetPipelineCacheData(dev_, cache_, &bytes, data.data()) == VK_SUCCESS) {
+                    data.resize(bytes);
+                    if (pipeline_cache_io::save(path_, id_, data)) { stats_.savedBytes = bytes; stats_.save = "saved"; }
+                    else stats_.save = "io-error";
+                }
+            }
+        } catch (...) { stats_.save = "io-error"; }
+        stats_.saveMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count();
+    }
+private:
+    VkDevice dev_;
+    VkPipelineCache cache_ = VK_NULL_HANDLE;
+    std::string path_;
+    pipeline_cache_io::Identity id_;
+    StageCacheStats& stats_;
+};
+
 class StageEngine {
 public:
     ~StageEngine() {
@@ -659,19 +717,49 @@ public:
         }
         // the pipelines on threads of their own: the driver compiles them side by side (the tree kernel's alone is
         // about half a minute on a cold cache; one after the other they were a minute)
+        static const char* names[S_PIPES] = {"hm", "init", "aux", "apply", "ore", "cover", "rock", "tree", "freeze", "disk", "spring",
+                                            "lake", "mask", "farplaces", "fartrees", "farcanopy", "vein", "lakew", "rockw"};
+        auto cacheSetupBegin = std::chrono::steady_clock::now();
+        std::string cacheBase = pipelineCachePath();
+        pipeline_cache_io::Identity identity;
+        if (!cacheBase.empty()) {
+            VkPhysicalDeviceProperties p{};
+            vkGetPhysicalDeviceProperties(phys_, &p);
+            identity.vendor = p.vendorID; identity.device = p.deviceID; identity.driver = p.driverVersion;
+            std::memcpy(identity.uuid.data(), p.pipelineCacheUUID, identity.uuid.size());
+        }
         std::vector<VkResult> res(S_PIPES, VK_SUCCESS);
+        std::vector<StageCacheStats> cacheStats(S_PIPES);
         std::vector<std::thread> th;
         for (uint32_t i = 0; i < S_PIPES; i++)
             th.emplace_back([&, i] {
+                auto id = identity;
+                if (!cacheBase.empty()) id.shader = pipeline_cache_io::hash(code[i], size[i]);
+                // Stable names replace prior shader/driver versions: at most nineteen persistent cache slots.
+                StagePipelineCache cache(dev_, cacheBase.empty() ? "" : cacheBase + ".feat-store." + names[i], id, cacheStats[i]);
                 VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
                 cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
                 cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
                 cp.stage.module = modules_[i];
                 cp.stage.pName = "main";
                 cp.layout = layout_;
-                res[i] = vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]);
+                auto t = std::chrono::steady_clock::now();
+                res[i] = vkCreateComputePipelines(dev_, cache.handle(), 1, &cp, nullptr, &pipes_[i]);
+                cacheStats[i].createMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count();
+                if (res[i] == VK_SUCCESS) cache.save();
             });
         for (auto& t : th) t.join();
+        if (!cacheBase.empty()) {
+            for (uint32_t i = 0; i < S_PIPES; ++i) {
+                const auto& s = cacheStats[i];
+                std::printf("{\"featurePipelineCache\":1,\"pipeline\":\"%s\",\"load\":\"%s\",\"save\":\"%s\",\"loadedBytes\":%zu,\"savedBytes\":%zu,"
+                            "\"loadMs\":%.3f,\"createMs\":%.3f,\"saveMs\":%.3f,\"result\":%d}\n", names[i], s.load.c_str(), s.save.c_str(),
+                            s.loadedBytes, s.savedBytes, s.loadMs, s.createMs, s.saveMs, int(res[i]));
+            }
+            std::printf("{\"featurePipelineCacheSetup\":1,\"pipelines\":%u,\"wallMs\":%.3f}\n", S_PIPES,
+                        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - cacheSetupBegin).count());
+            std::fflush(stdout);
+        }
         for (uint32_t i = 0; i < S_PIPES; i++)
             if (res[i] != VK_SUCCESS) return fail(err, "pipeline " + std::to_string(i) + " refused");
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB * 2};

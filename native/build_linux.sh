@@ -165,6 +165,7 @@ run() {
   elif grep -q '^SKIP' "$LOG" && [ "$ALLOW_SKIP" != 1 ]; then echo "-- SKIPPED (counts as a failure; --allow-skip)"; status=1
   else echo "-- ok"; fi
 }
+run "$BUILD/atlas_pipeline_cache_io_test"
 run "$BUILD/atlas_tests" "$RASTER"
 # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit (a device
 # without shaderFloat64 + RTE / SignedZeroInfNanPreserve float controls reports the CPU fallback and passes)
