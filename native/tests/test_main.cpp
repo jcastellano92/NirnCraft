@@ -2456,6 +2456,124 @@ static void testEdits() {
     fs::remove_all(dir, ec);
 }
 
+// Real Vulkan ranking regression: a GPU-supplied section waits outside the current footprint, then is requested
+// when the camera moves closer without shifting the level-0 window. No rankResults are injected by this test.
+static void testGpuStandbyRanking() {
+    AtlasContext* ctx = nullptr;
+    AtlasStatus created = atlas_create(ATLAS_BACKEND_VULKAN, &ctx);
+    CHECK(created == ATLAS_OK && ctx != nullptr);
+    if (created != ATLAS_OK || !ctx) return;
+    AtlasGen* gen = nullptr;
+    AtlasStatus made = atlas_gen_create_for(ctx, &gen);
+    CHECK(made == ATLAS_OK && gen != nullptr);
+    if (made != ATLAS_OK || !gen) { atlas_destroy(ctx); return; }
+    auto body = [&] {
+        AtlasFrame f{};
+        f.cameraPos[0] = 0; f.cameraPos[1] = 100; f.cameraPos[2] = 0;
+        const float inv[16] = {0.4f, 0, 0, 0, 0, 0, 0.4f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+        std::memcpy(f.invViewProj, inv, sizeof(inv));
+        f.width = 64; f.height = 64; f.maxDistance = 1000; f.sunDir[1] = 1; f.lodBias = 100;
+        std::vector<float> depth(64 * 64);
+        AtlasFrameOutput out{nullptr, nullptr, depth.data()};
+        const auto started = std::chrono::steady_clock::now();
+        const auto deadline = started + std::chrono::seconds(100);
+        auto nextProgress = started + std::chrono::seconds(25);
+        unsigned frames = 0;
+        auto frame = [&] {
+            auto now = std::chrono::steady_clock::now();
+            if (now >= nextProgress) {
+                std::printf("TRACE progress standby GPU frames %u elapsed %.1fs\n", frames,
+                            std::chrono::duration<double>(now - started).count());
+                nextProgress = now + std::chrono::seconds(25);
+            }
+            if (now >= deadline) { CHECK(false && "GPU standby fixture deadline"); return false; }
+            AtlasStatus result = atlas_render(ctx, &f, &out);
+            ++frames;
+            CHECK(result == ATLAS_OK);
+            return result == ATLAS_OK;
+        };
+        double centre[3] = {0, 100, 0};
+        CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+        if (!frame()) return;
+        std::string initial = atlas_info(ctx);
+        auto grid = initial.find("\"voxgrid\"");
+        auto reachPos = grid == std::string::npos ? std::string::npos : initial.find("\"reach\":", grid);
+        CHECK(reachPos != std::string::npos);
+        if (reachPos == std::string::npos) return;
+        const double reach = std::strtod(initial.c_str() + reachPos + std::strlen("\"reach\":"), nullptr);
+        auto originPos = initial.find("\"origin\":[", grid);
+        int originX = 0, originZ = 0;
+        CHECK(originPos != std::string::npos && std::sscanf(initial.c_str() + originPos, "\"origin\":[%d,%d]", &originX, &originZ) == 2);
+        if (originPos == std::string::npos) return;
+        std::printf("TRACE standby GPU initial reach %.2f; candidate box distance 48\n", reach);
+        CHECK(reach > 0 && reach < 48);
+        if (!(reach > 0 && reach < 48)) return;
+        int32_t pos[3] = {3, 6, 0};
+        std::vector<uint16_t> ids(4096);
+        for (size_t i = 0; i < ids.size(); ++i) ids[i] = (i & 1) ? 2 : 3;
+        uint8_t accepted = 0;
+        CHECK(atlas_debug_gpu_sections(ctx, 1, pos, ids.data(), nullptr, &accepted) == ATLAS_OK);
+        CHECK(accepted == 1); // coarse accepted; level-0 must remain in GPU standby
+        auto reports = [&](bool& found, unsigned& targetCount) {
+            int32_t dropped[4096] = {}, wanted[4096] = {};
+            uint32_t nd = 0, nw = 0;
+            uint32_t lost = atlas_gen_grid_reports(gen, dropped, 1024, &nd, wanted, 1024, &nw);
+            CHECK(lost == 0);
+            for (uint32_t i = 0; i < nw; ++i) {
+                const int32_t* v = wanted + 4 * i;
+                if (v[0] == 0 && v[1] == 3 && v[2] == 6 && v[3] == 0) { found = true; ++targetCount; }
+            }
+        };
+        bool found = false; unsigned targetCount = 0;
+        for (int i = 0; i < 8; ++i) { if (!frame()) return; reports(found, targetCount); }
+        CHECK(!found && targetCount == 0);
+        std::string waiting = atlas_info(ctx);
+        auto waitPos = waiting.find("\"gpuWaiting\":");
+        CHECK(waitPos != std::string::npos);
+        unsigned long gpuWaiting = waitPos == std::string::npos ? 0 : std::strtoul(waiting.c_str() + waitPos + std::strlen("\"gpuWaiting\":"), nullptr, 10);
+        CHECK(gpuWaiting >= 1);
+        std::printf("TRACE standby GPU outside reach: waiting %lu, target requests %u\n", gpuWaiting, targetCount);
+        // Three sections closer: inside the existing window and within the same fixed numerical reach.
+        f.cameraPos[0] = 48;
+        centre[0] = 48;
+        CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+        for (int i = 0; i < 80 && !found; ++i) {
+            if (!frame()) return;
+            reports(found, targetCount);
+        }
+        CHECK(found && targetCount == 1);
+        if (!found) return;
+        std::string moved = atlas_info(ctx);
+        auto movedGrid = moved.find("\"voxgrid\"");
+        auto movedOrigin = movedGrid == std::string::npos ? std::string::npos : moved.find("\"origin\":[", movedGrid);
+        int movedX = 0, movedZ = 0;
+        CHECK(movedOrigin != std::string::npos && std::sscanf(moved.c_str() + movedOrigin, "\"origin\":[%d,%d]", &movedX, &movedZ) == 2);
+        CHECK(originX == movedX && originZ == movedZ);
+        std::printf("TRACE standby GPU wanted key {0,3,6,0}; origin (%d,%d)->(%d,%d)\n", originX, originZ, movedX, movedZ);
+        for (int i = 0; i < 3; ++i) { if (!frame()) return; reports(found, targetCount); }
+        CHECK(targetCount == 1); // no early duplicate before the retry interval
+        accepted = 0;
+        CHECK(atlas_debug_gpu_sections(ctx, 1, pos, ids.data(), nullptr, &accepted) == ATLAS_OK);
+        CHECK(accepted == 1);
+        const int32_t xyz[] = {48, 96, 0, 49, 96, 0, 48, 97, 0, 49, 97, 0};
+        uint32_t values[4] = {};
+        bool matched = false;
+        for (int i = 0; i < 80 && !matched; ++i) {
+            if (!frame()) return;
+            AtlasStatus status = atlas_debug_read_blocks(ctx, xyz, 4, values);
+            CHECK(status == ATLAS_OK);
+            if (status != ATLAS_OK) return;
+            matched = values[0] == 3 && values[1] == 2 && values[2] == 3 && values[3] == 2;
+        }
+        std::printf("TRACE standby GPU requested %u times; readback %u %u %u %u\n",
+                    targetCount, values[0], values[1], values[2], values[3]);
+        CHECK(matched);
+    };
+    body();
+    atlas_gen_destroy(gen);
+    atlas_destroy(ctx);
+}
+
 // ---- the render thread's per-tick reads never wait for the generator's or the store's locks (docs/ATLAS-STATUS.md, stalls) ----
 // In game a frame sat 1 to 4.6 s inside atlas_info while the generator stored chunks: the call took the gen cache's, the grid's
 // and the world's locks, and the writer thread held the first through a file append. atlas_debug_hold_locks (api.cpp) holds all
@@ -2572,7 +2690,7 @@ int main(int argc, char** argv) {
         {"neardepth", [&] { testNearDepth(raster); }}, {"columnheights", [&] { testColumnHeights(raster); }},
         {"grasstint", [&] { testGrassTint(raster); }}, {"surfaceoverrides", [&] { testSurfaceOverrides(raster); }},
         {"parity", [&] { parity(raster); }}, {"coarse", testCoarseGiven}, {"reask", testReask}, {"slice", testSlice}, {"reachstep", testReachStep}, {"tiers", testTiers}, {"edits", testEdits},
-        {"stalls", testStalls},
+        {"stalls", testStalls}, {"gpustandby", testGpuStandbyRanking},
     };
     for (const Suite& t : suites) {
         if (!only.empty() && only.find("," + std::string(t.name) + ",") == std::string::npos) continue;
