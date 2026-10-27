@@ -52,6 +52,11 @@ final class AtlasAir {
 
     private AtlasAir() {}
 
+    static void closeAtShutdown() {
+        if (msView != null) { msView.close(); msView = null; }
+        if (msTexture != null) { msTexture.close(); msTexture = null; }
+    }
+
     /** Once a frame on the render thread: the climate at the eye, eased; the air from it, set when it moved enough. */
     static void update(Minecraft mc, AtlasNative lib, AtlasNative.Context ctx) {
         if (lib == null || !lib.hasAir()) return;

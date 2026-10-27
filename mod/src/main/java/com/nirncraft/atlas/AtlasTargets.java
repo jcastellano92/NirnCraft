@@ -210,6 +210,12 @@ final class AtlasTargets implements AutoCloseable {
             allocate(w, h);
         }
 
+        @Override
+        public void close() {
+            super.close(); // TextureManager owns this registered target and its texture/view.
+            if (sampler != null) { sampler.close(); sampler = null; } // This target creates its own sampler.
+        }
+
         private void allocate(int w, int h) {
             GpuDevice device = RenderSystem.getDevice();
             // render attachment: clearable (clear() in other dimensions)

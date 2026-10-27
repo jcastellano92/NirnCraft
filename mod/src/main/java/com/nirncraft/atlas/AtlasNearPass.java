@@ -202,6 +202,24 @@ public final class AtlasNearPass {
 
     private AtlasNearPass() {}
 
+    /** Final client shutdown only; world changes and model reloads retain their reusable targets. */
+    static void closeAtShutdown() {
+        active = false;
+        owned = drawn = lit = false;
+        for (TextureTarget target : new TextureTarget[] {shadow, gbuffer, light, frame, skyFrame, history[0], history[1]})
+            if (target != null) target.destroyBuffers();
+        shadow = gbuffer = light = frame = skyFrame = history[0] = history[1] = null;
+        for (var buffer : new net.minecraft.client.renderer.MappableRingBuffer[] {shadowProjUbo, projUbo, taaUbo, info})
+            if (buffer != null) buffer.close();
+        shadowProjUbo = projUbo = taaUbo = info = null;
+        if (lightmapScratchView != null) { lightmapScratchView.close(); lightmapScratchView = null; }
+        if (lightmapBlankView != null) { lightmapBlankView.close(); lightmapBlankView = null; }
+        if (lightmapScratch != null) { lightmapScratch.close(); lightmapScratch = null; }
+        if (lightmapBlank != null) { lightmapBlank.close(); lightmapBlank = null; }
+        if (terrainSampler != null) { terrainSampler.close(); terrainSampler = null; }
+        terrainSamplerAniso = -1;
+    }
+
     private static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath("nirncraft", path);
     }

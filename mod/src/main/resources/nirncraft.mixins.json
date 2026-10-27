@@ -4,7 +4,9 @@
   "package": "com.nirncraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "VkDeviceCreate"
+    "VkDeviceCreate",
+    "VkPipelineDestroy",
+    "GpuProfilerClose"
   ],
   "injectors": {
     "defaultRequire": 0

@@ -22,6 +22,11 @@ public final class SkyCube {
     private static TextureTarget cube;
     private static boolean cleared;
 
+    public static void closeAtShutdown() {
+        if (cube != null) { cube.destroyBuffers(); cube = null; }
+        cleared = false;
+    }
+
     /** The target AtlasSky draws the emitters into. */
     public static TextureTarget target() {
         if (cube == null) cube = new TextureTarget("nirncraft sky cube", FACE * 6, FACE, GpuFormat.RGBA16_FLOAT, null);

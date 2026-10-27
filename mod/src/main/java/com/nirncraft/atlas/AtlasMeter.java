@@ -57,9 +57,23 @@ final class AtlasMeter {
     private static volatile float measuredAt = Float.NaN;  // the exposure the reading was taken under
     private static float exposure = Float.NaN;  // log2, adapted
     private static long lastNanos;
+    private static volatile boolean stopping;
+    private static final Object readbackLock = new Object();
+
+    static void closeAtShutdown() {
+        synchronized (readbackLock) {
+            stopping = true; // Pending readbacks may retire during Minecraft's later encoder drain.
+            if (grid != null) { grid.destroyBuffers(); grid = null; }
+            for (int i = 0; i < ring.length; i++) {
+                if (ring[i] != null) { ring[i].close(); ring[i] = null; }
+                busy[i] = false;
+            }
+        }
+    }
 
     /** End of the level's frame: meter the main target (vanilla's, the frame as finished). */
     static void meter(float exposureNow) {
+        if (stopping) return;
         if (AtlasNearPass.insideSolid) return;  // (clipping into rock: the eye holds, the dark is not metered)
         Minecraft mc = Minecraft.getInstance();
         var main = mc.gameRenderer.mainRenderTarget();
@@ -83,22 +97,25 @@ final class AtlasMeter {
         final float under = exposureNow;
         GpuBuffer buf = ring[slot];
         encoder.copyTextureToBuffer(grid.getColorTexture(), buf, 0L, () -> {
-            try (var view = buf.slice(0, (long) W * H * 16).map(true, false)) {
-                ByteBuffer b = view.data().order(ByteOrder.nativeOrder());
-                double sum = 0, wsum = 0;
-                for (int i = 0; i < W * H; i++) {
-                    float mean = b.getFloat(i * 16), w = b.getFloat(i * 16 + 8);
-                    sum += mean * w;
-                    wsum += w;
+            synchronized (readbackLock) {
+                if (stopping) { busy[slot] = false; return; }
+                try (var view = buf.slice(0, (long) W * H * 16).map(true, false)) {
+                    ByteBuffer b = view.data().order(ByteOrder.nativeOrder());
+                    double sum = 0, wsum = 0;
+                    for (int i = 0; i < W * H; i++) {
+                        float mean = b.getFloat(i * 16), w = b.getFloat(i * 16 + 8);
+                        sum += mean * w;
+                        wsum += w;
+                    }
+                    if (wsum > 0) {
+                        // the frame is displayed (exposed, tonemapped): the scene's luminance is the reading less the
+                        // exposure it was taken under (the tonemap's shoulder compresses the brightest: it meters a little low)
+                        sceneLog = (float) (sum / wsum) - under;
+                        measuredAt = under;
+                    }
+                } finally {
+                    busy[slot] = false;
                 }
-                if (wsum > 0) {
-                    // the frame is displayed (exposed, tonemapped): the scene's luminance is the reading less the
-                    // exposure it was taken under (the tonemap's shoulder compresses the brightest: it meters a little low)
-                    sceneLog = (float) (sum / wsum) - under;
-                    measuredAt = under;
-                }
-            } finally {
-                busy[slot] = false;
             }
         }, 0);
         next = (next + 1) % ring.length;

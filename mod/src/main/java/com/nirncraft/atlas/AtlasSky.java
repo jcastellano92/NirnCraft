@@ -161,8 +161,27 @@ final class AtlasSky implements CustomSkyboxRenderer {
     private static volatile long lightFrame;
     private static long frameCount;
     private static volatile boolean nightDrawn;
+    private static volatile boolean stopping;
+    private static final Object readbackLock = new Object();
 
     private AtlasSky() {}
+
+    static void closeAtShutdown() {
+        synchronized (readbackLock) {
+            stopping = true; // Late readback callbacks must not map buffers already scheduled for destruction.
+            for (MappableRingBuffer buffer : new MappableRingBuffer[] {INSTANCE.info, INSTANCE.airInfo, INSTANCE.nightInfo,
+                    INSTANCE.moonInfo, INSTANCE.celInfo}) if (buffer != null) buffer.close();
+            INSTANCE.info = INSTANCE.airInfo = INSTANCE.nightInfo = INSTANCE.moonInfo = INSTANCE.celInfo = null;
+            if (signs != null) { signs.close(); signs = null; }
+            if (view != null) { view.destroyBuffers(); view = null; }
+            if (lightTarget != null) { lightTarget.destroyBuffers(); lightTarget = null; }
+            for (int i = 0; i < ring.length; i++) {
+                if (ring[i] != null) { ring[i].close(); ring[i] = null; }
+                busy[i] = false;
+            }
+            SkyCube.closeAtShutdown();
+        }
+    }
 
     static void register(RegisterRenderPipelinesEvent e) {
         e.registerPipeline(PIPELINE);
@@ -192,6 +211,7 @@ final class AtlasSky implements CustomSkyboxRenderer {
 
     @Override
     public boolean renderSky(LevelRenderState levelRenderState, SkyRenderState sky, Matrix4fc modelView, GpuBufferSlice skyFog) {
+        if (stopping) return false;
         Minecraft mc = Minecraft.getInstance();
         float[] coeffs = AtlasAir.coeffs();
         GpuTextureView ms = AtlasAir.multiscatter();
@@ -357,17 +377,20 @@ final class AtlasSky implements CustomSkyboxRenderer {
         GpuBuffer buf = ring[slot];
         final long at = frameCount;
         encoder.copyTextureToBuffer(lightTarget.getColorTexture(), buf, 0L, () -> {
-            try (var v = buf.slice(0, 64L).map(true, false)) {
-                ByteBuffer b = v.data().order(ByteOrder.nativeOrder());
-                synchronized (diffuseSh) {
-                    for (int i = 0; i < 16; i++) {
-                        float x = b.getFloat(i * 4);
-                        diffuseSh[i] = Float.isFinite(x) ? x : 0f;
+            synchronized (readbackLock) {
+                if (stopping) { busy[slot] = false; return; }
+                try (var v = buf.slice(0, 64L).map(true, false)) {
+                    ByteBuffer b = v.data().order(ByteOrder.nativeOrder());
+                    synchronized (diffuseSh) {
+                        for (int i = 0; i < 16; i++) {
+                            float x = b.getFloat(i * 4);
+                            diffuseSh[i] = Float.isFinite(x) ? x : 0f;
+                        }
                     }
+                    lightFrame = at;
+                } finally {
+                    busy[slot] = false;
                 }
-                lightFrame = at;
-            } finally {
-                busy[slot] = false;
             }
         }, 0);
         next = (next + 1) % ring.length;

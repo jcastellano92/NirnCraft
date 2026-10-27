@@ -61,6 +61,29 @@ public final class AtlasClient {
     static final long LOSS_COOLDOWN_NS = 60_000_000_000L;
 
     private static AtlasNative lib;
+    private static boolean clientStopping;
+    /** A failed terminal close cannot be retried as a no-op and mistaken for safe device destruction. */
+    static final class ShutdownResources {
+        private final Runnable[] owners;
+        private boolean attempted;
+        private Throwable failure;
+
+        ShutdownResources(Runnable... owners) { this.owners = owners; }
+
+        void close() {
+            if (!attempted) {
+                attempted = true;
+                for (Runnable owner : owners) {
+                    try { owner.run(); }
+                    catch (Throwable error) {
+                        if (failure == null) failure = error;
+                        else if (failure != error) failure.addSuppressed(error);
+                    }
+                }
+            }
+            if (failure != null) throw new IllegalStateException("atlas: terminal GPU cleanup failed; device retained", failure);
+        }
+    }
     private static volatile AtlasNative.Context ctx;  // (volatile: the info thread reads it, AtlasInfo)
     private record ContextReaders(AtlasNative.Context context, AtlasMaterials materials, AtlasReleaseGate gate) {}
     private static volatile ContextReaders infoReaders;
@@ -324,6 +347,7 @@ public final class AtlasClient {
         AtlasClientSections.init();
         AtlasTextureClock.init(modBus);
         NeoForge.EVENT_BUS.addListener((ClientStoppingEvent e) -> {
+            clientStopping = true;
             try { if (guard != null) guard.stopped(); } // a clean exit is not a crash
             catch (Throwable t) { com.nirncraft.NirnCraft.LOGGER.warn("atlas: could not record clean shutdown", t); }
             boolean interrupted = false, stopped = false;
@@ -343,6 +367,20 @@ public final class AtlasClient {
                     long now = System.nanoTime();
                     if (now >= nextLog) {
                         com.nirncraft.NirnCraft.LOGGER.warn("atlas: waiting for {} context releases before device shutdown", releases.size());
+                        nextLog = now + 5_000_000_000L;
+                    }
+                    try { Thread.sleep(100); }
+                    catch (InterruptedException ignored) { interrupted = true; }
+                }
+            }
+            var resources = new ShutdownResources(AtlasNearPass::closeAtShutdown, AtlasSky::closeAtShutdown,
+                    AtlasMeter::closeAtShutdown, AtlasAir::closeAtShutdown);
+            for (;;) {
+                try { resources.close(); break; }
+                catch (Throwable failure) {
+                    long now = System.nanoTime();
+                    if (now >= nextLog) {
+                        com.nirncraft.NirnCraft.LOGGER.error("atlas: waiting for terminal GPU cleanup before device shutdown", failure);
                         nextLog = now + 5_000_000_000L;
                     }
                     try { Thread.sleep(100); }
@@ -865,6 +903,7 @@ public final class AtlasClient {
     }
 
     private static boolean start(Minecraft mc) {
+        if (clientStopping) return false;
         // Prior owners may still hold singleton stages or the old device interop. Keep drawing vanilla while
         // their release runs; a failed release deliberately prevents replacement ownership.
         if (!previousRelease.isDone() || previousRelease.isCompletedExceptionally()) return false;
