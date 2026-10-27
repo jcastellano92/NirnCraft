@@ -229,3 +229,28 @@ no lease and no matching Java/Prism process. A fixed raw NMT option inside the r
 45 CPU tests and its offline gate with the existing Crafter UI debt; actual enabled Minecraft NMT remains pending.
 Sol now prepares a populated-generator shutdown witness for a concrete near/far slab ownership gap, without
 claiming it explains the live memory growth. All previous failed receipts are preserved.
+
+## Actual allocation and populated-shutdown evidence (2026-10-27)
+
+The raw JVM-marker diagnostic `live-20261027-033859-394369` enabled NMT in all three actual Minecraft responses.
+HotSpot-tracked commitments were2388503/3400710/3418486KiB; named Windows-private samples reached18492743680
+bytes and the job peak22784147456 bytes. These sequential, differently scoped observations do not identify a
+native/driver owner or support residual subtraction. The run required forced cleanup and produced no readiness
+or visual acceptance. Independent post-job inspection twice confirmed original JVM marker/properties/backend,
+no lease and no matching client/owned launcher. The full allocation report remains UNVERIFIED because one current
+profile sample misses the unchanged timestamp-alignment gate; the separate NMT sidecar pins its three raw files.
+
+The populated borrowed-device diagnostic `gen-shutdown-borrowed-both-cached-20261027-0358` completed in30.734s,
+child exit1. Its explicit copied pipeline-cache pair matched the actual physical device; original cache files,
+saved inputs and source441f9422/core97a7f388 stayed unchanged. It admitted7 non-air near sections and5632 far
+cells (413 mixed), completed the real second copy, then stopped producing frames. Generator destruction emitted
+the retained-buffer warning; after context/token retirement Vulkan reported two leaked buffers and their two
+memory allocations at external device destruction (VUID05137). Four null-buffer descriptor diagnostics occurred
+earlier and remain a separate issue. The wrapper conservatively labels the receipt UNVERIFIED because the required
+zero-error marker is absent; the captured validation failures are positive evidence, not a clean shutdown.
+
+This reproduces a native child-ownership defect, not the cause of live21GiB growth or Minecraft's device-close
+delay. Sol owns a narrow producer-drain/consumer-retirement ownership repair and separate descriptor diagnosis;
+Terra independently reviews. No production repair or new stage pass has been accepted. A second focused Terra
+inspection evaluates porting deterministic near-state aliases to main without shared-Vulkan dependencies, so
+equivalent traversal orders cannot unnecessarily discard valid cached world data. Heavy jobs remain serialized.
