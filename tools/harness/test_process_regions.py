@@ -74,6 +74,20 @@ class ProcessRegionTests(unittest.TestCase):
         self.assertIn('private', line)
         self.assertIn('MiB', line)
 
+    def test_by_allocation_resolves_arena_header_owner_module(self):
+        size = 64 << 20
+        base = self.alloc(size)
+        k32_base = c.WinDLL('kernel32')._handle
+        hdr = (c.c_uint64 * 4).from_address(base)
+        hdr[0] = base
+        hdr[1] = size
+        hdr[2] = 0x0001000000000004
+        hdr[3] = k32_base + 0x1234
+        snap = process_regions.snapshot(os.getpid(), min_region=64 << 20)
+        mine = [a for a in snap['byAllocation'] if a['allocBase'] == base]
+        self.assertEqual(1, len(mine), snap['byAllocation'])
+        self.assertEqual(f'kernel32.dll+0x1234', mine[0].get('ownerModule', '').lower())
+
 
 if __name__ == '__main__':
     unittest.main()

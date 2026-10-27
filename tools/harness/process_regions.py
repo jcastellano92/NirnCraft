@@ -39,8 +39,44 @@ def api():
     k.VirtualQueryEx.restype = c.c_size_t
     k.GetProcessHandleCount.argtypes = [w.HANDLE, c.POINTER(w.DWORD)]
     k.GetCurrentProcess.restype = w.HANDLE
+    k.ReadProcessMemory.argtypes = [w.HANDLE, c.c_void_p, c.c_void_p, c.c_size_t, c.POINTER(c.c_size_t)]
+    k.ReadProcessMemory.restype = w.BOOL
     p.QueryWorkingSetEx.argtypes = [w.HANDLE, c.c_void_p, w.DWORD]
+    p.EnumProcessModules.argtypes = [w.HANDLE, c.c_void_p, w.DWORD, c.POINTER(w.DWORD)]
+    p.EnumProcessModules.restype = w.BOOL
+    p.GetModuleBaseNameW.argtypes = [w.HANDLE, c.c_void_p, w.LPWSTR, w.DWORD]
+    p.GetModuleBaseNameW.restype = w.DWORD
     return k, p
+
+
+def process_modules(handle, p):
+    mods = (c.c_void_p * 1024)()
+    needed = w.DWORD()
+    if not p.EnumProcessModules(handle, mods, c.sizeof(mods), c.byref(needed)):
+        return []
+    out = []
+    count = min(1024, needed.value // c.sizeof(c.c_void_p))
+    buf = c.create_unicode_buffer(260)
+    for i in range(count):
+        base = mods[i]
+        if base and p.GetModuleBaseNameW(handle, c.c_void_p(base), buf, 260):
+            out.append((int(base), buf.value))
+    out.sort()
+    return out
+
+
+def resolve_arena_owner(handle, alloc_base, mods, k):
+    hdr = (c.c_uint64 * 4)()
+    read = c.c_size_t()
+    if not k.ReadProcessMemory(handle, c.c_void_p(alloc_base), hdr, c.sizeof(hdr), c.byref(read)) or read.value < c.sizeof(hdr):
+        return None
+    if int(hdr[0]) != alloc_base or not hdr[3]:
+        return None
+    ptr = int(hdr[3])
+    for base, name in reversed(mods):
+        if base <= ptr < base + 0x20000000:
+            return '%s+0x%x' % (name, ptr - base)
+    return '0x%x' % ptr
 
 
 def open_handle_count():
@@ -109,6 +145,11 @@ def snapshot(pid, min_region=256 << 20, top=12):
         big.sort(key=lambda r: -r['size'])
         big = big[:top]
         by_alloc = sorted(allocs.values(), key=lambda a: -a['committedBytes'])[:top]
+        mods = process_modules(h, p) if by_alloc else []
+        for a in by_alloc:
+            owner = resolve_arena_owner(h, a['allocBase'], mods, k)
+            if owner:
+                a['ownerModule'] = owner
         for r in big:
             r['residentBytes'] = resident_bytes(h, r['base'], r['size'], p)
         return {'pid': int(pid), 'epoch': time.time(), 'totals': totals, 'largest': big, 'byAllocation': by_alloc, 'sizeBuckets': buckets, 'minRegionBytes': min_region,
