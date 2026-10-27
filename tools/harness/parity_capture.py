@@ -34,6 +34,55 @@ def set_backend(mode):
     game.lw.atomic(options, b'\n'.join(lines))
     return raw
 
+JCMD = Path(os.environ.get('JAVA25_HOME') or r'E:\NirnCraft-scratch\toolchains\jdk-25.0.4.1+1') / 'bin/jcmd.exe'
+
+
+def client_pid():
+    """The harness-launched client's java pid (its command line carries the nirncraft.atlas flags)."""
+    import subprocess
+    r = subprocess.run(['powershell', '-NoProfile', '-Command',
+                        "Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | Where-Object { $_.CommandLine -match 'nirncraft' -and $_.CommandLine -notmatch 'gradle' } | Select-Object -First 1 -ExpandProperty ProcessId"],
+                       capture_output=True, text=True)
+    return int(r.stdout.strip()) if r.stdout.strip().isdigit() else None
+
+
+def close_with_dump(out, mode, after=40):
+    """game.close() with thread dumps of the client if it has not exited `after` seconds in (a hung shutdown)."""
+    import subprocess, threading
+    pid = client_pid()
+    box = {}
+    def run():
+        try: game.close()
+        except Exception as exc: box['error'] = str(exc)
+    t = threading.Thread(target=run); t.start()
+    start = time.monotonic(); dumps = 0
+    while t.is_alive():
+        if pid and dumps < 3 and time.monotonic() - start > after * (dumps + 1):
+            r = subprocess.run([str(JCMD), str(pid), 'Thread.print', '-l'], capture_output=True, text=True, timeout=60)
+            (out / f'{mode}-shutdown-hang-{dumps}.txt').write_text(r.stdout + r.stderr, encoding='utf-8')
+            print('TRACE shutdown hang: thread dump', dumps, 'pid', pid, flush=True)
+            dumps += 1
+        time.sleep(2)
+    summary_close = {'pid': pid, 'seconds': round(time.monotonic() - start, 1), 'thread_dumps': dumps, **box}
+    (out / f'{mode}-close.json').write_text(json.dumps(summary_close, indent=2), encoding='utf-8')
+    if box: raise RuntimeError('clean close failed: ' + box['error'])
+
+def enable_validation(out):
+    """Khronos validation (object lifetime included) for the launched client: layer env plus a settings file in `out`."""
+    sdk = Path(os.environ.get('NIRNCRAFT_TOOLCHAINS') or r'E:\Skycraft-scratch\toolchains') / 'VulkanSDK/1.4.357.0/Bin'
+    if not (sdk / 'VkLayer_khronos_validation.json').exists(): raise SystemExit('validation layer not found in ' + str(sdk))
+    log = (out / 'validation.log').resolve()
+    log.unlink(missing_ok=True)
+    settings = out / 'vk_layer_settings.txt'
+    settings.write_text('khronos_validation.debug_action = VK_DBG_LAYER_ACTION_LOG_MSG\n'
+                        'khronos_validation.log_filename = %s\n'
+                        'khronos_validation.report_flags = error,warn,info\n'
+                        'khronos_validation.duplicate_message_limit = 10000\n'
+                        'khronos_validation.message_format_display_application_name = true\n' % log.as_posix(), encoding='utf-8')
+    os.environ['VK_LAYER_SETTINGS_PATH'] = str(out.resolve())
+    os.environ['VK_ADD_LAYER_PATH'] = str(sdk)
+    os.environ['VK_INSTANCE_LAYERS'] = 'VK_LAYER_KHRONOS_validation'
+
 
 def main():
     mode, out = sys.argv[1], Path(sys.argv[2])
@@ -45,6 +94,8 @@ def main():
     latest = game.GAME / 'logs/latest.log'
     offset = profile.stat().st_size if profile.exists() else 0
     os.environ['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
+    if '--validation' in sys.argv:
+        enable_validation(out)
     if game.running(): game.close()
     original = set_backend(mode)
     summary = {'mode': mode, 'shots': []}
@@ -64,7 +115,7 @@ def main():
         time.sleep(settle)
         text = latest.read_text(encoding='utf-8', errors='replace') if latest.exists() else ''
         summary['backend_log'] = (re.findall(r'Using graphics backend (\w+)', text) or ['?'])[-1]
-        for name, turn in POSES:
+        for name, turn in POSES[:int(sys.argv[sys.argv.index('--poses') + 1]) if '--poses' in sys.argv else len(POSES)]:
             heading = (atlas_tools.HEADING + turn) % 360
             scene = {'id': 'parity-%s-%s-%d' % (mode, name, int(time.time())), 'timeout': 45}
             shot, rec, _, _ = game.capture(scene, 'vanilla', [f'visit {x} {z} 3 {heading} 6 clear', 'try time set 6000', 'hud off', 'wait 12'],
@@ -77,7 +128,7 @@ def main():
     finally:
         (out / f'{mode}-summary.json').write_text(json.dumps(summary, indent=2, default=str), encoding='utf-8')
         try:
-            if game.running(): game.close()
+            if game.running(): close_with_dump(out, mode)
         finally:
             game.lw.atomic(game.GAME / 'options.txt', original)
 
