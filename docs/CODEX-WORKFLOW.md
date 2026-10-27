@@ -227,3 +227,24 @@ establish live cache revisit, full startup, frame-time, driver-resource or rende
 Merged as `d6913ad2` after independent source/package, XML and gate review. The recovery tag
 `before-cache-integration-2026-10-27` pins prior main `68ce5eef` and is protected from tag-pruning fetches.
 Post-merge engine/package comparison with the tested candidate is exact; no new route or Vulkan pass follows.
+
+## Incremental evidence and remaining terminal owners (2026-10-27)
+
+The candidate's Vulkan probe now journals capture requests and preserves complete PNG/metadata pairs independently
+of its action worker, with labeled partial sheets, hashes and changed-index TRACE events for Terra review. This
+closes the evidence-loss path seen in `live-20261027-133613-800642`; the recovered image proves a rendered world,
+while its memory-triggered, forced shutdown remains failed. Source was prepared by Terra, reviewed independently
+by the Terra gatekeeper and integrated in `a17e2c5a`; all71 CPU probe checks pass (`1027-141340`).
+
+Root also integrated Sol's sealed quality-query owner, the independently confirmed private near-light target
+cleanup, and opt-in object names/two-command-pool counters. Java `1027-141209` passes402 tests, zero failures/errors,
+19 opt-in skips, including actual FFM shutdown tests. The explicit42132fa6 offline gate (`1027-141538`) passes20
+items with19 passes, the independently known Crafter coverage failure, zero new failures and zero missing checks.
+Neither these offline results nor the sheet establish clean Vulkan shutdown, memory parity or route parity.
+See ATLAS-VULKAN-MC-LIFETIMES.md for the ownership audit and exact Jar identity.
+
+Installation of this new build was refused before mutation because a new desktop-owned idle Prism process1420,
+created13:38:55, was present (`1027-141515`). It differs from the launcher previously approved for closure. A new
+closure question is pending; no process was killed and the prior tested build remains installed. Runtime validation
+and the bounded route comparison resume after that ownership constraint is resolved. Main `atlas-render` stays
+at42132fa6; the migration candidate remains isolated and unaccepted. No push is authorized.

@@ -57,6 +57,8 @@ public final class QualityClient {
     private static long frameIndex, lastPre;
     private static boolean measuring, levelThisFrame;
     private static double lastWallMs;
+    private static boolean stopping, shutdownAttempted;
+    private static Throwable shutdownFailure;
 
     // the knobs drawn this frame: the controller's, with the pack's replaced by what its texture holds
     private static final double[] frameKnobs = new double[Knob.COUNT];
@@ -150,7 +152,7 @@ public final class QualityClient {
     // ------------------------------------------------------------------ frames
 
     private static void beginFrame(RenderFrameEvent.Pre e) {
-        if (failed) return;
+        if (stopping || failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             long now = System.nanoTime();
@@ -177,7 +179,7 @@ public final class QualityClient {
     }
 
     private static void endFrame(RenderFrameEvent.Post e) {
-        if (failed) return;
+        if (stopping || failed) return;
         try {
             if (!measuring) return;
             measuring = false;
@@ -193,6 +195,7 @@ public final class QualityClient {
 
     /** Reads the slot's previous result, then opens this frame's timestamp (outside passes: Pre). */
     private static void timestamps(long now) {
+        if (stopping) return;
         GpuDevice device = RenderSystem.getDevice();
         if (pool == null || poolDevice != device) {
             closePool();
@@ -233,9 +236,22 @@ public final class QualityClient {
         measuring = false;
     }
 
+    /** Render-thread terminal close; the host encoder retires this pool before its device is destroyed. */
+    public static void closeAtShutdown() {
+        stopping = true;
+        if (!shutdownAttempted) {
+            shutdownAttempted = true;
+            try { closePool(); }
+            catch (Throwable failure) { shutdownFailure = failure; }
+        }
+        if (shutdownFailure != null)
+            throw new IllegalStateException("adaptive quality: terminal query close failed; owner retained", shutdownFailure);
+    }
+
     // ------------------------------------------------------------------ start, profile
 
     private static boolean start(Minecraft mc) {
+        if (stopping) return false;
         DeviceInfo info = RenderSystem.getDevice().getDeviceInfo();
         int w = mc.getWindow().getWidth(), h = mc.getWindow().getHeight();
         HardwareTier.Guess guess = HardwareTier.classify(info.name(), info.vendorName(), info.type() == DeviceType.INTEGRATED, w, h);
@@ -272,7 +288,7 @@ public final class QualityClient {
     // ------------------------------------------------------------------ tick
 
     private static void tick(ClientTickEvent.Post e) {
-        if (controller == null || failed) return;
+        if (stopping || controller == null || failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             hostLoad(mc);

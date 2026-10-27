@@ -71,4 +71,33 @@ class AtlasVulkanMemoryTest {
         assertTrue(out.getAsJsonObject("nioBufferPools").has("mapped"));
         assertFalse(out.has("processPrivateBytes"));
     }
+
+    @Test
+    void commandPoolHandleCapacityIsSeparateFromLiveCommandBufferCounts() {
+        JsonObject row = AtlasVulkanMemory.poolCounts(0, 3, 32, 512);
+        assertEquals(3, row.get("usedCommandBuffers").getAsInt());
+        assertEquals(32, row.get("allocatedCommandBuffers").getAsInt());
+        assertEquals(512, row.get("pointerCapacity").getAsInt());
+        assertEquals(512L * org.lwjgl.system.Pointer.POINTER_SIZE, row.get("pointerCapacityBytes").getAsLong());
+        assertFalse(row.has("driverPoolBytes"));
+        assertEquals(0, AtlasVulkanMemory.poolCounts(1, 0, 0, 512).get("allocatedCommandBuffers").getAsInt());
+        assertThrows(IllegalArgumentException.class, () -> AtlasVulkanMemory.poolCounts(0, 33, 32, 512));
+        assertThrows(IllegalArgumentException.class, () -> AtlasVulkanMemory.poolCounts(0, 1, 32, 16));
+    }
+
+    @Test
+    void missingCommandPoolCountersNeverBecomeZeroAndDisabledNeverReadsThem() {
+        assertEquals("", AtlasVulkanMemory.profile(false, null,
+                () -> { fail("disabled allocator"); return null; }, () -> { fail("disabled pool query"); return null; }));
+        JsonObject unavailable = parse(AtlasVulkanMemory.profile(true, "client_not_running",
+                () -> { fail("closed allocator"); return null; }, () -> { fail("closed pools"); return null; }));
+        assertEquals("UNVERIFIED", unavailable.getAsJsonObject("minecraftCommandPools").get("status").getAsString());
+        var zero = new AtlasVulkanMemory.Counts(0, 0, 0, 0);
+        JsonObject failure = parse(AtlasVulkanMemory.profile(true, null,
+                () -> new AtlasVulkanMemory.Allocator(zero, List.of(), List.of()),
+                () -> { throw new IllegalStateException("accessor unavailable"); }));
+        JsonObject pools = failure.getAsJsonObject("minecraftCommandPools");
+        assertEquals("UNVERIFIED", pools.get("status").getAsString());
+        assertFalse(pools.has("pools"));
+    }
 }

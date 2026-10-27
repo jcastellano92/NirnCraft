@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.nirncraft.mixin.VkCommandPoolMemory;
+import com.nirncraft.mixin.VkEncoderMemory;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.vma.Vma;
@@ -38,7 +40,7 @@ final class AtlasVulkanMemory {
         if (!ENABLED) return "";
         String unavailable = !RenderSystem.isOnRenderThread() ? "render_thread_required"
                 : mc == null || !mc.isRunning() ? "client_not_running" : null;
-        return profile(true, unavailable, AtlasVulkanMemory::readAllocator);
+        return profile(true, unavailable, AtlasVulkanMemory::readAllocator, AtlasVulkanMemory::readCommandPools);
     }
 
     record Counts(long allocationBytes, long blockBytes, int allocationCount, int blockCount) {
@@ -69,6 +71,10 @@ final class AtlasVulkanMemory {
 
     // Also exercises disabled/missing/error semantics without creating a Vulkan device in a unit test.
     static String profile(boolean enabled, String unavailable, Supplier<Allocator> query) {
+        return profile(enabled, unavailable, query, () -> unverified("not_sampled"));
+    }
+
+    static String profile(boolean enabled, String unavailable, Supplier<Allocator> query, Supplier<JsonObject> poolQuery) {
         if (!enabled) return "";  // does not inspect the device, management beans or native entry points
         JsonObject out = new JsonObject();
         out.addProperty("timestampMillis", System.currentTimeMillis());
@@ -107,9 +113,50 @@ final class AtlasVulkanMemory {
             vma.addProperty("queryNs", System.nanoTime() - start);
         }
         out.add("minecraftVma", vma);
+        JsonObject pools;
+        try {
+            pools = unavailable != null ? unverified(unavailable) : Objects.requireNonNull(poolQuery.get());
+        } catch (RuntimeException | LinkageError failure) {
+            pools = unverified(failure.getClass().getSimpleName());
+        }
+        out.add("minecraftCommandPools", pools);
         out.add("javaHeap", javaHeap());
         out.add("nioBufferPools", bufferPools());
         return " mcMemory=" + out;
+    }
+
+    private static JsonObject readCommandPools() {
+        VulkanDevice device = AtlasVulkan.device();
+        if (device == null || !(device.createCommandEncoder() instanceof VkEncoderMemory encoder))
+            return unverified("encoder_counters_unavailable");
+        var pools = encoder.nirncraft$commandPools();
+        long submit = encoder.nirncraft$submitIndex();
+        if (pools == null || pools.length != 2 || submit < 0) return unverified("invalid_encoder_counters");
+        JsonArray rows = new JsonArray();
+        for (int i = 0; i < pools.length; i++) {
+            if (!(pools[i] instanceof VkCommandPoolMemory access)) return unverified("pool_counters_unavailable");
+            var handles = access.nirncraft$allocatedBuffers();
+            if (handles == null) return unverified("pool_table_unavailable");
+            rows.add(poolCounts(i, handles.position(), handles.limit(), handles.capacity()));
+        }
+        JsonObject out = new JsonObject();
+        out.addProperty("status", "VERIFIED");
+        out.addProperty("submitIndex", submit);
+        out.add("pools", rows);
+        out.addProperty("scope", "MC-owned command-buffer counts and pointer tables; excludes external ATLAS buffers and driver pool-storage bytes");
+        return out;
+    }
+
+    static JsonObject poolCounts(int index, int used, int allocated, int capacity) {
+        if (index < 0 || used < 0 || used > allocated || allocated > capacity || capacity < 0)
+            throw new IllegalArgumentException("invalid command pool counts");
+        JsonObject out = new JsonObject();
+        out.addProperty("pool", index);
+        out.addProperty("usedCommandBuffers", used);
+        out.addProperty("allocatedCommandBuffers", allocated);
+        out.addProperty("pointerCapacity", capacity);
+        out.addProperty("pointerCapacityBytes", (long) capacity * org.lwjgl.system.Pointer.POINTER_SIZE);
+        return out;
     }
 
     private static Allocator readAllocator() {

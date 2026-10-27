@@ -37,3 +37,23 @@ Source review and a Java build are required before testing. Acceptance additiona
 Minecraft object-lifetime validation through shutdown, proving that this mixin applies and eliminates
 the omitted-pipeline leaks. This source patch alone establishes neither clean shutdown nor reduced
 process memory.
+
+The actual 13:36 run (`live-20261027-133613-800642`) reached world readiness and saved a terrain capture.
+The descriptor invalidation and all 592 omitted pipelines were absent, but shutdown still failed with six
+live children: two buffers, one image/view pair, one sampler and one query pool. The supervisor initiated
+cleanup after sampled private commit reached its existing reserve; forced cleanup is not a shutdown pass.
+
+A second ownership audit found two additional mod omissions. `QualityClient` owned a timestamp query pool
+but its stopping listener only saved the profile. `AtlasTargets` created four targets but registered only
+three with TextureManager; its private near-light target therefore had no terminal owner. Both now close
+inside AtlasClient's existing latched group after native users retire. The registered textures retain
+TextureManager ownership. Query close failure remains latched, retains the owner and seals later GPU work.
+Attribution to the six reported handles still requires same-run validation.
+
+Java build `1027-141209` passes 402 tests with zero failures/errors and 19 opt-in skips. The two new query
+cleanup tests execute, as do the actual FFM shutdown tests. Diagnostic runs using the existing
+`nirncraft.atlas.memoryDiagnostics` property additionally request Minecraft's own Vulkan object names and
+sample the two existing command pools' buffer counts. Counts and pointer-table bytes exclude driver pool
+storage; unavailable counters remain unverified. Normal settings and validation verbosity are unchanged.
+The new Jar SHA-256 is `04714b19ffdfdda99fa270ff007512be8559bf3a3727c4af30a5a536bb7ef552`.
+Native source and packaged binaries are unchanged from the descriptor-corrected build.

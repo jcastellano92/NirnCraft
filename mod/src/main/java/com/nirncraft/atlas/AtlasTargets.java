@@ -83,6 +83,11 @@ final class AtlasTargets implements AutoCloseable {
         encoder.clearColorTexture(sunTarget.getTexture(), new Vector4f(0f, 0f, 0f, 0f));
     }
 
+    /** After native copies retire: the near-light target is private, unlike the three registered textures. */
+    static void closeAtShutdown() {
+        if (nearLightTarget != null) nearLightTarget.close();
+    }
+
     int sunSize() {
         return sunSize;
     }

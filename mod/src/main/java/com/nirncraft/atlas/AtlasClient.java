@@ -374,7 +374,8 @@ public final class AtlasClient {
                 }
             }
             var resources = new ShutdownResources(AtlasNearPass::closeAtShutdown, AtlasSky::closeAtShutdown,
-                    AtlasMeter::closeAtShutdown, AtlasAir::closeAtShutdown);
+                    AtlasMeter::closeAtShutdown, AtlasAir::closeAtShutdown, AtlasTargets::closeAtShutdown,
+                    com.nirncraft.render.quality.QualityClient::closeAtShutdown);
             for (;;) {
                 try { resources.close(); break; }
                 catch (Throwable failure) {

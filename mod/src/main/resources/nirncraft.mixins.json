@@ -6,7 +6,10 @@
   "client": [
     "VkDeviceCreate",
     "VkPipelineDestroy",
-    "GpuProfilerClose"
+    "GpuProfilerClose",
+    "VkDiagnosticLabels",
+    "VkEncoderMemory",
+    "VkCommandPoolMemory"
   ],
   "injectors": {
     "defaultRequire": 0

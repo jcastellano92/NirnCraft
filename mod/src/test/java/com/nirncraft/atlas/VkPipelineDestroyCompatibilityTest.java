@@ -17,6 +17,36 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Guards the precise upstream omission; actual deferred destruction still needs a Vulkan validation run. */
 class VkPipelineDestroyCompatibilityTest {
     @Test
+    void officialInstanceStillUsesTheExactDebugFactoryAtConstruction() throws Exception {
+        int[] calls = {0};
+        String owner = "com/mojang/renderpearl/backend/vulkan/VulkanInstance";
+        try (var stream = getClass().getClassLoader().getResourceAsStream(owner + ".class")) {
+            assertNotNull(stream);
+            new ClassReader(stream).accept(new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                    if (!name.equals("<init>") || !descriptor.equals("(IZZ)V")) return null;
+                    return new MethodVisitor(Opcodes.ASM9) {
+                        @Override
+                        public void visitMethodInsn(int opcode, String callOwner, String method, String type, boolean isInterface) {
+                            if (callOwner.equals("com/mojang/renderpearl/backend/vulkan/VulkanDebug") && method.equals("create") &&
+                                    type.equals("(IZLjava/util/Set;Ljava/util/Set;)Lcom/mojang/renderpearl/backend/vulkan/VulkanDebug;")) calls[0]++;
+                        }
+                    };
+                }
+            }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        }
+        assertEquals(1, calls[0], "recheck diagnostic-label injection after a Minecraft update");
+        try (var stream = getClass().getClassLoader().getResourceAsStream("nirncraft.mixins.json")) {
+            assertNotNull(stream);
+            var client = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
+                    .getAsJsonObject().getAsJsonArray("client").asList();
+            for (String mixin : new String[]{"VkDiagnosticLabels", "VkEncoderMemory", "VkCommandPoolMemory"})
+                assertEquals(1, client.stream().filter(e -> e.getAsString().equals(mixin)).count());
+        }
+    }
+
+    @Test
     void officialDestructorStillOmitsExactlyTheTwoStencilVariants() throws Exception {
         String owner = "com/mojang/renderpearl/backend/vulkan/VulkanRenderPipeline";
         Set<String> storedPipelines = new HashSet<>(), destroyedPipelines = new HashSet<>();
