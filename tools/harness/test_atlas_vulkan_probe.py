@@ -683,6 +683,52 @@ class PreparedNativeTests(unittest.TestCase):
                     self.assertFalse(probe.game.prepared_native('digest', sources))
 
 
+class ResourceReloadTests(unittest.TestCase):
+    def test_reload_environment_is_explicit_gl_only_and_clears_inherited_request(self):
+        old = {'NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD': '1'}
+        self.assertNotIn('NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD', probe.reload_environment(old, 'gl', False))
+        self.assertEqual(old['NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD'], '1')
+        self.assertEqual(probe.reload_environment({}, 'gl', True)['NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD'], '1')
+        with self.assertRaises(ValueError): probe.reload_environment({}, 'shared', True)
+
+    def test_ready_after_reload_requires_new_context_ingest_and_complete_key(self):
+        boot = 'Using graphics backend OpenGL\nInfinite ATLAS far field on'
+        key = "atlas coarse bake: the cache set's key: build cac47eaf36f7a839 program 1e4e3aa669661cdb ingest b7372337063bdd00 map b9b4f36c48aec7ae extra de033c0000000003 stages c2e892498a31c612 (17) whole 1e5dc6eb8bdd05c3"
+        fresh = 'Infinite ATLAS far field on\natlas: ingest components full=b7372337063bdd00\n' + key
+        profile = 'frame{atlasMs=1.25 unified=true} ready{ok} quality{tier 1} core={"interop":"host-copy","reach":256,"pipelinesBuilding":0,"genCache":{"fingerprint":"1e5dc6eb8bdd05c3"}}'
+        self.assertTrue(probe.recreated_gl_ready(fresh, boot, profile))
+        self.assertFalse(probe.recreated_gl_ready('', boot, profile))
+        self.assertFalse(probe.recreated_gl_ready(key, boot, profile))
+        self.assertFalse(probe.recreated_gl_ready(fresh.replace('atlas: ingest components ', 'other '), boot, profile))
+        self.assertFalse(probe.recreated_gl_ready(fresh.replace(' stages c2e892498a31c612 (17)', ''), boot, profile))
+        self.assertFalse(probe.recreated_gl_ready(fresh, boot + '\nInfinite ATLAS stopped', profile))
+        self.assertFalse(probe.recreated_gl_ready(fresh, boot, profile.replace('ready{ok}', 'ready{pending: generator not running}')))
+        self.assertFalse(probe.recreated_gl_ready(fresh, boot, profile.replace('"fingerprint":"1e5dc6eb8bdd05c3"', '"fingerprint":"0000000000000000"')))
+
+    def test_reload_requires_profile_after_new_context_markers_even_with_identical_key(self):
+        boot = 'Using graphics backend OpenGL\nInfinite ATLAS far field on\n'
+        fresh = "Infinite ATLAS far field on\natlas: ingest components full=b7372337063bdd00\natlas coarse bake: the cache set's key: build cac47eaf36f7a839 program 1e4e3aa669661cdb ingest b7372337063bdd00 map b9b4f36c48aec7ae extra de033c0000000003 stages c2e892498a31c612 (17) whole 1e5dc6eb8bdd05c3\n"
+        ready = 'frame{atlasMs=1.25 unified=true} ready{ok} quality{tier 1} core={"interop":"host-copy","reach":256,"pipelinesBuilding":0,"genCache":{"fingerprint":"1e5dc6eb8bdd05c3"}}\n'
+        with tempfile.TemporaryDirectory() as d:
+            latest, profile = Path(d) / 'latest.log', Path(d) / 'profile.log'
+            for later_profile in (False, True):
+                latest.write_text(boot); profile.write_text(ready)
+                clock = {'now': 0}
+                def resources(*args, **kwargs): latest.write_text(boot + fresh)
+                def advance(seconds):
+                    clock['now'] += 60
+                    if later_profile:
+                        with profile.open('a') as stream: stream.write(ready)
+                with (patch.object(probe.game, 'actions', side_effect=resources),
+                      patch.object(probe.time, 'monotonic', side_effect=lambda: clock['now']),
+                      patch.object(probe.time, 'sleep', side_effect=advance)):
+                    if later_profile:
+                        observed = probe.reload_gl_resources(profile, latest, 100)
+                        self.assertTrue(observed['fresh_context_and_ingest_observed'])
+                    else:
+                        with self.assertRaises(RuntimeError): probe.reload_gl_resources(profile, latest, 100)
+
+
 class GlReceiptTests(unittest.TestCase):
     def test_saved_coarse_bake_log_extracts_real_parts_and_missing_is_unknown(self):
         line = "[27Oct2026 08:10:13.545] [atlas coarse bake/INFO] [com.nirncraft.NirnCraft/]: atlas coarse bake: the cache set's key: build cac47eaf36f7a839 program 1e4e3aa669661cdb ingest b7372337063bdd00 map b9b4f36c48aec7ae extra de033c0000000003 stages c2e892498a31c612 (17) whole 1e5dc6eb8bdd05c3"

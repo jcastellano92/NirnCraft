@@ -329,3 +329,10 @@ client/launcher cleanup; independent post-job checks twice find original setting
 The orchestrator brings main81883c4f into this isolated evaluation branch so route relaunches preserve caches by
 default, while retaining the tested strict player-pose helper and supervisor. Java/native payloads remain unchanged.
 Actual resource reload, a fresh route measurement, seams, driver budgets and all renderer stage gates remain open.
+
+The GL supervisor now has an opt-in resource-reload observation at the same camera. It requires new context and
+ingest messages plus a complete fresh key, then advances the profile boundary and waits for a subsequent ready
+sample carrying that key; an old ready sample cannot establish reload success. Capture metadata and full keys are
+compared separately from visual review. Its explicit81883c4f check gate passes15/16 with the one known Crafter
+coverage failure, zero new failures and zero missing checks (`1027-085451`,61s/1.48GiB). The57-case probe check
+passes. This is tool validation; the actual reload observation remains pending.

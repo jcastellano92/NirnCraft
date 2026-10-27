@@ -100,6 +100,59 @@ def latch_ready(result, key, profile, elapsed):
     result['readiness_observation'] = {'key': key, 'profile': profile, 'elapsed_seconds': round(elapsed, 2)}
 
 
+def reload_environment(env, transport, enabled):
+    env = dict(env)
+    env.pop('NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD', None)
+    if enabled:
+        if transport != 'gl': raise ValueError('resource reload probe requires GL transport')
+        env['NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD'] = '1'
+    return env
+
+
+def recreated_gl_marker(reload_log):
+    keys = fingerprint_observations(reload_log)
+    if not re.search(r'Infinite ATLAS far field on\b', reload_log) or 'atlas: ingest components ' not in reload_log:
+        return None
+    return next((key for key in reversed(keys) if all(value is not None for value in key['parts'].values())), None)
+
+
+def recreated_gl_ready(reload_log, boot_log, profile):
+    marker = recreated_gl_marker(reload_log)
+    fp = re.search(r'"genCache"\s*:\s*\{[^}]*"fingerprint"\s*:\s*"([0-9a-fA-F]{16})"', profile)
+    return bool(marker and fp and fp.group(1).lower() == marker['parts']['whole']
+                and gl_ready_gpu_profile_observed(boot_log, profile))
+
+
+def reload_gl_resources(profile, latest, deadline):
+    before = latest.read_bytes()
+    offset = profile.stat().st_size if profile.exists() else 0
+    remaining = int(deadline - time.monotonic())
+    if remaining < 65: raise RuntimeError('insufficient bounded time for resource reload')
+    started = time.monotonic()
+    game.actions(['resources'], timeout=min(60, remaining - 20))
+    observed_marker = None
+    while time.monotonic() < deadline - 12:
+        raw = latest.read_bytes()
+        if not raw.startswith(before): raise RuntimeError('game log replaced during resource reload')
+        changed = raw[len(before):].decode('utf-8', errors='replace')
+        marker = recreated_gl_marker(changed)
+        if marker and marker != observed_marker:
+            observed_marker = marker
+            # An old-context ready line may have been written while resources reloaded. Require a later sample,
+            # after observing the new context's complete key, even when the new and old fingerprints are equal.
+            offset = profile.stat().st_size if profile.exists() else 0
+        lines = atlas_static.profile_lines(profile, offset)
+        line = lines[-1] if lines else ''
+        print('TRACE progress resource reload', int(time.monotonic() - started),
+              (re.search(r'ready\{[^}]*\}', line) or ['no fresh profile'])[0], flush=True)
+        if observed_marker and recreated_gl_ready(changed, raw.decode('utf-8', errors='replace'), line):
+            return {'profile': line, 'elapsed_seconds': round(time.monotonic() - started, 2),
+                    'fingerprints': fingerprint_observations(changed),
+                    'fresh_context_and_ingest_observed': True}
+        time.sleep(min(3, max(0, deadline - 12 - time.monotonic())))
+    raise RuntimeError('no recreated GL context, ingest and ready profile after resource reload')
+
+
 def prepare_gl_pose(files, evidence):
     if not files: raise RuntimeError('kept world has no existing player')
     evidence = Path(evidence)
@@ -223,7 +276,10 @@ def worker(evidence, deadline):
     offset = profile.stat().st_size if profile.exists() else 0
     start = time.monotonic()
     transport = os.environ.get('NIRNCRAFT_ATLAS_PROBE_TRANSPORT', 'shared')
+    resource_reload = os.environ.get('NIRNCRAFT_ATLAS_PROBE_RESOURCE_RELOAD') == '1'
+    if resource_reload and transport != 'gl': raise RuntimeError('resource reload requires GL transport')
     result = {'state': 'UNVERIFIED', 'evidence': str(evidence),
+              'resource_reload_requested': resource_reload,
               'transport_requested': os.environ.get('NIRNCRAFT_ATLAS_PROBE_TRANSPORT', 'shared'),
               'requested_generator_cache_root': requested_cache,
               'checks': {}, 'unsupported': [
@@ -249,7 +305,7 @@ def worker(evidence, deadline):
     try:
         game.assert_prepared()
         os.environ['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
-        print('TRACE begin Vulkan launch', flush=True)
+        print('TRACE begin', transport, 'launch', flush=True)
         game.ensure('atlas', groups)
         print('TRACE ready client', flush=True)
         x, z, _ = atlas_tools.START
@@ -278,17 +334,28 @@ def worker(evidence, deadline):
             time.sleep(5)
         if not result['checks'].get('ready_gpu_profile_observed' if transport == 'gl' else 'ready_and_delivered'):
             raise RuntimeError('no fresh ready GPU profile before deadline')
-        for name, px in [('before', x), ('after', x + 2)]:
+        for name, px in [('before', x), ('after', x if resource_reload else x + 2)]:
+            if resource_reload and name == 'after':
+                prior_keys = fingerprint_observations(latest.read_text(encoding='utf-8', errors='replace'))
+                result['resource_reload_observation'] = reload_gl_resources(profile, latest, deadline)
+                next_keys = result['resource_reload_observation']['fingerprints']
+                result['checks']['resource_reload_stable_fingerprint'] = bool(prior_keys and next_keys) and prior_keys[-1]['parts'] == next_keys[-1]['parts']
             remaining = int(deadline - time.monotonic())
             if remaining < 8:
                 raise RuntimeError('deadline before ' + name + ' capture')
             scene = {'id': 'vk-probe-' + name, 'timeout': min(remaining - 2, 30)}
             shot, rec, _, extra = game.capture(scene, 'vanilla',
-                [f'visit {px} {z} 3 {atlas_tools.HEADING} 6 clear', 'hud on', 'wait 10'],
+                [f'visit {px} {z} 3 {atlas_tools.HEADING} 6 clear']
+                + (['try time set 6000'] if resource_reload else []) + ['hud on', 'wait 10'],
                 lambda tag: [f'capture {tag}'])
             shutil.copy2(shot, evidence / (name + '.png'))
             (evidence / (name + '.json')).write_text(json.dumps({'receipt': rec, 'extra': extra}, indent=2), encoding='utf-8')
             print('TRACE captured', name, flush=True)
+        if resource_reload:
+            poses = [json.loads((evidence / (name + '.json')).read_text())['receipt'] for name in ('before', 'after')]
+            fields = ('position', 'eye', 'yaw', 'pitch', 'fov', 'dimension', 'renderDistance', 'dayTime', 'weather')
+            result['checks']['resource_reload_capture_pose_equal'] = all(
+                field in poses[0] and field in poses[1] and poses[0][field] == poses[1][field] for field in fields)
     except Exception as exc:
         result['error'] = str(exc)
         print('UNVERIFIED:', exc, flush=True)
@@ -662,10 +729,12 @@ def main():
                     help='use a new generator cache inside this run’s evidence directory')
     ap.add_argument('--transport', choices=('shared', 'host', 'gl'), default='shared',
                     help='shared S3 baseline or own-device S1 host-copy allocation control; not a speed comparison')
+    ap.add_argument('--resource-reload', action='store_true', help='GL only: recreate models/context and compare the same camera before/after')
     ap.add_argument('--worker', nargs=2, metavar=('EVIDENCE', 'DEADLINE'), help=argparse.SUPPRESS)
     ap.add_argument('--close-worker', action='store_true', help=argparse.SUPPRESS)
     ap.add_argument('--snapshot-worker', metavar='EVIDENCE', help=argparse.SUPPRESS)
     args = ap.parse_args()
+    if args.resource_reload and args.transport != 'gl': ap.error('--resource-reload requires --transport gl')
     if args.close_worker:
         game.close()
         return 0
@@ -714,7 +783,7 @@ def main():
         ack = evidence / 'launch-ack.json'
         guard = LauncherGuard(ack, started_wall, Path(os.environ['LOCALAPPDATA']) / 'Programs/PrismLauncher/prismlauncher.exe')
         lines[hits[0]] = forced
-        env = transport_environment(launch_environment, args.transport)
+        env = reload_environment(transport_environment(launch_environment, args.transport), args.transport, args.resource_reload)
         env['NIRNCRAFT_HARNESS_JVM'] += ',nirncraft.atlas.probeOwner=' + uuid.uuid4().hex
         env['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
         env = diagnostic_environment(env, evidence, args.memory_diagnostics)
