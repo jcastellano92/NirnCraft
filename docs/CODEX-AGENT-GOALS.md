@@ -7,11 +7,11 @@ the renderer. No pushes are authorized.
 | Owner | Model | Goal | Measurable gate | Workspace / ownership |
 |---|---|---|---|---|
 | Coordinator | Current session | Finish direct Vulkan integration and combine accepted work | Fresh prepared ABI0.18 jar; bounded Minecraft VK_SHARED run with delivered frames, independently reviewed captures and subsequent draws; resize/relaunch; matched route measurements before performance claims | vulkan-recovery; Java/Vulkan integration, common harness, docs, packaging and main integration |
-| Frame pacing worker (`sol_review`) | gpt-6.1-sol, high | Remove the terrain-lock convoy behind the measured 68.7 ms render stall | Cold/background world/store reads cannot block render-facing setView/frame/staging; edit/reset/unload/stale-read regressions; native/output agreement and independent review; live route p99 target20ms/worst50ms remains the final performance gate | frame-pacing; voxgrid, world and necessary sectionstore snapshots/tickets, focused native regressions |
-| Seam worker (`terra_seam`) | gpt-6.1-terra | Make detail continuous across LOD boundaries | Cube candidate/reference paired geometry agreement and adequate boundary coverage; target DeltaE<2 at every observed boundary and stationary jitter flips<1%; all six boundaries eventually covered, no cap increases or hidden missing views | seam-parallel; shade-pass cube albedo and focused offline rig/analysis only |
+| Renderer worker (`sol_review`) | gpt-6.1-sol, high | Reduce the measured feature-pipeline startup delay using bounded reusable driver caches | Same-candidate cold/warm setup, all eight fingerprints and exact generated output agree; actual 19 cache hits, unchanged SPIR-V/resources and safe corruption fallback; no memory-cap increase | feature-pipeline-cache; attached feature pipelines, cache IO helper and focused offline pair oracle. Earlier frame-pacing and allocation-control packets are frozen. |
+| Lifecycle worker (`terra_seam`) | gpt-6.1-terra | Drain generator, bake, overlay, readers and startup owners before native/context/device destruction | Exactly-once release, nonblocking normal retirement, real shutdown barrier before shared-device close; blocked-owner/failure regressions, full build and later actual reload/shutdown gates | generator-lifecycle; Java ownership controller and targeted native-binding callers. Seam experiments stay preserved in seam-parallel; all six boundary/jitter targets remain open. |
 | Independent gatekeeper (`renderer_gatekeeper`) | gpt-6.1-terra | Verify evidence against the complete stage0-5 requirements and catch regressions | Maintain requirement/evidence/gap matrix; independent image/diff verdicts; reject insufficient coverage, stale artifacts or narrow checks used as broad acceptance | Read-only tracked source; own reports under E:/NirnCraft-scratch/codex-gatekeeper-evidence |
 
-## Current evidence and gaps
+## Early checkpoint evidence and gaps (before parallel repairs)
 
 Main `atlas-render` remains at `ca3c6c20`. Shared-device Vulkan recovery checkpoint `9366b010` is separate, with
 reviewed startup/status fixes awaiting the next fresh-jar probe. Native, parity, cancellation, delayed retirement,
@@ -43,7 +43,7 @@ pending their ceiling tests. Vulkan correctness remains the integration priority
 changes need separate parity, fingerprint/rebake and world-consistency gates. The runtime has four total slots,
 so the audit uses waiting time rather than launching an additional worker or displacing independent review.
 
-## Current follow-up priorities (2026-10-26, after live memory attribution)
+## Historical follow-up priorities (2026-10-26, after live memory attribution)
 
 The existing three-worker assignment remains; the seam worker now owns the focused cache-identity packet in
 cache-identity (base c5c6e117), while its unmeasured shade CSE variant stays parked in seam-parallel. The new packet
@@ -86,7 +86,7 @@ report and sends results as they become reviewable. Waiting for a GPU slot is ex
 coordinator advances the live integration lane while other lanes prepare code and oracles, then rotates queue windows.
 The active parent goal and all stage targets remain unchanged.
 
-## Current checkpoint (2026-10-27)
+## Checkpoint before frame-pacing integration (2026-10-27)
 
 Main renderer source remains `ca3c6c20`; main HEAD `162d96e5` also contains workflow/evidence fixes. The separate
 Vulkan candidate `6e599502` combines the reviewed synchronous S3 lifecycle, repaired off-lock section snapshots,
