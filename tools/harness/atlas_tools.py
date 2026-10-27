@@ -644,7 +644,7 @@ def run_route_scene(runner, s, v, fp):
     import results
     g = runner.game
     relaunch = bool(s.get("relaunch"))
-    cold = relaunch or bool(getattr(runner.a, "cold", False))
+    cold = bool(getattr(runner.a, "cold", False))
     stamp = time.strftime("%Y%m%d-%H%M%S")
     name = "route-relaunch" if relaunch else ("collide" if s.get("collide") else "route")
     folder = OUT / name / stamp
@@ -660,7 +660,7 @@ def run_route_scene(runner, s, v, fp):
             (g.GAME / "atlas-load.json").unlink(missing_ok=True)
             t_start = time.time()
             g.ensure(s["group"], runner.groups)
-            label = "run 2 (relaunch, same cache)" if i else ("run 1 (cold cache)" if (relaunch or cold) else "run (kept cache)")
+            label = "run 2 (relaunch, same cache)" if i else ("run 1 (cold cache)" if cold else "run 1 (kept cache)")
             try:
                 data = fly_route(runner, s, tag=TAG, since=t_start)
             except RuntimeError as e:

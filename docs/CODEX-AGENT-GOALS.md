@@ -271,3 +271,15 @@ before adding its model reload. It preserves ABI0.17 and all producer inputs, in
 OverlayLive identity. Source review cleared a full Java build. The first build stopped on two leftover0.18-only
 field references before tests; those were removed after termination, and a fresh build is queued. No Java port or
 native normal-close repair is merged into main at this checkpoint.
+
+The main-base Java candidate `3377d1aa` now passes a corrected full build:372 tests, zero failures/errors,19 opt-in
+skips; all19 new alias/lifetime tests pass. Its explicit e41568bf check-tier gate passes3/3, nothing missing or known
+failed; packaged/Jar bake inputs40d6c4f22688 are current. Source pins agree before/after; Jar4d5b12bd0d48. It remains
+isolated pending actual GL startup, model reload and revisit. Its first two undefined-field compile errors and the
+successful corrected logs remain separate evidence.
+
+Routine relaunch tests now retain existing generator/world caches. Only explicit `--cold` clears test caches;
+pipeline caches remain retained in either mode. Temporary-file regressions exercise the real route entry point and
+deletion implementation, proving both default preservation and explicit cold behavior. The root harness gate against
+2a7a0f7e completed11 items:10 passes, one independently known Crafter menu coverage failure, zero new failures and
+zero not run (`1027-074630`,107s/1.54GiB). No UI exemption, route threshold or missing-result rule was changed.

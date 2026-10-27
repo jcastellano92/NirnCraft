@@ -438,6 +438,32 @@ with _tf.TemporaryDirectory() as _td:
     _profile.write_text(_steady + "\n" + _steady, encoding="utf-8")
     expect(_static.profile_lines(_profile, 0) == [_steady], "partial profile writes do not count as complete samples")
 from types import SimpleNamespace as _NS
+import atlas_tools as _atlas_tools
+import results as _results
+
+# Relaunching exercises existing world data; only an explicit --cold may delete it.
+with _tf.TemporaryDirectory() as _td:
+    _root = Path(_td)
+    _game_stub = _NS(GAME=_root, ensure=lambda *args: None)
+    _scene = {"id": "atlas-route-relaunch", "group": "atlas", "relaunch": True}
+    for _cold in (False, True):
+        _cache = _root / "atlas-cache/1234/set/region.bin"
+        _world_cache = _root / "saves/test/data/nirncraft_atlas/section.bin"
+        _pipeline = _root / "atlas-cache/pipelines.bin"
+        for _file in (_cache, _world_cache, _pipeline):
+            _file.parent.mkdir(parents=True, exist_ok=True)
+            _file.write_bytes(b"retained-cache-sentinel")
+        _runner = _NS(game=_game_stub, groups={}, a=_NS(cold=_cold))
+        with (_patch.object(_atlas_tools, "OUT", _root / "reports"),
+              _patch.object(_atlas_tools, "ensure_spawn"),
+              _patch.object(_atlas_tools, "fly_route", side_effect=RuntimeError("not ready: fixture stop before route")),
+              _patch.object(_results, "record", return_value={"status": "fail"})):
+            _atlas_tools.run_route_scene(_runner, _scene, "atlas", "fixture")
+        expect(_cache.exists() == (not _cold) and _world_cache.exists() == (not _cold),
+               "relaunch preserves generator and world caches unless --cold is explicit" if not _cold
+               else "explicit --cold still clears generator and world caches")
+        expect(_pipeline.read_bytes() == b"retained-cache-sentinel", "pipeline cache survives either launch policy")
+
 _chosen = {"id": "chosen", "tier": "check", "group": "-", "tags": ["check:chosen"]}
 _other = {"id": "unrelated", "tier": "check", "group": "-", "tags": ["check:other"]}
 _gate_args = _NS(ids=[], tier="check", tag=["check:chosen"], suite=None, group=None, exclude=None, changed=None, limit=None)
