@@ -341,8 +341,8 @@ public:
         uint32_t chunk, slot, gen, id;
     };
     void gpuUniform(const std::vector<UniformHit>& hits);
-    // render thread, once a frame: the window follows the camera's block (FOLLOW sections behind; the columns it enters
-    // are read from the world when its lock is free); refill: the same read on the update thread (atlas_update), waiting
+    // Render thread: follow the camera and try an in-memory refill. The existing update thread does cold reads;
+    // neither a world-lock wait nor disk I/O is ever performed while holding the grid lock.
     void frame(const int32_t camBlock[3], World& world);
     void refill(World& world);
     static constexpr int FOLLOW = 4;
@@ -430,6 +430,9 @@ public:
         held.store(true);
         while (!release.load()) std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+    void publishBarrierForTest(const std::atomic<bool>* release, std::atomic<bool>* held) {
+        std::lock_guard<std::mutex> lock(mu_); publishReleaseForTest_ = release; publishHeldForTest_ = held;
+    }
     // the snapshot's "coarseLost" .. "coverage" fields as atlas_info writes them (ending in a comma)
     static std::string refineJson(const InfoSnap& s);
     int levels() const { return 1 + activeCoarse_; }  // level 0 and the coarse ones
@@ -484,6 +487,12 @@ private:
     // sections waiting for a batch: the world's own (shared, never copied) or an upload's copy
     using Ids = VgSrc;
     std::unordered_map<Key, Ids, KeyHash> pending_;
+    uint64_t windowRevision_ = 0, inputSerial_ = 0;
+    std::unordered_map<Key, uint64_t, KeyHash> inputRevision_;
+    std::unordered_set<Key, KeyHash> lookupWanted_;
+    std::unordered_set<Key, KeyHash> worldSources_;
+    const std::atomic<bool>* publishReleaseForTest_ = nullptr;
+    std::atomic<bool>* publishHeldForTest_ = nullptr;
     World* world_ = nullptr;
     bool clearPending_ = false;
     // per cell (in memory: chunk (x, y, z) at ((y - VG_MIN_SY) * D + z mod D) * D + x mod D)
@@ -546,7 +555,9 @@ private:
     std::vector<Key3> released_;
     Stats stats_;
     void shift(int nox, int noz, World& world);    // (mu_ held)
-    void refillLocked(World& world, bool wait);    // (mu_ held)
+    void refillSnapshot(World& world, bool wait);  // takes its own short grid holds, reads outside them
+    void requestHostRefill(int sx, int sy, int sz);  // mu_ held, retain a cold/busy lookup for the update thread
+    bool refreshWorldSource(const Key& key, VgSrc& source);  // mu_ held, memory-only and never waits
     static int pmod(int a, int d) { return ((a % d) + d) % d; }
     bool inWindow(int sx, int sy, int sz) const {
         return sx >= ox_ && sx < ox_ + D && sz >= oz_ && sz < oz_ + D && sy >= VG_MIN_SY && sy < VG_MIN_SY + H;
@@ -633,7 +644,6 @@ private:
     int lastEye_[3] = {0, 0, 0};
     void layOut();                                       // (mu_ held)
     void placeLevel(Level& L, int camSx, int camSz);     // (mu_ held) follow the camera
-    void refillCoarse(World& world, bool wait);          // (mu_ held) the entered columns' sections from the world
     void takeCoarse(VgBatch& b);                         // (mu_ held)
     // (takeCoarse) a slot for the cell (level-local; ~0u: none), its chunk cleared; the cells whose section columns'
     // rock and air are to be written at the batch's end; the victims for a full pool (farthest last)

@@ -32,6 +32,8 @@ if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
 if (-not $NoTest) {
     & (Join-Path $build "$Config\atlas_cache_test.exe")
     if ($LASTEXITCODE) { throw 'cache recovery tests failed' }
+    & (Join-Path $build "$Config\atlas_frame_lock_test.exe")
+    if ($LASTEXITCODE) { throw 'frame lock/snapshot tests failed' }
     if ($Validate) {
         $env:VK_ADD_LAYER_PATH = Join-Path $env:VULKAN_SDK 'Bin'
         $env:ATLAS_VK_VALIDATION = '1'
