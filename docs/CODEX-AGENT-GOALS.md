@@ -283,3 +283,25 @@ pipeline caches remain retained in either mode. Temporary-file regressions exerc
 deletion implementation, proving both default preservation and explicit cold behavior. The root harness gate against
 2a7a0f7e completed11 items:10 passes, one independently known Crafter menu coverage failure, zero new failures and
 zero not run (`1027-074630`,107s/1.54GiB). No UI exemption, route threshold or missing-result rule was changed.
+
+## First actual GL-host cache/lifetime candidate run (2026-10-27)
+
+The isolated Java candidate now also has reviewed bounded GL supervision at `e6d25f56`:66 CPU tests, no skips,
+including actual named-job accounting; corrected tools gate14 passes/one known Crafter failure/no missing checks.
+The original bad SDK-root failure remains preserved. Preparation installed the verified372-test Jar (built4d5b12bd,
+installed aa53c308; equal payloads except equivalent bake manifest formatting), current ABI0.17/native076af4d6,
+and current bakes40d6c4f22688. Before/after preparation cache inventories agree; no launch occurred during install.
+
+Actual `live-20261027-080917-164934` then reached a fresh ready profile at124s, captured two terrain views and closed
+without force in149s; job peak13.33GiB. Actual ingest b7372337063bdd00 and component witnesses agree with the prior
+canonical candidate. The native build change legitimately gives whole key1e5dc6eb8bdd05c3 (build cac47eaf36f7a839,
+program1e4e3aa669661cdb, mapb9b4f36c48aec7ae, extra de033c0000000003, stagesc2e892498a31c612/count17). Cache retention
+holds three sets, including the new16.2MB set. This is not a matched Vulkan memory/performance comparison.
+
+Independent post-job checks twice confirmed original JVM marker/backend, equivalent properties (line order differs),
+no lease and no matching client/launcher. The captures have different positions; they show terrain but cannot prove
+visual stability or absence of holes. The first includes white foreground/discontinuities needing matched reference.
+The raw worker receipt remains UNVERIFIED: its final camera move overwrote earlier readiness, and its fingerprint
+filter missed the actual key line. Tool corrections now preserve phase-specific readiness and parse real key lines.
+GL probes will also fix the kept player's starting pose before launch, so loading and captures concern the same
+horizontal region. Tests/review of those corrections and a matched relaunch remain pending. No renderer stage is done.
