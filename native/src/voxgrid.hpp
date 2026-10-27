@@ -344,6 +344,8 @@ public:
     // Render thread: follow the camera and try an in-memory refill. The existing update thread does cold reads;
     // neither a world-lock wait nor disk I/O is ever performed while holding the grid lock.
     void frame(const int32_t camBlock[3], World& world);
+    // Update thread: warm the next camera window before its first render, without moving render-owned windows.
+    void prepare(World& world, const double centre[3]);
     void refill(World& world);
     static constexpr int FOLLOW = 4;
     // the sections the grid gave up or could not take while they lie in its window (the pool full: the farthest go

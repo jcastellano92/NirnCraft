@@ -93,6 +93,7 @@ public:
         std::shared_ptr<const uint64_t> lease;
         uint32_t genVersion = 0;
         int x0 = 0, z0 = 0, x1 = 0, z1 = 0;
+        bool outsideKeep = false;  // an explicit section lookup, as get(), also reads outside retention
         std::vector<Region> regions;
         std::vector<Layer> layers;
         std::vector<Entry> loaded;
@@ -105,7 +106,7 @@ public:
             });
         }
     };
-    RangeRead readRange(int sx0, int sz0, int sx1, int sz1);
+    RangeRead readRange(int sx0, int sz0, int sx1, int sz1, bool outsideKeep = false);
     static void resolveRange(RangeRead& read);
     bool completeRange(const RangeRead& read);
     void memoryInRange(int sx0, int sz0, int sx1, int sz1, std::vector<std::pair<Key3, PackedIds>>& out) const;

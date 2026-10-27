@@ -224,6 +224,49 @@ static void coldMutationTickets() {
     }
 }
 
+static void coldUpdateCompatibility() {
+    Fixture fixture;
+    {
+        World world; fixture.world(world);
+        double away[3] = {20000, 100, 0}; double ms = 0;
+        world.update(away, 0, &ms);
+        auto outside = world.sectionSource(0, 6, 0);
+        check(outside.packed && !outside.raw, "explicit cold section lookup incorrectly obeyed range retention");
+        uint16_t decoded[4096]; unpackSection(outside.packed->data(), decoded);
+        check(decoded[1] == 3, "explicit outside-retention cold lookup returned wrong IDs");
+    }
+    for (bool first : {true, false}) {
+        World world; fixture.world(world);
+        VoxGrid grid; grid.D = 8; grid.slotCap = 64; grid.coarseLevels = 2; grid.coarseD = 8;
+        grid.coarseCap[1] = grid.coarseCap[2] = 16; grid.setWorld(&world);
+        double centre[3] = {0, 100, 0}; double away[3] = {20000, 100, 0}; double ms = 0;
+        int32_t farCamera[3] = {20000, 100, 0}, camera[3] = {0, 100, 0};
+        world.update(away, 0, &ms);
+        if (!first) { grid.frame(farCamera, world); grid.take(64); }
+        auto prior = grid.stats();
+        std::atomic<bool> release{false}, held{false};
+        world.sectionReadBarrierForTest(&release, &held);
+        auto update = std::async(std::launch::async, [&] {
+            // Same order as atlas_update: new retention centre, anticipate next frame, refill current window.
+            world.update(centre, 0, &ms); grid.prepare(world, centre); grid.refill(world);
+        });
+        auto until = std::chrono::steady_clock::now() + 2s;
+        while (!held.load() && std::chrono::steady_clock::now() < until) std::this_thread::yield();
+        if (!held.load()) { release.store(true); update.get(); check(false, "update prefetch did not reach cold I/O"); }
+        check(grid.stats().ox == prior.ox, "update preparation moved the render-owned grid window");
+        renderWhileHeld(release, [&] { grid.setView(0, -1); grid.frame(farCamera, world); grid.take(64); });
+        update.get(); world.sectionReadBarrierForTest(nullptr, nullptr);
+        // There is deliberately no second update after the camera moves (also the first actual centre frame).
+        grid.frame(camera, world);
+        auto batch = grid.take(64);
+        bool found = false;
+        for (const auto& words : batch.packs) if (words) {
+            uint16_t decoded[4096]; unpackSection(words->data(), decoded); found |= decoded[1] == 3;
+        }
+        check(found, "first render after update/jump did not stage the cold packed section");
+    }
+}
+
 static void publicationEdit(bool reset) {
     World world;
     VoxGrid grid; grid.D = 16; grid.slotCap = 256; grid.coarseLevels = 0; grid.setWorld(&world);
@@ -262,7 +305,7 @@ int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
         heldWorld(false); heldWorld(true); coldEdit(false); coldEdit(true); revisionAndReset(); missingEditedBase(); destructiveColdChange(); coldMutationTickets();
-        publicationEdit(false); publicationEdit(true);
+        publicationEdit(false); publicationEdit(true); coldUpdateCompatibility();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

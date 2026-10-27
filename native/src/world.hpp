@@ -225,7 +225,7 @@ public:
         std::vector<std::pair<Key3, SectionSrc>> entries;
     };
     // wait=true is the existing update thread: cold I/O runs outside mu_. The render path only tries memory.
-    bool snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out);
+    bool snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep = false);
     // The caller holds its grid lock; never wait for the world. Validation and publication are one operation.
     bool applySections(const SectionSnapshot& snapshot, const std::function<void()>& apply) const;
     bool trySectionSource(int sx, int sy, int sz, SectionSrc& out);

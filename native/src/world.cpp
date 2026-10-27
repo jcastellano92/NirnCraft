@@ -679,12 +679,12 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
     return s;
 }
 
-bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out) {
+bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep) {
     out = {};
     std::unique_lock<std::mutex> lock(mu_, std::defer_lock);
     if (wait) lock.lock();
     else if (!lock.try_lock()) return false;
-    auto read = store_->readRange(sx0, sz0, sx1, sz1);
+    auto read = store_->readRange(sx0, sz0, sx1, sz1, outsideKeep);
     for (auto& region : read.regions) if (region.scanned)
         region.index.erase(std::remove_if(region.index.begin(), region.index.end(), [&](const auto& loc) {
             return sections_.count(loc.key) != 0;
@@ -787,7 +787,7 @@ bool World::resolveSectionSource(int sx, int sy, int sz, SectionSrc& out) {
     if (current()) return true;
     lock.unlock();
     SectionSnapshot snapshot;
-    bool complete = snapshotSections(sx, sz, sx + 1, sz + 1, true, snapshot);
+    bool complete = snapshotSections(sx, sz, sx + 1, sz + 1, true, snapshot, true);
     lock.lock();
     if (current()) return true;
     if (!complete) return false;

@@ -588,7 +588,7 @@ void SectionStore::changed(const Key3& k) {
     else { changed_.clear(); reads_.clear(); }
 }
 
-SectionStore::RangeRead SectionStore::readRange(int sx0, int sz0, int sx1, int sz1) {
+SectionStore::RangeRead SectionStore::readRange(int sx0, int sz0, int sx1, int sz1, bool outsideKeep) {
     RangeRead read;
     read.epoch = epoch_; read.serial = serial_; read.genVersion = genVersion_;
     uint64_t oldest = serial_;
@@ -600,9 +600,9 @@ SectionStore::RangeRead SectionStore::readRange(int sx0, int sz0, int sx1, int s
         it = it->second <= oldest ? changed_.erase(it) : std::next(it);
     read.lease = std::make_shared<const uint64_t>(serial_);
     reads_.push_back(read.lease);
-    read.x0 = sx0; read.z0 = sz0; read.x1 = sx1; read.z1 = sz1;
+    read.x0 = sx0; read.z0 = sz0; read.x1 = sx1; read.z1 = sz1; read.outsideKeep = outsideKeep;
     if (sx0 >= sx1 || sz0 >= sz1) return read;
-    auto kept = [&](int rx, int rz) { return keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_); };
+    auto kept = [&](int rx, int rz) { return outsideKeep || keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_); };
     for (const auto& [k, r] : warm_)
         if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) {
             read.known.insert(k);
@@ -717,7 +717,7 @@ bool SectionStore::completeRange(const RangeRead& read) {
     auto inRead = [&](int rx, int rz) {
         return rx >= fdivs(read.x0, 16) && rx <= fdivs(read.x1 - 1, 16) &&
                rz >= fdivs(read.z0, 16) && rz <= fdivs(read.z1 - 1, 16) &&
-               (keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_));
+               (read.outsideKeep || keep_ < 0 || (std::abs(rx - keepRx_) <= keep_ && std::abs(rz - keepRz_) <= keep_));
     };
     for (const auto& [rk, region] : cold_)
         if (region.fileBytes && inRead(int32_t(uint32_t(rk >> 32)), int32_t(uint32_t(rk))) &&

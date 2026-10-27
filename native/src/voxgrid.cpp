@@ -788,6 +788,36 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     if (readNow || placed) refillSnapshot(world, false);
 }
 
+void VoxGrid::prepare(World& world, const double centre[3]) {
+    int x0 = 0, z0 = 0, x1 = 0, z1 = 0;
+    bool needed = false;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (!enabled) return;
+        int sx = int(std::floor(centre[0] / 16)), sz = int(std::floor(centre[2] / 16));
+        auto window = [&](int ox, int oz, int side, int span) {
+            if (!needed) { x0 = ox * span; z0 = oz * span; x1 = (ox + side) * span; z1 = (oz + side) * span; }
+            else { x0 = std::min(x0, ox * span); z0 = std::min(z0, oz * span);
+                   x1 = std::max(x1, (ox + side) * span); z1 = std::max(z1, (oz + side) * span); }
+            needed = true;
+        };
+        if (!centred_ || std::abs(sx - (ox_ + D / 2)) > FOLLOW || std::abs(sz - (oz_ + D / 2)) > FOLLOW)
+            window(sx - D / 2, sz - D / 2, D, 1);
+        int levels = std::clamp(coarseLevels, 0, VG_LEVELS - 1);
+        for (int k = 1; k <= levels; ++k) {
+            int span = 1 << k, cx = fdiv(sx, span), cz = fdiv(sz, span), follow = std::max(1, 8 >> k);
+            const Level& level = lv_[k];
+            if (!laidOut_ || !level.centred || std::abs(cx - (level.ox + level.D / 2)) > follow ||
+                std::abs(cz - (level.oz + level.D / 2)) > follow)
+                window(cx - coarseD / 2, cz - coarseD / 2, coarseD, span);
+        }
+    }
+    if (needed) {
+        World::SectionSnapshot snapshot;
+        world.snapshotSections(x0, z0, x1, z1, true, snapshot);  // ticket I/O without either shared lock
+    }
+}
+
 void VoxGrid::refill(World& world) {
     if (!enabled) return;
     World::Made made;
