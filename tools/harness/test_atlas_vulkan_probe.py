@@ -502,6 +502,26 @@ class SupervisorChecks(unittest.TestCase):
             rows = [probe.json.loads(line) for line in (Path(folder) / 'memory.jsonl').read_text().splitlines()]
             self.assertEqual([r['phase'] for r in rows], ['before-launch', 'after-client-cleanup'])
 
+    def test_large_client_gets_rate_limited_region_census(self):
+        big = {'job': {}, 'processes': [{'pid': 7, 'client': True, 'privateBytes': 9 * 2**30},
+                                         {'pid': 8, 'client': False, 'privateBytes': 9 * 2**30}]}
+        census = {'pid': 7, 'totals': {}, 'largest': []}
+        with tempfile.TemporaryDirectory() as folder, patch.object(probe.process_memory, 'sample', return_value=big), \
+                patch.object(probe.process_regions, 'snapshot', return_value=census) as snap, \
+                patch.object(probe.time, 'monotonic', side_effect=[100.0, 101.0, 120.0]):
+            probe.memory_sample(folder, [7], phase='running')
+            probe.memory_sample(folder, [7], phase='running')  # inside the interval: no second census
+            probe.memory_sample(folder, [7], phase='running')
+            self.assertEqual([7, 7], [call.args[0] for call in snap.call_args_list])
+            rows = [probe.json.loads(line) for line in (Path(folder) / 'regions.jsonl').read_text().splitlines()]
+            self.assertEqual(2, len(rows))
+            self.assertEqual(7, rows[0]['pid'])
+        small = {'job': {}, 'processes': [{'pid': 7, 'client': True, 'privateBytes': 2**30}]}
+        with tempfile.TemporaryDirectory() as folder, patch.object(probe.process_memory, 'sample', return_value=small), \
+                patch.object(probe.process_regions, 'snapshot') as snap:
+            probe.memory_sample(folder, [7])
+            snap.assert_not_called()
+            self.assertFalse((Path(folder) / 'regions.jsonl').exists())
     def test_exhausted_snapshot_budget_does_not_spawn_helper(self):
         with patch.object(probe.subprocess, 'Popen') as start:
             with self.assertRaises(TimeoutError):

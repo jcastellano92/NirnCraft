@@ -22,6 +22,7 @@ import atlas_static
 import probe_visuals
 import atlas_tools
 import process_memory
+import process_regions
 import probe_flags
 
 
@@ -50,9 +51,30 @@ def abi_logged(raw, version="0.19.0"):
     return bool(re.search(r"atlas_core [^\n]*\(abi\s+" + re.escape(version) + r"(?:[;)\s])", raw))
 
 
+REGION_CENSUS_MIN_PRIVATE = 4 * 2**30
+REGION_CENSUS_INTERVAL = 10.0
+_last_region_census = {}
+
+
+def region_census(evidence, row):
+    # Attribution only: which kind of allocation holds the commit (private/mapped, resident or merely charged).
+    # Rate limited per process so the supervisor's pressure check is never starved by a long address-space walk.
+    for item in row.get('processes', []):
+        if not item.get('client') or item.get('privateBytes', 0) < REGION_CENSUS_MIN_PRIVATE: continue
+        now = time.monotonic()
+        if now - _last_region_census.get(item['pid'], -1e9) < REGION_CENSUS_INTERVAL: continue
+        _last_region_census[item['pid']] = now
+        census = process_regions.snapshot(item['pid'])
+        census['phase'] = row.get('phase')
+        census['privateBytes'] = item['privateBytes']
+        with (Path(evidence) / 'regions.jsonl').open('a', encoding='utf-8') as stream:
+            stream.write(json.dumps(census) + '\n')
+
+
 def memory_sample(evidence, pids=(), phase='running'):
     row = process_memory.sample(pids)
     row['phase'] = phase
+    region_census(evidence, row)
     with (Path(evidence) / 'memory.jsonl').open('a', encoding='utf-8') as stream:
         stream.write(json.dumps(row) + '\n')
     return row
