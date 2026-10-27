@@ -254,3 +254,20 @@ delay. Sol owns a narrow producer-drain/consumer-retirement ownership repair and
 Terra independently reviews. No production repair or new stage pass has been accepted. A second focused Terra
 inspection evaluates porting deterministic near-state aliases to main without shared-Vulkan dependencies, so
 equivalent traversal orders cannot unnecessarily discard valid cached world data. Heavy jobs remain serialized.
+
+The isolated native normal-close repair now has a fresh229-second/6.77GiB prebuild,13 passing CPU checks and
+byte-identical83 production/114 configured shaders. Source934840ab1c50, DLLf46e6839706b and test executable
+2d8c914b63eb are pinned in its scratch receipt. The repeated cached borrowed-device fixture
+`gen-shutdown-fixed-borrowed-both-20261027-0739` admitted the same7 near sections and5632 far cells/413 mixed,
+completed copy2 and produced no extra frames. It transferred two slabs after producer drain, then released both
+(62959632 requested bytes) after native consumer drain at context close. Final external device destruction reported
+zero validation errors, including no initial null descriptors. Child exit0/reaped, originals unchanged and clone
+updates recorded; independent Terra comparison confirms the narrow before/after result. The baseline remains raw
+and unchanged. This is not production acceptance: checked terminal failure propagation and actual live shutdown
+still need proof. Ordinary detach must remain reusable, so a terminal close operation cannot silently change it.
+
+The separate main-base GL-host candidate ports deterministic aliases with coherent worker/context lifetime handling
+before adding its model reload. It preserves ABI0.17 and all producer inputs, including the conservative Java
+OverlayLive identity. Source review cleared a full Java build. The first build stopped on two leftover0.18-only
+field references before tests; those were removed after termination, and a fresh build is queued. No Java port or
+native normal-close repair is merged into main at this checkpoint.
