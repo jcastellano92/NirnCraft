@@ -2,6 +2,25 @@
  "description": "Changed files -> the tests they can affect (tags, prefix match) and the hot reload they need. First matching rule wins unless it says \"final\": false. Used by `harness.py run --changed [REF]`, `harness.py gate` (merge / push) and watch mode.",
  "rules": [
   {
+   "paths": [
+    "tools/harness/atlas_vulkan_probe.py",
+    "tools/harness/test_atlas_vulkan_probe.py",
+    "tools/harness/probe_flags.py",
+    "tools/harness/process_memory.py",
+    "tools/harness/test_process_memory.py",
+    "tools/harness/game.py",
+    "tools/harness/test_game_prepared.py",
+    "tools/harness/test_game_status.py",
+    "tools/dev/live_world.py",
+    "tools/dev/test_live_world.py"
+   ],
+   "tags": [
+    "check:vulkan-probe"
+   ],
+   "reload": null,
+   "final": false
+  },
+  {
    "paths": ["tools/dev/build_263.py", "tools/dev/build_263.ps1", "tools/dev/process_guard.py", "tools/dev/test_process_guard.py"],
    "tags": ["check:build-wrapper"],
    "reload": null
