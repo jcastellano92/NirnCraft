@@ -534,13 +534,15 @@ final class AtlasClientGen implements AutoCloseable {
         camYaw = yaw;
         camSet = true;
         int cx = (int) Math.floor(x) >> 4, cz = (int) Math.floor(z) >> 4;
-        if (cx == camCx && cz == camCz) return;
+        AtlasClientGen c = active;
+        // A replacement generator needs its own readiness origin even when the camera stayed in the same chunk.
+        boolean firstFollow = c != null && c.jumpNs == 0;
+        if (cx == camCx && cz == camCz && !firstFollow) return;
         int ox = camCx, oz = camCz;
         camCx = cx;
         camCz = cz;
-        AtlasClientGen c = active;
         if (c == null) return;
-        if (ox == Integer.MIN_VALUE || Math.max(Math.abs(cx - ox), Math.abs(cz - oz)) > 4) {
+        if (firstFollow || ox == Integer.MIN_VALUE || Math.max(Math.abs(cx - ox), Math.abs(cz - oz)) > 4) {
             camVx = camVz = 0;
             c.jumped(cx, cz);
         }

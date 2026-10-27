@@ -336,3 +336,11 @@ sample carrying that key; an old ready sample cannot establish reload success. C
 compared separately from visual review. Its explicit81883c4f check gate passes15/16 with the one known Crafter
 coverage failure, zero new failures and zero missing checks (`1027-085451`,61s/1.48GiB). The57-case probe check
 passes. This is tool validation; the actual reload observation remains pending.
+
+Actual reload `live-20261027-090450-547771` recreated context/ingest with the same key, but remained at spawn0/441
+until the bounded observation expired. It closed normally (180s job/13.46GiB), with settings/process cleanup
+independently checked twice. `follow()` returned early for unchanged static camera coordinates before initializing
+the replacement generator's per-instance jump/readiness origin. The narrow repair permits that first follow even
+in the same chunk. Explicit4848c5a0 gate3/3 passes (`1027-091106`,191s/5.02GiB); actual Java372/0 failures/errors/
+19 skips, Jar e711370db72c, unchanged generator identity79ee02738613/native076af4d670e6. The red live receipt is
+preserved; the same-camera repaired reload and route remain pending.
