@@ -264,3 +264,68 @@ Full Java build passed 372 tests, zero failures/errors, 19 opt-in skips (log `10
 The bounded GL probe supervisor is checkpointed separately from the Java candidate. Its 66 focused CPU tests passed, including actual named-job memory accounting. The explicit `3377d1aa` tools gate passed 14 checks, with one known crafter UI-coverage failure and zero new or missing checks (`1027-080342-ingest__GL_corrected_tools_gate.log`); 46 shader-pack stages compiled using the versioned SDK. The earlier incorrect-SDK gate failure remains in `1027-080104-ingest__GL_tools_check_gate.log`. GL runtime readiness, shutdown, reload and cache reuse still require live evidence.
 
 The fixed-pose GL probe now journals player backups before mutation, validates saved position and rotation, and records the first ready profile separately from later movement. It extracts the actual coarse-bake fingerprint components with unknown values left absent. The explicit `e41568bf` combined gate passed 15 of 16 checks, with one known crafter UI-coverage failure and zero new or missing checks (`1027-081926-ingest__combined_GL_candidate_gate.log`). The 54-case probe check and 7 prepared/status cases reran; the earlier 372-case Java, 5 process-memory and 6 launch-budget passing results were reused. Actual fixed-pose GL startup, reload and warm cache revisit remain unverified.
+The isolated native normal-close repair now has a fresh229-second/6.77GiB prebuild,13 passing CPU checks and
+byte-identical83 production/114 configured shaders. Source934840ab1c50, DLLf46e6839706b and test executable
+2d8c914b63eb are pinned in its scratch receipt. The repeated cached borrowed-device fixture
+`gen-shutdown-fixed-borrowed-both-20261027-0739` admitted the same7 near sections and5632 far cells/413 mixed,
+completed copy2 and produced no extra frames. It transferred two slabs after producer drain, then released both
+(62959632 requested bytes) after native consumer drain at context close. Final external device destruction reported
+zero validation errors, including no initial null descriptors. Child exit0/reaped, originals unchanged and clone
+updates recorded; independent Terra comparison confirms the narrow before/after result. The baseline remains raw
+and unchanged. This is not production acceptance: checked terminal failure propagation and actual live shutdown
+still need proof. Ordinary detach must remain reusable, so a terminal close operation cannot silently change it.
+
+The separate main-base GL-host candidate ports deterministic aliases with coherent worker/context lifetime handling
+before adding its model reload. It preserves ABI0.17 and all producer inputs, including the conservative Java
+OverlayLive identity. Source review cleared a full Java build. The first build stopped on two leftover0.18-only
+field references before tests; those were removed after termination, and a fresh build is queued. No Java port or
+native normal-close repair is merged into main at this checkpoint.
+
+The main-base Java candidate `3377d1aa` now passes a corrected full build:372 tests, zero failures/errors,19 opt-in
+skips; all19 new alias/lifetime tests pass. Its explicit e41568bf check-tier gate passes3/3, nothing missing or known
+failed; packaged/Jar bake inputs40d6c4f22688 are current. Source pins agree before/after; Jar4d5b12bd0d48. It remains
+isolated pending actual GL startup, model reload and revisit. Its first two undefined-field compile errors and the
+successful corrected logs remain separate evidence.
+
+Routine relaunch tests now retain existing generator/world caches. Only explicit `--cold` clears test caches;
+pipeline caches remain retained in either mode. Temporary-file regressions exercise the real route entry point and
+deletion implementation, proving both default preservation and explicit cold behavior. The root harness gate against
+2a7a0f7e completed11 items:10 passes, one independently known Crafter menu coverage failure, zero new failures and
+zero not run (`1027-074630`,107s/1.54GiB). No UI exemption, route threshold or missing-result rule was changed.
+
+## First actual GL-host cache/lifetime candidate run (2026-10-27)
+
+The isolated Java candidate now also has reviewed bounded GL supervision at `e6d25f56`:66 CPU tests, no skips,
+including actual named-job accounting; corrected tools gate14 passes/one known Crafter failure/no missing checks.
+The original bad SDK-root failure remains preserved. Preparation installed the verified372-test Jar (built4d5b12bd,
+installed aa53c308; equal payloads except equivalent bake manifest formatting), current ABI0.17/native076af4d6,
+and current bakes40d6c4f22688. Before/after preparation cache inventories agree; no launch occurred during install.
+
+Actual `live-20261027-080917-164934` then reached a fresh ready profile at124s, captured two terrain views and closed
+without force in149s; job peak13.33GiB. Actual ingest b7372337063bdd00 and component witnesses agree with the prior
+canonical candidate. The native build change legitimately gives whole key1e5dc6eb8bdd05c3 (build cac47eaf36f7a839,
+program1e4e3aa669661cdb, mapb9b4f36c48aec7ae, extra de033c0000000003, stagesc2e892498a31c612/count17). Cache retention
+holds three sets, including the new16.2MB set. This is not a matched Vulkan memory/performance comparison.
+
+Independent post-job checks twice confirmed original JVM marker/backend, equivalent properties (line order differs),
+no lease and no matching client/launcher. The captures have different positions; they show terrain but cannot prove
+visual stability or absence of holes. The first includes white foreground/discontinuities needing matched reference.
+The raw worker receipt remains UNVERIFIED: its final camera move overwrote earlier readiness, and its fingerprint
+filter missed the actual key line. Tool corrections now preserve phase-specific readiness and parse real key lines.
+GL probes will also fix the kept player's starting pose before launch, so loading and captures concern the same
+horizontal region. Tests/review of those corrections and a matched relaunch remain pending. No renderer stage is done.
+
+## Matched GL cache observations and evaluation baseline (2026-10-27)
+
+The first corrected-pose run `live-20261027-082510-356030` observed ready at89.53s, near generated818/cached68,
+and normal shutdown (115s job/13.74GiB peak). The same `17fe73c3` candidate repeated at the identical saved
+(-149.5,200,260.5) pose in `live-20261027-082923-751893`: ready65.98s, near generated82/cached1007, far25/25
+cached, coarse263/263 loaded0.2s/windows1.0s, no far tile writes or hash errors in that readiness sample.
+All eight key fields agree, including whole1e5dc6eb8bdd05c3. Aggregate misses and87 section writes prevent a
+zero-regeneration claim; actual visited-footprint versus unfinished/fringe work still needs diagnosis. Startup
+readiness is not the route's under-two-second revisit measurement. Both runs close normally without forced
+client/launcher cleanup; independent post-job checks twice find original settings, no lease and no processes.
+
+The orchestrator brings main81883c4f into this isolated evaluation branch so route relaunches preserve caches by
+default, while retaining the tested strict player-pose helper and supervisor. Java/native payloads remain unchanged.
+Actual resource reload, a fresh route measurement, seams, driver budgets and all renderer stage gates remain open.
