@@ -255,6 +255,15 @@ Terra independently reviews. No production repair or new stage pass has been acc
 inspection evaluates porting deterministic near-state aliases to main without shared-Vulkan dependencies, so
 equivalent traversal orders cannot unnecessarily discard valid cached world data. Heavy jobs remain serialized.
 
+## ABI 0.17 deterministic ingest candidate (2026-10-27)
+
+The isolated `codex-main-ingest-stability` candidate selects deterministic visual aliases and retains generator, far, bake, overlay, startup and context-reader owners until their release drains. Its GL interop detach is pumped on the render thread; native legacy detach is void, so internal detach failures are not observable here. Existing complete fingerprint components remain enabled; the overlay lifecycle change changes generator identity and can legitimately invalidate a cache once.
+
+Full Java build passed 372 tests, zero failures/errors, 19 opt-in skips (log `1027-074100-ingest__Java_corrected_full_build.log`); its 19 focused tests all passed. Jar SHA-256 `4d5b12bd0d4865a024348c356a8505739727e6fa19ef180623b60ec7e32f2e7e`; packaged bake inputs match `40d6c4f22688`. Explicit-base `e41568bf` check gate passed all 3 checks with zero new, known or missing results (log `1027-074447-ingest__explicit_base_check_gate.log`). Actual GL startup, reload, retirement and two-launch cache revisit remain unverified; this checkpoint is not a production acceptance or merge.
+
+The bounded GL probe supervisor is checkpointed separately from the Java candidate. Its 66 focused CPU tests passed, including actual named-job memory accounting. The explicit `3377d1aa` tools gate passed 14 checks, with one known crafter UI-coverage failure and zero new or missing checks (`1027-080342-ingest__GL_corrected_tools_gate.log`); 46 shader-pack stages compiled using the versioned SDK. The earlier incorrect-SDK gate failure remains in `1027-080104-ingest__GL_tools_check_gate.log`. GL runtime readiness, shutdown, reload and cache reuse still require live evidence.
+
+The fixed-pose GL probe now journals player backups before mutation, validates saved position and rotation, and records the first ready profile separately from later movement. It extracts the actual coarse-bake fingerprint components with unknown values left absent. The explicit `e41568bf` combined gate passed 15 of 16 checks, with one known crafter UI-coverage failure and zero new or missing checks (`1027-081926-ingest__combined_GL_candidate_gate.log`). The 54-case probe check and 7 prepared/status cases reran; the earlier 372-case Java, 5 process-memory and 6 launch-budget passing results were reused. Actual fixed-pose GL startup, reload and warm cache revisit remain unverified.
 The isolated native normal-close repair now has a fresh229-second/6.77GiB prebuild,13 passing CPU checks and
 byte-identical83 production/114 configured shaders. Source934840ab1c50, DLLf46e6839706b and test executable
 2d8c914b63eb are pinned in its scratch receipt. The repeated cached borrowed-device fixture
@@ -305,3 +314,33 @@ The raw worker receipt remains UNVERIFIED: its final camera move overwrote earli
 filter missed the actual key line. Tool corrections now preserve phase-specific readiness and parse real key lines.
 GL probes will also fix the kept player's starting pose before launch, so loading and captures concern the same
 horizontal region. Tests/review of those corrections and a matched relaunch remain pending. No renderer stage is done.
+
+## Matched GL cache observations and evaluation baseline (2026-10-27)
+
+The first corrected-pose run `live-20261027-082510-356030` observed ready at89.53s, near generated818/cached68,
+and normal shutdown (115s job/13.74GiB peak). The same `17fe73c3` candidate repeated at the identical saved
+(-149.5,200,260.5) pose in `live-20261027-082923-751893`: ready65.98s, near generated82/cached1007, far25/25
+cached, coarse263/263 loaded0.2s/windows1.0s, no far tile writes or hash errors in that readiness sample.
+All eight key fields agree, including whole1e5dc6eb8bdd05c3. Aggregate misses and87 section writes prevent a
+zero-regeneration claim; actual visited-footprint versus unfinished/fringe work still needs diagnosis. Startup
+readiness is not the route's under-two-second revisit measurement. Both runs close normally without forced
+client/launcher cleanup; independent post-job checks twice find original settings, no lease and no processes.
+
+The orchestrator brings main81883c4f into this isolated evaluation branch so route relaunches preserve caches by
+default, while retaining the tested strict player-pose helper and supervisor. Java/native payloads remain unchanged.
+Actual resource reload, a fresh route measurement, seams, driver budgets and all renderer stage gates remain open.
+
+The GL supervisor now has an opt-in resource-reload observation at the same camera. It requires new context and
+ingest messages plus a complete fresh key, then advances the profile boundary and waits for a subsequent ready
+sample carrying that key; an old ready sample cannot establish reload success. Capture metadata and full keys are
+compared separately from visual review. Its explicit81883c4f check gate passes15/16 with the one known Crafter
+coverage failure, zero new failures and zero missing checks (`1027-085451`,61s/1.48GiB). The57-case probe check
+passes. This is tool validation; the actual reload observation remains pending.
+
+Actual reload `live-20261027-090450-547771` recreated context/ingest with the same key, but remained at spawn0/441
+until the bounded observation expired. It closed normally (180s job/13.46GiB), with settings/process cleanup
+independently checked twice. `follow()` returned early for unchanged static camera coordinates before initializing
+the replacement generator's per-instance jump/readiness origin. The narrow repair permits that first follow even
+in the same chunk. Explicit4848c5a0 gate3/3 passes (`1027-091106`,191s/5.02GiB); actual Java372/0 failures/errors/
+19 skips, Jar e711370db72c, unchanged generator identity79ee02738613/native076af4d670e6. The red live receipt is
+preserved; the same-camera repaired reload and route remain pending.

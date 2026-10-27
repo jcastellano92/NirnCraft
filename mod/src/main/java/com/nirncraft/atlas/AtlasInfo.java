@@ -38,11 +38,14 @@ final class AtlasInfo {
      * there is none. For diagnostics that must be current (the probe verbs); not for per-tick callers.
      */
     static String fresh(long maxAgeMs) {
-        AtlasNative.Context c = AtlasClient.infoContext();
-        if (c == null) return null;
-        Snap s = snap;
-        if (s != null && s.ctx == c && System.nanoTime() - s.ns <= maxAgeMs * 1_000_000L) return s.json;
-        return read(c);
+        var lease = AtlasClient.acquireInfoContext();
+        if (lease == null) return null;
+        try (lease) {
+            AtlasNative.Context c = lease.context();
+            Snap s = snap;
+            if (s != null && s.ctx == c && System.nanoTime() - s.ns <= maxAgeMs * 1_000_000L) return s.json;
+            return read(c);
+        }
     }
 
     private static String read(AtlasNative.Context c) {
@@ -63,8 +66,10 @@ final class AtlasInfo {
             LockSupport.parkNanos(PERIOD_NS);
             try {
                 if (System.nanoTime() - askedNs > WARM_NS) continue;
-                AtlasNative.Context c = AtlasClient.infoContext();
-                if (c != null) read(c);
+                var lease = AtlasClient.acquireInfoContext();
+                if (lease != null) {
+                    try (lease) { read(lease.context()); }
+                }
             } catch (RuntimeException e) {
                 // (a read that failed is a stale answer: the next one tries again)
             }

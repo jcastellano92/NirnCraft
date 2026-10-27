@@ -454,14 +454,20 @@ final class AtlasFarField implements AutoCloseable {
 
     /** Asks the worker to leave and waits up to 2 s for it (it may still be mid-pass after that: see close). */
     void stopWorker() {
-        if (!running) return;
-        running = false;
-        worker.interrupt();
+        requestStop();
+        if (!worker.isAlive()) return;
         try {
             worker.join(2000);
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /** Signal cancellation without waiting on the render thread. */
+    void requestStop() {
+        if (!running) return;
+        running = false;
+        worker.interrupt();
     }
 
     /**
@@ -485,6 +491,21 @@ final class AtlasFarField implements AutoCloseable {
                 afterExit = all;  // still in a pass: it releases on its way out
                 return;
             }
+        }
+        all.run();
+    }
+
+    /** Release worker variant: report source-close failure to the owning retirement ticket. */
+    void closeTracked(java.util.function.Consumer<Throwable> completion) {
+        stopWorker();
+        Runnable all = () -> {
+            Throwable failure = null;
+            try { source.close(); }
+            catch (Throwable t) { failure = t; }
+            completion.accept(failure);
+        };
+        synchronized (exitLock) {
+            if (!exited) { afterExit = all; return; }
         }
         all.run();
     }

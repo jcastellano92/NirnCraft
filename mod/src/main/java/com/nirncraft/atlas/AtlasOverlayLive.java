@@ -62,7 +62,8 @@ final class AtlasOverlayLive {
     private static volatile List<BlockState> states;
     private static volatile Path library;
     private static volatile MinecraftServer server;
-    private static volatile Live live;
+    private static final AtlasOwnedSlot<Live> live = new AtlasOwnedSlot<>();
+    private static final AtlasStageOwners<AtlasGenNative.Gen, AtlasOvlNative.Ovl, Live> prepared = new AtlasStageOwners<>();
     private static boolean registered;
 
     private AtlasOverlayLive() {}
@@ -118,22 +119,30 @@ final class AtlasOverlayLive {
             com.nirncraft.NirnCraft.LOGGER.info("atlas overlays: off (the core or the generator's device cannot run them)");
             return;
         }
-        Live l = new Live(gen, prog, ovl, srv, lib);
-        live = l;
-        l.thread.start();
+        prepared.prepare(gen, ovl, resource -> new Live(gen, prog, resource, srv, lib));
         com.nirncraft.NirnCraft.LOGGER.info("atlas overlays: stages on {}, {} block states", ovl.device(), prog.blocks.size());
     }
 
+    /** Called only by the generation-checked publication transaction. */
+    static void publish(AtlasGenNative.Gen gen) {
+        Live l = prepared.get(gen);
+        if (l == null) return;
+        live.publish(l, l.thread::start);
+    }
+
     private static void detach(AtlasGenNative.Gen gen) {
-        Live l = live;
-        if (l == null || l.gen != gen) return;
-        live = null;
-        l.close();
+        prepared.release(gen, l -> {
+            live.clear(l);
+            l.readers.closeAdmission();
+            boolean interrupted = l.readers.awaitDrained();
+            if (interrupted) Thread.currentThread().interrupt();
+            l.close();
+        }, AtlasOvlNative.Ovl::close);
     }
 
     /** Whether the overlays have looked for the seeded starts near the camera (a chunk is final only after, finalAt). */
     static boolean scanned() {
-        Live l = live;
+        Live l = live.get();
         return l == null || l.scanned;
     }
 
@@ -143,7 +152,7 @@ final class AtlasOverlayLive {
      * found. The integrated server keeps what it is given for good, so it waits for this.
      */
     static boolean finalAt(int cx, int cz) {
-        Live l = live;
+        Live l = live.get();
         if (l == null) return true;  // (the overlays are off: no tapes to wait for)
         if (!l.scanned) return false;
         int[] b = l.noBakeSent;
@@ -155,18 +164,22 @@ final class AtlasOverlayLive {
 
     /** The overlays' handle on this generator (the decoration's mask reads their piece boxes), or null. */
     static java.lang.foreign.MemorySegment handleFor(AtlasGenNative.Gen gen) {
-        Live l = live;
-        return l == null || l.gen != gen ? null : l.ovl.handle();
+        Live l = prepared.get(gen);
+        return l == null ? null : l.ovl.handle();
     }
 
     /** "overlays: settlements ready / recording, chunks stamped" (atlas-info). */
     static String state() {
-        Live l = live;
-        return l == null ? "overlays off" : l.state();
+        Live l = live.get();
+        if (l == null) return "overlays off";
+        var lease = l.readers.enter();
+        if (lease == null) return "overlays off";
+        try (lease) { return l.state(); }
     }
 
     private static final class Live {
         final AtlasGenNative.Gen gen;
+        final AtlasReleaseGate readers = new AtlasReleaseGate();
         final AtlasGenProgram prog;
         final AtlasOvlNative.Ovl ovl;
         final MinecraftServer server;
@@ -248,13 +261,22 @@ final class AtlasOverlayLive {
         void close() {
             running = false;
             thread.interrupt();
-            try {
-                thread.join(10_000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            // The overlay owns native stages on the generator.  A timed join can leave the worker using
+            // those stages after ovl.close(), so release must wait until the worker has actually exited.
+            boolean interrupted = false;
+            while (thread.isAlive()) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
             }
-            ovl.close();  // its stages leave the generator before it closes
-            if (rec != null) rec.close();
+            try {
+                ovl.close();  // its stages leave the generator before it closes
+                if (rec != null) rec.close();
+            } finally {
+                if (interrupted) Thread.currentThread().interrupt();
+            }
         }
 
         void run() {

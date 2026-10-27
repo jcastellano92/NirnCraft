@@ -35,6 +35,55 @@ versionRange="[26.3.0.90,26.4)"
 }
 
 
+class LaunchBudgetTest(unittest.TestCase):
+    def test_ordinary_calls_keep_existing_limits(self):
+        with patch.dict(live.os.environ, {}, clear=True):
+            self.assertIsNone(live.remaining_timeout())
+            self.assertEqual(180, live.remaining_timeout(180))
+
+    def test_budget_never_invents_time(self):
+        with patch.dict(live.os.environ, {"NIRNCRAFT_HARNESS_DEADLINE": "105"}, clear=True), patch.object(live.time, "monotonic", return_value=100):
+            self.assertEqual(5, live.remaining_timeout())
+            self.assertEqual(2, live.remaining_timeout(2))
+        with patch.dict(live.os.environ, {"NIRNCRAFT_HARNESS_DEADLINE": "100"}, clear=True), patch.object(live.time, "monotonic", return_value=100):
+            with self.assertRaises(TimeoutError): live.remaining_timeout()
+
+    def test_invalid_deadlines_fail_closed(self):
+        for raw in ("nan", "inf", "oops"):
+            with self.subTest(raw=raw), patch.dict(live.os.environ, {"NIRNCRAFT_HARNESS_DEADLINE": raw}, clear=True):
+                with self.assertRaises(ValueError): live.remaining_timeout()
+
+    def test_cancellation_prevents_launcher_even_with_time_left(self):
+        with tempfile.TemporaryDirectory() as d:
+            cancel = Path(d)/"cancel"; cancel.touch(); ack = Path(d)/"ack.json"
+            env = {"NIRNCRAFT_HARNESS_CANCEL_FILE": str(cancel), "NIRNCRAFT_HARNESS_LAUNCH_ACK_FILE": str(ack)}
+            with patch.dict(live.os.environ, env, clear=True), patch.object(live.subprocess, "Popen") as start:
+                with self.assertRaisesRegex(RuntimeError, "canceled"): live.request_preview_launch("launcher")
+                start.assert_not_called()
+            self.assertEqual("prevented", json.loads(ack.read_text())["state"])
+
+    def test_expired_helper_cannot_issue_late_launch(self):
+        with tempfile.TemporaryDirectory() as d:
+            ack=Path(d)/"ack.json"
+            env={"NIRNCRAFT_HARNESS_DEADLINE":"1", "NIRNCRAFT_HARNESS_LAUNCH_ACK_FILE":str(ack)}
+            with patch.dict(live.os.environ, env, clear=True), patch.object(live.time,"monotonic",return_value=2), patch.object(live.subprocess,"Popen") as start:
+                with self.assertRaises(TimeoutError): live.request_preview_launch("launcher")
+                start.assert_not_called()
+            self.assertEqual("prevented", json.loads(ack.read_text())["state"])
+
+    def test_successful_handoff_records_ack_without_credentials(self):
+        with tempfile.TemporaryDirectory() as d:
+            ack=Path(d)/"ack.json"
+            with patch.dict(live.os.environ,{"NIRNCRAFT_HARNESS_LAUNCH_ACK_FILE":str(ack)},clear=True), patch.object(live.subprocess,"Popen") as start:
+                start.return_value.pid=123
+                live.request_preview_launch("launcher", "kept-test-world")
+                self.assertIn("--world", start.call_args.args[0])
+            receipt=json.loads(ack.read_text())
+            self.assertEqual("requested",receipt["state"])
+            self.assertEqual(123,receipt["launcherPid"])
+            self.assertEqual({"state","at","launcherPid"},set(receipt))
+
+
 class PreviewTest(unittest.TestCase):
     def test_close_waits_through_the_shutdown_silence(self):
         # a close: the heartbeat goes stale while the game saves and exits; that is the close working, not a hang

@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +21,7 @@ import live_world as lw  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import trace as tr  # noqa: E402
+import probe_flags  # noqa: E402
 
 GAME = lw.GAME
 SHOTS = GAME / "build/autotest-screenshots"
@@ -114,16 +116,16 @@ def ready():
 
 
 # ----------------------------------------------------------------------------------------------- launch / close
-def _set_group_flags(jvm):
+def _set_group_flags(jvm, raw_args=()):
     cfg = lw.INSTANCE / "instance.cfg"
     text = cfg.read_text(encoding="utf-8")
     m = re.search(r'^JvmArgs="?(.*?)"?$', text, re.M)
     if not m:
         raise SystemExit("instance has no JvmArgs; prepare it with tools/qa/prism_autotest.ps1 -PrepareOnly -Live")
     args = re.sub(re.escape(MARK[0]) + r".*?" + re.escape(MARK[1]), "", m.group(1)).strip()
-    extra = " ".join(f"-D{k}={v}" for k, v in sorted(jvm.items()))
-    if extra:
-        args = f"{args} {MARK[0]} {extra} {MARK[1]}"
+    marker = probe_flags.format_marker(jvm, raw_args)
+    if marker:
+        args = f"{args} {marker.decode('utf-8')}"
     text = text[:m.start()] + f'JvmArgs="{args}"' + text[m.end():]
     lw.atomic(cfg, text.encode())
     write_flags_file(jvm)
@@ -225,6 +227,15 @@ def _iris_enable():
             cfg.write_text(re.sub(r"^enableShaders=false", "enableShaders=true", text, flags=re.M), encoding="utf-8")
 
 
+def current_atlas_failure(log_text):
+    """Only a later delivered-on canonical status can supersede an earlier off/stopped state."""
+    latest = None
+    transitions = r"(?:NirnCraft: Infinite ATLAS far field (?P<state>on|off)\b|Infinite ATLAS stopped\b)[^\n]{0,240}"
+    for match in re.finditer(transitions, log_text):
+        latest = None if match.group("state") == "on" else match.group(0)
+    return latest
+
+
 def launch(group, groups, limit=900, attempt=1):
     """Starts the client and waits for its world. A client that dies while loading (before the world is up: a driver
     or window-creation crash such as 0xC000041D) is started once more; a second death fails the launch."""
@@ -267,7 +278,7 @@ def _launch(group, groups, limit=900):
         jvm["nirncraft.atlas.dump"] = os.environ["NIRNCRAFT_ATLAS_DUMP"]
     _set_group_flags(jvm)
     _enable_overlay()
-    code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True)
+    code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True, timeout=lw.remaining_timeout())
     if code.returncode:
         raise RuntimeError("launch failed: " + (code.stdout + code.stderr)[-600:])
     t0, gone = time.monotonic(), 0
@@ -279,11 +290,11 @@ def _launch(group, groups, limit=900):
                 tail = (GAME / "logs" / "latest.log").read_text(encoding="utf-8", errors="replace")[-200000:]
             except OSError:
                 tail = ""
-            m = re.search(r"Infinite ATLAS (stopped|far field off)[^\n]{0,240}", tail)
-            if m:
-                tr.step("atlas_not_running", line=m.group(0)[:240])
+            failure = current_atlas_failure(tail)
+            if failure:
+                tr.step("atlas_not_running", line=failure[:240])
                 close()
-                raise RuntimeError("Infinite ATLAS is not running in this client (" + m.group(0)[:240] + ")")
+                raise RuntimeError("Infinite ATLAS is not running in this client (" + failure[:240] + ")")
             STATE.parent.mkdir(parents=True, exist_ok=True)
             STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
                                          "shaders": True, "since": time.time()}), encoding="utf-8")
@@ -303,7 +314,7 @@ def close():
     if not running():
         STATE.unlink(missing_ok=True)
         return
-    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "close"], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "close"], capture_output=True, text=True, timeout=lw.remaining_timeout())
     if r.returncode:
         raise RuntimeError("clean close failed: " + (r.stdout + r.stderr)[-400:])
     STATE.unlink(missing_ok=True)
@@ -317,7 +328,7 @@ BUILT = buildpaths.build_dir() / "libs/nirncraft-0.1.0.jar"
 def stale_core():
     """A message when the installed core is older than the latest build (tests would run yesterday's code)."""
     inst = GAME / "mods/nirncraft-core.jar"
-    if BUILT.exists() and inst.exists() and BUILT.stat().st_mtime > inst.stat().st_mtime + 60 and sha(BUILT) != sha(inst):
+    if BUILT.exists() and inst.exists() and BUILT.stat().st_mtime > inst.stat().st_mtime + 60 and not prepared_core_matches(BUILT, inst):
         return (f"the installed core ({time.ctime(inst.stat().st_mtime)}) is older than the latest build "
                 f"({time.ctime(BUILT.stat().st_mtime)}): run with --rebuild, or tools/dev/live_world.py install-core")
     return None
@@ -400,7 +411,7 @@ def ensure_current():
         if r.returncode:
             raise RuntimeError("jar build failed (tests would run stale code):\n" + build_failure(r))
     inst = GAME / "mods/nirncraft-core.jar"
-    if BUILT.exists() and (not inst.exists() or sha(BUILT) != sha(inst)):
+    if BUILT.exists() and (not inst.exists() or not prepared_core_matches(BUILT, inst)):
         log("  installing the current build (the installed core was older)")
         tr.step("auto_install")
         if running():
@@ -433,6 +444,52 @@ def ensure_current():
                 actions(["reload"], timeout=600)
     except RuntimeError as e:
         raise RuntimeError(f"shader pack build failed (tests would run a stale pack): {e}")
+
+
+def prepared_core_matches(built, installed):
+    """Installer ZIP metadata may differ; every payload must match, with only manifest JSON formatting ignored."""
+    if sha(built) == sha(installed):
+        return Path(built).is_file() and Path(installed).is_file()
+    try:
+        with zipfile.ZipFile(built) as a, zipfile.ZipFile(installed) as b:
+            names = a.namelist()
+            other = b.namelist()
+            if len(names) != len(set(names)) or len(other) != len(set(other)) or set(names) != set(other):
+                return False
+            for name in names:
+                left, right = a.read(name), b.read(name)
+                if left == right:
+                    continue
+                if name != "nirncraft/baked/manifest.json" or json.loads(left) != json.loads(right):
+                    return False
+            return True
+    except (OSError, ValueError, zipfile.BadZipFile):
+        return False
+
+
+def prepared_native(digest, native_sources):
+    shipped_current = NATIVE_SHIPPED.exists() and not native_sources.stale("windows-x86_64", digest)
+    return shipped_current and (not NATIVE_BUILT.exists() or
+           (not native_stale(digest=digest) and sha(NATIVE_BUILT) == sha(NATIVE_SHIPPED)))
+
+
+def assert_prepared():
+    """A bounded live probe may skip auto-build only after validating the already installed inputs."""
+    import native_sources
+    digest = native_sources.source_hash()
+    if not prepared_native(digest, native_sources):
+        raise RuntimeError("native inputs are not prepared; run ensure_current outside the live probe")
+    newest = max((f.stat().st_mtime for f in (ROOT / "mod/src/main").rglob("*") if f.is_file()), default=0)
+    if not BUILT.exists() or newest > BUILT.stat().st_mtime + 1:
+        raise RuntimeError("Java/resources are not prepared; build before the live probe")
+    installed = GAME / "mods/nirncraft-core.jar"
+    if not installed.exists() or not prepared_core_matches(BUILT, installed):
+        raise RuntimeError("installed core differs from the prepared build")
+    override = GAME / "atlas-dev" / NATIVE_SHIPPED.name
+    if override.exists() and sha(override) != sha(NATIVE_SHIPPED):
+        raise RuntimeError("development native override differs from the prepared core")
+    if (GAME / "atlas-shaders").exists() and any((GAME / "atlas-shaders").glob("*.spv")):
+        raise RuntimeError("development shader overrides are not prepared")
 
 
 def ensure(group, groups):

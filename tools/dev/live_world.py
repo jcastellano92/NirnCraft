@@ -7,6 +7,7 @@ import argparse
 from contextlib import nullcontext
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -52,6 +53,49 @@ def atomic(path, data):
     tmp = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex[:8])
     tmp.write_bytes(data)
     os.replace(tmp, path)
+
+
+def remaining_timeout(cap=None):
+    """Optional inherited probe budget. Ordinary harness commands retain their existing timeouts."""
+    raw = os.environ.get("NIRNCRAFT_HARNESS_DEADLINE")
+    if raw is None:
+        return cap
+    try:
+        deadline = float(raw)
+    except ValueError as exc:
+        raise ValueError("invalid harness deadline") from exc
+    if not math.isfinite(deadline):
+        raise ValueError("invalid harness deadline")
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("harness deadline expired")
+    return remaining if cap is None else min(cap, remaining)
+
+
+def _launch_ack(state, **details):
+    path = os.environ.get("NIRNCRAFT_HARNESS_LAUNCH_ACK_FILE")
+    if path:
+        atomic(Path(path), json.dumps({"state": state, "at": time.time(), **details}).encode("utf-8"))
+
+
+def request_preview_launch(launcher, world=None):
+    # Check at the last point before handing work to Prism: a canceled helper cannot launch later.
+    try:
+        remaining_timeout()
+        cancel = os.environ.get("NIRNCRAFT_HARNESS_CANCEL_FILE")
+        if cancel and Path(cancel).exists():
+            raise RuntimeError("harness launch canceled")
+    except (TimeoutError, ValueError, RuntimeError):
+        _launch_ack("prevented")
+        raise
+    try:
+        child = subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME,
+                                  *(["--world", world] if world else [])], creationflags=subprocess.CREATE_NO_WINDOW)
+    except Exception:
+        _launch_ack("failed")
+        raise
+    _launch_ack("requested", launcherPid=child.pid)
+    return child
 
 
 def heartbeat_age(status, status_file, now=None):
@@ -116,7 +160,7 @@ def processes():
         $g = Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue
         [pscustomobject]@{pid=$_.ProcessId; window=$g.MainWindowTitle; windowOpen=($g.MainWindowHandle -ne 0); responding=$g.Responding}
     }); ConvertTo-Json -InputObject $p -Compress""".replace("INSTANCE_PATTERN", pattern.replace("'", "''"))
-    result = subprocess.run(["powershell", "-NoProfile", "-Command", script], capture_output=True, text=True, check=True)
+    result = subprocess.run(["powershell", "-NoProfile", "-Command", script], capture_output=True, text=True, check=True, timeout=remaining_timeout())
     return json.loads(result.stdout or "[]")
 
 
@@ -146,7 +190,7 @@ def storage():
         [pscustomobject]@{drive=[string]$part.DriveLetter; model=$disk.FriendlyName; bus=[string]$disk.BusType;
             freeGB=[math]::Round($vol.SizeRemaining/1GB,1); sizeGB=[math]::Round($vol.Size/1GB,1)}
     }); ConvertTo-Json -InputObject $rows -Compress"""
-    result = subprocess.run(["powershell", "-NoProfile", "-Command", script], capture_output=True, text=True, check=True)
+    result = subprocess.run(["powershell", "-NoProfile", "-Command", script], capture_output=True, text=True, check=True, timeout=remaining_timeout())
     rows = json.loads(result.stdout)
     return {"repository": str(REPO), "previewGame": str(GAME), "volumes": rows,
             "nvmeDetected": any(r["bus"] == "NVMe" for r in rows),
@@ -587,15 +631,14 @@ def dispatch(args):
         # (tools/dev/owner_play.py: NIRNCRAFT_LAUNCH_WORLD joins that saved world at launch, no autotest needed. The game
         # inherits this process's environment only when Prism is not already running: a running Prism forwards the launch)
         world = os.environ.get("NIRNCRAFT_LAUNCH_WORLD")
-        subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME, *(["--world", world] if world else [])],
-                         creationflags=subprocess.CREATE_NO_WINDOW)
+        request_preview_launch(launcher, world)
         print("Preview launch requested; status will report when the world heartbeat is ready")
     elif args.action == "close":
         if not processes():
             print("Preview already closed")
             return
         if status()["client"].get("fresh"):
-            live_actions(["stop"], timeout=180, cancel=True)
+            live_actions(["stop"], timeout=remaining_timeout(180), cancel=True)
         else:
             # Bootstrap from the previous live controller, which had no status JSON.
             log = GAME / "logs/latest.log"
@@ -607,11 +650,11 @@ def dispatch(args):
                 for p in processes():
                     subprocess.run(["powershell", "-NoProfile", "-Command",
                                     f"$g = Get-Process -Id {int(p['pid'])} -ErrorAction SilentlyContinue; "
-                                    "if ($g) { [void]$g.CloseMainWindow() }"], check=False)
+                                    "if ($g) { [void]$g.CloseMainWindow() }"], check=False, timeout=remaining_timeout())
                 print("No live controller: requested a normal window close")
-        deadline = time.monotonic() + 180
+        deadline = time.monotonic() + remaining_timeout(180)
         while processes() and time.monotonic() < deadline:
-            time.sleep(1)
+            time.sleep(remaining_timeout(1))
         if processes():
             raise RuntimeError("Clean close is still pending; no process was killed")
         print("Preview closed cleanly")

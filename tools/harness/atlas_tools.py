@@ -143,30 +143,35 @@ def _nbt_skip(b, i, t):
 
 
 def set_player_pose(path, x, y, z, yaw, pitch):
-    """A player file's saved Pos and Rotation overwritten in place (the values are fixed-size: nothing else moves).
-    Returns the Pos it had."""
+    """Update both saved position and rotation only after validating their exact NBT types."""
     raw = gzip.decompress(Path(path).read_bytes())
-    if raw[0] != 10:
+    if not raw or raw[0] != 10:
         raise ValueError("not an NBT compound")
-    buf = bytearray(raw)
     i = 3 + struct.unpack_from(">H", raw, 1)[0]
-    old = None
+    offsets = {}
     while raw[i] != 0:
         t = raw[i]
         ln = struct.unpack_from(">H", raw, i + 1)[0]
         name = raw[i + 3:i + 3 + ln].decode("utf-8", "replace")
         i += 3 + ln
-        if t == 9 and name in ("Pos", "Rotation"):
+        if name in ("Pos", "Rotation"):
+            if name in offsets or t != 9:
+                raise ValueError("invalid or duplicate player " + name)
             et, n = raw[i], struct.unpack_from(">i", raw, i + 1)[0]
-            if name == "Pos" and et == 6 and n == 3:
-                old = struct.unpack_from(">ddd", raw, i + 5)
-                struct.pack_into(">ddd", buf, i + 5, x, y, z)
-            elif name == "Rotation" and et == 5 and n == 2:
-                struct.pack_into(">ff", buf, i + 5, yaw, pitch)
+            if (et, n) != ((6, 3) if name == "Pos" else (5, 2)):
+                raise ValueError("invalid player " + name)
+            offsets[name] = i + 5
         i = _nbt_skip(raw, i, t)
-    if old is None:
-        raise ValueError("the player file has no Pos")
+    if set(offsets) != {"Pos", "Rotation"}:
+        raise ValueError("player file requires Pos and Rotation")
+    old = struct.unpack_from(">ddd", raw, offsets["Pos"])
+    buf = bytearray(raw)
+    struct.pack_into(">ddd", buf, offsets["Pos"], x, y, z)
+    struct.pack_into(">ff", buf, offsets["Rotation"], yaw, pitch)
     Path(path).write_bytes(gzip.compress(bytes(buf)))
+    written = gzip.decompress(Path(path).read_bytes())
+    if written != bytes(buf):
+        raise IOError("player pose readback differs from requested bytes")
     return old
 
 

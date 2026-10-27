@@ -51,9 +51,10 @@ final class AtlasClientSections {
     private static final IdentityHashMap<BlockState, Integer> IDS = new IdentityHashMap<>();  // (client thread)
     // sections whose blocks changed (SectionPos.asLong), read again on their own (client thread)
     private static final Set<Long> DIRTY = ConcurrentHashMap.newKeySet();
-    // per (block, model, tint kind, light) the first state seen with it: states that look alike (a fire's age, a
-    // leaf's distance) share one id, so a ticking block re-uploads nothing (client thread)
-    private static final java.util.Map<java.util.List<Object>, Integer> LOOKS = new ConcurrentHashMap<>();  // (any thread)
+    // Per-block immutable tables. Each visual group uses its minimum state id, independent of caller order.
+    // Replacing the map at reset prevents an in-flight old build from publishing into a new context's epoch.
+    private static final AtlasCanonicalLooks.Epochs<net.minecraft.world.level.block.Block, BlockState> LOOKS = new AtlasCanonicalLooks.Epochs<>();
+    private static Object idsEpoch;  // IDS is only touched on the client thread
 
     static void init() {
         if (!ON) return;
@@ -97,7 +98,7 @@ final class AtlasClientSections {
 
     /**
      * The near id of a state, the one rule for every near section atlas takes (the client feed's, and generation's:
-     * AtlasClientGen's table of its generator ids): its full state id, or that of the first state looking just like
+     * AtlasClientGen's table of its generator ids): its full state id, or the lowest id of a state looking just like
      * it; 0 not kept. Any thread.
      */
     static int nearIdOf(BlockState s) {
@@ -106,15 +107,57 @@ final class AtlasClientSections {
 
     private static int nearId(BlockState s) {
         if (!nearKept(s)) return 0;
+        Object models = Minecraft.getInstance().getModelManager().getBlockStateModelSet();
+        var epoch = LOOKS.forModels(models);
+        var block = s.getBlock();
+        var ids = epoch.blocks.get(block);
+        if (ids == null) {
+            // Build outside the concurrent map: a render caller never waits for another caller's model scan.
+            // If first callers race, each scan yields the same canonical ids; only one table is retained.
+            var built = buildLooks(block);
+            var previous = epoch.blocks.putIfAbsent(block, built);
+            ids = previous != null ? previous : built;
+        }
+        if (models != Minecraft.getInstance().getModelManager().getBlockStateModelSet() || !LOOKS.isCurrent(epoch))
+            throw new IllegalStateException("atlas block models changed during alias construction");
+        Integer id = ids.get(s);
+        return id != null ? id : net.minecraft.world.level.block.Block.getId(s);
+    }
+
+    private static java.util.Map<BlockState, Integer> buildLooks(net.minecraft.world.level.block.Block block) {
+        long started = System.nanoTime();
+        var states = block.getStateDefinition().getPossibleStates();
+        var keys = new java.util.IdentityHashMap<BlockState, java.util.List<Object>>();
+        var groups = new AtlasCanonicalLooks<java.util.List<Object>>();
+        for (BlockState s : states) {
+            if (!nearKept(s)) continue;
+            var key = lookKey(s);
+            keys.put(s, key);
+            groups.add(key, net.minecraft.world.level.block.Block.getId(s));
+        }
+        var ids = new java.util.IdentityHashMap<BlockState, Integer>();
+        for (var entry : keys.entrySet()) ids.put(entry.getKey(), groups.id(entry.getValue()));
+        double elapsedMs = (System.nanoTime() - started) / 1e6;
+        if (elapsedMs >= 2.0)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: canonical states for {}: {} states, {} kept, {} groups, {} ms",
+                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block), states.size(), ids.size(), groups.size(),
+                    String.format(java.util.Locale.ROOT, "%.2f", elapsedMs));
+        return java.util.Collections.unmodifiableMap(ids);
+    }
+
+    static void resetLooks() {
+        LOOKS.reset();
+    }
+
+    private static java.util.List<Object> lookKey(BlockState s) {
         // what it looks like: the model parts it draws (by identity: a fence's arms, a door's half, a crop's age; a model
         // object can be shared by every state of a block and pick its parts by the state it is given)
         java.util.List<Object> parts = new java.util.ArrayList<>();
         for (var part : AtlasShapes.parts(s)) parts.add(new Ident(part));
         if (parts.isEmpty()) parts.add(new Ident(s));  // (no model parts: a fluid; one look a state)
         // (and its fluid: a waterlogged fence is the water's too)
-        java.util.List<Object> key = java.util.List.of(s.getBlock(), parts, AtlasMaterials.tintKind(s), s.getLightEmission(),
+        return java.util.List.of(s.getBlock(), parts, AtlasMaterials.tintKind(s), s.getLightEmission(),
                 s.getFluidState().isEmpty());
-        return LOOKS.computeIfAbsent(key, k -> net.minecraft.world.level.block.Block.getId(s));
     }
 
     /** An object compared by identity (a model instance). */
@@ -132,6 +175,11 @@ final class AtlasClientSections {
 
     /** Section sec's blocks as near ids (nearId), x + 16 * (z + 16 * y). */
     private static int[] nearIds(net.minecraft.world.level.chunk.LevelChunkSection sec) {
+        var epoch = LOOKS.forModels(Minecraft.getInstance().getModelManager().getBlockStateModelSet());
+        if (idsEpoch != epoch) {
+            IDS.clear();
+            idsEpoch = epoch;
+        }
         int[] ids = new int[4096];
         if (sec == null || sec.hasOnlyAir()) return ids;
         for (int y = 0; y < 16; y++)
@@ -366,7 +414,7 @@ final class AtlasClientSections {
         QUEUED.clear();
         DIRTY.clear();
         IDS.clear();
-        LOOKS.clear();
+        resetLooks();
         Minecraft mc = Minecraft.getInstance();
         if (!ON || mc.level == null || mc.player == null) return;
         int r = mc.options.getEffectiveRenderDistance() + 2;

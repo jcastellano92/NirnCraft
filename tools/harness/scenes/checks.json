@@ -10,6 +10,130 @@
   },
   "scenes": [
     {
+      "id": "check-preview-prepared-status",
+      "title": "Prepared core provenance and latest renderer status regressions",
+      "tags": [
+        "check:vulkan-probe",
+        "suite:harness",
+        "check:tools"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "tools/harness",
+        "-p",
+        "test_game_*.py"
+      ],
+      "inputs": [
+        "tools/harness/game.py",
+        "tools/harness/test_game_prepared.py",
+        "tools/harness/test_game_status.py",
+        "tools/harness/atlas_vulkan_probe.py"
+      ],
+      "metrics": {
+        "tests": "Ran (\\d+) tests?"
+      },
+      "timeout": 60
+    },
+    {
+      "id": "check-launch-budget",
+      "title": "Preview deadline, cancellation and launcher acknowledgement regressions",
+      "tags": [
+        "check:vulkan-probe",
+        "suite:harness",
+        "check:tools"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "tools/dev",
+        "-p",
+        "test_live_world.py",
+        "-k",
+        "LaunchBudgetTest"
+      ],
+      "inputs": [
+        "tools/dev/live_world.py",
+        "tools/dev/test_live_world.py"
+      ],
+      "metrics": {
+        "tests": "Ran (\\d+) tests?"
+      },
+      "timeout": 60
+    },
+    {
+      "id": "check-vulkan-probe-safety",
+      "title": "Vulkan probe bounded launch, cancellation, cleanup and memory-policy regressions",
+      "tags": [
+        "check:vulkan-probe",
+        "suite:harness",
+        "check:tools"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "tools/harness",
+        "-p",
+        "test_atlas_vulkan_probe.py"
+      ],
+      "inputs": [
+        "tools/harness/atlas_vulkan_probe.py",
+        "tools/harness/test_atlas_vulkan_probe.py",
+        "tools/harness/atlas_tools.py",
+        "tools/harness/probe_flags.py",
+        "tools/harness/process_memory.py",
+        "tools/dev/agent_job.py"
+      ],
+      "metrics": {
+        "tests": "Ran (\\d+) tests?"
+      },
+      "timeout": 60
+    },
+    {
+      "id": "check-process-memory",
+      "title": "Read-only Windows process/job accounting and handle cleanup",
+      "tags": [
+        "check:vulkan-probe",
+        "suite:harness",
+        "check:tools"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "tools/harness",
+        "-p",
+        "test_process_memory.py"
+      ],
+      "inputs": [
+        "tools/harness/process_memory.py",
+        "tools/harness/test_process_memory.py"
+      ],
+      "metrics": {
+        "tests": "Ran (\\d+) tests?"
+      },
+      "timeout": 60
+    },
+    {
       "id": "check-build-wrapper",
       "title": "Build wrapper, real build-lock contention and worktree output isolation regressions",
       "tags": ["check:build-wrapper", "suite:harness", "check:tools"],
