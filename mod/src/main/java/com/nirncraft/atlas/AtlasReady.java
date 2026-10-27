@@ -165,7 +165,8 @@ public final class AtlasReady {
             JsonObject v = info.getAsJsonObject("voxgrid");
             StringBuilder b = new StringBuilder("grid:");
             for (String k : new String[]{"settled", "resident", "slotsTotal", "pending", "waiting", "gpuWaiting", "coarseWaiting", "pendingSections",
-                    "nearestMissing", "cutoff", "reach"})
+                    "nearestMissing", "cutoff", "reach", "wantedAsked", "wantedHeld", "wantedReasked", "wantedPending", "rankCut",
+                    "rankWaitBest", "rankAdmits", "rankEvicts"})
                 if (v.has(k)) b.append(' ').append(k).append(' ').append(v.get(k).getAsString());
             long nm = v.has("nearestMissing") ? v.get("nearestMissing").getAsLong() : -1;
             if (nm == 0) b.append(" (level 0's waiting sections are past its reach or a full pool's cut-off: the coarse levels draw them)");

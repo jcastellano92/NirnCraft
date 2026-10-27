@@ -255,13 +255,13 @@ public:
         return t;
     }
     std::string refineInfo() const {
-        char b[224];
+        char b[352];
         {
             std::lock_guard<std::mutex> lock(mu_);
             size_t lost = 0, given = 0;
             for (int k = 1; k < VG_LEVELS; k++) lost += lostCells_[k].size(), given += cgiven_[k].size();
             std::snprintf(b, sizeof b, "\"coarseLost\":%zu,\"coarseGiven\":%zu,\"wantedAsked\":%llu,\"wantedHeld\":%llu,\"wantedReasked\":%llu,", lost,
-                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_, (unsigned long long)reasked_);
+                          given, (unsigned long long)wantedAgain_, (unsigned long long)wantedHeld_, (unsigned long long)reasked_, rankCut_, rankWaitBest_, rankAdmits_.size(), rankEvicts_.size(), gpuWanted_.size());
         }
         return std::string(b) + coverageJson();  // (its own lock)
     }
