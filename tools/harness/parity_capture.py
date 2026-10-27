@@ -60,6 +60,8 @@ def close_with_dump(out, mode, after=40):
         if pid and dumps < 3 and time.monotonic() - start > after * (dumps + 1):
             r = subprocess.run([str(JCMD), str(pid), 'Thread.print', '-l'], capture_output=True, text=True, timeout=60)
             (out / f'{mode}-shutdown-hang-{dumps}.txt').write_text(r.stdout + r.stderr, encoding='utf-8')
+            r2 = subprocess.run(['powershell', '-NoProfile', '-Command', "(Get-Process -Id %d).Threads | Sort-Object TotalProcessorTime -Descending | Select-Object Id,ThreadState,WaitReason,TotalProcessorTime,PriorityLevel | Format-Table -AutoSize | Out-String -Width 200" % pid], capture_output=True, text=True, timeout=60)
+            (out / f'{mode}-shutdown-hang-{dumps}-os-threads.txt').write_text(r2.stdout + r2.stderr, encoding='utf-8')
             print('TRACE shutdown hang: thread dump', dumps, 'pid', pid, flush=True)
             dumps += 1
         time.sleep(2)
@@ -94,6 +96,8 @@ def main():
     latest = game.GAME / 'logs/latest.log'
     offset = profile.stat().st_size if profile.exists() else 0
     os.environ['NIRNCRAFT_HARNESS_NO_BUILD'] = '1'
+    if '--memdiag' in sys.argv:
+        os.environ['NIRNCRAFT_HARNESS_JVM'] = ','.join(filter(None, [os.environ.get('NIRNCRAFT_HARNESS_JVM', ''), 'nirncraft.atlas.memoryDiagnostics=true']))
     if '--validation' in sys.argv:
         enable_validation(out)
     if game.running(): game.close()
