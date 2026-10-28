@@ -48,7 +48,7 @@ BUILD_LABEL = "owner-play: build jar"
 # The owner's flags: Infinite ATLAS draws every pixel with the client's GPU world generation and the passive profiler
 # (the harness group "atlas" minus its autotest world). Nothing under nirncraft.autotest / dev / harness.
 OWNER_JVM = {"nirncraft.atlas.unified": "true", "nirncraft.atlas.clientGen": "true", "nirncraft.atlas.profile": "true",
-             "nirncraft.atlas.safeMode": "false"}
+             "nirncraft.atlas.safeMode": "false", "nirncraft.devTest": "true"}
 DROP_FLAGS = re.compile(r"-Dnirncraft\.(autotest|dev|preview|harness|visualtest|atlas)[\w.]*(=\S*)?")
 TAMRIEL = ROOT / "mod/src/main/resources/nirncraft/tamriel"
 

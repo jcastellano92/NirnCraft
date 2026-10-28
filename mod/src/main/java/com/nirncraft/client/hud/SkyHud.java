@@ -44,6 +44,7 @@ public final class SkyHud {
         float partialTick = delta.getGameTimeDeltaPartialTick(false);
         int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
+        if (!com.nirncraft.devtest.DevTestState.shouldShowVitals(mc.player)) return;
         if (mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null || !(mc.gameMode != null && mc.gameMode.canHurtPlayer())) return;
         PlayerData data = SkyData.get(mc.player);
         boolean combat = ClientState.has(CorePackets.SyncVitals.IN_COMBAT);
@@ -145,6 +146,7 @@ public final class SkyHud {
     // ------------------------------------------------------------------ notifications
 
     public static void renderNotifications(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        if (!com.nirncraft.devtest.DevTestState.shouldShowNotifications(Minecraft.getInstance().player)) return;
         float partialTick = delta.getGameTimeDeltaPartialTick(false);
         int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();

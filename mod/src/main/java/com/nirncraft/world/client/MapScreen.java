@@ -85,6 +85,11 @@ public class MapScreen extends Screen {
     private ClientQuestData.Member pendingMember;
     private List<Component> tooltip;
     private Button yesButton, noButton;
+    private boolean devTpOpen;
+    private int devTpX, devTpZ;
+    private String devTpLabel = "";
+    @org.jetbrains.annotations.Nullable
+    private CompoundTag devTpPinLoc;
 
     /** A place or location drawn on the map. */
     private record Pin(int x, int z, int icon, int priority, Component name, LocationKind kind, boolean known,
@@ -245,6 +250,9 @@ public class MapScreen extends Screen {
         double mx = event.x(), my = event.y();
         int button = com.nirncraft.client.screen.UiInput.actionButton(event.button());
         if (super.mouseClicked(event, doubleClick)) return true;
+        if (minecraft != null && com.nirncraft.devtest.DevTestState.isActive(minecraft.player) && handleDevMapClick(mx, my, button)) {
+            return true;
+        }
         if (pendingTravel != null || pendingMember != null) {
             cancelTravel();
             return true;
@@ -285,6 +293,28 @@ public class MapScreen extends Screen {
         if (button == 0 && pressedOnMap) {
             pressedOnMap = false;
             if (dragDistance >= 4) return true;
+            if (minecraft != null && com.nirncraft.devtest.DevTestState.isActive(minecraft.player)) {
+                if (hoveredPin != null) {
+                    devTpOpen = true;
+                    devTpX = hoveredPin.x();
+                    devTpZ = hoveredPin.z();
+                    devTpLabel = hoveredPin.name().getString();
+                    devTpPinLoc = hoveredPin.loc();
+                    click(1.1f);
+                    return true;
+                } else if (onMap(mx, my)) {
+                    devTpOpen = true;
+                    devTpX = (int) Math.round(worldX(mx));
+                    devTpZ = (int) Math.round(worldZ(my));
+                    Region r = minecraft.level != null && minecraft.level.dimension() == Level.OVERWORLD
+                            ? TamrielMap.region(devTpX, devTpZ) : null;
+                    String rName = r != null ? r.name().getString() : "Tamriel";
+                    devTpLabel = rName + " (" + devTpX + ", " + devTpZ + ")";
+                    devTpPinLoc = null;
+                    click(1.1f);
+                    return true;
+                }
+            }
             if (hoveredMember != null) {
                 pendingMember = hoveredMember;
                 updateButtons();
@@ -411,8 +441,13 @@ public class MapScreen extends Screen {
         if (overworld) {
             MapTiles.uploadFinished();
             drawTiles(g);
+            if (com.nirncraft.devtest.DevTestState.isActive(player) && com.nirncraft.devtest.DevTestState.mapBiomeOverlay) {
+                drawBiomeOverlay(g, mouseX, mouseY);
+            }
             drawPaperGrain(g);
-            drawFog(g);
+            if (!com.nirncraft.devtest.DevTestState.isActive(player) || !com.nirncraft.devtest.DevTestState.noFogOfWar) {
+                drawFog(g);
+            }
             // the planned road network (roads module), drawn over the fog like Skyrim's map shows every road
             com.nirncraft.roads.client.RoadMapLayer.draw(g, font, this::screenX, this::screenY, scale, left, top, right, bottom);
             drawProvinceAndRegionNames(g);
@@ -436,6 +471,7 @@ public class MapScreen extends Screen {
         if (showLegend) drawLegend(g);
 
         if (pendingTravel != null || pendingMember != null) drawTravelDialog(g, player);
+        if (com.nirncraft.devtest.DevTestState.isActive(player)) drawDevMapOverlayUi(g, player, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (tooltip != null && pendingTravel == null && pendingMember == null) g.setComponentTooltipForNextFrame(font, tooltip, mouseX, mouseY);
     }
@@ -670,21 +706,36 @@ public class MapScreen extends Screen {
         String dim = level.dimension().identifier().toString();
         List<Pin> out = new ArrayList<>();
         Set<String> listed = new HashSet<>();
+        boolean devUnlock = com.nirncraft.devtest.DevTestState.isActive(player)
+                && com.nirncraft.devtest.DevTestState.unlockAllMap;
+        boolean devAllLocs = com.nirncraft.devtest.DevTestState.isActive(player)
+                && com.nirncraft.devtest.DevTestState.mapShowAllLocations;
         for (int i = 0; i < list.size(); i++) {
             CompoundTag loc = list.getCompoundOrEmpty(i);
             if (!loc.getStringOr("dim", "").equals(dim)) continue;
-            if (loc.getBooleanOr("hidden", false)) continue; // a stranger's homestead not yet discovered: a point on the compass only
+            if (!devAllLocs && loc.getBooleanOr("hidden", false)) continue; // a stranger's homestead not yet discovered: a point on the compass only
             LocationKind kind = LocationKind.byId(loc.getStringOr("type", ""));
             Place place = WorldData.place(loc).orElse(null);
             if (place != null) listed.add(place.id());
+            boolean rumoredOnly = !devUnlock && loc.getBooleanOr("known", false);
             out.add(new Pin(loc.getIntOr("x", 0), loc.getIntOr("z", 0), kind.icon, priority(place, kind), WorldData.displayName(loc), kind,
-                    loc.getBooleanOr("known", false), loc.getBooleanOr("cleared", false), loc, place));
+                    rumoredOnly, loc.getBooleanOr("cleared", false), loc, place));
         }
         if (level.dimension() == Level.OVERWORLD) {
             for (Place p : Places.all()) {
-                if (listed.contains(p.id()) || (p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY)) continue;
+                if (listed.contains(p.id())) continue;
+                if (!devAllLocs && !devUnlock && p.type() != PlaceType.CAPITAL && p.type() != PlaceType.CITY) continue;
                 LocationKind kind = LocationKind.forPlace(p);
-                out.add(new Pin(p.x(), p.z(), kind.icon, priority(p, kind), p.name(), kind, true, false, null, p));
+                CompoundTag synthLoc = null;
+                if (devUnlock) {
+                    synthLoc = new CompoundTag();
+                    synthLoc.putString("id", p.id());
+                    synthLoc.putInt("x", p.x());
+                    synthLoc.putInt("z", p.z());
+                    synthLoc.putString("dim", dim);
+                    synthLoc.putString("type", kind.id);
+                }
+                out.add(new Pin(p.x(), p.z(), kind.icon, priority(p, kind), p.name(), kind, !devUnlock, false, synthLoc, p));
             }
         }
         out.sort(Comparator.comparingInt(Pin::priority).reversed());
@@ -719,8 +770,11 @@ public class MapScreen extends Screen {
         Pin hovered = null;
         float iconSize = scale < 1 / 30.0 ? 11f : scale < 1 / 8.0 ? 13f : 16f;
         
+        boolean devAllLocs = com.nirncraft.devtest.DevTestState.isActive(player)
+                && com.nirncraft.devtest.DevTestState.mapShowAllLocations;
         for (Pin pin : pins) {
-            if (scale < minScale(pin.priority())) continue;
+            if (!devAllLocs && scale < minScale(pin.priority())) continue;
+            if (devAllLocs && pin.priority() <= 1 && scale < 1 / 64.0) continue;
             float sx = (float) screenX(pin.x() + 0.5);
             float sy = (float) screenY(pin.z() + 0.5);
             if (sx < left - 10 || sx > right + 10 || sy < top - 10 || sy > bottom + 10) continue;
@@ -1073,5 +1127,184 @@ public class MapScreen extends Screen {
         g.centeredText(font, q, cx, cy - 22, 0xFFF5EBC8);
         g.centeredText(font, Component.translatable("world.nirncraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)),
                 cx, cy - 8, 0xFFA89F86);
+    }
+
+    // ------------------------------------------------------------------ Dev / Creative Map Overlays & Safe Teleport
+
+    private void drawBiomeOverlay(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int stepPx = 12;
+        for (int sy = top; sy < bottom; sy += stepPx) {
+            int sy2 = Math.min(bottom, sy + stepPx);
+            int wz = Mth.floor(worldZ(sy + stepPx * 0.5));
+            for (int sx = left; sx < right; sx += stepPx) {
+                int sx2 = Math.min(right, sx + stepPx);
+                int wx = Mth.floor(worldX(sx + stepPx * 0.5));
+                Region r = TamrielMap.region(wx, wz);
+                if (r == null || Provinces.isSea(r)) continue;
+                int hash = r.id().hashCode();
+                int rgb = ((hash & 0x7F) + 80) << 16 | (((hash >> 8) & 0x7F) + 80) << 8 | (((hash >> 16) & 0x7F) + 80);
+                g.fill(sx, sy, sx2, sy2, 0x50000000 | rgb);
+            }
+        }
+    }
+
+    private void drawDevMapOverlayUi(GuiGraphicsExtractor g, Player player, int mouseX, int mouseY) {
+        // Top-left Dev Overlay Toggle Pills inside map header
+        String[] labels = {
+                "Fog: " + (com.nirncraft.devtest.DevTestState.noFogOfWar ? "OFF" : "ON"),
+                "Biomes: " + (com.nirncraft.devtest.DevTestState.mapBiomeOverlay ? "ON" : "OFF"),
+                "All Locs: " + (com.nirncraft.devtest.DevTestState.mapShowAllLocations ? "ON" : "OFF"),
+                "All Roads: " + (com.nirncraft.devtest.DevTestState.mapShowAllRoads ? "ON" : "OFF")
+        };
+        boolean[] active = {
+                com.nirncraft.devtest.DevTestState.noFogOfWar,
+                com.nirncraft.devtest.DevTestState.mapBiomeOverlay,
+                com.nirncraft.devtest.DevTestState.mapShowAllLocations,
+                com.nirncraft.devtest.DevTestState.mapShowAllRoads
+        };
+        int px = left + 4;
+        int py = top + 4;
+        for (int i = 0; i < labels.length; i++) {
+            int pw = font.width(labels[i]) + 10;
+            boolean hov = mouseX >= px && mouseX < px + pw && mouseY >= py && mouseY < py + 14;
+            com.nirncraft.inventory.client.SkyUi.panel(g, px, py, px + pw, py + 14);
+            int col = hov ? com.nirncraft.inventory.client.SkyUi.BRIGHT
+                    : (active[i] ? com.nirncraft.inventory.client.SkyUi.GOLD : com.nirncraft.inventory.client.SkyUi.DIM);
+            g.text(font, labels[i], px + 5, py + 3, col, false);
+            px += pw + 4;
+        }
+
+        // Dev Teleport & Fast Travel Action Bar when a point or pin was clicked on the map
+        if (devTpOpen) {
+            int sx = (int) Math.round(screenX(devTpX + 0.5));
+            int sy = (int) Math.round(screenY(devTpZ + 0.5));
+            if (sx >= left && sx < right && sy >= top && sy < bottom) {
+                diamond(g, sx, sy, 6, 0xFF1E140A);
+                diamond(g, sx, sy, 5, com.nirncraft.inventory.client.SkyUi.GOLD);
+            }
+
+            int barW = Math.min(width - 28, 430);
+            int barH = 42;
+            int bx = (width - barW) / 2;
+            int by = bottom - barH - 6;
+            com.nirncraft.inventory.client.SkyUi.panel(g, bx, by, bx + barW, by + barH);
+            String title = "TELEPORT / FAST TRAVEL: " + devTpLabel;
+            g.centeredText(font, Component.literal(title), width / 2, by + 5, com.nirncraft.inventory.client.SkyUi.GOLD);
+
+            String[] actions = {
+                    "Safe Surface",
+                    "Above (+35m)",
+                    "Aerial (+120m)",
+                    devTpPinLoc != null ? "Fast Travel" : "Set Waypoint",
+                    "Close"
+            };
+            int btnY = by + 20;
+            int totalW = 0;
+            int[] btnW = new int[actions.length];
+            for (int i = 0; i < actions.length; i++) {
+                btnW[i] = font.width(actions[i]) + 12;
+                totalW += btnW[i] + (i > 0 ? 4 : 0);
+            }
+            int curX = width / 2 - totalW / 2;
+            for (int i = 0; i < actions.length; i++) {
+                int w = btnW[i];
+                boolean hov = mouseX >= curX && mouseX < curX + w && mouseY >= btnY && mouseY < btnY + 16;
+                g.fill(curX, btnY, curX + w, btnY + 16, hov ? 0x44E8C060 : 0x24FFFFFF);
+                com.nirncraft.inventory.client.SkyUi.hline(g, curX, curX + w, btnY, hov ? 0xE0 : 0x70);
+                com.nirncraft.inventory.client.SkyUi.hline(g, curX, curX + w, btnY + 15, hov ? 0xE0 : 0x70);
+                g.centeredText(font, Component.literal(actions[i]), curX + w / 2, btnY + 4,
+                        hov ? com.nirncraft.inventory.client.SkyUi.BRIGHT : com.nirncraft.inventory.client.SkyUi.TEXT);
+                curX += w + 4;
+            }
+        }
+    }
+
+    private boolean handleDevMapClick(double mx, double my, int button) {
+        if (button != 0) return false;
+        // 1. Check top-left overlay toggle pills
+        String[] labels = {
+                "Fog: " + (com.nirncraft.devtest.DevTestState.noFogOfWar ? "OFF" : "ON"),
+                "Biomes: " + (com.nirncraft.devtest.DevTestState.mapBiomeOverlay ? "ON" : "OFF"),
+                "All Locs: " + (com.nirncraft.devtest.DevTestState.mapShowAllLocations ? "ON" : "OFF"),
+                "All Roads: " + (com.nirncraft.devtest.DevTestState.mapShowAllRoads ? "ON" : "OFF")
+        };
+        int px = left + 4;
+        int py = top + 4;
+        for (int i = 0; i < labels.length; i++) {
+            int pw = font.width(labels[i]) + 10;
+            if (mx >= px && mx < px + pw && my >= py && my < py + 14) {
+                switch (i) {
+                    case 0 -> com.nirncraft.devtest.DevTestState.noFogOfWar = !com.nirncraft.devtest.DevTestState.noFogOfWar;
+                    case 1 -> com.nirncraft.devtest.DevTestState.mapBiomeOverlay = !com.nirncraft.devtest.DevTestState.mapBiomeOverlay;
+                    case 2 -> com.nirncraft.devtest.DevTestState.mapShowAllLocations = !com.nirncraft.devtest.DevTestState.mapShowAllLocations;
+                    case 3 -> com.nirncraft.devtest.DevTestState.mapShowAllRoads = !com.nirncraft.devtest.DevTestState.mapShowAllRoads;
+                }
+                click(1.0f);
+                return true;
+            }
+            px += pw + 4;
+        }
+
+        // 2. Check Dev Teleport Bar buttons if open
+        if (devTpOpen) {
+            int barW = Math.min(width - 28, 430);
+            int barH = 42;
+            int bx = (width - barW) / 2;
+            int by = bottom - barH - 6;
+            String[] actions = {
+                    "Safe Surface",
+                    "Above (+35m)",
+                    "Aerial (+120m)",
+                    devTpPinLoc != null ? "Fast Travel" : "Set Waypoint",
+                    "Close"
+            };
+            int btnY = by + 20;
+            int totalW = 0;
+            int[] btnW = new int[actions.length];
+            for (int i = 0; i < actions.length; i++) {
+                btnW[i] = font.width(actions[i]) + 12;
+                totalW += btnW[i] + (i > 0 ? 4 : 0);
+            }
+            int curX = width / 2 - totalW / 2;
+            for (int i = 0; i < actions.length; i++) {
+                int w = btnW[i];
+                if (mx >= curX && mx < curX + w && my >= btnY && my < btnY + 16) {
+                    switch (i) {
+                        case 0 -> {
+                            com.nirncraft.devtest.DevTestClient.sendTeleportMapSafe(devTpX, devTpZ, com.nirncraft.devtest.DevTestCommands.TP_SURFACE_SAFE);
+                            devTpOpen = false;
+                            onClose();
+                        }
+                        case 1 -> {
+                            com.nirncraft.devtest.DevTestClient.sendTeleportMapSafe(devTpX, devTpZ, com.nirncraft.devtest.DevTestCommands.TP_ABOVE_GROUND);
+                            devTpOpen = false;
+                            onClose();
+                        }
+                        case 2 -> {
+                            com.nirncraft.devtest.DevTestClient.sendTeleportMapSafe(devTpX, devTpZ, com.nirncraft.devtest.DevTestCommands.TP_HIGH_AERIAL);
+                            devTpOpen = false;
+                            onClose();
+                        }
+                        case 3 -> {
+                            if (devTpPinLoc != null && !devTpPinLoc.getStringOr("id", "").isEmpty()) {
+                                com.nirncraft.devtest.DevTestClient.sendTeleportMapSafe(devTpX, devTpZ, com.nirncraft.devtest.DevTestCommands.TP_SURFACE_SAFE);
+                                devTpOpen = false;
+                                onClose();
+                            } else {
+                                setWaypoint(new BlockPos(devTpX, playerY(), devTpZ), devTpLabel);
+                                devTpOpen = false;
+                            }
+                        }
+                        case 4 -> devTpOpen = false;
+                    }
+                    return true;
+                }
+                curX += w + 4;
+            }
+            if (mx >= bx && mx < bx + barW && my >= by && my < by + barH) {
+                return true;
+            }
+        }
+        return false;
     }
 }

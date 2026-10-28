@@ -91,6 +91,7 @@ public class SkyrimInventoryScreen extends Screen {
     private boolean vwVisible = true;
     private int hoverAction = -1;
     private boolean hoverCrafting;
+    private boolean hoverCreativeCatalog;
     private boolean hoverPreview;
     /** The detail panel's text scroll (lines): reset on a new selection, bounded by {@code detMaxScroll} while drawing. */
     private int detScroll, detMaxScroll;
@@ -395,6 +396,19 @@ public class SkyrimInventoryScreen extends Screen {
         int by = Math.max(y + 6, bottom - 19);
         int bx1 = catX + 4, bx2 = catX + catW - 4;
         hoverCrafting = SkyUi.inside(mx, my, bx1, by, bx2, by + 14) && by + 14 <= bottom;
+        hoverCreativeCatalog = false;
+        if (minecraft != null && com.nirncraft.devtest.DevTestState.isActive(minecraft.player)) {
+            int cby = by - 18;
+            if (cby >= y + 2) {
+                hoverCreativeCatalog = SkyUi.inside(mx, my, bx1, cby, bx2, cby + 14);
+                g.fill(bx1, cby, bx2, cby + 14, hoverCreativeCatalog ? 0x45E8C060 : 0x22E8C060);
+                SkyUi.hline(g, bx1, bx2, cby, hoverCreativeCatalog ? 0xE0 : 0x90);
+                SkyUi.hline(g, bx1, bx2, cby + 13, hoverCreativeCatalog ? 0xE0 : 0x90);
+                String cLabel = "CREATIVE";
+                int clx = (bx1 + bx2) / 2 - font.width(cLabel) / 2;
+                g.text(font, cLabel, clx, cby + 3, hoverCreativeCatalog ? SkyUi.BRIGHT : SkyUi.GOLD, false);
+            }
+        }
         if (by + 14 <= bottom) {
             g.fill(bx1, by, bx2, by + 14, hoverCrafting ? 0x40FFFFFF : 0x1EFFFFFF);
             SkyUi.hline(g, bx1, bx2, by, hoverCrafting ? 0xC0 : 0x70);
@@ -733,6 +747,11 @@ public class SkyrimInventoryScreen extends Screen {
         labels.add(Component.translatable(e.favorite ? "inventory.nirncraft.action.unfavorite" : "inventory.nirncraft.action.favorite"));
         keys.add("F");
         runs.add(this::favorite);
+        if (minecraft != null && com.nirncraft.devtest.DevTestState.isActive(minecraft.player)) {
+            labels.add(Component.literal("Place in World"));
+            keys.add("P");
+            runs.add(() -> com.nirncraft.devtest.DevTestClient.armOneShotItemOrBlock(e.name, e.stack));
+        }
 
         int n = labels.size();
         int cols = 2;
@@ -1079,6 +1098,10 @@ public class SkyrimInventoryScreen extends Screen {
         }
 
         if (button == 0 || button == 1) {
+            if (hoverCreativeCatalog && button == 0 && minecraft != null) {
+                minecraft.gui.setScreen(new com.nirncraft.devtest.SkyrimCreativeScreen(this));
+                return true;
+            }
             if (hoverCrafting && button == 0) {
                 openVanilla();
                 return true;

@@ -45,7 +45,7 @@ public final class SkyCrosshair {
         float partialTick = delta.getGameTimeDeltaPartialTick(false);
         int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.gui.hud.isHidden() || mc.gui.screen() != null || !ours(mc)) return;
+        if (mc.gui.hud.isHidden() || mc.gui.screen() != null || !ours(mc) || !com.nirncraft.devtest.DevTestState.shouldShowCrosshair(mc.player)) return;
         if (mc.player.isCrouching() || com.nirncraft.arsenal.client.KillCamClient.active()) return;
         int cx = width / 2;
         int cy = height / 2;

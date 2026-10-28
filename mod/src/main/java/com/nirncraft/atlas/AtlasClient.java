@@ -802,10 +802,11 @@ public final class AtlasClient {
                     || AtlasClientSections.coversEye(p.x, p.z)))
                 frame.flags |= AtlasNative.FRAME_FILL_NEAR;
             if (groups) frame.flags |= AtlasNative.FRAME_GROUPS;
-            if (quality.cpuLightLow()) frame.flags |= AtlasNative.FRAME_LIGHT_LOW;  // the CPU's first step down
+            boolean devNoTracedLight = com.nirncraft.devtest.DevTestState.isActive(mc.player) && !com.nirncraft.devtest.DevTestState.tracedLighting;
+            if (quality.cpuLightLow() || devNoTracedLight) frame.flags |= AtlasNative.FRAME_LIGHT_LOW;  // the CPU's first step down
 
             boolean nearOwned = AtlasNearPass.owns();
-            boolean nearLit = nearOwned && ctx.hasNearLight() && AtlasNearPass.unified();
+            boolean nearLit = !devNoTracedLight && nearOwned && ctx.hasNearLight() && AtlasNearPass.unified();
             if (nearLit) {
                 frame.flags |= AtlasNative.FRAME_NEAR_LIGHT | AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS;
                 // atlas's clouds, in its light and haze (NirnCraft's deck steps aside: OverworldClouds), unless weather is off

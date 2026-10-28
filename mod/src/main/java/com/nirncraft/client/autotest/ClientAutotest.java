@@ -753,12 +753,33 @@ public final class ClientAutotest {
                     case "map" -> new MapScreen();
                     case "journal" -> new JournalScreen();
                     case "inventory" -> new SkyrimInventoryScreen();
+                    case "creative" -> new com.nirncraft.devtest.SkyrimCreativeScreen();
+                    case "devsettings" -> new com.nirncraft.devtest.DevSettingsScreen(null);
+                    case "devcapture" -> { com.nirncraft.devtest.DevTestClient.triggerSessionCapture(mc.gui.screen()); yield mc.gui.screen(); }
+                    case "race" -> { com.nirncraft.client.screen.RaceScreen.openForDevPreview(mc.gui.screen()); yield mc.gui.screen(); }
                     case "magic" -> new MagicMenuScreen();
                     case "skills" -> new SkillsScreen();
                     case "hub" -> new HubScreen();
                     case "close" -> null;
                     default -> throw new IllegalArgumentException("Unknown QA screen");
                 });
+            } else if (action.startsWith("guiscale ")) {
+                mc.options.guiScale().set(Integer.parseInt(action.substring(9).trim()));
+                if (mc.gui.screen() != null) mc.gui.screen().resize(mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
+            } else if (action.startsWith("mouse-click ")) {
+                String[] mp = action.substring(12).trim().split("\\s+");
+                net.minecraft.client.gui.screens.Screen curScreen = mc.gui.screen();
+                if (curScreen != null && mp.length >= 2) {
+                    int btn = mp.length > 2 ? Integer.parseInt(mp[2]) : 0;
+                    curScreen.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(Double.parseDouble(mp[0]), Double.parseDouble(mp[1]), new net.minecraft.client.input.MouseButtonInfo(btn, 0)), false);
+                }
+            } else if (action.startsWith("dev-action ")) {
+                String da = action.substring(11).trim();
+                if (da.startsWith("time-digit ")) com.nirncraft.devtest.DevTestState.startTimeFade(mc.level.getOverworldClockTime(), Integer.parseInt(da.substring(11).trim()));
+                else if (da.equals("cycle-ceiling")) com.nirncraft.devtest.DevTestState.cycleQualityCeiling(1);
+                else if (da.startsWith("fps-mode ")) com.nirncraft.devtest.DevTestState.fpsOverlayMode = com.nirncraft.devtest.DevTestState.FpsOverlayMode.valueOf(da.substring(9).trim().toUpperCase(java.util.Locale.ROOT));
+                else if (da.startsWith("map-biomes ")) com.nirncraft.devtest.DevTestState.mapBiomeOverlay = da.substring(11).trim().equals("on");
+                else if (da.equals("toggle-lighting")) com.nirncraft.devtest.DevTestState.toggleTracedLighting();
             } else if (action.startsWith("screen ")) {
                 UiProbe.open(mc, action.substring(7).trim());
             } else if (action.startsWith("click ")) {

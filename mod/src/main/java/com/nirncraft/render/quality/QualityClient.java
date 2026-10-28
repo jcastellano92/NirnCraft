@@ -167,6 +167,7 @@ public final class QualityClient {
             controller.setCovered(covered(mc));
             if ((frameIndex & 63) == 0) controller.setTargetFps(targetFps(mc, controller.hardware().tier()));
             double[] q = controller.frame(now);
+            if (com.nirncraft.devtest.DevTestState.isActive(mc.player)) com.nirncraft.devtest.DevTestState.clampKnobs(q);
             // the pack's knobs: uploaded here, before any pass, when their bytes change (64 bytes)
             if (ADAPTIVE && texture.fill(q, controller.level()) && texture.upload())
                 for (Knob k : Knob.ALL) if (k.owner == Knob.Owner.PACK) packApplied[k.ordinal()] = q[k.ordinal()];

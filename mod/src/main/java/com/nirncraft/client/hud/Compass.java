@@ -18,7 +18,7 @@ public final class Compass {
         float partialTick = delta.getGameTimeDeltaPartialTick(false);
         int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.gui.hud.isHidden()) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || !com.nirncraft.devtest.DevTestState.shouldShowCompass(mc.player)) return;
         Font font = mc.font;
         int half = 110;
         int cx = width / 2;

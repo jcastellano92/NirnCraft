@@ -414,7 +414,12 @@ public final class ClientEvents {
         if (player == null) return;
 
         // When sheathed, hands and weapons are lowered / put away
-        if (com.nirncraft.combat.Sheathe.isSheathed(player)) {
+        if (com.nirncraft.devtest.DevTestState.shouldHideHands(player)) {
+            event.setCanceled(true);
+            return;
+        }
+        // When sheathed (and not holding a Dev one-shot placement item), hands and weapons are lowered / put away
+        if (com.nirncraft.devtest.DevTestState.activePlacement == null && com.nirncraft.combat.Sheathe.isSheathed(player)) {
             event.setCanceled(true);
             return;
         }

@@ -50,9 +50,11 @@ public final class RoadMapLayer {
         int quads = 0;
         float zoom = (float) Math.max(0.6, Math.min(2.2, Math.sqrt(scale * 12)));
         // draw lesser roads first so highways lie on top
+        boolean showAll = com.nirncraft.devtest.DevTestState.isActive(net.minecraft.client.Minecraft.getInstance().player)
+                && com.nirncraft.devtest.DevTestState.mapShowAllRoads;
         for (int kind = Road.TRAIL; kind >= Road.HIGHWAY; kind--) {
-            if (kind == Road.TRAIL && scale < 1 / 6.0) continue;
-            if (kind == Road.LANE && scale < 1 / 14.0) continue;
+            if (!showAll && kind == Road.TRAIL && scale < 1 / 6.0) continue;
+            if (!showAll && kind == Road.LANE && scale < 1 / 14.0) continue;
             float w = WIDTH[kind] * zoom * 0.5f;
             int rgb = COLOR[kind];
             int alpha = kind == Road.TRAIL ? 0x90 : 0xD0;
@@ -88,7 +90,7 @@ public final class RoadMapLayer {
         }
         if(quads>0) g.submitGuiElementRenderState(new RoadState(vertices.toFloatArray(),colors.toIntArray(),new org.joml.Matrix3x2f(g.pose()),g.peekScissorStack(),
             new net.minecraft.client.gui.navigation.ScreenRectangle(left-4,top-4,right-left+8,bottom-top+8).transformMaxBounds(g.pose())));
-        if (scale > 1 / 45.0 && scale < 1.0) drawNames(g, font, sx, sy, scale, left, top, right, bottom);
+        if ((showAll || scale > 1 / 45.0) && scale < 1.0) drawNames(g, font, sx, sy, scale, left, top, right, bottom);
     }
 
     private record RoadState(float[] xy,int[] colors,org.joml.Matrix3x2fc pose,

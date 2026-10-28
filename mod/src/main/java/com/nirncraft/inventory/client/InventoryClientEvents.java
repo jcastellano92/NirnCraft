@@ -39,6 +39,8 @@ public final class InventoryClientEvents {
 
     private InventoryClientEvents() {}
 
+    public static void openVanillaOnce() { vanillaOnce = true; }
+
     static void allowVanillaOnce() {
         vanillaOnce = true;
     }
@@ -60,7 +62,16 @@ public final class InventoryClientEvents {
         LocalPlayer player = mc.player;
         if (player == null || next == null) return;
 
-        if (next.getClass() == InventoryScreen.class) {
+        if (next.getClass() == InventoryScreen.class
+                || next instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen) {
+            if (vanillaOnce) {
+                vanillaOnce = false;
+                return;
+            }
+            if (com.nirncraft.devtest.DevTestState.isActive(player)) {
+                event.setNewScreen(new com.nirncraft.devtest.SkyrimCreativeScreen());
+                return;
+            }
             if (!player.isCreative() && !player.isSpectator()) {
                 event.setNewScreen(new com.nirncraft.client.screen.HubScreen());
             }
@@ -88,11 +99,19 @@ public final class InventoryClientEvents {
     /** A way back from the vanilla inventory to the Skyrim one. */
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (event.getScreen().getClass() != InventoryScreen.class || !replaceInventory()) return;
+        Screen s = event.getScreen();
+        boolean isInv = s.getClass() == InventoryScreen.class
+                || s instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+        if (!isInv || !replaceInventory()) return;
         Minecraft mc = Minecraft.getInstance();
         Component label = Component.translatable("inventory.nirncraft.open_skyrim");
         int w = mc.font.width(label) + 16;
         event.addListener(Button.builder(label, b -> mc.gui.setScreen(new SkyrimInventoryScreen())).bounds(4, 4, w, 16).build());
+        if (com.nirncraft.devtest.DevTestState.isActive(mc.player)) {
+            Component cLabel = Component.literal("NirnCraft Creative");
+            int cw = mc.font.width(cLabel) + 16;
+            event.addListener(Button.builder(cLabel, b -> mc.gui.setScreen(new com.nirncraft.devtest.SkyrimCreativeScreen())).bounds(8 + w, 4, cw, 16).build());
+        }
     }
 
     // ------------------------------------------------------------------ keys & sprinting

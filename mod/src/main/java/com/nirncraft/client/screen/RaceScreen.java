@@ -67,6 +67,20 @@ public class RaceScreen extends Screen {
     // layout (computed in init)
     private int listX, listY, listW, listH, infoX, infoY, infoW, infoH, modelX, modelY, modelScale;
     private int btnX, btnY, btnW, btnH;
+    private boolean devPreviewMode;
+    @org.jetbrains.annotations.Nullable
+    private Screen devParentScreen;
+
+    public static RaceScreen openForDevPreview(@org.jetbrains.annotations.Nullable Screen parent) {
+        RaceScreen s = new RaceScreen();
+        s.devPreviewMode = true;
+        s.devParentScreen = parent;
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc != null && mc.gui != null) {
+            mc.gui.setScreen(s);
+        }
+        return s;
+    }
 
     public RaceScreen() {
         super(Component.translatable("screen.nirncraft.race"));
@@ -95,7 +109,16 @@ public class RaceScreen extends Screen {
     @Override
     public boolean shouldCloseOnEsc() {
         // First-time character creation cannot be cancelled without choosing a race
-        return false;
+        return devPreviewMode || com.nirncraft.devtest.DevTestState.isActive(minecraft != null ? minecraft.player : null);
+    }
+
+    @Override
+    public void onClose() {
+        if (devPreviewMode && minecraft != null) {
+            minecraft.gui.setScreen(devParentScreen);
+            return;
+        }
+        super.onClose();
     }
 
     @Override
@@ -662,6 +685,18 @@ public class RaceScreen extends Screen {
     }
 
     private void confirmSelection() {
+        if (devPreviewMode) {
+            if (UiInput.shiftDown()) {
+                com.nirncraft.devtest.DevTestClient.sendApplyRacePreview(selected, look());
+            } else {
+                com.nirncraft.devtest.DevTestState.showToast(
+                        "RACE PREVIEW: " + selected.name(),
+                        "Closed without changing player state (Shift+Confirm to apply look)",
+                        2400L);
+            }
+            onClose();
+            return;
+        }
         SkyNetwork.sendToServer(new CorePackets.ChooseRace(selected.id(), look()));
         com.nirncraft.quest.client.IntroClient.characterConfirmed();
         onClose();
