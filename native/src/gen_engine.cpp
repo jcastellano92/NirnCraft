@@ -1521,6 +1521,7 @@ public:
                 // submission of about ATLAS_GEN_PART_MS; its state waits in colInfo (atlas_gen.slang).
                 uint32_t B = bandBlocks(), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
                 uint32_t bands = (uint32_t(NOISE_H_BLOCKS) + B) / B;  // (y from the stack's top, NOISE_H + 1 values, B a band)
+                uint32_t groupedBands = 0, groupedBlocks = 0;
                 for (uint32_t k = 0; k < bands; k++) {
                     GenParams pb = b.params;
                     pb.pad0 = int32_t(B);  // (atlas_gen.slang BAND_SIZE, BAND_INDEX)
@@ -1528,14 +1529,30 @@ public:
                     vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &pb);
                     vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipes_[p]);
                     vkCmdDispatch(cmd_, gx, n, 1);
-                    ring_[cur_].sliceKind = BAND_KIND;
-                    ring_[cur_].sliceUnits = B;
+                    groupedBands++;
+                    groupedBlocks += B;
+                    int bandHi = -64 + NOISE_H_BLOCKS - int(k * B);
+                    // High sky bands (y > 240) and deep basement bands (y < -16) are mostly early-exit or uniform rock;
+                    // coalesce multiple bands per submission to avoid hundreds of <0.3 ms micro-submissions.
+                    bool skyBand = bandHi > 240;
+                    int nextBandHi = -64 + NOISE_H_BLOCKS - int((k + 1) * B);
+                    uint32_t maxGroup = skyBand ? 16u : 1u;
+                    bool flushSkyBeforeTerrain = skyBand && nextBandHi <= 240;
                     if (k + 1 < bands) {
                         barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                        if (!submit(err, false)) return false;
-                        begin();
-                        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                        if (groupedBands >= maxGroup || flushSkyBeforeTerrain) {
+                            ring_[cur_].sliceKind = skyBand ? -1 : BAND_KIND;
+                            ring_[cur_].sliceUnits = skyBand ? 0 : groupedBlocks;
+                            if (!submit(err, false)) return false;
+                            begin();
+                            vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
+                            groupedBands = 0;
+                            groupedBlocks = 0;
+                        }
+                    } else {
+                        ring_[cur_].sliceKind = skyBand ? -1 : BAND_KIND;
+                        ring_[cur_].sliceUnits = skyBand ? 0 : groupedBlocks;
                     }
                 }
                 vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
@@ -2485,7 +2502,7 @@ private:
         std::chrono::steady_clock::time_point bucketAt = std::chrono::steady_clock::now();
         uint64_t subs = 0;
         int cls = 0;
-        bool init = false;
+        bool init = false, wasBoost = false;
         // the frames' own period (probes), what they may take, the probe under way
         double baseMs = 0.0, allowMs = 0.0;
         double recent[50] = {};  // (the last 10 s of window periods)
@@ -2789,8 +2806,25 @@ private:
         }();
         if (!on || !shared_ || !backend_) return 0.0;
         pace_.lastSubAt = std::chrono::steady_clock::now();  // (busy from here: a window with a wait in it is not the frames' own)
+        if (pace_.cls == 2 || boost_.load(std::memory_order_relaxed)) {
+            // (the loading phase: the card is the generator's; do not feed unpaced loading-screen frame periods into paceUpdate)
+            pace_.wasBoost = true;
+            return 0.0;
+        }
+        if (pace_.wasBoost) {
+            pace_.wasBoost = false;
+            auto now = pace_.lastSubAt;
+            pace_.last = now;
+            pace_.sampleAt = now;
+            pace_.sampleFrames = backend_->framesSubmitted();
+            pace_.periodMs = 0.0;
+            pace_.duty = 0.5;
+            pace_.tokens = 20.0;
+            pace_.tokensFar = 20.0;
+            std::memset(pace_.recent, 0, sizeof(pace_.recent));
+            pace_.recentAt = 0;
+        }
         paceUpdate();
-        if (pace_.cls == 2 || boost_.load(std::memory_order_relaxed)) return 0.0;  // (the loading phase: the card is the generator's)
         double need = pace_.cls ? 10.0 : 0.0, waited = 0.0;
         auto t0 = std::chrono::steady_clock::now();
         // (the work in flight ahead of the frames: at most ATLAS_GEN_AHEAD_MS (6) of it, estimated)
@@ -2799,20 +2833,6 @@ private:
             std::string e;
             if (!waitOldest(e, true)) break;
             waited = msSince(t0);
-        }
-        // (the gaps between frames: not while a frame is on the GPU, a frame period at most, then one part anyway: a
-        // GPU the frames keep busy still gets its share; ATLAS_GEN_GAPS=0 off)
-        static const bool gaps = !(std::getenv("ATLAS_GEN_GAPS") && std::getenv("ATLAS_GEN_GAPS")[0] == '0');
-        // (only where the frames leave gaps: frames that keep the GPU busy end to end (an empty world's long far rays) would
-        // otherwise hold the generator to a submission a frame, and the world it would fill stays empty)
-        double idleMs = pace_.periodMs - pace_.gpuMs;
-        if (gaps && pace_.periodMs > 0.0 && pace_.gpuMs > 0.0 && pace_.gpuMs < 0.75 * pace_.periodMs) {
-            double cap = std::min(20.0, std::max(2.0, idleMs)), g0 = waited;
-            while (backend_->frameOnGpu() && waited - g0 < cap) {
-                std::this_thread::sleep_for(std::chrono::microseconds(500));
-                waited = msSince(t0);
-            }
-            pace_.lastSubAt = std::chrono::steady_clock::now();
         }
         double& bucket = pace_.cls == 1 ? pace_.tokensFar : pace_.tokens;
         // (the far path waits for its tokens 40 ms a submission at most: a tile holds the generator's locks (the render thread's
@@ -2833,6 +2853,21 @@ private:
             waited = msSince(t0);
             pace_.lastSubAt = std::chrono::steady_clock::now();
             paceUpdate();
+        }
+        // (the gaps between frames: not while a frame is on the GPU, a frame period at most, then one part anyway: a
+        // GPU the frames keep busy still gets its share; ATLAS_GEN_GAPS=0 off. Checked right before vkQueueSubmit after
+        // token refill so the submission fires at the start of the inter-frame idle gap.)
+        static const bool gaps = !(std::getenv("ATLAS_GEN_GAPS") && std::getenv("ATLAS_GEN_GAPS")[0] == '0');
+        // (only where the frames leave gaps: frames that keep the GPU busy end to end (an empty world's long far rays) would
+        // otherwise hold the generator to a submission a frame, and the world it would fill stays empty)
+        double idleMs = pace_.periodMs - pace_.gpuMs;
+        if (gaps && pace_.periodMs > 0.0 && pace_.gpuMs > 0.0 && pace_.gpuMs < 0.75 * pace_.periodMs) {
+            double gapCap = std::min(20.0, std::max(2.0, idleMs)), g0 = waited;
+            while (backend_->frameOnGpu() && waited - g0 < gapCap) {
+                std::this_thread::sleep_for(std::chrono::microseconds(500));
+                waited = msSince(t0);
+            }
+            pace_.lastSubAt = std::chrono::steady_clock::now();
         }
         pace_.waitedMs += waited;
         if (pace_.cls) pace_.farWaitedMs += waited;

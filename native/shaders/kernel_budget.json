@@ -73,8 +73,8 @@
    "structCallsOk": []
   },
   "atlas_feat_cover": {
-   "instructions": 22118,
-   "private": 2,
+   "instructions": 22153,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 10,
    "structCalls": 0,
@@ -119,8 +119,8 @@
    ]
   },
   "atlas_feat_disk": {
-   "instructions": 19788,
-   "private": 2,
+   "instructions": 19814,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -179,8 +179,8 @@
    "structCallsOk": []
   },
   "atlas_feat_fartrees": {
-   "instructions": 12718,
-   "private": 2,
+   "instructions": 12737,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 15,
    "structCalls": 0,
@@ -201,8 +201,8 @@
    ]
   },
   "atlas_feat_freeze": {
-   "instructions": 19786,
-   "private": 2,
+   "instructions": 19812,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -259,8 +259,8 @@
    "structCallsOk": []
   },
   "atlas_feat_lake": {
-   "instructions": 20691,
-   "private": 2,
+   "instructions": 20717,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -325,8 +325,8 @@
    ]
   },
   "atlas_feat_ore": {
-   "instructions": 21165,
-   "private": 2,
+   "instructions": 21209,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -375,8 +375,8 @@
    "structCallsOk": []
   },
   "atlas_feat_rock": {
-   "instructions": 21221,
-   "private": 2,
+   "instructions": 21247,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -439,8 +439,8 @@
    "structCallsOk": []
   },
   "atlas_feat_spring": {
-   "instructions": 19746,
-   "private": 2,
+   "instructions": 19772,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
    "structCalls": 0,
@@ -481,8 +481,8 @@
    ]
   },
   "atlas_feat_tree": {
-   "instructions": 41811,
-   "private": 2,
+   "instructions": 41864,
+   "private": 1,
    "workgroup": 0,
    "fnArrays": 24,
    "structCalls": 0,
@@ -1067,7 +1067,7 @@
    "structCallsOk": []
   },
   "atlas_nearlight": {
-   "instructions": 25864,
+   "instructions": 26246,
    "private": 28,
    "workgroup": 1,
    "fnArrays": 30,
@@ -1083,35 +1083,22 @@
    ]
   },
   "atlas_neartemporal": {
-   "instructions": 29135,
-   "private": 28,
+   "instructions": 4214,
+   "private": 0,
    "workgroup": 0,
-   "fnArrays": 30,
+   "fnArrays": 0,
    "structCalls": 0,
    "structCallsOk": [
-    "cumulusDensity",
-    "traceGroups",
-    "traceLodCore",
-    "traceLodRegions",
-    "traceRegion",
-    "traceSecondaryCore",
-    "traceVoxGrid"
+    "cumulusDensity"
    ]
   },
   "atlas_nearup": {
-   "instructions": 17566,
-   "private": 28,
+   "instructions": 768,
+   "private": 0,
    "workgroup": 0,
-   "fnArrays": 30,
+   "fnArrays": 0,
    "structCalls": 0,
-   "structCallsOk": [
-    "traceGroups",
-    "traceLodCore",
-    "traceLodRegions",
-    "traceRegion",
-    "traceSecondaryCore",
-    "traceVoxGrid"
-   ]
+   "structCallsOk": []
   },
   "atlas_ovl_access": {
    "instructions": 10836,
@@ -1424,21 +1411,21 @@
     "shared": 12560,
     "local": 5264,
     "stack": 0,
-    "binary": 570112
+    "binary": 572288
    },
    "nearUpsampleMain": {
-    "registers": 128,
-    "shared": 12544,
-    "local": 2416,
+    "registers": 43,
+    "shared": 0,
+    "local": 0,
     "stack": 0,
-    "binary": 369536
+    "binary": 10240
    },
    "nearTemporalMain": {
-    "registers": 128,
-    "shared": 12544,
-    "local": 5440,
+    "registers": 72,
+    "shared": 768,
+    "local": 0,
     "stack": 0,
-    "binary": 656896
+    "binary": 56576
    },
    "lightKernel": {
     "registers": 41,

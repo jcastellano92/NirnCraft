@@ -482,20 +482,20 @@ double dmax(double a, double b) { return (a != a) ? a : (a >= b ? (a == 0.0l && 
 // hi low, hi high), not in a thread-private static: NVIDIA's compiler took the [noinline] random functions writing a
 // Private variable for side-effect free and re-evaluated or merged their calls (ore's two nextInt(3) drew three
 // times). A storage buffer write it must keep. It also carries the random from one dispatch to the next.
-static uint sRA;
+[ForceInline] uint sRA() { return sG.base + SCR_META + 6u; }
 // the trees' trace (dev): each placement's stages and marks with the draws so far into M_DBG, against the Java
 // reference's (FloraTreeFeature.trace, the dump's .trees.txt; tools: treecmp.py). Off: it costs a store a draw.
 static const bool TREE_TRACE = false;
 [ForceInline]
-uint64_t rngLo() { return (uint64_t(scratch[sRA + 1u]) << 32) | uint64_t(scratch[sRA]); }
+uint64_t rngLo() { return (uint64_t(scratch[sRA() + 1u]) << 32) | uint64_t(scratch[sRA()]); }
 [ForceInline]
-uint64_t rngHi() { return (uint64_t(scratch[sRA + 3u]) << 32) | uint64_t(scratch[sRA + 2u]); }
+uint64_t rngHi() { return (uint64_t(scratch[sRA() + 3u]) << 32) | uint64_t(scratch[sRA() + 2u]); }
 [ForceInline]
 void rngStore(uint64_t lo, uint64_t hi) {
-    scratch[sRA] = uint(lo & 0xFFFFFFFFu);
-    scratch[sRA + 1u] = uint(lo >> 32u);
-    scratch[sRA + 2u] = uint(hi & 0xFFFFFFFFu);
-    scratch[sRA + 3u] = uint(hi >> 32u);
+    scratch[sRA()] = uint(lo & 0xFFFFFFFFu);
+    scratch[sRA() + 1u] = uint(lo >> 32u);
+    scratch[sRA() + 2u] = uint(hi & 0xFFFFFFFFu);
+    scratch[sRA() + 3u] = uint(hi >> 32u);
 }
 uint64_t rotl(uint64_t x, uint k) { return (x << k) | (x >> (64u - k)); }
 uint64_t mixStafford13(uint64_t z) {
@@ -518,7 +518,7 @@ void rngSeed(int64_t seed) {
 [ForceInline]
 uint64_t xoroNext() {
     uint64_t s0 = rngLo(), s1 = rngHi();
-    if (TREE_TRACE) scratch[sRA + 5u] = scratch[sRA + 5u] + 1u;  // the draws (WorldgenRandom.getCount: the trees' trace)
+    if (TREE_TRACE) scratch[sRA() + 5u] = scratch[sRA() + 5u] + 1u;  // the draws (WorldgenRandom.getCount: the trees' trace)
     uint64_t result = rotl(s0 + s1, 17u) + s0;
     s1 = s1 ^ s0;
     rngStore(rotl(s0, 49u) ^ s1 ^ (s1 << 21u), rotl(s1, 28u));
@@ -3272,7 +3272,7 @@ void treeTrace(uint stage, int x, int y, int z, uint extra) {
     if (n >= 170u) return;
     uint w = at + 1u + n * 6u;
     scratch[w] = stage; scratch[w + 1] = uint(x); scratch[w + 2] = uint(y); scratch[w + 3] = uint(z);
-    scratch[w + 4] = scratch[sRA + 5u]; scratch[w + 5] = extra;
+    scratch[w + 4] = scratch[sRA() + 5u]; scratch[w + 5] = extra;
     scratch[at] = n + 1u;
 }
 [noinline]
@@ -3842,7 +3842,7 @@ void featInitMain(uint3 id : SV_DispatchThreadID) {
 }
 
 // the origin this thread decorates and its random's words, set by the kernel before it calls featBody
-#define FEAT_ENTER(o) { sG = orgOf(o); sRA = sG.base + SCR_META + 6u; }
+#define FEAT_ENTER(o) { sG = orgOf(o); }
 [noinline]
 void featBody<let T : uint>(uint o) {
     // (sG and sRA are the kernel's to set, FEAT_ENTER: a callee that writes private state is the pattern a driver may merge)
@@ -4934,7 +4934,6 @@ void featFarTreesMain(uint3 id : SV_DispatchThreadID) {
     int cz = params.targets * (16 << lod) + int(t / uint(side)) * per + (per >> 1);
     uint weight = uint(per * per);
     sG.base = FAR_THR + slot * FAR_THR_W;  // (flag()'s word and the random: this thread's own)
-    sRA = sG.base + SCR_META + 6u;
     // the biomes the chunk holds (its centre and corners: applyBiomeDecoration's listing)
     int b[5];
     int x0 = cx * 16, z0 = cz * 16;

@@ -3253,6 +3253,12 @@ groupshared uint gsSplitFresh;
 void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gt : SV_GroupThreadID) {
     airBegin();
     gEyeRoofed = -1;
+    if (id.x == 0u && id.y == 0u) {
+        gAblate = asuint(frame.jitter.w);
+        gSecAblate = gAblate;
+        gHead = groupData[0];
+        outNearAge[0] = eyeRoofed() ? 512u : 0u;
+    }
     uint w = frame.dims.x, h = frame.dims.y;
     bool primary = splitPrimary();
     bool scheduled = true;
@@ -3277,8 +3283,10 @@ void nearLightMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3
             uint cp = c.y * w + c.x;
             uint count, stride;
             prevNearAge.GetDimensions(count, stride);
+            float4 hist; uint samples; bool histRoofed;
             fresh = count < w * h || (prevNearAge[cp] & 255u) < NEAR_SAMPLES_YOUNG ||
-                    abs(prevSurface[cp] - cd) > 0.03 * cd + 0.1;
+                    abs(prevSurface[cp] - cd) > 0.03 * cd + 0.1 ||
+                    nearHistoryAt(c, cd, hist, samples, histRoofed) <= 0.25;
         }
         if (fresh) InterlockedOr(gsSplitFresh, 1u);
         GroupMemoryBarrierWithGroupSync();
@@ -3339,13 +3347,6 @@ float3 nearInfoNormal(uint info) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
-    airBegin();
-    gEyeRoofed = -1;
-    // (eyeRoofed's ray: the material shapes and the measurements' switches, as every other entry's; without them
-    // plants, fences and panes overhead counted as solid cover)
-    gHead = groupData[0];
-    gAblate = asuint(frame.jitter.w);
-    gSecAblate = gAblate;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
@@ -3411,7 +3412,7 @@ void nearUpsampleMain(uint3 id : SV_DispatchThreadID) {
         if (primary && roofed > 0.5 && v.a >= 0.0) v.a = -1.0;
         outNearLight[pix] = v;
     }
-    if (!primary && roofed > 0.5 && eyeRoofed()) outColor[pix].rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
+    if (!primary && roofed > 0.5 && (outNearAge[0] & 512u) != 0u) outColor[pix].rgb = float3(0, 0, 0);  // under cover at both ends: unlit air
 }
 
 // The near light's own history (FRAME_NEAR_SPLIT, after nearUpsampleMain): each pixel's light is one ray of each kind,
@@ -3430,13 +3431,10 @@ static const uint NEAR_SAMPLES = 8u;  // (PRIMARY_NEAR_LIT) a pixel's own sample
 [numthreads(8, 8, 1)]
 void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
     airBegin();
-    gEyeRoofed = -1;
-    gHead = groupData[0];  // (eyeRoofed's and the fallback light's rays, as nearLightMain's)
-    gAblate = asuint(frame.jitter.w);
-    gSecAblate = gAblate;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
+    bool eyeRoof = (outNearAge[0] & 512u) != 0u;
     float nd = nearDepth[pix];
     if (!(nd < 1e29)) return;
     bool primary = splitPrimary();
@@ -3460,12 +3458,9 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
         float4 hv = hw > 1e-4 ? hist / hw : float4(0, 0, 0, 0);
         uint n = hw > 0.25 ? samples : 0u;
         if (skipped && hw <= 0.25) {
-            // a tile off its schedule whose pixel has no history (a disocclusion its freshness test did not see: the
-            // test reads the same pixel, not the reprojected point): traced here, rather than black for frames
-            gSampleIndex = int(frame.temporal.x >> 2u);
-            float4 nl = nearLightAt(id.xy, frame.camFrac.xyz, pixelRay(id.xy, w, h), nd, nearInfo[pix], frame.sunDir.xyz);
-            roofed = gNearRoofed;
-            cur = nl;
+            float3 nrm = nearInfoNormal(nearInfo[pix]);
+            cur = float4(skyAmbient(nrm, frame.sunDir.xyz) * FAR_AMBIENT_OCCLUSION + FAR_AMBIENT_FLOOR, 0.0);
+            roofed = false;
             n = 1u;
         } else if (skipped) {
             cur = hv;
@@ -3492,7 +3487,7 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
         } else if (n > 0u) {
             cur = hv;
         }
-        outNearAge[pix] = n | (roofed ? NEAR_AGE_ROOFED : 0u);
+        outNearAge[pix] = n | (roofed ? NEAR_AGE_ROOFED : 0u) | (pix == 0u && eyeRoof ? 512u : 0u);
     } else {
         // a traced pixel (one in four each frame) counts for more than the upsampled ones in between; where nothing was
         // traced this frame the history stands
@@ -3508,7 +3503,7 @@ void nearTemporalMain(uint3 id : SV_DispatchThreadID) {
         float4 wa = waterAdd[pix];
         AirPath air = aerialPathTo(dir, wa.a < 0.0 ? 0.0 : nd);  // (a < 0: the eye under water, its air in the colour)
         float T = dot(air.transmittance, float3(0.2126, 0.7152, 0.0722));
-        float3 ins = roofed && eyeRoofed() ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
+        float3 ins = roofed && eyeRoof ? float3(0, 0, 0) : air.inscatter;  // under cover at both ends: unlit air
         float3 albedo = outColor[pix].rgb;
         float3 light = cur.rgb;
         // the sun through water shaped by the waves over the point (caustics, at full rate: they move)

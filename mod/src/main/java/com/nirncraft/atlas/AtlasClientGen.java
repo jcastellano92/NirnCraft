@@ -854,7 +854,8 @@ final class AtlasClientGen implements AutoCloseable {
         pagesNow += ", " + (cache != null ? cache : "genCache{not in this library}");
         pagesNow += String.format(", generated chunks %d (cache served %d)", c.generatedChunks, c.cachedChunks);
         pagesNow += String.format(", nearBoost{%s missing %d, on %.0f ms in %d, bursts %d %d ms}", c.nearBoostOn ? "on" : "off", c.nearMissing,
-                (c.nearBoostMs + (c.nearBoostOn ? System.nanoTime() - c.nearBoostSinceNs : 0)) / 1e6, c.nearBoosts, c.bursts, c.burstMs);
+                (c.nearBoostMs + (c.nearBoostOn ? System.nanoTime() - c.nearBoostSinceNs : 0)) / 1e6, c.nearBoosts, c.bursts,
+                c.burstMs + (c.burstOn ? Math.max(0, (now - c.burstSinceNs) / 1_000_000L) : 0));
         return String.format("clientGen{%s%s chunks=%d flagged=%d ready=%d up=%d/%d sections pages=%d (%s) genMs=%.0f pageMs=%.0f "
                         + "(gpu=%.0f: kernels %.0f readback %.0f; decode=%.0f) uploadMs=%.0f features=%d featureMs=%.0f failures=%d jump{firstUp=%.0f windowUp=%.0f features=%.0f ms; %s}}",
                 c.direct ? "gpu->grid " : "", c.gen.device(), c.chunks, c.flagged, r, c.uploadedChunks, c.uploadedSections, c.pagesMade, pagesNow,
@@ -917,6 +918,7 @@ final class AtlasClientGen implements AutoCloseable {
             if (running && cacheArm && farOn) bake = AtlasCoarseBake.start(gen, releaseGate);
         }
         if (serverGen != null) serverGen.up();
+        if (jumpNs != 0 && firstUpNs == 0) burstUntilNs = System.nanoTime() + BURST_NS;
         int[] ids = new int[BATCH * AtlasGenNative.CHUNK_WORDS];
         int[] flags = new int[BATCH];
         int[] info = new int[BATCH * AtlasGenNative.INFO_WORDS];
@@ -1136,6 +1138,14 @@ final class AtlasClientGen implements AutoCloseable {
                 running = false;
             }
         }
+        if (burstOn) {
+            burstOn = false;
+            gen.boost(AtlasGenNative.Gen.BOOST_BURST, false);
+        }
+        if (nearBoostOn) {
+            nearBoostOn = false;
+            gen.boost(AtlasGenNative.Gen.BOOST_NEAR, false);
+        }
     }
 
     /**
@@ -1254,22 +1264,61 @@ final class AtlasClientGen implements AutoCloseable {
 
     /** The burst after a jump: at most this long (nirncraft.atlas.burstMs, 750), ended once the camera's 3 x 3 chunks are up. */
     static final long BURST_NS = Long.getLong("nirncraft.atlas.burstMs", 750L) * 1_000_000L;
-    private volatile long burstUntilNs;
+    private volatile long burstUntilNs, burstSinceNs;
     private boolean burstOn;
     private volatile long bursts, burstMs;
 
+    private boolean initialReadyLatched;
+
+    static boolean isGeneratorReady(Progress p, AtlasCoarseBake.Progress bk) {
+        if (p == null || !p.running() || !p.nearDone()) return false;
+        if (bk != null && bk.phase() > 0 && !bk.loaded()) return false;
+        return p.farTotal() <= 0 || p.far() >= p.farTotal();
+    }
+
+    static boolean shouldUnpaceBurst(boolean holdingScreen, boolean clientStarted, boolean initialReadyLatched,
+                                     boolean genReady, boolean spawnDone, double camSpeed, boolean camSet,
+                                     long nowNs, long burstUntilNs, boolean threeByThreeUp) {
+        if (holdingScreen) return true;
+        if (clientStarted && !initialReadyLatched && !genReady) return true;
+        if (clientStarted && camSet && !spawnDone && camSpeed < 0.5) return true;
+        return nowNs < burstUntilNs && camSet && !threeByThreeUp;
+    }
+
+    static boolean shouldAllowInterleavedFarTurn(boolean holdingScreen, boolean burstOn, boolean spawnDone, double nearTokensMs) {
+        if (!spawnDone) return false;
+        if (holdingScreen || burstOn) return true;
+        return nearTokensMs < 0.0 || nearTokensMs >= 20.0;
+    }
+
+    private boolean spawnAreaDone() {
+        return windowUpNs != 0 || (jumpNs != 0 && countUp(SPAWN_RADIUS) >= windowChunks(SPAWN_RADIUS));
+    }
+
     /**
-     * Right after a jump the camera's own chunk and its 8 neighbours go unpaced (BOOST_BURST: the loading screen's mode) until
-     * they are up or BURST_NS has passed; then the near field's capped boost (8 ms a frame period). Capped from the start,
-     * the first chunk was up 3.3 s after a jump, unpaced 0.72 s (10-26).
+     * Right after a jump (or while pre-ready / loading screen holds) the generator runs unpaced (BOOST_BURST: the loading
+     * screen's mode) until initial readiness or the camera's 3 x 3 chunks are up; then the near field's capped boost
+     * (8 ms a frame period) and normal frame pacing take over.
      */
     private void burstStep(long now) {
-        boolean want = now < burstUntilNs && camSet && !threeByThreeUp(camCx, camCz);
+        boolean hold = AtlasLoadingScreen.holding();
+        boolean clientStarted = AtlasClient.started();
+        boolean genReady = initialReadyLatched;
+        if (clientStarted && !initialReadyLatched) {
+            genReady = isGeneratorReady(progress(), AtlasCoarseBake.progress());
+            if (genReady && !hold) initialReadyLatched = true;
+        }
+        boolean spawnDone = !clientStarted || spawnAreaDone();
+        double spd = clientStarted && !spawnDone ? cameraSpeed() : 1.0;
+        boolean want = shouldUnpaceBurst(hold, clientStarted, initialReadyLatched, genReady,
+                spawnDone, spd, camSet, now, burstUntilNs, camSet && threeByThreeUp(camCx, camCz));
         if (want == burstOn) return;
         burstOn = want;
-        if (want) bursts++;
-        else {
-            burstMs += Math.max(0, (now - (burstUntilNs - BURST_NS)) / 1_000_000L);
+        if (want) {
+            burstSinceNs = now;
+            bursts++;
+        } else {
+            burstMs += Math.max(0, (now - burstSinceNs) / 1_000_000L);
             burstUntilNs = 0;
         }
         gen.boost(AtlasGenNative.Gen.BOOST_BURST, want);
@@ -1814,9 +1863,7 @@ final class AtlasClientGen implements AutoCloseable {
      * unconditionally there) is the horizon's.
      */
     private boolean farTurnOk() {
-        if (AtlasLoadingScreen.holding()) return true;
-        double tok = gen.nearTokensMs();
-        return tok < 0.0 || tok >= 20.0;
+        return shouldAllowInterleavedFarTurn(AtlasLoadingScreen.holding(), burstOn, spawnAreaDone(), gen.nearTokensMs());
     }
 
     private boolean farStep() {

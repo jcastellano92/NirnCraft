@@ -68,9 +68,11 @@ using VgIds = std::shared_ptr<const std::array<uint16_t, 4096>>;
 // a section's ids packed (sectionpack.hpp: the host's tiers), expanded on the GPU (vgUnpackMain)
 using VgPacked = std::shared_ptr<const std::vector<uint32_t>>;
 // where a section's ids are: raw on the host, packed on the host, or (both null) on the GPU (ingestGpu)
+constexpr uint32_t VG_UNI_UNSET = 0xFFFFFFFEu;
 struct VgSrc {
     VgIds ids;
     VgPacked packed;
+    uint32_t uni = VG_UNI_UNSET;
     bool gpu() const { return !ids && !packed; }
 };
 
@@ -599,7 +601,14 @@ private:
         std::vector<uint32_t> slotCell;  // per slot: its cell or ~0u
         std::vector<uint32_t> freeSlots;
         uint32_t nextSlot = 0, used = 0;
-        std::unordered_map<uint64_t, Col> cols;  // the window's section columns this level was given
+        std::vector<uint64_t> colRecv;   // flat [ccol * s * s + lz * s + lx] recv mask (k <= 4)
+        std::vector<uint16_t> colKnown;  // per coarse column: count of section columns with recv != 0
+        std::vector<int8_t> colMaxHigh;  // per coarse column: max highBit(recv) across section columns
+        size_t ccol(int cx, int cz) const { return size_t(pmod(cz, D)) * size_t(D) + size_t(pmod(cx, D)); }
+        size_t scol(int sx, int sz) const {
+            int s = 1 << k, cx = (sx >= 0 ? sx / s : -((-sx + s - 1) / s)), cz = (sz >= 0 ? sz / s : -((-sz + s - 1) / s));
+            return (ccol(cx, cz) * size_t(s) + size_t(sz - cz * s)) * size_t(s) + size_t(sx - cx * s);
+        }
         // (levels 5+) cells whose children changed
         std::vector<uint8_t> downDirty;
         std::vector<uint32_t> downList;
@@ -619,6 +628,11 @@ private:
         uint32_t levels = 0;
     };
     std::unordered_map<Key, CPending, KeyHash> cpending_;
+    std::vector<std::pair<int64_t, Key>> cpendingOrder_;
+    size_t cpendingCursor_ = 0;
+    uint64_t cpendingRev_ = 0, cpendingOrderRev_ = ~0ull;
+    int cpendingCam_[3] = {INT_MIN, INT_MIN, INT_MIN};
+    float cpendingView_[2] = {0.0f, 0.0f};
     std::unordered_map<Key, VgGpuRef, KeyHash> gpuRef_;  // (ingestGpu) sections waiting whose ids are on the GPU
     // (ingestCoarseGpu) per level the chunks given and not yet taken into a batch, by cell
     struct CGiven {

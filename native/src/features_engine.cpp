@@ -1180,13 +1180,18 @@ public:
                 // The round's time says what a unit of budget costs only when the round used its budget (origins left: it was
                 // cut short by it). A round that finished under it (a tree whose plan ended in a few operations, a feature of
                 // two placements) says nothing about the next, and growing on it by 4 sent a commit of 73 ms after a round
-                // of 1 (budget 65536 -> a part of 74 ms; 262144 -> 45): it keeps its budget, and a budget grows by 2 a round
-                // at most. A round over the target cuts it at once, by up to 8.
+                // of 1 (budget 65536 -> a part of 74 ms; 262144 -> 45): it keeps its budget, and a budget grows only when
+                // at least half the batch's origins were active (tail rounds with 1-2 active origins must not inflate the
+                // budget for the next batch's round 0). A round over the target cuts it at once, down to 1 if needed.
                 bool cut = left_.map && *static_cast<const uint32_t*>(left_.map) > 0u;
-                double want = double(bud) * partMs / ms;
-                double hi = ms > partMs ? double(bud) : cut ? double(bud) * 2.0 : double(bud);
-                bud = uint32_t(std::clamp(want, std::max(1.0, double(bud) / 8.0), hi));
-                bud = std::clamp<uint32_t>(bud, 1u, 1u << 20);
+                bool fullRound = partRound_ == 0 || partActive_ * 2 >= n;
+                double want = double(bud) * (ms > partMs ? partMs * 0.8 : partMs) / ms;
+                uint32_t minBud = minBudgetFor(partRoundRec_);
+                double lo = ms > partMs * 2.0 ? double(minBud) : std::max(double(minBud), double(bud) / 8.0);
+                double hi = ms > partMs ? double(bud) : (cut && fullRound && ms < partMs * 0.75) ? std::max(double(bud) + 1.0, double(bud) * 1.5) : double(bud);
+                uint32_t maxBud = maxBudgetFor(partRoundRec_);
+                bud = uint32_t(std::clamp(want, lo, hi));
+                bud = std::clamp<uint32_t>(bud, minBud, maxBud);
             }
             partLeft_ = left_.map ? *static_cast<const uint32_t*>(left_.map) : 0u;
             if (clockOn() && ptrace && left_.map) {
@@ -1210,15 +1215,29 @@ public:
             }
             partRoundRec_ = ~0u;
         }
+        static const bool ptraceAll = clockOn() && std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
+        if (!ptraceAll && partRound_ == 0) {
+            // Coalesce setup steps (STEP_AUX, STEP_HM, STEP_MASK, STEP_INIT), single-round feature types
+            // (FT_COVER=2, FT_FREEZE=5, FT_DISK=6, FT_SPRING=7, which never set *_PENDING and complete in 1 round at
+            // budget = 1u << 30), and STEP_APPLY without a synchronous left_.buf readback stall after each step.
+            uint32_t singleSteps = 0;
+            while (partCursor_ < total) {
+                uint32_t s = partSteps_[partCursor_];
+                bool multiRound = s < STEP_AUX && (types_[s] == 1 || types_[s] == 3 || types_[s] == 4 || types_[s] == 8);
+                if (multiRound) {
+                    if (singleSteps > 0) return ATLAS_GEN_STAGE_MORE;
+                    break;
+                }
+                runStep(cmd, p, dispatch, s, true, 1u << 30);
+                partCursor_++;
+                if (++singleSteps >= 16) return partCursor_ < total ? ATLAS_GEN_STAGE_MORE : 0;
+            }
+        }
         if (partCursor_ >= total) return 0;
         uint32_t step = partSteps_[partCursor_];
         if (step < STEP_AUX) {
             std::string err;
             if (!ensure(left_, CNT_BYTES, true, err)) return 3;
-            static const bool treePhasesOn = [] {
-                const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
-                return !(e && e[0] == '0');
-            }();
             auto it = featBudget_.find(step);
             // (trees: an operation budget with the commit in phases, else one tree a round as before)
             static const bool lakesOn = [] {
@@ -1231,17 +1250,19 @@ public:
                 return !(e && e[0] == '0');
             }();
             bool rockParts = rocksOn && types_[step] == 3;
-            uint32_t bud = it != featBudget_.end() ? it->second
-                                                   : (featBudget_[step] = types_[step] == 4 ? (treePhasesOn ? 512u : 1u) : (lakeParts || rockParts) ? 4096u : 64u);
+            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = initBudgetFor(step, lakeParts || rockParts));
+            partActive_ = partRound_ == 0 ? n : std::max(1u, partLeft_);
             vkCmdFillBuffer(cmd, cnt_.buf, 0, clockOn() ? CNT_BYTES : 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            // an ore's vein: its block loop on the vein kernel's threads (atlas_features.slang featVeinMain), its three
-            // passes the parts after this one, written at the origin's next round; ATLAS_FEAT_VEINS=0: on the one lane
+            // an ore's vein: its block loop on the vein kernel's threads (atlas_features.slang featVeinMain), its five
+            // passes right after this one (or in separate parts when ATLAS_FEAT_PART_TRACE=1), written at the origin's
+            // next round; ATLAS_FEAT_VEINS=0: on the one lane
             static const bool veins = [] {
                 const char* e = std::getenv("ATLAS_FEAT_VEINS");
                 return !(e && e[0] == '0');
             }();
+            static const bool ptrace = std::getenv("ATLAS_FEAT_PART_TRACE") != nullptr;
             partVein_ = veins && types_[step] == 1;
             partPhase_ = 0;
             if (partVein_) p.store = 3u;
@@ -1260,6 +1281,15 @@ public:
             // ATLAS_FEAT_ROCKS=0: on the one lane
             if (rockParts) p.store = 17u;
             runStep(cmd, p, dispatch, step, partRound_ == 0, bud);
+            if (partVein_ && !ptrace) {
+                static const uint32_t order[5] = {3, 0, 1, 2, 4};
+                for (uint32_t ph = 0; ph < 5; ph++) {
+                    p.k = order[ph];
+                    dispatch(S_VEIN, order[ph] == 3 ? 1u : (VEIN_W + 63) / 64, n);
+                }
+                p.k = 0;
+                partPhase_ = 5;
+            }
             if (lakeParts) {
                 p.k = 0;
                 dispatch(S_LAKEW, (7u * 1176u + 63u) / 64u, n);
@@ -1333,9 +1363,61 @@ public:
     std::vector<int32_t> partSlotXZ_;
     uint32_t partCursor_ = 0, partSlots_ = 0;
     uint32_t partRound_ = 0, partRoundRec_ = ~0u, partRoundPart_ = 0;
-    uint32_t partPhase_ = 0, partLeft_ = 0;  // (an ore's round: its vein pass next, and the round's count of origins left)
+    uint32_t partPhase_ = 0, partLeft_ = 0, partActive_ = 0;  // (an ore's round: its vein pass next, and the round's count of origins left)
     bool partVein_ = false;  // (the feature in rounds: its round, the record the last part ran)
     std::unordered_map<uint32_t, uint32_t> featBudget_;  // per record: placements an origin a round (fitted to the part)
+    uint32_t oreSizeOf(uint32_t step) const {
+        if (step >= types_.size() || types_[step] != 1 || !staging_.map || size_t(step) + 5 >= progBytes_ / 4) return 0u;
+        const uint32_t* pw = static_cast<const uint32_t*>(staging_.map);
+        uint32_t cfg = pw[step + 5];
+        return size_t(cfg) < progBytes_ / 4 ? pw[cfg] : 0u;
+    }
+    uint32_t initBudgetFor(uint32_t step, bool wideParts) const {
+        static const bool treePhasesOn = [] {
+            const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
+            return !(e && e[0] == '0');
+        }();
+        uint32_t type = step < types_.size() ? types_[step] : 0u;
+        if (type == 4) return treePhasesOn ? 256u : 1u;
+        if (wideParts) return 2048u;
+        if (type == 1) {
+            uint32_t sz = oreSizeOf(step);
+            return sz >= 12u ? 1u : (sz >= 8u ? 4u : 16u);
+        }
+        return 64u;
+    }
+    uint32_t minBudgetFor(uint32_t step) const {
+        static const bool treePhasesOn = [] {
+            const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
+            return !(e && e[0] == '0');
+        }();
+        static const bool lakesOn = [] {
+            const char* e = std::getenv("ATLAS_FEAT_LAKES");
+            return !(e && e[0] == '0');
+        }();
+        static const bool rocksOn = [] {
+            const char* e = std::getenv("ATLAS_FEAT_ROCKS");
+            return !(e && e[0] == '0');
+        }();
+        uint32_t type = step < types_.size() ? types_[step] : 0u;
+        if (type == 4 && treePhasesOn) return 64u;
+        if ((type == 8 && lakesOn) || (type == 3 && rocksOn)) return 256u;
+        return 1u;
+    }
+    uint32_t maxBudgetFor(uint32_t step) const {
+        static const bool treePhasesOn = [] {
+            const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
+            return !(e && e[0] == '0');
+        }();
+        uint32_t type = step < types_.size() ? types_[step] : 0u;
+        if (type == 4) return treePhasesOn ? 1024u : 1u;
+        if (type == 3 || type == 8) return 4096u;
+        if (type == 1) {
+            uint32_t sz = oreSizeOf(step);
+            return sz >= 16u ? 1u : (sz >= 12u ? 2u : (sz >= 8u ? 16u : 64u));
+        }
+        return 256u;
+    }
     Buf left_;  // (host) the last round's count of origins with placements left
     struct RecStat {
         double max = 0, sum = 0;
