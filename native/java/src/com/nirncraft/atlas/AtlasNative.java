@@ -43,7 +43,7 @@ public final class AtlasNative {
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48;
     /** Far light kinds (AtlasLight.kind). */
     public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
 
@@ -120,7 +120,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
+            info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -158,9 +158,6 @@ public final class AtlasNative {
         update = bind(l, lib, "atlas_update", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_DOUBLE));
         render = bind(l, lib, "atlas_render", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         getStats = bind(l, lib, "atlas_get_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
-        glAttach = bind(l, lib, "atlas_gl_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
-        glRenderIo = bind(l, lib, "atlas_gl_render_io", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
-        glDetach = bind(l, lib, "atlas_gl_detach", FunctionDescriptor.ofVoid(ADDRESS));
         info = bind(l, lib, "atlas_info", FunctionDescriptor.of(ADDRESS, ADDRESS));
         previewLoadRaster = bind(l, lib, "atlas_preview_load_raster", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         previewGenerate = bind(l, lib, "atlas_preview_generate",
@@ -389,10 +386,7 @@ public final class AtlasNative {
     public record MemoryInfo(long deviceLocal, long budget, long usage, long hostHeap, long atlas, boolean integrated,
                              boolean budgetExt) {}
 
-    /** GL texture names of the images shared with the game's GL context (rows bottom-up). */
-    public record GlTargets(int color, int normal, int depth, int nearDepth, int width, int height) {}
-
-    /** The game's side of a GL frame (see AtlasGlFrameIO in atlas.h); zero fields are unused. */
+    /** The game's side of a frame (see AtlasGlFrameIO in atlas.h); zero fields are unused. */
     public static final class GlFrameIO {
         public static final int BOUND_DEPTH = 0xFFFFFFFF, DEPTH_AUTO = 0xFFFFFFFF;
         public int nearDepthTex;
@@ -811,47 +805,7 @@ public final class AtlasNative {
             }
         }
 
-        // ---- game path: render thread, the game's GL context current ----
-
-        /** Creates the shared images (re-attach on resize). */
-        public GlTargets glAttach(int width, int height) {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment t = a.allocate(GL_TARGETS_SIZE, 4);
-                check((int) glAttach.invokeExact(ptr, width, height, t), "atlas_gl_attach");
-                return new GlTargets(t.get(JAVA_INT, 0), t.get(JAVA_INT, 4), t.get(JAVA_INT, 8), t.get(JAVA_INT, 12),
-                        t.get(JAVA_INT, 16), t.get(JAVA_INT, 20));
-            } catch (Throwable th) {
-                throw rethrow(th);
-            }
-        }
-
-        /** Queues the frame; GL commands issued afterwards see it. The CPU does not wait for the GPU. */
-        public void glRender(Frame f, GlFrameIO io) {
-            f.write(frameSeg);
-            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
-            if (io != null) io.write(ioSeg);
-            try {
-                // a typed local: a conditional passed straight to invokeExact is typed Object (its target), and the
-                // exact-type check then fails on every frame
-                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
-                check((int) glRenderIo.invokeExact(ptr, frameSeg, ioArg), "atlas_gl_render_io");
-            } catch (Throwable t) {
-                throw rethrow(t);
-            }
-        }
-
-        public void glDetach() {
-            try {
-                glDetach.invokeExact(ptr);
-            } catch (Throwable t) {
-                throw rethrow(t);
-            }
-        }
-
-        /**
-         * One line of JSON for the log (abi 0.8): device, driver, Vulkan version, and after glAttach the interop mode
-         * ("zero-copy (win32 handles)", "zero-copy (opaque fds)" or "host-copy" with interopReason and its cost).
-         */
+        /** One line of JSON for the log (abi 0.8): device, driver, Vulkan version, and attachment mode. */
         public String info() {
             try {
                 return ((MemorySegment) info.invokeExact(ptr)).reinterpret(1 << 16).getString(0);

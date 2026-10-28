@@ -344,55 +344,11 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* frame, c
 ATLAS_API AtlasStatus atlas_get_stats(AtlasContext* ctx, AtlasStats* out);
 
 /*
- * Game path (Vulkan backend; call on the render thread with the game's OpenGL 4.5 context current; zero-copy when
- * that context is on the same GPU and supports memory objects, else host copies, see atlas_info). atlas_create
- * on that thread picks the Vulkan device the context runs on. atlas_gl_attach creates color (RGBA16F linear, premultiplied), normal (RGBA8) and depth (R32F, view
- * distance in blocks) images, plus nearDepth (R32F) that the GL side writes with the near field's view distance,
- * all shared with that context; it returns their GL texture names (rows bottom-up, GL convention). Each
- * atlas_gl_render queues the frame and a GL-side semaphore wait: GL commands issued after it see the frame,
- * and the CPU never blocks on the GPU. Re-attach on resize; detach before destroying the GL context.
- * The CPU backend (a machine without a usable Vulkan device) takes the same calls with the same textures and outputs:
- * the near depth / info are linearised on the GL side and read back through a pixel-pack buffer and a fence, the
- * frame is rendered on a worker thread (below normal priority, all hardware threads but two) and uploaded when done,
- * so the textures show a frame two or more calls old (the first frame after an attach is rendered in the call);
- * ATLAS_CPU_GL=sync renders every frame in the call (no lag; the CPU waits for GL and the render). atlas_info's
- * "cpuGl" block has the worker's times and the lag. The stats' lastFrameMs is the worker's time per frame.
- */
-typedef struct AtlasGlTargets {
-    uint32_t color, normal, depth, nearDepth;
-    uint32_t width, height;
-} AtlasGlTargets;
-ATLAS_API AtlasStatus atlas_gl_attach(AtlasContext* ctx, uint32_t width, uint32_t height, AtlasGlTargets* out);
-ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* frame);
-
-/*
- * The game's side of a GL frame (all optional; zero = unused):
- *  nearDepthTex      the rasterised near field's depth texture (same size as the targets), or
- *                    ATLAS_GL_BOUND_DEPTH: the depth attachment of the draw framebuffer bound when atlas is called
- *                    (e.g. a shader pack's gbuffer target, whose texture the mod never sees). atlas linearises it
- *                    into the shared nearDepth image with a small GL compute pass, so covered pixels skip the far
- *                    march (sets ATLAS_FRAME_NEAR_DEPTH for the frame). Sky = depth 1 (or 0 when reversedZ).
- *  depthZeroToOne    1 when that depth was written with [0,1] clip depth (glClipControl), 0 for [-1,1],
- *                    ATLAS_GL_DEPTH_AUTO to read the context's GL_CLIP_DEPTH_MODE
+ * Frame options for atlas_vk_render_shared (all optional; zero = unused):
+ *  depthZeroToOne    1 when depth is [0,1] clip depth, 0 for [-1,1]
  *  reversedZ         1 when near = 1, far = 0
- *  nearInvProjection inverse of the projection used for that depth, column-major, camera-relative view space
- *  dstColor/Normal/Depth  GL textures (same size and format as the shared ones) that receive copies once the
- *                    frame is done, e.g. the textures a shader pack samples through customTexture.
- *  nearInfoTex       (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) the near field's surface info, a GL texture
- *                    the size of nearDepthTex's (bottom-up rows), internal format RGBA8 (GL_RGBA8 / UNORM):
- *                      r = block light level / 15, g = sky light level / 15 (atlas does not read r and g yet),
- *                      b, a = the surface's world-space unit normal, octahedral, as atlas_shared.slang octEncode:
- *                        p = n.xz / (|n.x| + |n.y| + |n.z|);
- *                        if (n.y < 0) p = (1 - |p.yx|) * (p.x >= 0 ? 1 : -1, p.y >= 0 ? 1 : -1);
- *                        (b, a) = p * 0.5 + 0.5
- *                      (decoded e = (b, a) * 2 - 1, n = (e.x, 1 - |e.x| - |e.y|, e.y), if n.y < 0 then
- *                      n.xz = (1 - |n.zx|) * sign(n.xz), normalised). atlas takes the texel its near depth took
- *                      (the farthest of the four samples over its pixel), 0 = none (no near light).
- *  dstNearLight      (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) GL texture, RGBA16F at atlas's resolution, that
- *                    receives the near light (see ATLAS_FRAME_NEAR_LIGHT); 0 = none (no near light). On host copies
- *                    the near depth and info are read back to the CPU for it (the CPU waits for the GL near pass).
- * atlas restores every piece of GL state it touches (program, texture/sampler units 14 and 15, image units 6 and 7,
- * pixel pack state).
+ *  nearInvProjection inverse of the near projection, column-major, camera-relative view space
+ *  dstColor/Normal/Depth/SunMap/NearLight  non-zero flags requesting the corresponding shared Vulkan output.
  */
 #define ATLAS_GL_BOUND_DEPTH 0xFFFFFFFFu
 #define ATLAS_GL_DEPTH_AUTO 0xFFFFFFFFu
@@ -403,42 +359,17 @@ typedef struct AtlasGlFrameIO {
     uint32_t reserved;
     float nearInvProjection[16];
     uint32_t dstColor, dstNormal, dstDepth;
-    uint32_t dstSunMap; /* RG32F size x size+1 (atlas_set_sun_map), or 0 */
+    uint32_t dstSunMap; /* non-zero when sun map is requested */
     uint32_t nearInfoTex, dstNearLight; /* (abi 0.15, read only with ATLAS_FRAME_NEAR_LIGHT) */
 } AtlasGlFrameIO;
-ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io);
-/* Legacy void detach and atlas_destroy refuse to release an attached shared-Vulkan context with an unresolved splice;
- * the context remains valid and must instead be detached with atlas_vk_detach_retired. */
-ATLAS_API void atlas_gl_detach(AtlasContext* ctx);
 
-/*
- * (additive, optional: the host binds them if present) Minecraft's Vulkan backend (docs/ATLAS-VULKAN-BACKEND.md), no
- * OpenGL anywhere. Stage S1, atlas on its own Vulkan device: atlas_vk_attach makes the frame's images (as
- * atlas_gl_attach, without GL textures); atlas_vk_render renders a frame like atlas_gl_render_io and hands it over in
- * host memory, in the GL path's layouts (rows bottom-up, the order Minecraft's Vulkan render targets keep too): the
- * caller uploads it into its own textures (Minecraft's CommandEncoder.writeToTexture) before the next call. The CPU
- * waits for the frame's GPU work in the call (as the GL path's host copies). `io` carries the GL path's options; its
- * texture names are only flags here: a non-zero dstNearLight asks for the near light (only with
- * ATLAS_FRAME_PRIMARY_NEAR*: there is no near depth or info to read without GL). All out pointers null: no frame
- * yet. atlas_gl_detach detaches.
- */
-typedef struct AtlasVkHostFrame {
-    const void* color;     /* RGBA16F, width x height */
-    const void* normal;    /* RGBA8 */
-    const void* depth;     /* R32F, view distance in blocks */
-    const void* nearLight; /* RGBA16F, or null (no near light this frame) */
-    const void* sunMap;    /* RG32F, sunSize x (sunSize + 1), or null */
-    uint32_t width, height, sunSize, reserved;
-} AtlasVkHostFrame;
 ATLAS_API AtlasStatus atlas_vk_attach(AtlasContext* ctx, uint32_t width, uint32_t height);
-ATLAS_API AtlasStatus atlas_vk_render(AtlasContext* ctx, const AtlasFrame* frame, const AtlasGlFrameIO* io,
-                                      AtlasVkHostFrame* out);
 
 /*
  * (additive, optional) Stage S3: atlas on Minecraft's own VkDevice, which Minecraft created with atlas's features
  * (shaderInt64; float64 when offered) and queues (NirnCraft's device-sharing mixin). atlas_create_on_vulkan makes a
  * Vulkan context that adopts the device (it never creates, waits idle on or destroys it, and submits only to its own
- * queues); attach with atlas_vk_attach as for S1. Each atlas_vk_render_shared traces the frame on atlas's frame queue
+ * queues); attach with atlas_vk_attach. Each atlas_vk_render_shared traces the frame on atlas's frame queue
  * (no CPU wait) and returns a splice for the caller's frame, recorded outside any render pass: wait on waitSemaphore
  * (a timeline) for waitValue at the transfer stage, execute commandBuffer (it copies the frame into `targets`:
  * Minecraft's images in GENERAL layout, used on graphicsFamily only, the same formats and size as the attach; the sun

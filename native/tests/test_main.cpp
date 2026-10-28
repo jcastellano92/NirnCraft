@@ -1455,13 +1455,11 @@ static void testFaults() {
         CHECK(std::strstr(atlas_last_error(ctx), "DEVICE_LOST") != nullptr);
         CHECK(atlas_render(ctx, &f, &o) == ATLAS_ERR_DEVICE_LOST);
         CHECK(std::strstr(atlas_last_error(ctx), "lost earlier") != nullptr);
-        AtlasGlTargets gt{};
-        CHECK(atlas_gl_attach(ctx, 64, 64, &gt) == ATLAS_ERR_DEVICE_LOST);
+        CHECK(atlas_vk_attach(ctx, 64, 64) == ATLAS_ERR_DEVICE_LOST);
         double centre[3] = {10.5, 140.0, 10.5};
         CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
         CHECK(atlas_memory_info(ctx, &mi) == ATLAS_ERR_DEVICE_LOST);
         CHECK(std::string(atlas_info(ctx)).find("\"deviceLost\":true") != std::string::npos);
-        atlas_gl_detach(ctx);
         atlas_destroy(ctx);
 
         // a hang: ATLAS_ERR_TIMEOUT, then dead the same way; destroy abandons the device instead of waiting

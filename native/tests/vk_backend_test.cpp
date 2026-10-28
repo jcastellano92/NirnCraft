@@ -1,11 +1,9 @@
-// Minecraft's Vulkan backend paths (docs/ATLAS-VULKAN-BACKEND.md), without the game:
-//  S1  atlas_vk_attach + atlas_vk_render: atlas on its own device, the frame handed over in host memory; against the host
-//      render (colour to half precision, depth exactly; rows bottom-up as the GL path's).
+// Minecraft's shared Vulkan backend path (docs/ATLAS-VULKAN-BACKEND.md), without the game:
 //  S3  atlas_create_on_vulkan on a device this test makes the way NirnCraft's device-sharing mixin makes Minecraft's
 //      (shaderInt64, timeline semaphores, atlas's frame queue in a compute-only family where there is one, the
 //      generator's beside it); atlas_vk_render_shared's splice runs on the test's "Minecraft" graphics queue (wait,
-//      execute, signal) into the test's own images, read back: the same pixels as S1.
-// usage: atlas_vk_test <data dir>   (ATLAS_VK_VALIDATION=1: the Khronos layer on both devices, any error fails)
+//      execute, signal) into the test's own images, read back and compared against the host reference render.
+// usage: atlas_vk_test <data dir>   (ATLAS_VK_VALIDATION=1: the Khronos layer on the device, any error fails)
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
@@ -449,61 +447,6 @@ static bool referenceFrame(const std::string& data, uint32_t W, uint32_t H, std:
     return ok;
 }
 
-// ---- S1 ------------------------------------------------------------------------------------------------------------
-static bool stageOne(const std::string& data, uint32_t W, uint32_t H, Frame& out, std::vector<float>& refC,
-                     std::vector<float>& refD, const std::vector<float>& refLight, double& msPerFrame) {
-    std::printf("S1: atlas on its own device, the frame in host memory\n");
-    AtlasContext* ctx = nullptr;
-    if (atlas_create(ATLAS_BACKEND_VULKAN, &ctx) != ATLAS_OK) {
-        std::printf("  SKIP: no Vulkan backend (%s)\n", atlas_last_error(nullptr));
-        return false;
-    }
-    Scene s;
-    if (!loadScene(ctx, data, W, H, s)) {
-        atlas_destroy(ctx);
-        return false;
-    }
-    CHECK(atlas_vk_attach(ctx, W, H) == ATLAS_OK);
-    std::string info = atlas_info(ctx);
-    CHECK(info.find("\"interop\":\"vulkan host-copy (own device)\"") != std::string::npos);
-    AtlasGlFrameIO io{};
-    io.dstColor = io.dstDepth = 1;
-    io.dstNearLight = (s.f.flags & ATLAS_FRAME_NEAR_LIGHT) ? 1u : 0u;
-    AtlasVkHostFrame hf{};
-    auto t0 = std::chrono::steady_clock::now();
-    for (int i = 0; i < FRAMES; i++) {
-        if (i == WARM) t0 = std::chrono::steady_clock::now();
-        if (atlas_vk_render(ctx, &s.f, &io, &hf) != ATLAS_OK) {
-            std::printf("  FAIL atlas_vk_render %d: %s\n", i, atlas_last_error(ctx));
-            failures++;
-            atlas_destroy(ctx);
-            return false;
-        }
-    }
-    msPerFrame = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / (FRAMES - WARM);
-    std::printf("  receipt S1: independent context, %d frames, output age 0, info %s\n", FRAMES, atlas_info(ctx));
-    sceneReceipt(ctx, "S1", false);
-    CHECK(hf.color && hf.depth && hf.width == W && hf.height == H);
-    if (s.f.flags & ATLAS_FRAME_NEAR_LIGHT) CHECK(hf.nearLight != nullptr);
-    if (hf.color && hf.depth) {
-        size_t px = size_t(W) * H;
-        out.color.assign(static_cast<const uint16_t*>(hf.color), static_cast<const uint16_t*>(hf.color) + px * 4);
-        out.depth.assign(static_cast<const float*>(hf.depth), static_cast<const float*>(hf.depth) + px);
-        if (hf.nearLight) out.nearLight.assign(static_cast<const uint16_t*>(hf.nearLight), static_cast<const uint16_t*>(hf.nearLight) + px * 4);
-        contentReceipt("S1", out.depth, nonzeroHalfLight(out.nearLight.empty() ? nullptr : out.nearLight.data(), px),
-                       (s.f.flags & ATLAS_FRAME_NEAR_LIGHT) != 0, s.f, true);
-        size_t bc, bd;
-        compareHost(refC, refD, out, W, H, bc, bd);
-        if (s.f.flags & ATLAS_FRAME_NEAR_LIGHT) compareNearLight("S1", refLight, out, W, H);
-        std::printf("  %d frames, %.2f ms wall per atlas_vk_render (CPU waits for the GPU, host copy); vs the host render: "
-                    "%zu colour / %zu depth pixels differ of %zu\n", FRAMES, msPerFrame, bc, bd, px);
-        CHECK(bc == 0 && bd == 0);
-    }
-    atlas_gl_detach(ctx);
-    atlas_destroy(ctx);
-    return true;
-}
-
 // ---- S3 ------------------------------------------------------------------------------------------------------------
 struct Img {
     VkImage image = VK_NULL_HANDLE;
@@ -518,8 +461,8 @@ static uint32_t memType(VkPhysicalDevice phys, uint32_t bits, VkMemoryPropertyFl
     return UINT32_MAX;
 }
 
-static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const Frame& s1, const std::vector<float>& refC,
-                       const std::vector<float>& refD, const std::vector<float>& refLight, double s1Ms, int lifecycle = 0) {
+static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const std::vector<float>& refC,
+                       const std::vector<float>& refD, const std::vector<float>& refLight, int lifecycle = 0) {
     bool generatorShutdown = lifecycle == 4;
     bool abandon = lifecycle > 0 && lifecycle < 4;
     std::printf("S3: atlas on the test's \"Minecraft\" device, spliced into its queue\n");
@@ -859,19 +802,10 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const Fr
                 CHECK(before.raySteps == after.raySteps && before.lastFrameMs == after.lastFrameMs);
                 CHECK(atlas_vk_attach(ctx, W + 1, H) == ATLAS_ERR_STATE);
                 CHECK(atlas_set_sun_map(ctx, 128, 256.0f) == ATLAS_ERR_STATE);
-                AtlasGlTargets glTargets{};
-                CHECK(atlas_gl_attach(ctx, W, H, &glTargets) == ATLAS_ERR_UNSUPPORTED);
-                CHECK(atlas_gl_render_io(ctx, &s.f, &io) == ATLAS_ERR_STATE);
-                CHECK(atlas_gl_render(ctx, &s.f) == ATLAS_ERR_STATE);
                 AtlasFrameOutput legacyOutput{};
                 CHECK(atlas_render(ctx, &s.f, &legacyOutput) == ATLAS_ERR_STATE);
-                AtlasVkHostFrame legacyHost{};
-                CHECK(atlas_vk_render(ctx, &s.f, &io, &legacyHost) == ATLAS_ERR_STATE);
                 CHECK(atlas_get_stats(ctx, &after) == ATLAS_OK);
                 CHECK(before.raySteps == after.raySteps && before.lastFrameMs == after.lastFrameMs);
-                CHECK(atlas_vk_copy_complete(ctx, first.signalValue, &ready) == ATLAS_OK && ready == 0);
-                // Legacy void teardown has no place to return a retirement token: it must refuse and retain this context.
-                atlas_gl_detach(ctx);
                 CHECK(atlas_vk_copy_complete(ctx, first.signalValue, &ready) == ATLAS_OK && ready == 0);
                 atlas_destroy(ctx);
                 CHECK(atlas_vk_copy_complete(ctx, first.signalValue, &ready) == ATLAS_OK && ready == 0);
@@ -1023,22 +957,18 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const Fr
             size_t badC, badD;
             compareHost(refC, refD, got, W, H, badC, badD);
             if (lit) compareNearLight("S3", refLight, got, W, H);
-            size_t sameAsS1 = 0;
-            if (!s1.color.empty())
-                for (size_t i = 0; i < px; i++)
-                    sameAsS1 += std::memcmp(&s1.color[i * 4], &got.color[i * 4], 8) == 0 &&
-                                std::memcmp(&s1.depth[i], &got.depth[i], 4) == 0;
             std::printf("  %d frames: %.3f ms CPU per atlas_vk_render_shared (no wait), %.2f ms wall per frame with the "
-                        "splices; vs the host render: %zu colour / %zu depth pixels differ; identical to S1: %zu of %zu "
-                        "(S1 %.2f ms wall)\n", FRAMES, s3Ms, s3WallMs, badC, badD, sameAsS1, px, s1Ms);
+                        "splices; vs the host render: %zu colour / %zu depth pixels differ of %zu\n",
+                        FRAMES, s3Ms, s3WallMs, badC, badD, px);
             CHECK(badC == 0 && badD == 0);
-            if (!s1.color.empty()) CHECK(sameAsS1 == px);
         } else {
             std::printf("  FAIL: S3 scene could not be loaded\n");
             failures++;
         }
-        atlas_gl_detach(ctx);
+        AtlasVkRetirement* retired = nullptr;
+        CHECK(atlas_vk_detach_retired(ctx, &retired) == ATLAS_OK);
         atlas_destroy(ctx);  // (never Minecraft's device: the test destroys it below)
+        if (retired) CHECK(atlas_vk_release_retired(retired) == ATLAS_OK);
     }
 cleanup:
     vkDeviceWaitIdle(dev);
@@ -1115,14 +1045,11 @@ static bool abandonedChild(const char* executable, const std::string& data, cons
 int main(int argc, char** argv) {
     std::string data = argc > 1 ? argv[1] : "native/data";
     const uint32_t W = 320, H = 180;
-    Frame s1;
     std::vector<float> refC, refD, refLight;
-    double s1Ms = 0;
-    // Fix temporal and transport knobs for all three independent contexts.
+    // Fix temporal and transport knobs for both independent contexts.
 #if defined(_WIN32)
     _putenv_s("ATLAS_FAR_AMORT", "0");
     _putenv_s("ATLAS_NEAR_FULLRES", "1");
-    _putenv_s("ATLAS_HOSTCOPY_LATENCY", "0");
     _putenv_s("ATLAS_FAR_LEAN", "0");
     _putenv_s("ATLAS_FAR_SPLIT_KERNEL", "0");
     _putenv_s("ATLAS_AB", "");
@@ -1132,7 +1059,6 @@ int main(int argc, char** argv) {
 #else
     setenv("ATLAS_FAR_AMORT", "0", 1);
     setenv("ATLAS_NEAR_FULLRES", "1", 1);
-    setenv("ATLAS_HOSTCOPY_LATENCY", "0", 1);
     setenv("ATLAS_FAR_LEAN", "0", 1);
     setenv("ATLAS_FAR_SPLIT_KERNEL", "0", 1);
     unsetenv("ATLAS_AB");
@@ -1140,7 +1066,7 @@ int main(int argc, char** argv) {
     unsetenv("ATLAS_ABLATE");
     unsetenv("ATLAS_TIMING_DEVICE_OUTPUTS");
 #endif
-    std::printf("  receipt settings: amort=0 nearFull=1 hostLatency=0 lean=0 splitKernel=0; lit=%s\n",
+    std::printf("  receipt settings: amort=0 nearFull=1 lean=0 splitKernel=0; lit=%s\n",
                 std::getenv("ATLAS_VK_TEST_LIT") ? std::getenv("ATLAS_VK_TEST_LIT") : "0");
     if (argc > 2 && (std::strcmp(argv[2], "--gen-shutdown-child") == 0 ||
                      std::strcmp(argv[2], "--gen-shutdown-inputs") == 0)) {
@@ -1175,9 +1101,8 @@ int main(int argc, char** argv) {
         }
         std::printf("TRACE gen-shutdown case=%s input-preflight-complete before-Vulkan\n", scenario);
         if (owned) return generatorShutdownOwned(16, 16) && !failures ? 0 : 1;
-        Frame none;
         std::vector<float> empty;
-        bool ran = stageThree(data, 16, 16, none, empty, empty, empty, 0, 4);
+        bool ran = stageThree(data, 16, 16, empty, empty, empty, 4);
         return ran && !failures ? 0 : 1;
     }
     if (argc > 2 && std::strcmp(argv[2], "--memory-gauges") == 0)
@@ -1185,10 +1110,9 @@ int main(int argc, char** argv) {
     if (argc > 2 && (std::strcmp(argv[2], "--abandon-child") == 0 || std::strcmp(argv[2], "--cancel-child") == 0 ||
                      std::strcmp(argv[2], "--repeat-child") == 0)) {
         std::printf("TRACE abandon: child started\n"); std::fflush(stdout);
-        Frame noFrame;
         std::vector<float> empty;
         int scenario = std::strcmp(argv[2], "--repeat-child") == 0 ? 3 : std::strcmp(argv[2], "--cancel-child") == 0 ? 2 : 1;
-        bool ran = stageThree(data, W, H, noFrame, empty, empty, empty, 0, scenario);
+        bool ran = stageThree(data, W, H, empty, empty, empty, scenario);
         return ran && failures == 0 ? 0 : 1;
     }
     if (argc > 2 && std::strcmp(argv[2], "--abandon-parent") == 0)
@@ -1200,12 +1124,8 @@ int main(int argc, char** argv) {
     if (!memoryGauges(data, W, H)) return 1;
     if (!referenceFrame(data, W, H, refC, refD, refLight)) return 1;
     auto t0 = std::chrono::steady_clock::now();
-    std::printf("TRACE begin vkhost\n");
-    if (!stageOne(data, W, H, s1, refC, refD, refLight, s1Ms)) failures++;
-    std::printf("TRACE done vkhost %.1fs\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
-    t0 = std::chrono::steady_clock::now();
     std::printf("TRACE begin vkshared\n");
-    if (!refC.empty() && !stageThree(data, W, H, s1, refC, refD, refLight, s1Ms)) failures++;
+    if (!refC.empty() && !stageThree(data, W, H, refC, refD, refLight)) failures++;
     std::printf("TRACE done vkshared %.1fs\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;

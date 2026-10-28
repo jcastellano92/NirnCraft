@@ -64,7 +64,7 @@ class AtlasTerminalCloseNativeTest {
     void preAttachBuildUsesActualOwnershipFlagBeforePathSelection() throws Exception {
         try (var context = fixture().create(0)) {
             var build = CompletableFuture.completedFuture(new Object[]{context, false, true});
-            var ticket = new AtlasClient.ReleaseTicket(null, AtlasVulkan.Path.VK_HOST, null,
+            var ticket = new AtlasClient.ReleaseTicket(null, AtlasVulkan.Path.VK_SHARED, null,
                     new AtomicReference<>(), null, null, new CompletableFuture<>(), build, null);
             ticket.launch();
             assertThrows(ExecutionException.class, () -> ticket.done.get(2, TimeUnit.SECONDS));

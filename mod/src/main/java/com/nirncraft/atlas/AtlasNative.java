@@ -65,7 +65,7 @@ public final class AtlasNative {
     // (0.15 appended AtlasFrame.nearInfo, AtlasFrameOutput.nearLight and AtlasGlFrameIO's two near-light names, read by
     // the core only under FRAME_NEAR_LIGHT: the larger structs are what an older core reads the start of)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 152, OUTPUT_SIZE = 40, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 104, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48,
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_IO_SIZE = 104, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48,
             SHAPE_SIZE = 400;
     /** Far light kinds (AtlasLight.kind). */
     public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
@@ -143,7 +143,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setEclipse, setJitter, setShapes, setTextures, debugSection, debugMaterial, debugAblate, setTextureTicks, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setEclipse, setJitter, setShapes, setTextures, debugSection, debugMaterial, debugAblate, setTextureTicks, setPreExposure, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -157,8 +157,8 @@ public final class AtlasNative {
     private final MethodHandle setBricks, setOffsets;
     // tests: level 0's block ids as the GPU holds them (atlas_debug_read_blocks; null with an older library)
     private final MethodHandle readBlocks;
-    // Minecraft's Vulkan backend (atlas_vk_attach / atlas_vk_render; null with an older library)
-    private final MethodHandle vkAttach, vkRender, createOnVulkan, vkRenderShared;
+    // Minecraft's Vulkan backend (atlas_vk_attach / atlas_create_on_vulkan / atlas_vk_render_shared)
+    private final MethodHandle vkAttach, createOnVulkan, vkRenderShared;
     private final MethodHandle vkCopyComplete, vkWaitCopy, vkCancelSplice, vkPrepareClose, vkDetachRetired, vkReleaseRetired;
     /** AtlasClimate and AtlasAir (atlas.h) as float arrays: 13 and 11 floats. */
     public static final int CLIMATE_FLOATS = 13, AIR_FLOATS = 11;
@@ -196,9 +196,6 @@ public final class AtlasNative {
         update = bind(l, lib, "atlas_update", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_DOUBLE));
         render = bind(l, lib, "atlas_render", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         getStats = bind(l, lib, "atlas_get_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
-        glAttach = bind(l, lib, "atlas_gl_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
-        glRenderIo = bind(l, lib, "atlas_gl_render_io", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
-        glDetach = bind(l, lib, "atlas_gl_detach", FunctionDescriptor.ofVoid(ADDRESS));
         info = bind(l, lib, "atlas_info", FunctionDescriptor.of(ADDRESS, ADDRESS));
         previewLoadRaster = bind(l, lib, "atlas_preview_load_raster", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         previewGenerate = bind(l, lib, "atlas_preview_generate",
@@ -259,7 +256,6 @@ public final class AtlasNative {
         setOffsets = bindOptional(l, lib, "atlas_set_material_offsets", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         readBlocks = bindOptional(l, lib, "atlas_debug_read_blocks", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         vkAttach = bindOptional(l, lib, "atlas_vk_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
-        vkRender = bindOptional(l, lib, "atlas_vk_render", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         createOnVulkan = bindOptional(l, lib, "atlas_create_on_vulkan", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         vkRenderShared = bindOptional(l, lib, "atlas_vk_render_shared",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
@@ -604,23 +600,12 @@ public final class AtlasNative {
                              boolean budgetExt) {}
 
     /**
-     * (Minecraft's Vulkan backend, atlas on its own device: atlas_vk_render) a frame in host memory, the GL path's layouts
-     * (rows bottom-up): colour RGBA16F, depth R32F, near light RGBA16F (null: none), sun map RG32F sunSize x sunSize + 1
-     * (null: none). Valid until the next render call. Null colour: no frame yet.
-     */
-    public record VkHostFrame(MemorySegment color, MemorySegment depth, MemorySegment nearLight, MemorySegment sunMap,
-                              int width, int height, int sunSize) {}
-
-    /**
      * (stage S3) atlas's splice into Minecraft's frame (AtlasVkSplice): wait on waitSemaphore for waitValue (0: none),
      * execute the command buffer (its copies into Minecraft's textures), signal signalSemaphore = signalValue.
      */
     public record VkSplice(long waitSemaphore, long waitValue, long commandBuffer, long signalSemaphore, long signalValue) {}
 
-    /** GL texture names of the images shared with the game's GL context (rows bottom-up). */
-    public record GlTargets(int color, int normal, int depth, int nearDepth, int width, int height) {}
-
-    /** The game's side of a GL frame (see AtlasGlFrameIO in atlas.h); zero fields are unused. */
+    /** The game's side of a frame (see AtlasGlFrameIO in atlas.h); zero fields are unused. */
     public static final class GlFrameIO {
         public static final int BOUND_DEPTH = 0xFFFFFFFF, DEPTH_AUTO = 0xFFFFFFFF;
         public int nearDepthTex;
@@ -1397,43 +1382,9 @@ public final class AtlasNative {
             }
         }
 
-        // ---- game path: render thread, the game's GL context current ----
+        // ---- game path: render thread, shared Vulkan device ----
 
-        /** Creates the shared images (re-attach on resize). */
-        public GlTargets glAttach(int width, int height) {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment t = a.allocate(GL_TARGETS_SIZE, 4);
-                check((int) glAttach.invokeExact(ptr, width, height, t), "atlas_gl_attach");
-                return new GlTargets(t.get(JAVA_INT, 0), t.get(JAVA_INT, 4), t.get(JAVA_INT, 8), t.get(JAVA_INT, 12),
-                        t.get(JAVA_INT, 16), t.get(JAVA_INT, 20));
-            } catch (Throwable th) {
-                throw rethrow(th);
-            }
-        }
-
-        /** Queues the frame; GL commands issued afterwards see it. The CPU does not wait for the GPU. */
-        public void glRender(Frame f, GlFrameIO io) {
-            // the near light only to a core that has it, and only with both of its textures (atlas.h)
-            boolean nearLight = hasNearLight() && io != null && io.nearInfoTex != 0 && io.dstNearLight != 0;
-            f.write(frameSeg, nearLight);
-            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
-            if (io != null) io.write(ioSeg, nearLight);
-            try {
-                // a typed local: a conditional passed straight to invokeExact is typed Object (its target), and the
-                // exact-type check then fails on every frame
-                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
-                check((int) glRenderIo.invokeExact(ptr, frameSeg, ioArg), "atlas_gl_render_io");
-            } catch (Throwable t) {
-                throw rethrow(t);
-            }
-        }
-
-        /** (Minecraft's Vulkan backend) atlas_vk_attach is in this core. */
-        public boolean hasVulkanHost() {
-            return vkAttach != null && vkRender != null;
-        }
-
-        /** (Minecraft's Vulkan backend, atlas's own device) the frame's images, no GL (re-attach on resize). */
+        /** (Minecraft's Vulkan backend) the frame's images (re-attach on resize). */
         public void vkAttach(int width, int height) {
             if (vkAttach == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no atlas_vk_attach");
             try {
@@ -1443,39 +1394,11 @@ public final class AtlasNative {
             }
         }
 
-        private MemorySegment vkOutSeg;
-
-        /**
-         * (Minecraft's Vulkan backend, atlas's own device) renders the frame and hands it over in host memory; the CPU waits
-         * for the frame's GPU work. io's texture names are flags only (dstNearLight != 0: the near light, primary frames only).
-         */
-        public VkHostFrame vkRender(Frame f, GlFrameIO io) {
-            boolean nearLight = hasNearLight() && io != null && io.dstNearLight != 0;
-            f.write(frameSeg, nearLight);
-            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
-            if (vkOutSeg == null) vkOutSeg = frameArena.allocate(56, 8);
-            if (io != null) io.write(ioSeg, nearLight);
-            try {
-                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
-                check((int) vkRender.invokeExact(ptr, frameSeg, ioArg, vkOutSeg), "atlas_vk_render");
-            } catch (Throwable t) {
-                throw rethrow(t);
-            }
-            MemorySegment color = vkOutSeg.get(ADDRESS, 0);
-            if (color.address() == 0) return null;
-            int w = vkOutSeg.get(JAVA_INT, 40), h = vkOutSeg.get(JAVA_INT, 44), sun = vkOutSeg.get(JAVA_INT, 48);
-            long px = (long) w * h;
-            MemorySegment depth = vkOutSeg.get(ADDRESS, 16), near = vkOutSeg.get(ADDRESS, 24), sunMap = vkOutSeg.get(ADDRESS, 32);
-            return new VkHostFrame(color.reinterpret(px * 8), depth.reinterpret(px * 4),
-                    near.address() == 0 ? null : near.reinterpret(px * 8),
-                    sunMap.address() == 0 || sun == 0 ? null : sunMap.reinterpret((long) sun * (sun + 1) * 8), w, h, sun);
-        }
-
         private MemorySegment vkTargetsSeg, vkSpliceSeg;
 
         /**
          * (stage S3, a context made by createOnVulkan) traces the frame on atlas's queue and returns the splice that copies
-         * it into Minecraft's images (VkImage handles, GENERAL layout; 0: not wanted). io as for vkRender.
+         * it into Minecraft's images (VkImage handles, GENERAL layout; 0: not wanted).
          */
         public VkSplice vkRenderShared(Frame f, GlFrameIO io, long color, long depth, long nearLight, long sunMap) {
             if (vkRenderShared == null) throw new AtlasException(ERR_UNSUPPORTED, "this atlas_core has no atlas_vk_render_shared");
@@ -1554,17 +1477,8 @@ public final class AtlasNative {
             }
         }
 
-        public void glDetach() {
-            try {
-                glDetach.invokeExact(ptr);
-            } catch (Throwable t) {
-                throw rethrow(t);
-            }
-        }
-
         /**
-         * One line of JSON for the log (abi 0.8): device, driver, Vulkan version, and after glAttach the interop mode
-         * ("zero-copy (win32 handles)", "zero-copy (opaque fds)" or "host-copy" with interopReason and its cost).
+         * One line of JSON for the log (abi 0.8): device, driver, Vulkan version, and attachment mode.
          */
         public String info() {
             // (one caller at a time: the core answers from a string of the context's that the next call rewrites; and

@@ -4,6 +4,28 @@ The owner expanded the team on 2026-10-26: one coordinator plus three assigned w
 one-child limit. The full docs/ATLAS-PLAN.md objective remains active; completing a component goal does not complete
 the renderer. No pushes are authorized.
 
+## Gate G11 Completed: Single-Path Shared-Vulkan End State & Live Prism Verification (2026-10-27)
+
+Following live verification across Gates G5–G10, Gate G11 completed the owner-approved end-state cleanup on branch
+`codex-mem-g7`:
+- Kept `com.nirncraft.mixin.VkDeviceCreate` + `AtlasVkShare.createDevice` as the single Vulkan device-creation hook.
+- Removed the temporary device-share off switches (`-Dnirncraft.atlas.vkShareDevice=false`,
+  `-Dnirncraft.atlas.vkSharedSync=false`, `AtlasVkShare.enabled()`, `AtlasVkShare.sharedSyncEnabled()`).
+- Removed the own-device `VK_HOST` fallback (`AtlasVulkan.Path.VK_HOST`, `AtlasTargets.upload(VkHostFrame)`,
+  `AtlasNative.VkHostFrame`, `atlas_vk_render`).
+- Removed the OpenGL interop bridge (`AtlasVulkan.Path.GL`, `AtlasTargets.glIdOf`, `AtlasNearPass.infoGlId`/`depthGlId`,
+  `AtlasNative.GlTargets`, `atlas_gl_attach`, `atlas_gl_render`, `atlas_gl_render_io`, `atlas_gl_detach`,
+  `native/src/gl_api.cpp`, `native/src/gl_api.hpp`, `native/src/gl_near.hpp`, `native/tests/gl_interop_test.cpp`).
+- Rebuilt and verified both packaged natives (`windows-x86_64/atlas_core.dll` and `linux-x86_64/libatlas_core.so`,
+  ABI 0.19.0, 171 `atlas_*` exports, source hash `495e4d25e48a`, `check_natives.py --require-fresh` green).
+- Passed all Windows and Linux native test suites, all Java unit tests (`build_263.py --offline test`), and all 9 checks
+  in `harness.py run --suite harness --tier check` via `agent_job.py --kind cpu`.
+- Passed live 4-pose Khronos-validated Prism capture (`E:\Skycraft-scratch\codex-grid-evidence\g11-live`):
+  - `ready{ok}`, `backend_log: "Vulkan"`, `onMinecraftDevice: true`, `interop: "vulkan shared device (zero-copy)"`.
+  - All 4 poses (`vulkan-p0.png`..`vulkan-p3.png`) captured with 2,255 delivered frames and 0 skipped frames.
+  - `validation.log`: 317 bytes, 0 `ERROR` / `VUID-` lines, 0 leaked Vulkan objects at device destruction.
+  - `vulkan-close.json`: `{"pid": 3436, "seconds": 8.0, "thread_dumps": 0}`, peak job memory 13.62 GB.
+
 | Owner | Model | Goal | Measurable gate | Workspace / ownership |
 |---|---|---|---|---|
 | Coordinator | Current session | Complete the default shared-Vulkan migration, then renderer targets | Actual MC Vulkan/shared-device delivery, genuine complete loading, paired captures, bounded memory and graceful shutdown; full integration gate | grid-standby-admission: reviewed Vulkan assembly, native packages, product defaults and main integration |

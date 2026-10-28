@@ -63,7 +63,6 @@ public final class AtlasFaultProbe {
             AtlasNative.AtlasException again = renderFails(ctx, f, depth);
             check(again != null && again.deviceLost(), "and stays lost: " + again);
             check(ctx.info().contains("\"deviceLost\":true"), "atlas_info says so");
-            ctx.glDetach();
         }
         try (AtlasNative.Context ctx = scene(n, backend, f)) {
             check(ctx.debugFault(AtlasNative.FAULT_TIMEOUT, 0), "arm timeout");

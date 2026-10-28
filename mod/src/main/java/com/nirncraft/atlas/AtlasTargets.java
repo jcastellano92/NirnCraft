@@ -6,20 +6,18 @@ import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.renderpearl.api.textures.AddressMode;
 import com.mojang.renderpearl.api.textures.FilterMode;
 import com.mojang.renderpearl.api.textures.GpuTexture;
-import com.mojang.renderpearl.backend.opengl.GlTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector4f;
 
-import java.lang.reflect.Method;
 import java.util.OptionalDouble;
 
 /**
  * The textures the NirnCraft shader pack samples (customTexture.atlasColor = nirncraft:atlas/color, atlasDepth =
  * nirncraft:atlas/depth): ordinary Minecraft textures registered in the TextureManager, which is how Iris resolves a
- * pack's namespaced custom textures. atlas copies each finished frame into them (glCopyImageSubData, no CPU), so
- * nothing outside atlas ever touches the Vulkan-shared images themselves.
+ * pack's namespaced custom textures. atlas copies each finished frame into them on the shared Vulkan device, so
+ * nothing outside atlas ever touches atlas's internal images themselves.
  * <p>Iris resolves a pack's custom textures once, when it loads the pack, and keeps those texture objects: so the three
  * targets are created once, at client setup (before any pack loads), as 1 x 1 placeholders that read "nothing far",
  * and later resizes swap the GPU texture inside the same objects ({@link Target#resize}); Iris reads the current one at
@@ -37,30 +35,25 @@ final class AtlasTargets implements AutoCloseable {
 
     private final int width, height, sunSize;
     private final Target color, depth, sun;
-    private final AtlasNative.GlTargets shared;
 
-    private AtlasTargets(int width, int height, int sunSize, Target color, Target depth, Target sun, AtlasNative.GlTargets shared) {
+    private AtlasTargets(int width, int height, int sunSize, Target color, Target depth, Target sun) {
         this.width = width;
         this.height = height;
         this.sunSize = sunSize;
         this.color = color;
         this.depth = depth;
         this.sun = sun;
-        this.shared = shared;
     }
 
     /** sunSize: the sun map's size (0: none; the pack then sees a 1 x 2 map without a valid flag and skips it). */
     static AtlasTargets create(AtlasNative.Context ctx, int width, int height, int sunSize) {
         registerPlaceholders();
-        // OpenGL: images shared with GL; Minecraft's Vulkan backend: atlas's own images, frames uploaded (upload)
-        AtlasNative.GlTargets shared = null;
-        if (AtlasVulkan.vulkan()) ctx.vkAttach(width, height);
-        else shared = ctx.glAttach(width, height);
+        ctx.vkAttach(width, height);
         colorTarget.resize(width, height);
         depthTarget.resize(width, height);
         sunTarget.resize(Math.max(1, sunSize), Math.max(2, sunSize + 1));
         nearLightTarget.resize(width, height);
-        AtlasTargets t = new AtlasTargets(width, height, sunSize, colorTarget, depthTarget, sunTarget, shared);
+        AtlasTargets t = new AtlasTargets(width, height, sunSize, colorTarget, depthTarget, sunTarget);
         t.clear();
         return t;
     }
@@ -92,24 +85,12 @@ final class AtlasTargets implements AutoCloseable {
         return sunSize;
     }
 
-    int sunId() {
-        return sunSize > 0 ? sun.glId : 0;
-    }
-
     int width() {
         return width;
     }
 
     int height() {
         return height;
-    }
-
-    int colorId() {
-        return color.glId;
-    }
-
-    int depthId() {
-        return depth.glId;
     }
 
     /** The registered textures (what the pack samples; the fallback compositor draws from them). */
@@ -135,10 +116,6 @@ final class AtlasTargets implements AutoCloseable {
         return sunSize;
     }
 
-    int nearLightId() {
-        return nearLightTarget.glId;
-    }
-
     /** Nothing far (another dimension, or no window built yet): coverage 0, so the pack shows the near field alone.
      * Requested from inside the level render (where a pass is open and no encoder work is allowed) and carried out
      * by {@link #flushClear()} between frames. */
@@ -157,25 +134,7 @@ final class AtlasTargets implements AutoCloseable {
         encoder.clearColorTexture(depthTarget.getTexture(), new Vector4f(1e30f, 0f, 0f, 0f));
     }
 
-    /**
-     * (Minecraft's Vulkan backend, atlas's own device) a finished frame into the registered textures through the encoder
-     * (rows in the order the GL path keeps them: Minecraft's Vulkan render targets keep the same order). False when the
-     * encoder is inside a render pass (the copy must wait: the caller's frame shows the previous one).
-     */
-    boolean upload(AtlasNative.VkHostFrame f) {
-        var encoder = RenderSystem.getDevice().createCommandEncoder();
-        if (!AtlasVulkan.outsidePass(encoder)) return false;
-        if (f.width() != width || f.height() != height) return false;
-        encoder.writeToTexture(color.getTexture(), f.color().asByteBuffer(), 0, 0, 0, 0, width, height);
-        encoder.writeToTexture(depth.getTexture(), f.depth().asByteBuffer(), 0, 0, 0, 0, width, height);
-        if (f.nearLight() != null && nearLightTarget.w == width && nearLightTarget.h == height)
-            encoder.writeToTexture(nearLightTarget.getTexture(), f.nearLight().asByteBuffer(), 0, 0, 0, 0, width, height);
-        if (f.sunMap() != null && sunSize == f.sunSize())
-            encoder.writeToTexture(sun.getTexture(), f.sunMap().asByteBuffer(), 0, 0, 0, 0, sunSize, sunSize + 1);
-        return true;
-    }
-
-    /** (stage S3) the VkImages atlas copies into: colour, depth, near light (0 unless asked), sun map (0: none). */
+    /** The VkImages atlas copies into: colour, depth, near light (0 unless asked), sun map (0: none). */
     long[] vkImages(boolean nearLight) {
         return new long[] {vkImage(color), vkImage(depth),
                 nearLight && nearLightTarget.w == width && nearLightTarget.h == height ? vkImage(nearLightTarget) : 0,
@@ -200,12 +159,11 @@ final class AtlasTargets implements AutoCloseable {
         clear();
     }
 
-    /** One registered texture; its GL name is what atlas copies into. */
+    /** One registered texture that atlas copies into. */
     static final class Target extends AbstractTexture {
         private final String label;
         private final GpuFormat format;
         private int w, h;
-        int glId;
 
         Target(String label, GpuFormat format, int w, int h) {
             this.label = label;
@@ -227,7 +185,6 @@ final class AtlasTargets implements AutoCloseable {
             this.texture = device.createTexture(label, GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST
                     | GpuTexture.USAGE_RENDER_ATTACHMENT, format, w, h, 1, 1);
             this.textureView = device.createTextureView(this.texture);
-            this.glId = glIdOf(this.texture);
             this.w = w;
             this.h = h;
         }
@@ -240,18 +197,6 @@ final class AtlasTargets implements AutoCloseable {
             allocate(nw, nh);
             if (oldView != null) oldView.close();
             if (oldTexture != null) oldTexture.close();
-        }
-    }
-
-    /** The GL name of a texture on Renderpearl's OpenGL backend (Iris adds iris$getGlId for wrapped ones). */
-    static int glIdOf(GpuTexture t) {
-        if (t instanceof GlTexture gl) return gl.glId();
-        if (t instanceof com.mojang.renderpearl.backend.vulkan.VulkanGpuTexture) return 0;  // (no GL name on Vulkan)
-        try {
-            Method m = t.getClass().getMethod("iris$getGlId");
-            return (int) m.invoke(t);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("atlas needs the OpenGL backend (texture is " + t.getClass().getName() + ")", e);
         }
     }
 }

@@ -13,11 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * The one mixin of the narrow exception for Minecraft's Vulkan backend (docs/AGENT-RULES.md, approved 2026-10-26;
  * docs/ATLAS-VULKAN-BACKEND.md): wraps the single {@code vkCreateDevice} call in {@code VulkanBackend.createDevice} so
- * Minecraft's device also carries what Infinite ATLAS needs to run on it (shaderInt64, optional float64, its queues,
- * the memory budget). All of it lives in {@link com.nirncraft.atlas.AtlasVkShare#createDevice}; switch:
- * {@code -Dnirncraft.atlas.vkShareDevice=false} (then the call is Minecraft's own and ATLAS keeps its own device).
- * Re-checked on every Minecraft update: {@code require = 0}, so a moved call leaves Minecraft as it is and ATLAS on its
- * own device (AtlasVkShare.shared() stays null).
+ * Minecraft's device also carries what Infinite ATLAS needs to run on it (shaderInt64, shaderInt16, shaderFloat16,
+ * optional float64, its queues, the memory budget). All of it lives in {@link com.nirncraft.atlas.AtlasVkShare#createDevice}.
+ * Re-checked on every Minecraft update: {@code require = 0}, so a moved call leaves Minecraft as it is
+ * (AtlasVkShare.shared() stays null and ATLAS stays off for the session).
  */
 @Mixin(VulkanBackend.class)
 public abstract class VkDeviceCreate {

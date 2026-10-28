@@ -1,6 +1,5 @@
-// GPU timing of the game path: a hidden GL context, atlas_gl_render into the shared images (device-local outputs,
-// no readback), median GPU time per feature set. The harness's host path reads every output back over PCIe, so
-// its timings at high resolutions mostly measure the bus, not the kernel.
+// GPU timing of the Vulkan path: ATLAS_TIMING_DEVICE_OUTPUTS=1 renders into device-local outputs without PCIe
+// readback, reporting median GPU time per feature set.
 //   atlas_bench [w=2560 h=1440 frames=40 x=0 z=0 above=60 yaw=105 pitch=2]
 #include <algorithm>
 #include <chrono>
@@ -14,7 +13,6 @@
 
 #include "atlas/atlas.h"
 #include "camera.hpp"
-#include "gl_context.hpp"
 
 static double arg(int argc, char** argv, const char* k, double d) {
     for (int i = 1; i < argc; i++) {
@@ -25,13 +23,11 @@ static double arg(int argc, char** argv, const char* k, double d) {
 }
 
 int main(int argc, char** argv) {
-    atlas_test::GlContext glc;
-    std::string glErr;
-    if (!glc.create(glErr)) {
-        std::printf("no GL context: %s\n", glErr.c_str());
-        return 1;
-    }
-
+#if defined(_WIN32)
+    _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
+#else
+    setenv("ATLAS_TIMING_DEVICE_OUTPUTS", "1", 1);
+#endif
     uint32_t W = uint32_t(arg(argc, argv, "w", 2560)), H = uint32_t(arg(argc, argv, "h", 1440));
     int frames = int(arg(argc, argv, "frames", 40));
     double x = arg(argc, argv, "x", 0), z = arg(argc, argv, "z", 0);
@@ -62,11 +58,6 @@ int main(int argc, char** argv) {
     }
     double centre[3] = {x, y, z};
     atlas_update(ctx, centre, 0);
-    AtlasGlTargets t{};
-    if (atlas_gl_attach(ctx, W, H, &t) != ATLAS_OK) {
-        std::printf("attach failed: %s\n", atlas_last_error(ctx));
-        return 1;
-    }
     std::printf("%s\n", atlas_info(ctx));
     AtlasFrame f{};
     f.cameraPos[0] = x;
@@ -123,7 +114,8 @@ int main(int argc, char** argv) {
                 {"  clouds at quarter res", ATLAS_FRAME_ATMOS | ATLAS_FRAME_SHADOWS | ATLAS_FRAME_CLOUDS | ATLAS_FRAME_CLOUDS_QUARTER, false}};
     // bring the GPU to its boost clock first: short runs otherwise time the clock ramp
     f.flags = ATLAS_FRAME_ATMOS | ATLAS_FRAME_SHADOWS;
-    for (int i = 0; i < 250; i++) atlas_gl_render(ctx, &f);
+    AtlasFrameOutput o{};
+    for (int i = 0; i < 250; i++) atlas_render(ctx, &f, &o);
     std::printf("%ux%u, camera (%.0f, %.0f, %.0f), sets interleaved\n", W, H, x, y, z);
     const int NS = int(sizeof(sets) / sizeof(sets[0]));
     std::vector<std::vector<double>> gpu(NS), cpu(NS);
@@ -134,9 +126,9 @@ int main(int argc, char** argv) {
             if (sets[k].lights && lights.empty()) continue;
             f.flags = sets[k].flags;
             atlas_set_light_group(ctx, 1, sets[k].lights ? lights.data() : nullptr, sets[k].lights ? uint32_t(lights.size()) : 0u);
-            for (int r = 0; r < 4; r++) atlas_gl_render(ctx, &f);
+            for (int r = 0; r < 4; r++) atlas_render(ctx, &f, &o);
             auto c0 = std::chrono::steady_clock::now();
-            atlas_gl_render(ctx, &f);
+            atlas_render(ctx, &f, &o);
             cpu[k].push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count());
             AtlasStats st{};
             atlas_get_stats(ctx, &st);
@@ -146,14 +138,11 @@ int main(int argc, char** argv) {
         if (gpu[k].empty()) continue;
         std::sort(gpu[k].begin(), gpu[k].end());
         std::sort(cpu[k].begin(), cpu[k].end());
-        // CPU: the atlas_gl_render call itself (zero-copy: recording; host-copy: plus the wait and the uploads)
         std::printf("  %-24s GPU median %6.2f ms  (p10 %.2f, p90 %.2f)  CPU per call median %6.2f ms\n", sets[k].name,
                     gpu[k][gpu[k].size() / 2], gpu[k][gpu[k].size() / 10], gpu[k][gpu[k].size() * 9 / 10],
                     cpu[k][cpu[k].size() / 2]);
     }
     std::printf("%s\n", atlas_info(ctx));
-    atlas_gl_detach(ctx);
     atlas_destroy(ctx);
-    glc.destroy();
     return 0;
 }

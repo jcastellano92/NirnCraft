@@ -78,20 +78,6 @@ struct FrameTargets {
     std::vector<float> nearLight;  // RGBA, 4 floats per pixel (FRAME_NEAR_LIGHT frames only)
 };
 
-// GL texture names of the images shared with the caller's OpenGL context (bottom-up rows, GL convention).
-struct GlTargets {
-    uint32_t color = 0, normal = 0, depth = 0, nearDepth = 0;
-    uint32_t width = 0, height = 0;
-};
-
-// (Minecraft's Vulkan backend, atlas on its own device) a frame in host memory, the GL path's layouts (rows bottom-up):
-// colour RGBA16F, normal RGBA8, depth R32F, near light RGBA16F (null: none this frame), sun map RG32F sunSize x
-// sunSize + 1 (null: none). Valid until the next vkRender. All null: no frame yet.
-struct VkHostFrame {
-    const void *color = nullptr, *normal = nullptr, *depth = nullptr, *nearLight = nullptr, *sunMap = nullptr;
-    uint32_t width = 0, height = 0, sunSize = 0;
-};
-
 // (Minecraft's Vulkan backend, stage S3) Minecraft's own device, which the device-sharing mixin created with atlas's
 // features and queues (atlas.h AtlasVkDevice): atlas adopts it instead of creating one.
 struct VkAdopt {
@@ -236,31 +222,12 @@ public:
     // (readiness) pipelines still being built off the render thread (the dev kernel reload); 0: all built
     virtual int pipelinesBuilding() const { return 0; }
 
-    // Game path (render thread, the game's GL context current): zero-copy through shared memory and semaphores
-    // when the driver pair supports it, else frames copied through host memory. Default: unsupported.
-    virtual bool glAttach(uint32_t, uint32_t, GlTargets&, std::string& err) {
-        err = "this backend cannot share images with OpenGL (use the Vulkan backend)";
-        return false;
-    }
-    // Renders straight into the shared images. GL commands issued after it returns see the frame (a GL-side
-    // semaphore wait is queued); the CPU does not block on the GPU. gpuMs reports the previous frame.
-    virtual bool glRender(const FrameInputs&, const GlFrameIO*, double*, std::string& err) {
-        err = "not attached";
-        return false;
-    }
-    virtual void glDetach() {}
-    // Minecraft's Vulkan backend with atlas on its own device (docs/ATLAS-VULKAN-BACKEND.md S1): the same frame as
-    // glRender with no GL anywhere; the caller uploads `out` into its own textures. Detach with glDetach.
+    // (stage S3, a backend made on Minecraft's device) the frame traced on atlas's queue; `out` is the command buffer
+    // that copies it into `targets`, to run on Minecraft's queue after waiting for atlas's frame. Attach with vkAttach.
     virtual bool vkAttach(uint32_t, uint32_t, std::string& err) {
         err = "this backend cannot render for Minecraft's Vulkan backend (use the Vulkan backend)";
         return false;
     }
-    virtual bool vkRender(const FrameInputs&, const GlFrameIO*, VkHostFrame&, double*, std::string& err) {
-        err = "this backend cannot render for Minecraft's Vulkan backend";
-        return false;
-    }
-    // (stage S3, a backend made on Minecraft's device) the frame traced on atlas's queue; `out` is the command buffer
-    // that copies it into `targets`, to run on Minecraft's queue after waiting for atlas's frame. Attach with vkAttach.
     virtual bool vkRenderShared(const FrameInputs&, const GlFrameIO*, const VkSharedTargets&, VkSplice&, double*,
                                 std::string& err) {
         err = "this backend does not run on Minecraft's Vulkan device";

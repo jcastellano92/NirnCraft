@@ -19,27 +19,26 @@ import java.util.function.Function;
 import static org.lwjgl.vulkan.VK12.*;
 
 /**
- * Minecraft's Vulkan device made fit for Infinite ATLAS (stage S2 of docs/ATLAS-VULKAN-BACKEND.md), called from the one
+ * Minecraft's Vulkan device made fit for Infinite ATLAS (docs/ATLAS-VULKAN-BACKEND.md), called from the one
  * approved mixin ({@code com.nirncraft.mixin.VkDeviceCreate}) around {@code VulkanBackend.createDevice}'s
  * {@code vkCreateDevice}. Only what the device supports is added, and only on top of what Minecraft asks for:
  * <ul>
- * <li>features: shaderInt64 (the tracer's baseline), shaderFloat64 when present (the client generator's exact doubles);</li>
+ * <li>features: shaderInt64 (the tracer's baseline), shaderInt16, shaderFloat16, shaderFloat64 when present (the client generator's exact doubles);</li>
  * <li>queues: ATLAS's frames' queue in a compute-only family when there is one (the async engine; its images are
  * shared by both families), else one more in Minecraft's graphics family, and the generator's beside it;</li>
  * <li>extensions: VK_EXT_memory_budget (atlas_memory_info) and VK_EXT_calibrated_timestamps (the flight recorder), when
  * offered and not already on.</li>
  * </ul>
- * A device that refuses the additions is created again exactly as Minecraft asked (ATLAS then runs on its own device,
- * stage S1). Switch: {@code -Dnirncraft.atlas.vkShareDevice=false}. Runs once, on the render thread, before any mod
- * event; it must never throw into Minecraft's start.
+ * A device that refuses the additions is created again exactly as Minecraft asked (ATLAS then stays off for the session).
+ * Runs once, on the render thread, before any mod event; it must never throw into Minecraft's start.
  */
 public final class AtlasVkShare {
-    /** What the shared device carries for ATLAS (null: the mixin did not run, was switched off, or the device refused). */
+    /** What the shared device carries for ATLAS (null: the mixin did not run or the device refused). */
     public record Shared(long instance, long physicalDevice, long device, int frameFamily, int frameIndex, int genFamily,
                          int genIndex, boolean float64, boolean memoryBudget, boolean calibrated) {}
 
     private static volatile Shared shared;
-    private static volatile String why = "the device-sharing mixin did not run (OpenGL, or Minecraft's device creation moved)";
+    private static volatile String why = "the device-sharing mixin did not run (Minecraft's device creation moved)";
     private static Shared pending;
     private static Runnable undo;  // (Minecraft's own feature struct back as it was, after the call)
 
@@ -49,41 +48,13 @@ public final class AtlasVkShare {
         return shared;
     }
 
-    /** Shared transport is the default; explicit false keeps the host-copy control available. */
-    static boolean sharedSyncEnabled() {
-        return !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.vkSharedSync"));
-    }
-
     /** Why there is no shared device (for the log), or "" when there is one. */
     public static String why() {
         return shared != null ? "" : why;
     }
 
-    /** -Dnirncraft.atlas.vkShareDevice (default on); read before the mod's harness flags are applied, so the file too. */
-    static boolean enabled() {
-        String v = System.getProperty("nirncraft.atlas.vkShareDevice");
-        if (v == null) {
-            try {
-                var f = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("nirncraft-harness-flags.properties");
-                if (java.nio.file.Files.isRegularFile(f)) {
-                    var p = new java.util.Properties();
-                    try (var in = java.nio.file.Files.newBufferedReader(f)) {
-                        p.load(in);
-                    }
-                    v = p.getProperty("nirncraft.atlas.vkShareDevice");
-                }
-            } catch (Throwable ignored) {
-            }
-        }
-        return v == null || !v.equalsIgnoreCase("false");
-    }
-
-    /** The mixin's body: Minecraft's own call when off or unfit, else the call with ATLAS's additions. */
+    /** The mixin's body: the call with ATLAS's additions, or Minecraft's own call when the device is unfit. */
     public static int createDevice(VkPhysicalDevice phys, VkDeviceCreateInfo info, Function<VkDeviceCreateInfo, Integer> create) {
-        if (!enabled()) {
-            why = "switched off (-Dnirncraft.atlas.vkShareDevice=false)";
-            return create.apply(info);
-        }
         VkDeviceCreateInfo ours;
         try (MemoryStack st = MemoryStack.stackPush()) {
             try {

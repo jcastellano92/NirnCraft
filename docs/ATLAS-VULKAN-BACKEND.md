@@ -1,7 +1,12 @@
-# ATLAS on Minecraft's Vulkan backend (spike, 2026-10-26)
+# ATLAS on Minecraft's Vulkan backend (spike, 2026-10-26; Gate G11 completed 2026-10-27)
 
-**Decision (owner, 2026-10-26):** ATLAS moves onto Minecraft 26.3's own Vulkan backend (renderpearl). GL interop stays
-only as a fallback. macOS remains outside the current migration gate; future Apple planning is recorded below.
+**Decision (owner, 2026-10-26; end-state cleanup completed 2026-10-27, Gate G11):** ATLAS runs exclusively on Minecraft
+26.3's own Vulkan backend (renderpearl) via the single device-creation hook (`com.nirncraft.mixin.VkDeviceCreate`) and
+shared-device `VK_SHARED` splice transport (`atlas_create_on_vulkan` + `atlas_vk_render_shared`). Following live Prism
+verification across Gates G5–G10, the device-share off switch (`-Dnirncraft.atlas.vkShareDevice=false`,
+`-Dnirncraft.atlas.vkSharedSync=false`), the own-device `VK_HOST` fallback (`atlas_vk_render`), and the OpenGL interop
+bridge (`atlas_gl_*`, `src/gl_api.*`, `src/gl_near.hpp`) have been removed. macOS remains outside the current migration
+gate; future Apple planning is recorded below.
 
 This plan comes from a read-only spike that read the client jar's bytecode with `javap -p -c`. **[V]** means seen in
 bytecode; **[I]** means inferred.
@@ -32,18 +37,18 @@ bytecode; **[I]** means inferred.
   external memory, and its images are plain VMA images. **[I]**
 - **What sharing the device gives.** The same device and queues, our own timeline semaphores, and zero-copy on every
   vendor, including AMD, Mesa and the Steam Deck.
-- **Mixin (narrow exception, approved by the orchestrator 2026-10-26).** `com.nirncraft.mixin.VkDeviceCreate`, a
-  `@WrapOperation` on the single `VK12.vkCreateDevice` call in
+- **Mixin (narrow exception, approved by the orchestrator 2026-10-26; single device-creation hook as of Gate G11).**
+  `com.nirncraft.mixin.VkDeviceCreate`, a `@WrapOperation` on the single `VK12.vkCreateDevice` call in
   `VulkanBackend.createDevice(FeatureSet, VulkanPhysicalDevice)`.
-  - It appends our extensions and features only when the device supports them: `shaderInt64`, optional float64,
-    `memory_budget` and `global_priority`.
-  - It adds one queue on the compute family.
-  - The switch is `atlas.vkShareDevice`.
-  - It's re-checked on every Minecraft update.
-- **Public fallback** (mixin off or unsupported): our own VkDevice plus a host copy through `encoder.writeToTexture`.
-  No GL is needed.
-- **GL stays** frozen to bug fixes for as long as Mojang ships it. We review removing it two Minecraft releases after
-  DEFAULT picks Vulkan first.
+  - It appends our extensions and features only when the device supports them: `shaderInt64`, `shaderInt16`,
+    `shaderFloat16`, optional `shaderFloat64`, `VK_EXT_memory_budget` and `VK_EXT_calibrated_timestamps`.
+  - It adds ATLAS's frame queue (compute-only family when available, else graphics family) and generator queue.
+  - It's re-checked on every Minecraft update (`require = 0`: if Minecraft's device creation moves or the physical
+    device lacks required features, Minecraft starts unmodified and ATLAS stays off for the session).
+- **Removed legacy paths (Gate G11):** The temporary `-Dnirncraft.atlas.vkShareDevice=false` /
+  `-Dnirncraft.atlas.vkSharedSync=false` switches, the own-device `VK_HOST` host-copy fallback (`atlas_vk_render`), and
+  the OpenGL interop bridge (`atlas_gl_attach`, `atlas_gl_render`, `atlas_gl_render_io`, `atlas_gl_detach`) were
+  dropped after the final Prism verification runs.
 
 ## First probe (≤ 1 hour, Java and LWJGL, dev instance)
 

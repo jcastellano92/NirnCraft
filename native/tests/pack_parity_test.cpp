@@ -19,8 +19,106 @@
 
 #include "atlas/atlas.h"
 #include "camera.hpp"
-#include "gl_api.hpp"
 #include "gl_context.hpp"
+
+#if defined(_WIN32)
+#define ATLAS_GLAPI __stdcall
+#else
+#define ATLAS_GLAPI
+#endif
+
+namespace {
+
+using GLenum = unsigned int;
+using GLuint = unsigned int;
+using GLint = int;
+using GLsizei = int;
+
+constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA = 0x1908, GL_FLOAT = 0x1406, GL_TEXTURE_MIN_FILTER = 0x2801,
+                 GL_TEXTURE_MAG_FILTER = 0x2800, GL_TEXTURE_WRAP_S = 0x2802, GL_TEXTURE_WRAP_T = 0x2803,
+                 GL_CLAMP_TO_EDGE = 0x812F, GL_COMPUTE_SHADER = 0x91B9, GL_COMPILE_STATUS = 0x8B81,
+                 GL_ALL_BARRIER_BITS = 0xFFFFFFFF;
+
+struct GlApi {
+    GLuint(ATLAS_GLAPI* CreateShader)(GLenum) = nullptr;
+    void(ATLAS_GLAPI* ShaderSource)(GLuint, GLsizei, const char* const*, const GLint*) = nullptr;
+    void(ATLAS_GLAPI* CompileShader)(GLuint) = nullptr;
+    void(ATLAS_GLAPI* GetShaderiv)(GLuint, GLenum, GLint*) = nullptr;
+    void(ATLAS_GLAPI* GetShaderInfoLog)(GLuint, GLsizei, GLsizei*, char*) = nullptr;
+    GLuint(ATLAS_GLAPI* CreateProgram)() = nullptr;
+    void(ATLAS_GLAPI* AttachShader)(GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* LinkProgram)(GLuint) = nullptr;
+    void(ATLAS_GLAPI* UseProgram)(GLuint) = nullptr;
+    GLint(ATLAS_GLAPI* GetUniformLocation)(GLuint, const char*) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniformMatrix4fv)(GLuint, GLint, GLsizei, unsigned char, const float*) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniform2f)(GLuint, GLint, float, float) = nullptr;
+    void(ATLAS_GLAPI* ProgramUniform1i)(GLuint, GLint, GLint) = nullptr;
+    void(ATLAS_GLAPI* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
+    void(ATLAS_GLAPI* TextureStorage2D)(GLuint, GLsizei, GLenum, GLsizei, GLsizei) = nullptr;
+    void(ATLAS_GLAPI* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
+    void(ATLAS_GLAPI* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
+    void(ATLAS_GLAPI* BindTextureUnit)(GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* DispatchCompute)(GLuint, GLuint, GLuint) = nullptr;
+    void(ATLAS_GLAPI* MemoryBarrierGL)(unsigned int) = nullptr;
+
+    static void* proc(const char* name) {
+#if defined(_WIN32)
+        void* p = reinterpret_cast<void*>(wglGetProcAddress(name));
+        auto v = reinterpret_cast<intptr_t>(p);
+        if (v == 0 || v == 1 || v == 2 || v == 3 || v == -1) {
+            HMODULE gl = GetModuleHandleA("opengl32.dll");
+            if (!gl) gl = LoadLibraryA("opengl32.dll");
+            p = gl ? reinterpret_cast<void*>(GetProcAddress(gl, name)) : nullptr;
+        }
+        return p;
+#else
+        using GetProcFn = void* (*)(const char*);
+        if (void* egl = dlopen("libEGL.so.1", RTLD_LAZY | RTLD_LOCAL | RTLD_NOLOAD))
+            if (auto gp = reinterpret_cast<GetProcFn>(dlsym(egl, "eglGetProcAddress")))
+                if (void* p = gp(name)) return p;
+        for (const char* lib : {"libGLX.so.0", "libGL.so.1"})
+            if (void* glx = dlopen(lib, RTLD_LAZY | RTLD_LOCAL | RTLD_NOLOAD))
+                if (auto gp = reinterpret_cast<GetProcFn>(dlsym(glx, "glXGetProcAddressARB")))
+                    if (void* p = gp(name)) return p;
+        return dlsym(RTLD_DEFAULT, name);
+#endif
+    }
+
+    bool load(std::string& err) {
+        std::string missing;
+#define LOAD(field, name)                                                  \
+    field = reinterpret_cast<decltype(field)>(proc(name));                 \
+    if (!field) missing += std::string(missing.empty() ? "" : ", ") + name;
+        LOAD(CreateShader, "glCreateShader")
+        LOAD(ShaderSource, "glShaderSource")
+        LOAD(CompileShader, "glCompileShader")
+        LOAD(GetShaderiv, "glGetShaderiv")
+        LOAD(GetShaderInfoLog, "glGetShaderInfoLog")
+        LOAD(CreateProgram, "glCreateProgram")
+        LOAD(AttachShader, "glAttachShader")
+        LOAD(LinkProgram, "glLinkProgram")
+        LOAD(UseProgram, "glUseProgram")
+        LOAD(GetUniformLocation, "glGetUniformLocation")
+        LOAD(ProgramUniformMatrix4fv, "glProgramUniformMatrix4fv")
+        LOAD(ProgramUniform2f, "glProgramUniform2f")
+        LOAD(ProgramUniform1i, "glProgramUniform1i")
+        LOAD(CreateTextures, "glCreateTextures")
+        LOAD(TextureStorage2D, "glTextureStorage2D")
+        LOAD(TextureSubImage2D, "glTextureSubImage2D")
+        LOAD(TextureParameteri, "glTextureParameteri")
+        LOAD(BindTextureUnit, "glBindTextureUnit")
+        LOAD(DispatchCompute, "glDispatchCompute")
+        LOAD(MemoryBarrierGL, "glMemoryBarrier")
+#undef LOAD
+        if (!missing.empty()) {
+            err = "OpenGL lacks " + missing;
+            return false;
+        }
+        return true;
+    }
+};
+
+}  // namespace
 
 using namespace atlas;
 

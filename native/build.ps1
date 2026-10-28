@@ -52,16 +52,6 @@ if (-not $NoTest) {
     if ($LASTEXITCODE) { throw 'height tests failed' }
     & (Join-Path $build "$Config\atlas_vk_test.exe") (Join-Path $here 'data')
     if ($LASTEXITCODE) { throw 'vulkan backend tests failed' }
-    # the GL bridge, zero-copy where the driver pair allows it, on two contexts: the default (compatibility) one and
-    # an OpenGL 3.3 core forward-compatible profile like Minecraft's, which must land on the same interop path ...
-    & (Join-Path $build "$Config\atlas_gl_test.exe") (Join-Path $here 'data') --context=both
-    if ($LASTEXITCODE) { throw 'gl interop test failed' }
-    # ... and the host-copy fallback AMD / Mesa / cross-GPU machines may land on, forced here
-    $env:ATLAS_INTEROP = 'hostcopy'
-    try {
-        & (Join-Path $build "$Config\atlas_gl_test.exe") (Join-Path $here 'data') --context=both
-        if ($LASTEXITCODE) { throw 'gl host-copy test failed' }
-    } finally { Remove-Item Env:ATLAS_INTEROP -ErrorAction SilentlyContinue }
     # the game's GLSL sky (the air, AtlasSky) must match atlas's, or the horizon shows a seam
     $atmo = Join-Path $repo 'mod/src/main/resources/assets/nirncraft/shaders/include/atlas_air.glsl'
     & (Join-Path $build "$Config/atlas_pack_test.exe") $atmo

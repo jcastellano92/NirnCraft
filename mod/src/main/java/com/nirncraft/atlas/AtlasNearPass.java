@@ -429,15 +429,6 @@ public final class AtlasNearPass {
                 && !mc.gameRenderer.useImprovedTransparency();
     }
 
-    /** The G-buffer's light target (block, sky, normal): atlas's near light reads it (AtlasGlIO.nearInfoTex). */
-    static int infoGlId() {
-        return light == null ? 0 : AtlasTargets.glIdOf(light.getColorTexture());
-    }
-
-    static int depthGlId() {
-        return gbuffer == null ? 0 : AtlasTargets.glIdOf(gbuffer.getDepthTexture());
-    }
-
     /** This frame's sub-pixel jitter, window pixels (AtlasClient hands atlas the same, in its pixels). */
     static float jitterX() {
         return jitterX;

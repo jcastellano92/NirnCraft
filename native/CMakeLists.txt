@@ -210,14 +210,14 @@ add_custom_target(atlas_build_hash ALL
   BYPRODUCTS "${GEN}/atlas_build_hash.h" COMMENT "the native build hash")
 add_library(atlas_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp src/bricks.cpp
+  src/lights.cpp src/voxgrid.cpp src/sectionstore.cpp src/gencache.cpp src/bricks.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_farsplit_spv.h" "${GEN}/stage_trace_spv.h" "${GEN}/stage_trace_clock_spv.h" "${GEN}/stage_trace_water_spv.h" "${GEN}/stage_trace_refine_spv.h" "${GEN}/atlas_farshade_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h" "${GEN}/atlas_nearlight_spv.h" "${GEN}/atlas_nearup_spv.h"
   "${GEN}/atlas_neartemporal_spv.h" ${VG_HEADERS} ${FAR_EXTRA_HEADERS})
 target_include_directories(atlas_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
 add_dependencies(atlas_core atlas_build_hash)
 target_compile_definitions(atlas_core PRIVATE ATLAS_BUILD ATLAS_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
-target_link_libraries(atlas_core PRIVATE ${ATLAS_GL_LIBS} Threads::Threads)
+target_link_libraries(atlas_core PRIVATE ${CMAKE_DL_LIBS} Threads::Threads)
 if(NOT MSVC)
   # one .so for every distro: the C++ runtime inside (a container-built library loads in the game's JVM on the host,
   # whatever libstdc++ that has), none of its symbols exported, and no undefined symbol left for load time
@@ -349,12 +349,7 @@ add_executable(atlas_frame_lock_test tests/frame_lock_test.cpp src/world.cpp src
 target_include_directories(atlas_frame_lock_test PRIVATE src include "${ATLAS_VK_INCLUDE}")
 target_link_libraries(atlas_frame_lock_test PRIVATE Threads::Threads)
 
-add_executable(atlas_gl_test tests/gl_interop_test.cpp src/gl_api.cpp)
-target_include_directories(atlas_gl_test PRIVATE src include)
-target_include_directories(atlas_gl_test PRIVATE tests)
-target_link_libraries(atlas_gl_test PRIVATE atlas_core ${ATLAS_TEST_GL_LIBS} Threads::Threads)
-
-add_executable(atlas_pack_test tests/pack_parity_test.cpp src/gl_api.cpp)
+add_executable(atlas_pack_test tests/pack_parity_test.cpp)
 add_executable(atlas_vk_test tests/vk_backend_test.cpp)
 target_include_directories(atlas_vk_test PRIVATE src include "${ATLAS_VK_INCLUDE}")
 target_link_libraries(atlas_vk_test PRIVATE atlas_core Threads::Threads ${CMAKE_DL_LIBS})
@@ -368,7 +363,7 @@ target_link_libraries(atlas_pack_test PRIVATE atlas_core ${ATLAS_TEST_GL_LIBS})
 add_executable(atlas_bench tools/atlas_bench.cpp)
 target_include_directories(atlas_bench PRIVATE src include)
 target_include_directories(atlas_bench PRIVATE tests)
-target_link_libraries(atlas_bench PRIVATE atlas_core ${ATLAS_TEST_GL_LIBS})
+target_link_libraries(atlas_bench PRIVATE atlas_core)
 
 # Exact terrain height (atlas_height.slang): precise floating point, then spv_exact adds the float controls and
 # refuses the build unless every arithmetic instruction is NoContraction and no inexact extended instruction is used.

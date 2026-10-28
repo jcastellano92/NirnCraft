@@ -173,9 +173,6 @@ run "$BUILD/atlas_close_admission_test"
 # without shaderFloat64 + RTE / SignedZeroInfNanPreserve float controls reports the CPU fallback and passes)
 run "$BUILD/atlas_height_test"
 run "$BUILD/atlas_vk_test" "$HERE/data"
-# the GL bridge on two contexts: a 4.5 core one, then an OpenGL 3.3 core forward-compatible profile like Minecraft's
-# (zero-copy where the interop extensions exist, host-copy otherwise; the 3.3 one must land on the same path)
-run "$BUILD/atlas_gl_test" "$HERE/data" --context=both
 run "$BUILD/atlas_pack_test" "$REPO/mod/src/main/resources/assets/nirncraft/shaders/include/atlas_air.glsl"
 [ "$status" = 0 ] && echo "ALL PASSED" || echo "SOME SUITES FAILED"
 exit "$status"

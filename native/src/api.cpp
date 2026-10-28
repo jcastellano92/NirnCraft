@@ -1271,34 +1271,8 @@ ATLAS_API AtlasStatus atlas_render(AtlasContext* ctx, const AtlasFrame* f, const
     ATLAS_CATCH(ctx)
 }
 
-ATLAS_API AtlasStatus atlas_gl_attach(AtlasContext* ctx, uint32_t w, uint32_t h, AtlasGlTargets* out) {
-    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
-    if (ctx && !work) return closeRejected(ctx);
-    if (!ctx || !out || w == 0 || h == 0) return ATLAS_ERR_ARG;
-    ATLAS_TRY
-    std::lock_guard<std::mutex> lock(ctx->mu);
-    AtlasStatus dead;
-    if (deadDevice(ctx, dead)) return dead;
-    GlTargets t;
-    std::string err;
-    if (!ctx->backend->glAttach(w, h, t, err)) return backendFailure(ctx, err, ATLAS_ERR_UNSUPPORTED);
-    *out = AtlasGlTargets{t.color, t.normal, t.depth, t.nearDepth, t.width, t.height};
-    return ATLAS_OK;
-    ATLAS_CATCH(ctx)
-}
-
-ATLAS_API AtlasStatus atlas_gl_render(AtlasContext* ctx, const AtlasFrame* f) {
-    return atlas_gl_render_io(ctx, f, nullptr);
-}
-
-static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* vkOut,
-                            const VkSharedTargets* shared = nullptr, VkSplice* splice = nullptr);
-
-ATLAS_API AtlasStatus atlas_gl_render_io(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io) {
-    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
-    if (ctx && !work) return closeRejected(ctx);
-    return renderIo(ctx, f, io, nullptr);
-}
+static AtlasStatus renderShared(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io,
+                                const VkSharedTargets& shared, VkSplice& splice);
 
 ATLAS_API AtlasStatus atlas_vk_attach(AtlasContext* ctx, uint32_t w, uint32_t h) {
     auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
@@ -1319,14 +1293,6 @@ ATLAS_API AtlasStatus atlas_vk_attach(AtlasContext* ctx, uint32_t w, uint32_t h)
     ATLAS_CATCH(ctx)
 }
 
-ATLAS_API AtlasStatus atlas_vk_render(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* out) {
-    auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
-    if (ctx && !work) return closeRejected(ctx);
-    if (!out) return ATLAS_ERR_ARG;
-    *out = AtlasVkHostFrame{};
-    return renderIo(ctx, f, io, out);
-}
-
 ATLAS_API AtlasStatus atlas_vk_render_shared(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io,
                                              const AtlasVkTargets* targets, AtlasVkSplice* out) {
     auto work = ctx ? ctx->backend->admitWork() : Backend::WorkTicket{};
@@ -1339,7 +1305,7 @@ ATLAS_API AtlasStatus atlas_vk_render_shared(AtlasContext* ctx, const AtlasFrame
     t.nearLight = targets->nearLight;
     t.sunMap = targets->sunMap;
     VkSplice s;
-    AtlasStatus st = renderIo(ctx, f, io, nullptr, &t, &s);
+    AtlasStatus st = renderShared(ctx, f, io, t, s);
     if (st == ATLAS_OK) *out = AtlasVkSplice{s.waitSemaphore, s.waitValue, s.commandBuffer, s.signalSemaphore, s.signalValue};
     return st;
 }
@@ -1455,13 +1421,12 @@ ATLAS_API AtlasStatus atlas_vk_release_retired(AtlasVkRetirement* retired) {
     catch (...) { return ATLAS_ERR_INTERNAL; }
 }
 
-// The frame for the GL path (vkOut and shared null) or for Minecraft's Vulkan backend (vkOut: the frame in host memory;
-// shared: on Minecraft's device, the splice into its frame)
-static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io, AtlasVkHostFrame* vkOut,
-                            const VkSharedTargets* shared, VkSplice* splice) {
+// The frame for Minecraft's shared Vulkan device: returns the splice into Minecraft's frame.
+static AtlasStatus renderShared(AtlasContext* ctx, const AtlasFrame* f, const AtlasGlFrameIO* io,
+                                const VkSharedTargets& shared, VkSplice& splice) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return ATLAS_ERR_ARG;
     ATLAS_TRY
-    ATLAS_ZONE("api:glRender");
+    ATLAS_ZONE("api:vkRenderShared");
     std::unique_lock<std::mutex> lock(ctx->mu, std::defer_lock);
     {
         ATLAS_ZONE_MIN("wait:ctxLock", 50);
@@ -1469,9 +1434,7 @@ static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasG
     }
     AtlasStatus dead;
     if (deadDevice(ctx, dead)) return dead;
-    if (ctx->backend->vkSharedAttached() && !shared)
-        return ctx->fail(ATLAS_ERR_STATE, "shared Vulkan attachments require atlas_vk_render_shared");
-    if (shared) {
+    {
         bool ready = false;
         std::string err;
         if (!ctx->backend->vkCopyComplete(0, ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
@@ -1505,38 +1468,17 @@ static AtlasStatus renderIo(AtlasContext* ctx, const AtlasFrame* f, const AtlasG
             g.dstNearLight = io->dstNearLight;
         }
     }
-    // the near light needs the near field's depth, its info and somewhere to put the result (the backend also drops
-    // it where it cannot read the near depth this frame)
     // (ATLAS_FRAME_PRIMARY_NEAR: the near field is atlas's own, only the output is needed)
     bool primaryNear = (f->flags & FRAME_PRIMARY_NEAR_BITS) != 0;
-    if (!io || (!primaryNear && (!g.nearDepthTex || !g.nearInfoTex)) || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
+    if (!io || !primaryNear || !g.dstNearLight) in.frame.dims[2] &= ~ATLAS_FRAME_NEAR_LIGHT;
     double ms = ctx->stats.lastFrameMs;
     std::string err;
-    if (shared) {
-        if (!ctx->backend->vkRenderShared(in, io ? &g : nullptr, *shared, *splice, &ms, err))
-            return backendFailure(ctx, err, ATLAS_ERR_GPU);
-    } else if (vkOut) {
-        VkHostFrame h;
-        if (!ctx->backend->vkRender(in, io ? &g : nullptr, h, &ms, err)) return backendFailure(ctx, err, ATLAS_ERR_GPU);
-        *vkOut = AtlasVkHostFrame{h.color, h.normal, h.depth, h.nearLight, h.sunMap, h.width, h.height, h.sunSize, 0};
-    } else if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) {
+    if (!ctx->backend->vkRenderShared(in, io ? &g : nullptr, shared, splice, &ms, err))
         return backendFailure(ctx, err, ATLAS_ERR_GPU);
-    }
     rememberFrame(ctx, f);
     ctx->stats.lastFrameMs = ms;
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
-}
-
-ATLAS_API void atlas_gl_detach(AtlasContext* ctx) {
-    auto work = ctx ? ctx->backend->admitRetirement() : Backend::WorkTicket{};
-    if (ctx && !work) { std::fprintf(stderr, "[atlas] refusing detach while terminal close is unresolved\n"); return; }
-    if (!ctx) return;
-    try {
-        std::lock_guard<std::mutex> lock(ctx->mu);
-        ctx->backend->glDetach();  // after a loss: frees the GL side and the images without waiting on the device
-    } catch (...) {
-    }
 }
 
 // General 4x4 inverse (column-major), in double. False when singular.

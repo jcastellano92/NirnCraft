@@ -10,23 +10,16 @@ import com.mojang.renderpearl.frontend.FrontendRenderPipeline;
 import org.lwjgl.vulkan.VkCommandBuffer;
 
 /**
- * Infinite ATLAS on Minecraft's Vulkan backend (docs/ATLAS-VULKAN-BACKEND.md). Which way the frame reaches Minecraft:
- * <ul>
- * <li>{@link Path#GL}: Minecraft runs OpenGL; the GL interop bridge (atlas_gl_*), as before;</li>
- * <li>{@link Path#VK_HOST} (stage S1, the public fallback): Minecraft runs Vulkan, atlas keeps its own Vulkan device and
- * hands each frame over in host memory, uploaded with the encoder's writeToTexture (atlas_vk_render);</li>
- * <li>{@link Path#VK_SHARED} (stage S3): atlas runs on Minecraft's own VkDevice (the device-sharing mixin gave it its
- * features and queues: {@link AtlasVkShare}), traces on its own queue and splices one command buffer into Minecraft's
- * frame that copies the result into Minecraft's textures, after a timeline-semaphore wait (atlas_vk_render_shared).
- * The opt-in synchronous baseline submits that copy and waits with a deadline before resolving it.</li>
- * </ul>
- * The path is chosen once per context: {@link #choose} (a shared context that cannot be made falls back to VK_HOST).
+ * Infinite ATLAS on Minecraft's Vulkan backend (docs/ATLAS-VULKAN-BACKEND.md):
+ * {@link Path#VK_SHARED} runs on Minecraft's own VkDevice (the device-sharing mixin gave it its features and queues:
+ * {@link AtlasVkShare}), traces on its own queue and splices one command buffer into Minecraft's frame that copies the
+ * result into Minecraft's textures, after a timeline-semaphore wait (atlas_vk_render_shared).
  */
 final class AtlasVulkan {
-    enum Path { GL, VK_HOST, VK_SHARED }
+    enum Path { VK_SHARED }
 
     private static Boolean vulkan;
-    private static Path path;
+    private static Path path = Path.VK_SHARED;
     private static VulkanDevice device;
     private enum CopyPhase { OFFERED, CANCELING, RECORDING, SUBMITTED, COMPLETE, FAILED }
     // Render-thread owned. A failed/ambiguous insertion is retained until device teardown is prevented.
@@ -42,10 +35,9 @@ final class AtlasVulkan {
         return v;
     }
 
-    /** The path of the current context (GL until a Vulkan context chose). */
+    /** The path of the current context. */
     static Path path() {
-        Path p = path;
-        return p != null ? p : vulkan() ? Path.VK_HOST : Path.GL;
+        return Path.VK_SHARED;
     }
 
     /** The context just made runs on this path. */

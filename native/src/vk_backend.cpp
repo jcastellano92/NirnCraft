@@ -1,18 +1,14 @@
 // Vulkan compute backend for the atlas_far kernel.
 //  * Host path (harness, tests): scene in host-visible buffers (BAR when available), outputs read back.
-//  * GL path (game), zero-copy: outputs published into images whose memory is exported to the game's OpenGL context
-//    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32 on Windows, VK_KHR_external_memory_fd <->
-//    GL_EXT_memory_object_fd on Linux), ordered by shared semaphores, so the frame never touches the CPU. Two frame
-//    slots: the CPU records frame N+1 while the GPU still runs frame N.
-//  * GL path, host-copy fallback (no interop extensions, formats not exportable, or the GL context on another GPU):
-//    the same images are local to Vulkan, copied to host memory and uploaded into plain GL textures.
+//  * Shared Vulkan device path (game, atlas_create_on_vulkan): atlas adopts Minecraft's own VkDevice and runs on its
+//    own queue, publishing outputs into shared images and recording a copy command buffer spliced into Minecraft's
+//    frame with timeline semaphores (atlas_vk_render_shared).
 // Baseline: Vulkan 1.2 with shaderInt64, shaderInt16 and shaderFloat16 required by the compiled kernels.
 #include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES, the loader is opened at run time
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
-#include <vulkan/vulkan_win32.h>
 #else
 #include <unistd.h>
 #endif
@@ -72,8 +68,6 @@
 #include "atlas_vg_ranklist_spv.h"
 #include "atlas/atlas.h"  // (atlas_pipeline_progress)
 #include "backend.hpp"
-#include "gl_api.hpp"
-#include "gl_near.hpp"
 #include "sectionpack.hpp"
 #include "voxgrid.hpp"
 
@@ -88,107 +82,6 @@ char name[96] = "";
 constexpr uint32_t INIT_KERNELS = 26;
 }  // namespace pipeprog
 namespace {
-
-// ---- platform shim: the one place the two interop flavours differ -------------------------------------------------
-#if defined(_WIN32)
-using ExtHandle = HANDLE;
-const ExtHandle NO_HANDLE = nullptr;
-constexpr VkExternalMemoryHandleTypeFlagBits MEM_HANDLE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-constexpr VkExternalSemaphoreHandleTypeFlagBits SEM_HANDLE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-const char* const MEM_EXT = VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME;
-const char* const SEM_EXT = VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME;
-const char* const INTEROP_NAME = "zero-copy (win32 handles)";
-const char* const GL_INTEROP_EXTS = "GL_EXT_memory_object_win32 + GL_EXT_semaphore_win32";
-const char* const GL_MEM_EXT = "GL_EXT_memory_object_win32";
-const char* const GL_SEM_EXT = "GL_EXT_semaphore_win32";
-void closeHandle(ExtHandle& h) {
-    if (h) CloseHandle(h);
-    h = nullptr;
-}
-bool glHasInterop(const GlApi& gl) { return gl.memoryObjectWin32 && gl.semaphoreWin32; }
-
-struct ExportFns {
-    PFN_vkGetMemoryWin32HandleKHR mem = nullptr;
-    PFN_vkGetSemaphoreWin32HandleKHR sem = nullptr;
-    bool load(VkDevice d) {
-        mem = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(vkGetDeviceProcAddr(d, "vkGetMemoryWin32HandleKHR"));
-        sem = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(d, "vkGetSemaphoreWin32HandleKHR"));
-        return mem && sem;
-    }
-    bool memory(VkDevice d, VkDeviceMemory m, ExtHandle& out) const {
-        VkMemoryGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR};
-        hi.memory = m;
-        hi.handleType = MEM_HANDLE;
-        return mem(d, &hi, &out) == VK_SUCCESS;
-    }
-    bool semaphore(VkDevice d, VkSemaphore s, ExtHandle& out) const {
-        VkSemaphoreGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR};
-        hi.semaphore = s;
-        hi.handleType = SEM_HANDLE;
-        return sem(d, &hi, &out) == VK_SUCCESS;
-    }
-};
-// GL duplicates nothing: the handle stays ours and is closed when the image goes
-void glImportMemory(const GlApi& gl, GLuint obj, uint64_t size, ExtHandle& h) {
-    gl.ImportMemoryWin32HandleEXT(obj, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, h);
-}
-void glImportSemaphore(const GlApi& gl, GLuint obj, ExtHandle& h) {
-    gl.ImportSemaphoreWin32HandleEXT(obj, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, h);
-}
-#else
-using ExtHandle = int;
-const ExtHandle NO_HANDLE = -1;
-constexpr VkExternalMemoryHandleTypeFlagBits MEM_HANDLE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-constexpr VkExternalSemaphoreHandleTypeFlagBits SEM_HANDLE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
-const char* const MEM_EXT = VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME;
-const char* const SEM_EXT = VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME;
-const char* const INTEROP_NAME = "zero-copy (opaque fds)";
-const char* const GL_INTEROP_EXTS = "GL_EXT_memory_object_fd + GL_EXT_semaphore_fd";
-const char* const GL_MEM_EXT = "GL_EXT_memory_object_fd";
-const char* const GL_SEM_EXT = "GL_EXT_semaphore_fd";
-void closeHandle(ExtHandle& h) {
-    if (h >= 0) close(h);
-    h = -1;
-}
-bool glHasInterop(const GlApi& gl) { return gl.memoryObjectFd && gl.semaphoreFd; }
-
-struct ExportFns {
-    PFN_vkGetMemoryFdKHR mem = nullptr;
-    PFN_vkGetSemaphoreFdKHR sem = nullptr;
-    bool load(VkDevice d) {
-        mem = reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(d, "vkGetMemoryFdKHR"));
-        sem = reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(vkGetDeviceProcAddr(d, "vkGetSemaphoreFdKHR"));
-        return mem && sem;
-    }
-    bool memory(VkDevice d, VkDeviceMemory m, ExtHandle& out) const {
-        VkMemoryGetFdInfoKHR hi{VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR};
-        hi.memory = m;
-        hi.handleType = MEM_HANDLE;
-        return mem(d, &hi, &out) == VK_SUCCESS;
-    }
-    bool semaphore(VkDevice d, VkSemaphore s, ExtHandle& out) const {
-        VkSemaphoreGetFdInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR};
-        hi.semaphore = s;
-        hi.handleType = SEM_HANDLE;
-        return sem(d, &hi, &out) == VK_SUCCESS;
-    }
-};
-// A successful fd import transfers the fd to GL (it must not be closed or reused); a failed one leaves it ours.
-void glImportMemory(const GlApi& gl, GLuint obj, uint64_t size, ExtHandle& h) {
-    gl.ImportMemoryFdEXT(obj, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, h);
-    if (gl.GetError() == GL_NO_ERROR) h = -1;
-}
-void glImportSemaphore(const GlApi& gl, GLuint obj, ExtHandle& h) {
-    gl.ImportSemaphoreFdEXT(obj, GL_HANDLE_TYPE_OPAQUE_FD_EXT, h);
-    if (gl.GetError() == GL_NO_ERROR) h = -1;
-}
-#endif
-
-// VkHost: Minecraft's Vulkan backend with atlas on its own device (stage S1 of docs/ATLAS-VULKAN-BACKEND.md): no GL at
-// all, the frame copied to host memory for the caller to upload into its own textures (atlas_vk_render)
-// VkShared: atlas on Minecraft's own VkDevice (stage S3): traced on atlas's queue, copied into Minecraft's images by a
-// command buffer the caller splices into its frame after a timeline wait (atlas_vk_render_shared)
-enum class Interop { None, ZeroCopy, HostCopy, VkHost, VkShared };
 
 std::string jsonEscape(const std::string& s) {
     std::string o;
@@ -345,9 +238,7 @@ struct SharedImage {
     VkImage image = VK_NULL_HANDLE;
     VkDeviceMemory mem = VK_NULL_HANDLE;
     VkImageView view = VK_NULL_HANDLE;
-    ExtHandle handle = NO_HANDLE;
-    VkDeviceSize size = 0;        // of its (dedicated) allocation: what GL imports
-    GLuint glMem = 0, glTex = 0;  // host-copy: glTex is a plain GL texture, glMem 0
+    VkDeviceSize size = 0;
 };
 
 // Independent of VulkanBackend/AtlasContext: the caller releases this only after Minecraft's queue has retired all
@@ -371,15 +262,8 @@ struct SharedVkRetirement final : VkRetirement {
             if (s->view) destroyView(device, s->view, nullptr);
             if (s->image) destroyImage(device, s->image, nullptr);
             if (s->mem) freeMemory(device, s->mem, nullptr);
-            closeHandle(s->handle);
         }
     }
-};
-
-struct SharedSemaphore {
-    VkSemaphore sem = VK_NULL_HANDLE;
-    ExtHandle handle = NO_HANDLE;
-    GLuint gl = 0;
 };
 
 // The scene's six buffers. Two copies: the update thread fills the one no in-flight frame reads, frames flip to it.
@@ -411,11 +295,6 @@ struct Slot {
     VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
     bool farDirty = true, publishDirty = true, ingestDirty = true;
-    SharedSemaphore glReady, vkDone;
-    Buf hostOut;            // host-copy: this slot's frame in host memory (colour, normal, depth, sun map)
-    bool hostPending = false;  // hostOut holds a frame not yet uploaded to GL
-    bool hostSun = false;      // ... including the sun map
-    bool hostNearLight = false;  // ... and the near light (abi 0.15)
     // the level-0 grid's build this frame (voxgrid.hpp): its sections and jobs in host memory, what to record
     Buf vgStage, vgJobs, vgGsrc;
     // (the GPU's own sections) level 0's jobs copied back after the build: those vgSectionMain found to be one id
@@ -481,7 +360,6 @@ public:
             destroyInterop();
             for (auto& s : slots_) {
                 for (auto& b : s.bufs) release(b);
-                release(s.hostOut);
                 release(s.vgStage);
                 release(s.vgJobs);
                 release(s.vgGsrc);
@@ -595,19 +473,11 @@ public:
                         q(typeName(props_.deviceType)) + ",\"vendor\":\"" + vendor + "\",\"driver\":" + q(driverName_) +
                         ",\"driverId\":" + std::to_string(driverId_) + ",\"api\":" + q(apiString(props_.apiVersion)) +
                         ",\"deviceUuid\":" + q(hex16(deviceUuid_)) + ",\"driverUuid\":" + q(hex16(driverUuid_)) +
-                        ",\"pickedForGlContext\":" + b(glMatchedAtCreate_) + ",\"onMinecraftDevice\":" + b(adopted_);
-        const char* mode = mode_ == Interop::ZeroCopy ? INTEROP_NAME : mode_ == Interop::HostCopy ? "host-copy"
-                           : mode_ == Interop::VkHost ? "vulkan host-copy (own device)"
-                           : mode_ == Interop::VkShared ? "vulkan shared device (zero-copy)" : "not attached";
-        o += ",\"interop\":" + q(mode);
-        if (mode_ == Interop::HostCopy || mode_ == Interop::VkHost) {
-            o += ",\"interopReason\":" + q(interopWhy_) + ",\"hostCopy\":{\"waitMs\":" + std::to_string(hostWaitMs_) +
-                 ",\"uploadMs\":" + std::to_string(hostUploadMs_) + ",\"nearDepthSkip\":false}";
-        }
-        o += ",\"vkExport\":" + b(interopCapable_);
-        if (!interopCapable_) o += ",\"vkExportReason\":" + q(vkInteropWhy_);
-        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) + ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
-             ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
+                        ",\"onMinecraftDevice\":" + b(adopted_) +
+                        ",\"interop\":" + q(attached_ ? "vulkan shared device (zero-copy)" : "not attached") +
+                        ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) +
+                        ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
+                        ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
         // Allocation counters are not process-private memory: generator/feature engines,
         // Minecraft, the driver and detached retirement tokens have separate ownership.
         o += ",\"backendMemory\":{\"allocatedBytes\":" + std::to_string(allocated_.load()) +
@@ -637,18 +507,11 @@ public:
             const double queryMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - queryStart).count();
             o += "],\"driverHeapQueryMs\":" + std::to_string(queryMs);
         }
-        if (glLoaded_) {
-            o += ",\"gl\":{\"renderer\":" + q(glRenderer_) + ",\"version\":" + q(glVersion_) + ",\"vendor\":" + q(glVendor_) +
-                 ",\"winsys\":" + q(glWinsys_) + ",\"memoryObject\":" + b(glHasInterop(gl_)) +
-                 ",\"uuidMatch\":" + b(glUuidMatch_);
-            if (!glDriverUuid_.empty()) o += ",\"driverUuid\":" + q(glDriverUuid_);
-            o += "}";
-        }
         o += ",\"devices\":[";
         for (size_t i = 0; i < seen_.size(); i++) {
             const DeviceSeen& d = seen_[i];
             o += std::string(i ? "," : "") + "{\"name\":" + q(d.name) + ",\"type\":" + q(d.type) + ",\"api\":" + q(d.api) +
-                 ",\"glContext\":" + b(d.glMatch) + ",\"chosen\":" + b(int(i) == chosen_);
+                 ",\"chosen\":" + b(int(i) == chosen_);
             if (!d.unfit.empty()) o += ",\"unfit\":" + q(d.unfit);
             o += "}";
         }
@@ -668,7 +531,6 @@ public:
         } else if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) {
             return false;
         }
-        probeInterop();
         // far kernel: binding 0 uniform, the rest storage buffers
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1113,92 +975,42 @@ public:
         return true;
     }
 
-    // ---- GL interop ------------------------------------------------------------------------------------------
-
-    bool glAttach(uint32_t w, uint32_t h, GlTargets& out, std::string& err) override {
-        if (adopted_) return fail(err, "a Minecraft-owned Vulkan device cannot attach OpenGL interop");
-        if (attached_) glDetach();
-        if (!gl_.load(err)) return false;
-        glLoaded_ = true;
-        auto str = [&](GLenum e) {
-            const GLubyte* s = gl_.GetString(e);
-            return s ? std::string(reinterpret_cast<const char*>(s)) : std::string("?");
-        };
-        glRenderer_ = str(GL_RENDERER);
-        glVersion_ = str(GL_VERSION);
-        glVendor_ = str(GL_VENDOR);
-        glWinsys_ = GlApi::windowSystem();
-        while (gl_.GetError() != GL_NO_ERROR) {}  // the caller's stale errors are not ours
-        // zero-copy when the driver pair allows it, else host copies; ATLAS_INTEROP=hostcopy|zerocopy forces one
-        const char* f = std::getenv("ATLAS_INTEROP");
-        std::string force = f ? f : "";
-        {
-            // reported whatever the mode (info): is the GL context on our device at all?
-            uint8_t u[8][16];
-            int n = 0;
-            glUuidMatch_ = false;
-            if (gl_.deviceUuids(u, 8, n))
-                for (int i = 0; i < n; i++) glUuidMatch_ |= std::memcmp(u[i], deviceUuid_, 16) == 0;
-        }
-        std::string why = zeroCopyBlocker(w, h, force != "zerocopy");
-        if (force == "hostcopy") why = "forced by ATLAS_INTEROP=hostcopy";
-        if (!why.empty() && force == "zerocopy") return fail(err, ("zero-copy interop unavailable: " + why).c_str());
-        bool ok = false;
-        if (why.empty()) {
-            mode_ = Interop::ZeroCopy;
-            ok = createTargets(w, h, err);
-            if (!ok) {
-                destroyInterop();
-                if (force == "zerocopy") return false;
-                why = "zero-copy import failed (" + err + ")";
-            }
-        }
-        if (!ok) {
-            mode_ = Interop::HostCopy;
-            if (!createTargets(w, h, err)) {
-                destroyInterop();
-                return false;
-            }
-        }
-        interopWhy_ = why;
-        if (mode_ == Interop::HostCopy) std::fprintf(stderr, "[atlas] OpenGL interop: host copies (%s)\n", why.c_str());
-        width_ = w;
-        height_ = h;
-        firstGlFrame_ = true;
-        attached_ = true;
-        frameIndex_ = 0;
-        for (auto& s : slots_) s.publishDirty = s.ingestDirty = true;
-        out = {images_[IMG_COLOR].glTex, images_[IMG_NORMAL].glTex, images_[IMG_DEPTH].glTex, images_[IMG_NEAR].glTex, w, h};
-        return true;
-    }
-
-    // ---- Minecraft's Vulkan backend, atlas on its own device (stage S1): no GL, the frame in host memory ---------
+    // ---- atlas on Minecraft's device (stage S3) ---------------------------------------------------------------
+    // The frame is traced on atlas's own queue (a compute-only family where there is one, the images then shared by
+    // both families; else a second queue of Minecraft's graphics family) into atlas's images; its submission waits for
+    // Minecraft's copies out of those images from the previous frame (copyTl_) and signals frameTl_. The copies into
+    // Minecraft's images are a command buffer the caller splices into its frame (waitSemaphore frameTl_, execute,
+    // signalSemaphore copyTl_), so neither side's CPU waits.
 
     bool vkAttach(uint32_t w, uint32_t h, std::string& err) override {
-        if (attached_ && mode_ == Interop::VkShared) {
+        if (!adopted_) return fail(err, "atlas_vk_attach requires a context made by atlas_create_on_vulkan");
+        if (attached_) {
             bool ready = false;
             if (!vkCopyComplete(0, ready, err)) return false;
             if (!ready) return fail(err, "cannot reattach while Minecraft's copy is outstanding");
-        }
-        if (attached_) glDetach();
-        mode_ = adopted_ ? Interop::VkShared : Interop::VkHost;
-        if (!createTargets(w, h, err) || (adopted_ && !createSplice(err))) {
+            if (fault_ == Fault::Timeout) {
+                attached_ = false;
+                return fail(err, "the device hung");
+            }
+            if (reloadThread_.joinable()) reloadThread_.join();
+            if (closeState() != CloseState::Drained) waitIdle();
+            for (auto& s : slots_) s.inFlight = false;
             destroyInterop();
-            mode_ = Interop::None;
+        }
+        if (!createTargets(w, h, err) || !createSplice(err)) {
+            destroyInterop();
             return false;
         }
-        interopWhy_ = adopted_ ? "atlas on Minecraft's Vulkan device" : "Minecraft's Vulkan backend, atlas on its own device";
         width_ = w;
         height_ = h;
         firstGlFrame_ = true;
         attached_ = true;
         frameIndex_ = 0;
-        vkHostOut_ = {};
         for (auto& s : slots_) s.publishDirty = s.ingestDirty = true;
         return true;
     }
 
-    bool vkSharedAttached() const override { return attached_ && mode_ == Interop::VkShared; }
+    bool vkSharedAttached() const override { return adopted_ && attached_; }
 
     bool vkCopyComplete(uint64_t value, bool& ready, std::string& err) override {
         ready = false;
@@ -1274,156 +1086,53 @@ public:
         frameTlValue_ = copyValue_ = lastCopyWait_ = priorCopyWait_ = 0;
         splice_ = {};
         attached_ = false;
-        mode_ = Interop::None;
-        for (auto& s : slots_) s.hostPending = false;
         out = token.release();
         return true;
     }
 
     bool vkRenderShared(const FrameInputs& in, const GlFrameIO* io, const VkSharedTargets& targets, VkSplice& out,
                         double* gpuMs, std::string& err) override {
-        if (mode_ != Interop::VkShared) return fail(err, "atlas_vk_attach on a context made by atlas_create_on_vulkan first");
-        sharedTargets_ = targets;
-        splice_ = {};
-        if (!glRender(in, io, gpuMs, err)) return false;
-        out = splice_;
-        return true;
-    }
-
-    bool vkRender(const FrameInputs& in, const GlFrameIO* io, VkHostFrame& out, double* gpuMs, std::string& err) override {
-        if (mode_ != Interop::VkHost) return fail(err, "atlas_vk_attach first");
-        vkHostOut_ = {};
-        if (!glRender(in, io, gpuMs, err)) return false;
-        out = vkHostOut_;
-        return true;
-    }
-
-    bool glRender(const FrameInputs& in, const GlFrameIO* io, double* gpuMs, std::string& err) override {
-        if (!attached_) return fail(err, "atlas_gl_attach first");
+        if (!vkSharedAttached()) return fail(err, "atlas_vk_attach on a context made by atlas_create_on_vulkan first");
         if (lost_) return fail(err, "the device was lost");
-        // before any GL semaphore is signalled: a failure here leaves GL waiting on nothing
         if (injectedNow(err)) return false;
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
+        sharedTargets_ = targets;
+        splice_ = {};
         Slot& s = slots_[frameIndex_ % SLOTS];
-        ATLAS_ZONE("vk:glRender");
+        ATLAS_ZONE("vk:vkRenderShared");
         auto tg0 = std::chrono::steady_clock::now();
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
         auto tg1 = std::chrono::steady_clock::now();
-        const bool host = mode_ == Interop::HostCopy || mode_ == Interop::VkHost;
-        const bool vk = mode_ == Interop::VkHost || mode_ == Interop::VkShared;  // (no GL: no near depth / info inputs)
-        // the near light (abi 0.15): the near field's depth and surface info in, the caller's texture out
-        // (ATLAS_FRAME_PRIMARY_NEAR: atlas's own near field; the near light is an output only, traced in the far pass)
         const bool primaryNear = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_BITS) != 0;
-        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight &&
-                               (primaryNear || (!vk && in.wantNearDepth && io->nearDepthTex && io->nearInfoTex));
-        // the near-depth skip reads the near field's distances from the shared image; host copies cannot share it
-        // without stalling GL on the near field, so they march every pixel (the composite's depth test still keeps
-        // whatever is nearer). The near light needs those distances: host copies then read them back (the stall)
-        const bool nearOn = in.wantNearDepth && !primaryNear && !vk && (!host || nearLight);
+        const bool nearLight = (in.frame.dims[2] & FRAME_NEAR_LIGHT_BIT) && io && io->dstNearLight && primaryNear;
         FrameGpu frame = in.frame;
-        if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
-        else frame.dims[2] &= ~0x20u;
+        frame.dims[2] &= ~0x20u;
         if (!nearLight) frame.dims[2] &= ~FRAME_NEAR_LIGHT_BIT;
-        // the near light at half resolution (atlas_far.slang nearLightMain); ATLAS_NEAR_FULLRES=1: every pixel traced
-        // in the far pass, as the host render does (read each frame: atlas_gl_test switches it for its parity check)
         const char* fullEnv = std::getenv("ATLAS_NEAR_FULLRES");
         const bool nearFull = fullEnv && *fullEnv == '1';
-        // (PRIMARY_NEAR_LIT, the unified field: the light by need, atlas_far.slang nearLightMain; the G-buffer mode keeps
-        // its full-rate light in the far pass)
         const bool lit = (in.frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0;
         if (nearLight && !nearFull && (!primaryNear || lit)) frame.dims[2] |= FRAME_NEAR_SPLIT_BIT;
         else frame.dims[2] &= ~FRAME_NEAR_SPLIT_BIT;
         farAmortBit(frame, s);
-        hostNearInputs_ = host && nearLight && !primaryNear;
-        const Mem nearKind = hostNearInputs_ ? Mem::HostWrite : Mem::DeviceOnly;
+        hostNearInputs_ = false;
         if (!prepare(s, in, frame, false, err)) return false;
-        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, nearKind, err)) return false;
-        if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, nearKind, err)) return false;
+        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, Mem::DeviceOnly, err)) return false;
+        if (nearLight && !ensure(s.bufs[B_NEAR_INFO], size_t(w) * h * 4, false, Mem::DeviceOnly, err)) return false;
         refreshDescriptors(s);
-
-        {
-            ATLAS_ZONE_MIN("gl:linearizeNearDepth", 100);
-            if (io && io->nearDepthTex && !primaryNear && !vk && (!host || nearLight) && !linearizeNearDepth(*io, w, h, nearLight, err))
-                return false;
-        }
-        if (hostNearInputs_ && !readNearInputs(s, w, h)) return fail(err, "reading the near depth and info back from GL failed");
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
                 if (!waitSlot(o, nullptr, err)) return false;
             destroyShared(sunImage_);
             sunImageSize_ = 0;
             if (sunSize_) {
-                if (!createImage(sunImage_, VK_FORMAT_R32G32_SFLOAT, GL_RG32F, sunSize_, sunSize_ + 1, err)) return false;
+                if (!createVkImage(sunImage_, VK_FORMAT_R32G32_SFLOAT, sunSize_, sunSize_ + 1, err)) return false;
                 sunImageSize_ = sunSize_;
                 sunImageFresh_ = true;
             }
         }
         auto tg2 = std::chrono::steady_clock::now();
-        if (host) return hostCopyFrame(s, in, frame, io, nearLight, gpuMs, err);
-        if (mode_ == Interop::VkShared) {
-            if (!sharedFrame(s, in, frame, nearLight, err)) return false;
-            auto tg3 = std::chrono::steady_clock::now();
-            auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
-                v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
-            };
-            ease(glTimes_.waitMs, tg0, tg1);
-            ease(glTimes_.prepareMs, tg1, tg2);
-            ease(glTimes_.recordMs, tg2, tg3);
-            return true;
-        }
-
-        // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
-        GLuint tex[IMAGES + 1];
-        GLenum layouts[IMAGES + 1];
-        for (int i = 0; i < IMAGES; i++) {
-            tex[i] = images_[i].glTex;
-            layouts[i] = GL_LAYOUT_GENERAL_EXT;
-        }
-        GLuint nTex = IMAGES;
-        if (sunImage_.glTex) {
-            tex[IMAGES] = sunImage_.glTex;
-            layouts[IMAGES] = GL_LAYOUT_GENERAL_EXT;
-            nTex++;
-        }
-        {
-            ATLAS_ZONE_MIN("gl:signalSemaphore+flush", 100);
-            gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
-            gl_.Flush();
-        }
-
-        begin(s);
-        ATLAS_ZONE("vk:recordAndSubmit");
-        imageBarriers(s.cmd, true);
-        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
-        std::memcpy(&pcv[3], &in.preExposure, 4);
-        if (nearOn) {
-            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
-            vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestLayout_, 0, 1, &s.ingestSet, 0, nullptr);
-            vkCmdPushConstants(s.cmd, ingestLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
-            vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
-            computeBarrier(s.cmd);
-            s.gt.mark(s.cmd, "nearIngest");
-        }
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
-                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
-        computeBarrier(s.cmd);
-        if (sunDispatchRows_ && sunImage_.image) copySunToImage(s.cmd);
-        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
-        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
-        vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
-        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
-        imageBarriers(s.cmd, false);
-        if (!submit(s, &s.glReady.sem, &s.vkDone.sem, err)) return false;
-        firstGlFrame_ = false;
-        frameIndex_++;
-
-        // GL commands after this point wait for the Vulkan frame
-        {
-            ATLAS_ZONE_MIN("gl:waitSemaphore+copyToCaller", 100);
-            gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
-            copyToCaller(io, w, h, nearLight);
-        }
+        if (!sharedFrame(s, in, frame, nearLight, err)) return false;
         auto tg3 = std::chrono::steady_clock::now();
         auto ease = [](double& v, std::chrono::steady_clock::time_point a, std::chrono::steady_clock::time_point b) {
             v += (std::chrono::duration<double, std::milli>(b - a).count() - v) * 0.05;
@@ -1431,30 +1140,9 @@ public:
         ease(glTimes_.waitMs, tg0, tg1);
         ease(glTimes_.prepareMs, tg1, tg2);
         ease(glTimes_.recordMs, tg2, tg3);
+        out = splice_;
         return true;
     }
-
-    // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
-    void copyToCaller(const GlFrameIO* io, uint32_t w, uint32_t h, bool nearLight) {
-        if (!io) return;
-        const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
-        for (int i = 0; i < 3; i++)
-            if (dst[i])
-                gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
-                                     GLsizei(w), GLsizei(h), 1);
-        if (nearLight && io->dstNearLight)
-            gl_.CopyImageSubData(images_[IMG_NEAR_LIGHT].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstNearLight, GL_TEXTURE_2D,
-                                 0, 0, 0, 0, GLsizei(w), GLsizei(h), 1);
-        if (io->dstSunMap && sunImage_.glTex)
-            gl_.CopyImageSubData(sunImage_.glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstSunMap, GL_TEXTURE_2D, 0, 0, 0, 0,
-                                 GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
-    }
-
-    // ---- atlas on Minecraft's device (stage S3) ---------------------------------------------------------------
-    // The frame is traced on atlas's own queue (a compute-only family where there is one, the images then shared by
-    // both families; else a second queue of Minecraft's graphics family) into atlas's images, as the other paths; its submission waits for Minecraft's copies out of those images from the
-    // previous frame (copyTl_) and signals frameTl_. The copies into Minecraft's images are a command buffer the caller
-    // splices into its frame (waitSemaphore frameTl_, execute, signalSemaphore copyTl_), so neither side's CPU waits.
 
     static constexpr uint32_t SPLICE_RING = 4;  // copy command buffers: Minecraft keeps up to 2 frames in flight
 
@@ -1636,117 +1324,6 @@ public:
         return true;
     }
 
-    // ---- host-copy fallback ----------------------------------------------------------------------------------
-    // The frame is published into Vulkan-local images (the same publish pass, so the GL textures hold exactly what
-    // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
-    // CPU waits for this frame's GPU work (no added latency); ATLAS_HOSTCOPY_LATENCY=1 uploads the previous
-    // frame instead, so the CPU never waits but the far field lags one frame behind the camera.
-    bool hostCopyFrame(Slot& s, const FrameInputs& in, const FrameGpu& frame, const GlFrameIO* io, bool nearLight,
-                       double* gpuMs, std::string& err) {
-        uint32_t w = width_, h = height_;
-        size_t px = size_t(w) * h;
-        const bool vk = mode_ == Interop::VkHost;
-        VkDeviceSize sunBytes = sunDispatchRows_ && (sunImage_.glTex || (vk && sunSize_)) ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0;
-        // colour, normal, depth, the near light (RGBA16F) and the sun map, one after the other
-        VkDeviceSize bytes = VkDeviceSize(px) * 24 + VkDeviceSize(sunSize_ ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0);
-        if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
-        begin(s);
-        hostImageBarrier(s.cmd, true);
-        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
-                  (frame.dims[2] & FRAME_PRIMARY_NEAR_LIT_BIT) != 0);
-        computeBarrier(s.cmd);
-        uint32_t pcv[4] = {w, h, nearLight ? (unifiedSplit(frame) ? 2u : 1u) : 0u, 0u};
-        std::memcpy(&pcv[3], &in.preExposure, 4);
-        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
-        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
-        vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
-        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
-        hostImageBarrier(s.cmd, false);
-        const int img[4] = {IMG_COLOR, IMG_NORMAL, IMG_DEPTH, IMG_NEAR_LIGHT};
-        const VkDeviceSize texel[4] = {8, 4, 4, 8};
-        VkDeviceSize off = 0;
-        for (int i = 0; i < (nearLight ? 4 : 3); i++) {
-            VkBufferImageCopy region{};
-            region.bufferOffset = off;
-            region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            region.imageExtent = {w, h, 1};
-            vkCmdCopyImageToBuffer(s.cmd, images_[img[i]].image, VK_IMAGE_LAYOUT_GENERAL, s.hostOut.buf, 1, &region);
-            off += VkDeviceSize(px) * texel[i];
-        }
-        off = VkDeviceSize(px) * 24;  // (the sun map's place whether or not the near light came along)
-        if (sunBytes) {
-            VkBufferCopy rc{0, off, sunBytes};
-            vkCmdCopyBuffer(s.cmd, shared_[B_SUNMAP].buf, s.hostOut.buf, 1, &rc);
-        }
-        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
-        vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0,
-                             nullptr);
-        if (!submit(s, nullptr, nullptr, err)) return false;
-        s.hostPending = true;
-        s.hostSun = sunBytes != 0;
-        s.hostNearLight = nearLight;
-        firstGlFrame_ = false;
-        frameIndex_++;
-        const char* lag = std::getenv("ATLAS_HOSTCOPY_LATENCY");
-        Slot& up = lag && *lag == '1' ? slots_[frameIndex_ % SLOTS] : s;  // the other slot holds the previous frame
-        if (!up.hostPending) return true;
-        auto t0 = std::chrono::steady_clock::now();
-        if (!waitSlot(up, gpuMs, err)) return false;
-        auto t1 = std::chrono::steady_clock::now();
-        if (vk) {
-            // (Minecraft's Vulkan backend) the caller uploads from here (its encoder's writeToTexture) before the next call
-            const char* p = static_cast<const char*>(up.hostOut.map);
-            size_t px = size_t(w) * h;
-            vkHostOut_ = VkHostFrame{p, p + px * 8, p + px * 12, up.hostNearLight ? p + px * 16 : nullptr,
-                                     up.hostSun ? p + px * 24 : nullptr, w, h, up.hostSun ? sunSize_ : 0u};
-        } else {
-            hostUpload(up, w, h);
-        }
-        up.hostPending = false;
-        auto t2 = std::chrono::steady_clock::now();
-        hostWaitMs_ = std::chrono::duration<double, std::milli>(t1 - t0).count();
-        hostUploadMs_ = std::chrono::duration<double, std::milli>(t2 - t1).count();
-        if (!vk) copyToCaller(io, w, h, nearLight && up.hostNearLight);
-        return true;
-    }
-
-    // Host copies with the near light: the near depth and surface info the GL pass just wrote (atlas's resolution,
-    // bottom-up rows) read back into the slot's near buffers (row 0 top), as the ingest pass does on the device. The
-    // read waits for GL's near pass. The caller's pixel-pack state is saved and restored around it.
-    bool readNearInputs(Slot& s, uint32_t w, uint32_t h) {
-        size_t px = size_t(w) * h;
-        if (!s.bufs[B_NEAR].map || !s.bufs[B_NEAR_INFO].map || s.bufs[B_NEAR].size < px * 4 ||
-            s.bufs[B_NEAR_INFO].size < px * 4)
-            return false;
-        const GLenum keys[] = {GL_PACK_ROW_LENGTH, GL_PACK_SKIP_ROWS, GL_PACK_SKIP_PIXELS, GL_PACK_ALIGNMENT,
-                               GL_PACK_SWAP_BYTES, GL_PACK_LSB_FIRST};
-        const GLint want[] = {0, 0, 0, 4, 0, 0};
-        GLint saved[6] = {}, pbo = 0;
-        gl_.GetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &pbo);
-        for (int i = 0; i < 6; i++) gl_.GetIntegerv(keys[i], &saved[i]);
-        if (pbo) gl_.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-        for (int i = 0; i < 6; i++)
-            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], want[i]);
-        nearReadback_.resize(px * 2);
-        gl_.GetTextureImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, GLsizei(px * 4), nearReadback_.data());
-        gl_.GetTextureImage(images_[IMG_NEAR_INFO].glTex, 0, GL_RGBA, GL_UNSIGNED_BYTE, GLsizei(px * 4),
-                            nearReadback_.data() + px);
-        for (int i = 0; i < 6; i++)
-            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], saved[i]);
-        if (pbo) gl_.BindBuffer(GL_PIXEL_PACK_BUFFER, GLuint(pbo));
-        char* depth = static_cast<char*>(s.bufs[B_NEAR].map);
-        char* info = static_cast<char*>(s.bufs[B_NEAR_INFO].map);
-        const char* src = reinterpret_cast<const char*>(nearReadback_.data());
-        for (uint32_t y = 0; y < h; y++) {
-            size_t from = size_t(h - 1 - y) * w * 4, to = size_t(y) * w * 4;
-            std::memcpy(depth + to, src + from, size_t(w) * 4);
-            std::memcpy(info + to, src + px * 4 + from, size_t(w) * 4);
-        }
-        return true;
-    }
-
     void hostImageBarrier(VkCommandBuffer cmd, bool before) {
         if (before && firstGlFrame_) {
             VkImageMemoryBarrier b[IMAGES];
@@ -1773,34 +1350,6 @@ public:
                              nullptr, 0, nullptr);
     }
 
-    // Host buffer -> the GL textures. The caller's pixel-unpack state (Minecraft leaves row length / skips set after
-    // its own uploads, and may have a PBO bound) is saved and restored around the uploads.
-    void hostUpload(const Slot& s, uint32_t w, uint32_t h) {
-        const GLenum keys[] = {GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS, GL_UNPACK_ALIGNMENT,
-                               GL_UNPACK_SWAP_BYTES, GL_UNPACK_LSB_FIRST};
-        const GLint want[] = {0, 0, 0, 4, 0, 0};
-        GLint saved[6] = {}, pbo = 0;
-        gl_.GetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &pbo);
-        for (int i = 0; i < 6; i++) gl_.GetIntegerv(keys[i], &saved[i]);
-        if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        for (int i = 0; i < 6; i++)
-            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], want[i]);
-        size_t px = size_t(w) * h;
-        const char* p = static_cast<const char*>(s.hostOut.map);
-        gl_.TextureSubImage2D(images_[IMG_COLOR].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_HALF_FLOAT, p);
-        gl_.TextureSubImage2D(images_[IMG_NORMAL].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_UNSIGNED_BYTE, p + px * 8);
-        gl_.TextureSubImage2D(images_[IMG_DEPTH].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RED, GL_FLOAT, p + px * 12);
-        if (s.hostNearLight)
-            gl_.TextureSubImage2D(images_[IMG_NEAR_LIGHT].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_HALF_FLOAT,
-                                  p + px * 16);
-        if (s.hostSun && sunImage_.glTex)
-            gl_.TextureSubImage2D(sunImage_.glTex, 0, 0, 0, GLsizei(sunSize_), GLsizei(sunSize_ + 1), GL_RG, GL_FLOAT,
-                                  p + px * 24);
-        for (int i = 0; i < 6; i++)
-            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], saved[i]);
-        if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, GLuint(pbo));
-    }
-
     bool stageScene(const PackedScene& sc, const WorkTicket& work) override {
         if (!work.belongsTo(this)) return false;
         if (lost_) return false;
@@ -1813,28 +1362,6 @@ public:
         if (!uploadScene(copies_[c], sc, false, err)) return false;
         staged_ = c;
         return true;
-    }
-
-    void glDetach() override {
-        if (vkSharedAttached()) {
-            std::string err;
-            bool ready = false;
-            if (!vkCopyComplete(0, ready, err) || !ready) {
-                std::fprintf(stderr, "[atlas] refusing legacy detach with an outstanding Vulkan splice; use atlas_vk_detach_retired\n");
-                return;
-            }
-        }
-        if (fault_ == Fault::Timeout) {
-            // hung: nothing that work may still touch is freed (see the destructor); GL forgets the images
-            attached_ = false;
-            mode_ = Interop::None;
-            return;
-        }
-        if (reloadThread_.joinable()) reloadThread_.join();  // (a shader reload still building)
-        if (closeState() != CloseState::Drained) waitIdle();  // a checked terminal close already drained this queue
-        for (auto& s : slots_) s.inFlight = false;
-        destroyInterop();
-        mode_ = Interop::None;
     }
 
 private:
@@ -1853,12 +1380,6 @@ private:
     bool waitFence(VkFence f, const char* what, std::string& err) {
         ATLAS_ZONE_MIN("wait:gpuFence", 100);
         return vkOk(vkWaitForFences(dev_, 1, &f, VK_TRUE, FENCE_TIMEOUT_NS), what, err);
-    }
-
-    // GL state the pass touches is saved and restored (gl_near.hpp).
-    // info: also the near field's surface info (io.nearInfoTex) into the shared nearInfo image (the near light)
-    bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, bool info, std::string& err) {
-        return near_.run(gl_, io, w, h, info, images_[IMG_NEAR].glTex, images_[IMG_NEAR_INFO].glTex, err);
     }
 
     // The 64^3 RGBA8 cloud noise as a sampled 3D image (linear filter, repeat): one hardware trilinear fetch per
@@ -1980,21 +1501,13 @@ private:
         return true;
     }
 
-    // Which device: the one the game's GL context runs on when a context is current (atlas_create is called on the
-    // render thread: hybrid laptops, a Deck with lavapipe installed beside RADV, a second GPU), else the best type
-    // (discrete > integrated > virtual > cpu). ATLAS_VK_DEVICE=<index or name substring> overrides both.
+    // Which device: the best type (discrete > integrated > virtual > cpu). ATLAS_VK_DEVICE=<index or name substring>
+    // overrides the default ranking.
     bool pickDevice(std::string& err) {
         uint32_t n = 0;
         vkEnumeratePhysicalDevices(inst_, &n, nullptr);
         std::vector<VkPhysicalDevice> devs(n);
         vkEnumeratePhysicalDevices(inst_, &n, devs.data());
-        uint8_t glUuids[8][16];
-        int glCount = 0;
-        if (GlApi::contextCurrent()) {
-            GlApi probe;
-            std::string e;
-            if (probe.load(e)) probe.deviceUuids(glUuids, 8, glCount);
-        }
         const char* want = std::getenv("ATLAS_VK_DEVICE");
         int best = -1, bestScore = -1;
         std::string reasons;
@@ -2006,10 +1519,8 @@ private:
             const VkPhysicalDeviceProperties& p = p2.properties;
             VkPhysicalDeviceFeatures f;
             vkGetPhysicalDeviceFeatures(devs[i], &f);
-            bool glMatch = false;
-            for (int k = 0; k < glCount; k++) glMatch |= std::memcmp(glUuids[k], idp.deviceUUID, 16) == 0;
             std::string why = deviceUnfit(devs[i], p, f);
-            DeviceSeen seen{p.deviceName, typeName(p.deviceType), apiString(p.apiVersion), glMatch, why};
+            DeviceSeen seen{p.deviceName, typeName(p.deviceType), apiString(p.apiVersion), why};
             seen_.push_back(seen);
             if (!why.empty()) {
                 reasons += std::string(reasons.empty() ? "" : "; ") + p.deviceName + ": " + why;
@@ -2020,7 +1531,6 @@ private:
                         : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU    ? 2
                         : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU            ? 0
                                                                                  : 1;
-            if (glMatch) score += 100;
             if (want && *want) {
                 // an index, or a name substring (parsed by hand: strtol binds to glibc 2.38's __isoc23_strtol)
                 bool digits = true;
@@ -2040,7 +1550,6 @@ private:
         if (best < 0) return fail(err, ("no usable Vulkan device" + (reasons.empty() ? std::string() : " (" + reasons + ")")).c_str());
         phys_ = devs[size_t(best)];
         chosen_ = best;
-        glMatchedAtCreate_ = seen_[size_t(best)].glMatch;
         describeDevice();
         uint32_t qn = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, nullptr);
@@ -2131,9 +1640,7 @@ private:
         if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, a.genIndex, &genQueue_);
         if (!queue_) return fail(err, "atlas_create_on_vulkan: no queue at the frames' family / index");
         fr::gpuInit(dev_, timestampPeriod_, 64, calibratedTs_);
-        interopCapable_ = false;
-        vkInteropWhy_ = "on Minecraft's Vulkan device (no OpenGL)";
-        seen_.push_back(DeviceSeen{props_.deviceName, typeName(props_.deviceType), apiString(props_.apiVersion), false, ""});
+        seen_.push_back(DeviceSeen{props_.deviceName, typeName(props_.deviceType), apiString(props_.apiVersion), ""});
         chosen_ = int(seen_.size()) - 1;
         return true;
     }
@@ -2211,81 +1718,7 @@ private:
         return "no compute queue";
     }
 
-    // What the device can export to GL: the platform's handle type for memory and semaphores, for every format the
-    // bridge shares with the usage it needs, and whether those allocations must be dedicated (AMD's usually are).
-    void probeInterop() {
-        if (!interopCapable_) {
-            if (vkInteropWhy_.empty()) vkInteropWhy_ = "the Vulkan device does not export memory handles";
-            return;
-        }
-        const VkFormat fmts[] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
-                                 VK_FORMAT_R32G32_SFLOAT};
-        const char* names[] = {"RGBA16F", "RGBA8", "R32F", "RG32F"};
-        maxExport_ = UINT32_MAX;
-        for (int i = 0; i < 4; i++) {
-            VkPhysicalDeviceExternalImageFormatInfo ext{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO};
-            ext.handleType = MEM_HANDLE;
-            VkPhysicalDeviceImageFormatInfo2 fi{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2};
-            fi.pNext = &ext;
-            fi.format = fmts[i];
-            fi.type = VK_IMAGE_TYPE_2D;
-            fi.tiling = VK_IMAGE_TILING_OPTIMAL;
-            fi.usage = SHARED_USAGE;
-            VkExternalImageFormatProperties ep{VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES};
-            VkImageFormatProperties2 fp{VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2};
-            fp.pNext = &ep;
-            VkResult r = vkGetPhysicalDeviceImageFormatProperties2(phys_, &fi, &fp);
-            VkExternalMemoryFeatureFlags feat = ep.externalMemoryProperties.externalMemoryFeatures;
-            if (r != VK_SUCCESS || !(feat & VK_EXTERNAL_MEMORY_FEATURE_EXPORTABLE_BIT)) {
-                interopCapable_ = false;
-                vkInteropWhy_ = std::string(names[i]) + " storage images cannot be exported (" +
-                                (r != VK_SUCCESS ? "format query " + std::to_string(int(r)) : std::string("not exportable")) + ")";
-                return;
-            }
-            if (feat & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT) dedicatedOnly_ = true;
-            maxExport_ = std::min({maxExport_, fp.imageFormatProperties.maxExtent.width, fp.imageFormatProperties.maxExtent.height});
-        }
-        VkPhysicalDeviceExternalSemaphoreInfo si{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO};
-        si.handleType = SEM_HANDLE;
-        VkExternalSemaphoreProperties sp{VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES};
-        vkGetPhysicalDeviceExternalSemaphoreProperties(phys_, &si, &sp);
-        if (!(sp.externalSemaphoreFeatures & VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT)) {
-            interopCapable_ = false;
-            vkInteropWhy_ = "binary semaphores cannot be exported";
-        }
-    }
-
-    // Why zero-copy cannot work with the current GL context ("" when it can).
-    std::string zeroCopyBlocker(uint32_t w, uint32_t h, bool strictDriver) {
-        if (!interopCapable_) return vkInteropWhy_;
-        if (!glHasInterop(gl_)) {
-            std::string missing;
-            for (const char* e : {"GL_EXT_memory_object", "GL_EXT_semaphore", GL_MEM_EXT, GL_SEM_EXT})
-                if (!gl_.hasExtension(e)) missing += std::string(missing.empty() ? "" : ", ") + e;
-            return "the OpenGL context lacks " + (missing.empty() ? std::string(GL_INTEROP_EXTS) : missing);
-        }
-        uint8_t u[8][16];
-        int n = 0;
-        if (!gl_.deviceUuids(u, 8, n)) return "the OpenGL context reports no device UUID";
-        bool same = false;
-        for (int i = 0; i < n; i++) same |= std::memcmp(u[i], deviceUuid_, 16) == 0;
-        if (!same)
-            return "the OpenGL context (" + glRenderer_ + ", device " + hex16(u[0]) + ") is not on the Vulkan device " +
-                   props_.deviceName + " (" + hex16(deviceUuid_) + ")";
-        uint8_t du[16];
-        if (gl_.driverUuid(du)) {
-            glDriverUuid_ = hex16(du);
-            // opaque handles only import into the same driver build (spec: driver and device UUID must match);
-            // ATLAS_INTEROP=zerocopy waives this one check, for a stack that reports differing UUIDs yet works
-            if (strictDriver && std::memcmp(du, driverUuid_, 16) != 0)
-                return "GL driver UUID " + glDriverUuid_ + " differs from Vulkan's " + hex16(driverUuid_);
-        }
-        if (w > maxExport_ || h > maxExport_) return "targets larger than the exportable image size";
-        return "";
-    }
-
     bool createDevice(std::string& err) {
-        // interop extensions are optional: without them the host path still works
         uint32_t en = 0;
         vkEnumerateDeviceExtensionProperties(phys_, nullptr, &en, nullptr);
         std::vector<VkExtensionProperties> ext(en);
@@ -2296,7 +1729,6 @@ private:
             return false;
         };
         std::vector<const char*> enable;
-        // external memory / semaphores themselves are core in 1.1; only the handle flavour is an extension
         // VK_EXT_memory_budget (optional): what the process may use of each heap, for atlas_memory_info
         if (has(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)) {
             enable.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
@@ -2305,15 +1737,6 @@ private:
         if (has(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME)) {  // the flight recorder places GPU zones on the host clock
             enable.push_back(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME);
             calibratedTs_ = true;
-        }
-        if (has(MEM_EXT) && has(SEM_EXT)) {
-            enable.push_back(MEM_EXT);
-            enable.push_back(SEM_EXT);
-            interopCapable_ = true;
-        } else {
-            vkInteropWhy_ = std::string("the Vulkan device lacks ") +
-                            (!has(MEM_EXT) && !has(SEM_EXT) ? std::string(MEM_EXT) + " and " + SEM_EXT
-                                                            : std::string(has(MEM_EXT) ? SEM_EXT : MEM_EXT));
         }
         // the frames' queue, and the client generator's (lower priority: frames first)
         float prio[2] = {1.0f, 0.5f};
@@ -2427,7 +1850,6 @@ private:
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
         fr::gpuInit(dev_, timestampPeriod_, 64, calibratedTs_);
         if (genFamily_ != UINT32_MAX) vkGetDeviceQueue(dev_, genFamily_, genFamily_ == family_ ? 1 : 0, &genQueue_);
-        if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
     }
 
@@ -3789,63 +3211,10 @@ private:
         return true;
     }
 
-    // acquire: from GL (external queue family) for writing; release: back to GL.
-    void imageBarriers(VkCommandBuffer cmd, bool acquire) {
-        VkImageMemoryBarrier b[IMAGES];
-        for (int i = 0; i < IMAGES; i++) {
-            b[i] = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
-            b[i].image = images_[i].image;
-            b[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-            if (acquire) {
-                // nearDepth and nearInfo were cleared by GL at attach: keep their contents even on the first frame
-                bool undefined = firstGlFrame_ && i != IMG_NEAR && i != IMG_NEAR_INFO;
-                b[i].oldLayout = undefined ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
-                b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-                b[i].srcQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
-                b[i].dstQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : family_;
-                b[i].srcAccessMask = 0;
-                b[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-            } else {
-                b[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-                b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-                b[i].srcQueueFamilyIndex = family_;
-                b[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL;
-                b[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-                b[i].dstAccessMask = 0;
-            }
-        }
-        uint32_t n = IMAGES;
-        VkImageMemoryBarrier all[IMAGES + 1];
-        for (int i = 0; i < IMAGES; i++) all[i] = b[i];
-        if (sunImage_.image) {
-            VkImageMemoryBarrier& sb = all[n++];
-            sb = b[0];
-            sb.image = sunImage_.image;
-            bool undefined = acquire && sunImageFresh_;
-            if (acquire) {
-                sb.oldLayout = undefined ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
-                sb.srcQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
-                sb.dstQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : family_;
-                sb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            } else {
-                sb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            }
-            if (acquire) sunImageFresh_ = false;
-        }
-        // acquire: the first scope must name the stages the GL-ready semaphore wait blocks (compute and transfer, see
-        // submit), so the barrier chains after that wait; TOP_OF_PIPE there chains to nothing and the sun map copy
-        // could start before GL let go of the image (synchronization validation: WRITE_AFTER_WRITE)
-        const VkPipelineStageFlags work = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
-        vkCmdPipelineBarrier(cmd, work, acquire ? work : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr,
-                             n, all);
-    }
-
     // The sun map buffer into its shared image (whole image: a few MB, a few microseconds of copy).
     void copySunToImage(VkCommandBuffer cmd) {
         // the sun pass's buffer writes before the copy reads them, and the previous frame's copy into the same image
-        // before this one overwrites it (the queue ownership round trip through GL does not order two transfer
-        // writes on this queue for the synchronization validator; the compute images get that from the global
-        // compute barrier at the start of every frame)
+        // before this one overwrites it
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -3857,20 +3226,13 @@ private:
         vkCmdCopyBufferToImage(cmd, shared_[B_SUNMAP].buf, sunImage_.image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
     }
 
-    bool glUsable() const { return glLoaded_ && GlApi::contextCurrent(); }
-
     void destroyShared(SharedImage& s) {
-        if (glUsable()) {
-            if (s.glTex) gl_.DeleteTextures(1, &s.glTex);
-            if (s.glMem) gl_.DeleteMemoryObjectsEXT(1, &s.glMem);
-        }
         if (s.view) vkDestroyImageView(dev_, s.view, nullptr);
         if (s.image) vkDestroyImage(dev_, s.image, nullptr);
         if (s.mem) {
             vkFreeMemory(dev_, s.mem, nullptr);
             allocated_ -= s.size;
         }
-        closeHandle(s.handle);
         s = {};
     }
 
@@ -3986,54 +3348,20 @@ private:
         return UINT32_MAX;
     }
 
-    // The attach targets in the current mode: colour, normal, depth, nearDepth (+ semaphores for zero-copy).
+    // The attach targets on Minecraft's shared Vulkan device.
     bool createTargets(uint32_t w, uint32_t h, std::string& err) {
         const VkFormat fmt[IMAGES] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
                                       VK_FORMAT_R32_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R16G16B16A16_SFLOAT};
-        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F, GL_RGBA8, GL_RGBA16F};
         for (int i = 0; i < IMAGES; i++)
-            if (!createImage(images_[i], fmt[i], glFmt[i], w, h, err)) return false;
-        if (mode_ == Interop::ZeroCopy)
-            for (auto& s : slots_)
-                if (!createSemaphore(s.glReady, err) || !createSemaphore(s.vkDone, err)) return false;
-        if (mode_ == Interop::VkHost || mode_ == Interop::VkShared) return true;  // (no GL: the first frame's barrier starts them)
-        // nothing covers anything until the GL side writes the near field's distances
-        float uncovered = 1e30f, zero[4] = {};
-        gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
-        gl_.ClearTexImage(images_[IMG_NEAR_INFO].glTex, 0, GL_RGBA, GL_FLOAT, zero);
-        if (mode_ == Interop::HostCopy) {
-            // the first upload lands a frame late with ATLAS_HOSTCOPY_LATENCY: start empty, not undefined
-            gl_.ClearTexImage(images_[IMG_COLOR].glTex, 0, GL_RGBA, GL_FLOAT, zero);
-            gl_.ClearTexImage(images_[IMG_NORMAL].glTex, 0, GL_RGBA, GL_FLOAT, zero);
-            gl_.ClearTexImage(images_[IMG_DEPTH].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
-        }
-        GLenum e = gl_.GetError();
-        if (e != GL_NO_ERROR) {
-            err = "OpenGL error 0x" + hexWord(e) + " while creating the " +
-                  (mode_ == Interop::ZeroCopy ? "shared images" : "host-copy textures");
-            return false;
-        }
+            if (!createVkImage(images_[i], fmt[i], w, h, err)) return false;
         return true;
-    }
-
-    static std::string hexWord(uint32_t v) {
-        char b[16];
-        std::snprintf(b, sizeof(b), "%x", v);
-        return b;
-    }
-
-    bool createImage(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
-        return mode_ == Interop::ZeroCopy ? createShared(s, fmt, glFmt, w, h, err) : createLocal(s, fmt, glFmt, w, h, err);
     }
 
     static constexpr VkImageUsageFlags SHARED_USAGE = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
                                                       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-    bool createVkImage(SharedImage& s, VkFormat fmt, uint32_t w, uint32_t h, bool exported, std::string& err) {
-        VkExternalMemoryImageCreateInfo ext{VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO};
-        ext.handleTypes = MEM_HANDLE;
+    bool createVkImage(SharedImage& s, VkFormat fmt, uint32_t w, uint32_t h, std::string& err) {
         VkImageCreateInfo ic{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
-        ic.pNext = exported ? &ext : nullptr;
         ic.imageType = VK_IMAGE_TYPE_2D;
         ic.format = fmt;
         ic.extent = {w, h, 1};
@@ -4061,15 +3389,10 @@ private:
         req2.pNext = &dr;
         vkGetImageMemoryRequirements2(dev_, &ri, &req2);
         const VkMemoryRequirements& req = req2.memoryRequirements;
-        // exported images are always dedicated allocations: AMD (RADV / radeonsi) needs it to carry the tiling
-        // metadata across, the GL side must be told the same (GL_DEDICATED_MEMORY_OBJECT_EXT), and it is always legal
         VkMemoryDedicatedAllocateInfo ded{VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO};
         ded.image = s.image;
-        VkExportMemoryAllocateInfo exp{VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
-        exp.pNext = &ded;
-        exp.handleTypes = MEM_HANDLE;
         VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
-        ma.pNext = exported ? static_cast<const void*>(&exp) : (dr.requiresDedicatedAllocation || dr.prefersDedicatedAllocation ? &ded : nullptr);
+        ma.pNext = dr.requiresDedicatedAllocation || dr.prefersDedicatedAllocation ? &ded : nullptr;
         ma.allocationSize = req.size;
         ma.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         if (ma.memoryTypeIndex == UINT32_MAX) ma.memoryTypeIndex = memoryType(req.memoryTypeBits, 0);
@@ -4086,59 +3409,6 @@ private:
         return true;
     }
 
-    void glTextureParams(GLuint t) {
-        gl_.TextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl_.TextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl_.TextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl_.TextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
-    bool createShared(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
-        if (!createVkImage(s, fmt, w, h, true, err)) return false;
-        if (!export_.memory(dev_, s.mem, s.handle)) return fail(err, "exporting the image memory failed");
-        gl_.CreateMemoryObjectsEXT(1, &s.glMem);
-        GLint dedicated = 1;
-        gl_.MemoryObjectParameterivEXT(s.glMem, GL_DEDICATED_MEMORY_OBJECT_EXT, &dedicated);
-        glImportMemory(gl_, s.glMem, s.size, s.handle);
-        gl_.CreateTextures(GL_TEXTURE_2D, 1, &s.glTex);
-        gl_.TextureParameteri(s.glTex, GL_TEXTURE_TILING_EXT, GLint(GL_OPTIMAL_TILING_EXT));
-        gl_.TextureStorageMem2DEXT(s.glTex, 1, glFmt, GLsizei(w), GLsizei(h), s.glMem, 0);
-        glTextureParams(s.glTex);
-        GLenum e = gl_.GetError();
-        if (e != GL_NO_ERROR) {
-            err = "OpenGL error 0x" + hexWord(e) + " importing a shared image";
-            return false;
-        }
-        return true;
-    }
-
-    // host-copy: a Vulkan-only image the publish pass writes, and a plain GL texture the frame is uploaded into
-    bool createLocal(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
-        if (!createVkImage(s, fmt, w, h, false, err)) return false;
-        if (mode_ == Interop::VkHost || mode_ == Interop::VkShared) return true;
-        gl_.CreateTextures(GL_TEXTURE_2D, 1, &s.glTex);
-        gl_.TextureStorage2D(s.glTex, 1, glFmt, GLsizei(w), GLsizei(h));
-        glTextureParams(s.glTex);
-        return true;
-    }
-
-    bool createSemaphore(SharedSemaphore& s, std::string& err) {
-        VkExportSemaphoreCreateInfo exp{VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO};
-        exp.handleTypes = SEM_HANDLE;
-        VkSemaphoreCreateInfo sc{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-        sc.pNext = &exp;
-        if (vkCreateSemaphore(dev_, &sc, nullptr, &s.sem) != VK_SUCCESS) return fail(err, "vkCreateSemaphore (shared)");
-        if (!export_.semaphore(dev_, s.sem, s.handle)) return fail(err, "exporting a semaphore failed");
-        gl_.GenSemaphoresEXT(1, &s.gl);
-        glImportSemaphore(gl_, s.gl, s.handle);
-        GLenum e = gl_.GetError();
-        if (e != GL_NO_ERROR) {
-            err = "OpenGL error 0x" + hexWord(e) + " importing a semaphore";
-            return false;
-        }
-        return true;
-    }
-
     void destroyInterop() {
         destroySplice();
         if (leakImages_) {  // (Minecraft may still read them: left to the process exit, see destroySplice)
@@ -4147,18 +3417,7 @@ private:
         }
         destroyShared(sunImage_);
         sunImageSize_ = 0;
-        bool glOk = glUsable();
         for (auto& s : images_) destroyShared(s);
-        for (auto& sl : slots_) {
-            for (SharedSemaphore* sem : {&sl.glReady, &sl.vkDone}) {
-                if (glOk && sem->gl) gl_.DeleteSemaphoresEXT(1, &sem->gl);
-                if (sem->sem) vkDestroySemaphore(dev_, sem->sem, nullptr);
-                closeHandle(sem->handle);
-                *sem = {};
-            }
-            sl.hostPending = false;
-        }
-        near_.destroy(gl_, glOk);
         attached_ = false;
     }
 
@@ -4510,30 +3769,18 @@ private:
     // device choice and capabilities (for info())
     struct DeviceSeen {
         std::string name, type, api;
-        bool glMatch;
         std::string unfit;
     };
     std::vector<DeviceSeen> seen_;
     int chosen_ = -1;
-    bool glMatchedAtCreate_ = false;
     VkPhysicalDeviceProperties props_{};
     uint8_t driverUuid_[VK_UUID_SIZE] = {};
     std::string driverName_;
     uint32_t driverId_ = 0;
     VkDeviceSize maxStorageRange_ = 1ull << 27;
-    uint32_t maxExport_ = 0;
-    bool dedicatedOnly_ = false;
 
-    // interop
-    bool interopCapable_ = false, attached_ = false, firstGlFrame_ = true;
-    Interop mode_ = Interop::None;
-    std::string interopWhy_, vkInteropWhy_;  // why not zero-copy (empty when it is)
-    ExportFns export_;
-    bool glLoaded_ = false, glUuidMatch_ = false;
-    std::string glRenderer_, glVersion_, glVendor_, glWinsys_, glDriverUuid_;
-    double hostWaitMs_ = 0, hostUploadMs_ = 0;  // host-copy: last frame's CPU wait for the GPU, and upload time
-    VkHostFrame vkHostOut_;  // (VkHost) the frame the last vkRender handed over (null pointers: none yet)
-    // (VkShared, stage S3) Minecraft's device adopted; the splice's timelines, copy command buffers and targets
+    // shared Vulkan device (stage S3)
+    bool attached_ = false, firstGlFrame_ = true;
     bool adopted_ = false, leakImages_ = false;
     uint32_t graphicsFamily_ = 0;  // Minecraft's graphics queue's family (its queue runs the splices)
     VkSemaphore frameTl_ = VK_NULL_HANDLE, copyTl_ = VK_NULL_HANDLE;
@@ -4543,12 +3790,9 @@ private:
     uint64_t spliceValue_[4] = {};
     VkSharedTargets sharedTargets_;
     VkSplice splice_;
-    GlApi gl_;
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
-    GlNearPass near_;  // the near depth / info pass (gl_near.hpp)
     bool hostNearInputs_ = false;      // this frame's near inputs are written by the CPU (prepare's buffer kind)
-    std::vector<float> nearReadback_;  // host copies with the near light: GL's near depth and info, read back
 };
 
 }  // namespace
