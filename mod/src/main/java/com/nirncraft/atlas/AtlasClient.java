@@ -627,6 +627,7 @@ public final class AtlasClient {
                 lastPack = pack;
                 quality.setFallbackMode(!pack);
                 if (targets != null) {  // the sun map and the clouds follow the mode: new targets next
+                    if (ctx != null && !copyReady(() -> AtlasVulkan.drainPending(ctx))) return;
                     outputReady = false;
                     targets.close();
                     targets = null;
@@ -653,6 +654,7 @@ public final class AtlasClient {
                 // and cloud deck take over); the context and its tiles stay for when it comes back. In unified mode
                 // vanilla's terrain is suppressed, so atlas must keep drawing its minimum-quality world instead.
                 if (targets != null) {
+                    if (!copyReady(() -> AtlasVulkan.drainPending(ctx))) return;
                     outputReady = false;
                     targets.close();
                     targets = null;
@@ -664,6 +666,7 @@ public final class AtlasClient {
             int w = quality.width(mc.getWindow().getWidth()), h = quality.height(mc.getWindow().getHeight());
             int sunMap = quality.sunMapSize();
             if (targets == null || targets.width() != w || targets.height() != h || targets.sunSize() != sunMap) {
+                if (targets != null && !copyReady(() -> AtlasVulkan.drainPending(ctx))) return;
                 outputReady = false;
                 if (targets != null) targets.close();
                 targets = null;
@@ -840,7 +843,10 @@ public final class AtlasClient {
                 long[] img = targets.vkImages(nearLit);
                 AtlasNative.VkSplice sp = ctx.vkRenderShared(frame, io, img[0], img[1], img[2], img[3]);
                 if (sp == null) {
-                    if (!copyReady(() -> AtlasVulkan.finishPending(ctx))) return;
+                    if (!copyReady(() -> AtlasVulkan.waitRingSlot(ctx))) {
+                        skippedFrames++;
+                        return;
+                    }
                     sp = ctx.vkRenderShared(frame, io, img[0], img[1], img[2], img[3]);
                     if (sp == null) throw new IllegalStateException("atlas: shared Vulkan frame remained busy after completion");
                 }

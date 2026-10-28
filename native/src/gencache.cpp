@@ -268,6 +268,18 @@ GenCache::Region& GenCache::region(std::unique_lock<std::mutex>& l, uint64_t rk)
         l.lock();
         tmp.scanned = true;
         r = std::move(tmp);
+        if (r.data) {
+            dataBytes_ += r.data->size();
+            r.dataUse = ++dataClock_;
+            while (dataBytes_ > DATA_BUDGET) {
+                Region* lru = nullptr;
+                for (auto& [k, o] : regions_)
+                    if (o.data && &o != &r && (!lru || o.dataUse < lru->dataUse)) lru = &o;
+                if (!lru) break;
+                dataBytes_ -= std::min<uint64_t>(dataBytes_, lru->data->size());
+                lru->data.reset();
+            }
+        }
         st_.chunks += r.chunks.size();
         st_.sections += r.secs.size();
         scanning_--;
@@ -285,9 +297,16 @@ void GenCache::scanFile(const std::string& path, Region& r) {
         std::fclose(f);
         return;
     }
+    auto d = std::make_shared<std::vector<uint8_t>>(size_t(bytes));
+    size_t got = bytes ? std::fread(d->data(), 1, size_t(bytes), f) : 0;
+    std::fclose(f);
+    d->resize(got);
+    bytes = got;
     uint64_t at = 0;
     uint32_t h[HEAD];
-    while (std::fread(h, 4, HEAD, f) == HEAD && h[0] == MAGIC && h[5] <= MAX_PAYLOAD) {
+    while (at + HEAD * 4 <= bytes) {
+        std::memcpy(h, d->data() + size_t(at), HEAD * 4);
+        if (h[0] != MAGIC || h[5] > MAX_PAYLOAD) break;
         if (at + HEAD * 4 + pad4(h[5]) > bytes) break;  // (a torn payload is not an indexed record)
         Loc loc{at + HEAD * 4, h[5]};
         uint32_t type = h[1] & 0xFFu;
@@ -313,10 +332,10 @@ void GenCache::scanFile(const std::string& path, Region& r) {
             if (tru) r.coarseTrue.insert(k);
         }
         at += uint64_t(HEAD) * 4 + pad4(h[5]);
-        if (std::fseek(f, long(at), SEEK_SET) != 0) break;
     }
     r.fileBytes = at;
-    std::fclose(f);
+    d->resize(size_t(at));
+    if (!d->empty()) r.data = std::move(d);
     // The next append must start at the last whole record. Keeping a torn tail would hide every later record from
     // subsequent scans (and make its recorded offset differ from where append actually wrote it).
     if (at < bytes) std::filesystem::resize_file(path, at, ec);

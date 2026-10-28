@@ -235,6 +235,9 @@ public:
     }
     virtual bool vkCopyComplete(uint64_t, bool&, std::string& err) { err = "not a shared Vulkan context"; return false; }
     virtual bool vkWaitCopy(uint64_t, uint64_t, bool&, std::string& err) { err = "not a shared Vulkan context"; return false; }
+    // (S4) a frame may be traced now: with the staging ring, once the copy that last read the ring slot this frame will
+    // reuse is done (a non-blocking counter query); else every handed-out copy is done (vkCopyComplete(0)).
+    virtual bool vkRenderReady(bool& ready, std::string& err) { return vkCopyComplete(0, ready, err); }
     virtual bool vkCancelSplice(uint64_t, std::string& err) { err = "not a shared Vulkan context"; return false; }
     virtual bool vkDetachRetired(VkRetirement*&, std::string& err) { err = "not a shared Vulkan context"; return false; }
     virtual bool vkSharedAttached() const { return false; }

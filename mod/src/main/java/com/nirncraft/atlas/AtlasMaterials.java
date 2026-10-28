@@ -163,11 +163,7 @@ final class AtlasMaterials {
 
     private AtlasShapes.Shape shapeOf(BlockState s, int tint) {
         if (!shapes) return null;
-        try {
-            return AtlasShapes.of(s, tint);
-        } catch (RuntimeException e) {
-            return null;  // a model that cannot say: a plain cube in its colour
-        }
+        return AtlasShapes.extracted(s, tint).shape();
     }
 
     /**
@@ -273,24 +269,13 @@ final class AtlasMaterials {
             Short far = exact.get((long) AtlasFarState.farId(s) << 32 | (q & 0xFFFFFFFFL));
             return far != null ? far : tint >= 0 ? leaves(s, tint) : id(s);
         }
+        AtlasShapes.Extracted ext = AtlasShapes.extracted(s, q);
         pendingExact.add(q >= 0 ? tintedMaterial(s, q) : material(s));
-        pendingExactShapes.add(shapeOf(s, q));
-        int[][] tex;
-        try {
-            tex = AtlasShapes.textures(s, q);
-        } catch (RuntimeException e) {
-            tex = null;  // a model that cannot say: its face tiles then
-        }
-        pendingExactTextures.add(tex);
-        AtlasShapes.BrickModel brick;
-        try {
-            brick = AtlasShapes.brick(s, q);
-        } catch (RuntimeException e) {
-            brick = null;  // a model that cannot say: its shape then
-        }
-        pendingExactBricks.add(brick);
-        if (brick != null) exactBricks++;
-        pendingExactOffsets.add(AtlasShapes.offsetWord(s));
+        pendingExactShapes.add(shapes ? ext.shape() : null);
+        pendingExactTextures.add(ext.textures());
+        pendingExactBricks.add(ext.brick());
+        if (ext.brick() != null) exactBricks++;
+        pendingExactOffsets.add(ext.offsetWord());
         short id = (short) nextExact++;
         exact.put(key, id);
         byState.computeIfAbsent(sid, k -> new ArrayList<>()).add(new int[] {q, id});

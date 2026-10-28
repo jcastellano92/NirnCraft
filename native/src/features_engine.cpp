@@ -377,22 +377,23 @@ private:
                                     atlas_feat_lake_spv_size, atlas_feat_aux_spv_size};
         static const char* names[PIPES] = {"hm", "init", "copy", "apply", "pack", "ore", "cover", "rock", "tree", "freeze", "disk", "spring", "lake"};
         bool trace = std::getenv("ATLAS_FEAT_TRACE") != nullptr;
+        VkComputePipelineCreateInfo cps[PIPES]{};
         for (uint32_t i = 0; i < PIPES; i++) {
-            auto p0 = std::chrono::steady_clock::now();
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
             smci.pCode = code[i];
             if (vkCreateShaderModule(dev_, &smci, nullptr, &modules_[i]) != VK_SUCCESS) return fail(err, "shader module");
-            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            cp.stage.module = modules_[i];
-            cp.stage.pName = "main";
-            cp.layout = layout_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
-                return fail(err, "pipeline " + std::to_string(i));
-            if (trace) std::printf("TRACE done pipeline:%s %.1fs (%zu bytes)\n", names[i], msSince(p0) / 1000.0, size[i]), std::fflush(stdout);
+            cps[i].sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            cps[i].stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cps[i].stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cps[i].stage.module = modules_[i];
+            cps[i].stage.pName = "main";
+            cps[i].layout = layout_;
         }
+        auto p0 = std::chrono::steady_clock::now();
+        if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, PIPES, cps, nullptr, pipes_) != VK_SUCCESS)
+            return fail(err, "features pipelines");
+        if (trace) std::printf("TRACE done features pipelines %.1fs\n", msSince(p0) / 1000.0), std::fflush(stdout);
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = 1;

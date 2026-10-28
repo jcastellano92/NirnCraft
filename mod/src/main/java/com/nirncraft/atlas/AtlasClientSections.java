@@ -90,7 +90,7 @@ final class AtlasClientSections {
         if (AtlasSections.kept(s)) return true;
         if (s.getRenderShape() != net.minecraft.world.level.block.RenderShape.MODEL) return false;
         try {
-            return AtlasShapes.brickable(s, AtlasShapes.quads(s));
+            return AtlasShapes.stateModel(s).brickable();
         } catch (RuntimeException e) {
             return false;
         }
@@ -106,12 +106,13 @@ final class AtlasClientSections {
     }
 
     private static int nearId(BlockState s) {
-        if (!nearKept(s)) return 0;
+        if (s.isAir()) return 0;
         Object models = Minecraft.getInstance().getModelManager().getBlockStateModelSet();
         var epoch = LOOKS.forModels(models);
         var block = s.getBlock();
         var ids = epoch.blocks.get(block);
         if (ids == null) {
+            if (!nearKept(s)) return 0;
             // Build outside the concurrent map: a render caller never waits for another caller's model scan.
             // If first callers race, each scan yields the same canonical ids; only one table is retained.
             var built = buildLooks(block);
@@ -121,7 +122,7 @@ final class AtlasClientSections {
         if (models != Minecraft.getInstance().getModelManager().getBlockStateModelSet() || !LOOKS.isCurrent(epoch))
             throw new IllegalStateException("atlas block models changed during alias construction");
         Integer id = ids.get(s);
-        return id != null ? id : net.minecraft.world.level.block.Block.getId(s);
+        return id != null ? id : 0;
     }
 
     private static java.util.Map<BlockState, Integer> buildLooks(net.minecraft.world.level.block.Block block) {
@@ -147,6 +148,7 @@ final class AtlasClientSections {
 
     static void resetLooks() {
         LOOKS.reset();
+        AtlasShapes.clearSprites();
     }
 
     private static java.util.List<Object> lookKey(BlockState s) {

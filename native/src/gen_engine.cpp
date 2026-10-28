@@ -1291,20 +1291,22 @@ public:
         if (vkCreatePipelineLayout(dev_, &pl, nullptr, &stLayout_) != VK_SUCCESS) return fail(err, "store pipeline layout");
         const uint32_t* code[2] = {atlas_store_storeIn_spv, atlas_store_storeOut_spv};
         const size_t size[2] = {atlas_store_storeIn_spv_size, atlas_store_storeOut_spv_size};
+        VkComputePipelineCreateInfo stCps[2]{};
         for (uint32_t i = 0; i < 2; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
             smci.pCode = code[i];
             if (vkCreateShaderModule(dev_, &smci, nullptr, &stModules_[i]) != VK_SUCCESS) return fail(err, "store shader module");
-            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            cp.stage.module = stModules_[i];
-            cp.stage.pName = "main";
-            cp.layout = stLayout_;
-            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &stPipes_[i]) != VK_SUCCESS)
-                return fail(err, "store pipeline refused");
+            stCps[i].sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            stCps[i].stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            stCps[i].stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            stCps[i].stage.module = stModules_[i];
+            stCps[i].stage.pName = "main";
+            stCps[i].layout = stLayout_;
         }
+        if (vkCreateComputePipelines(dev_, pipeCache(), 2, stCps, nullptr, stPipes_) != VK_SUCCESS)
+            return fail(err, "store pipeline refused");
+        if (pipeCacheFresh_) savePipeCache();
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SNB};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = 1;
@@ -1938,25 +1940,26 @@ private:
                                     atlas_gen_math_spv_size, atlas_gen_probe_spv_size, atlas_gen_pageCols_spv_size,
                                     atlas_gen_pageBiomes_spv_size, atlas_gen_tile_spv_size, atlas_gen_tileSurf_spv_size,
                                     atlas_gen_tileBiome_spv_size, atlas_gen_farChunk_spv_size};
+        VkComputePipelineCreateInfo cps[PIPES]{};
         for (uint32_t i = 0; i < PIPES; i++) {
             VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
             smci.codeSize = size[i];
             smci.pCode = code[i];
             if (vkCreateShaderModule(dev_, &smci, nullptr, &modules_[i]) != VK_SUCCESS) return fail(err, "shader module");
-            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            cp.stage.module = modules_[i];
-            cp.stage.pName = "main";
-            cp.layout = layout_;
-            cp.flags = VK_PIPELINE_CREATE_DISPATCH_BASE_BIT;  // (a pass in slices of chunks: vkCmdDispatchBase)
-            auto p0 = std::chrono::steady_clock::now();
-            if (vkCreateComputePipelines(dev_, pipeCache(), 1, &cp, nullptr, &pipes_[i]) != VK_SUCCESS)
-                return fail(err, "pipeline " + std::to_string(i) + " (" + std::to_string(size[i]) + " bytes of SPIR-V) refused");
-            double pms = msSince(p0);
-            if (pms > 500.0) std::fprintf(stderr, "TRACE warn gen pipeline %u: the driver took %.1f s (%zu bytes of SPIR-V)\n", i, pms / 1000.0, size[i]);
-            if (pms > 250.0 || pipeCacheFresh_) savePipeCache();
+            cps[i].sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            cps[i].stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cps[i].stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cps[i].stage.module = modules_[i];
+            cps[i].stage.pName = "main";
+            cps[i].layout = layout_;
+            cps[i].flags = VK_PIPELINE_CREATE_DISPATCH_BASE_BIT;  // (a pass in slices of chunks: vkCmdDispatchBase)
         }
+        auto p0 = std::chrono::steady_clock::now();
+        if (vkCreateComputePipelines(dev_, pipeCache(), PIPES, cps, nullptr, pipes_) != VK_SUCCESS)
+            return fail(err, "generator compute pipelines refused");
+        double pms = msSince(p0);
+        if (pms > 500.0) std::fprintf(stderr, "TRACE warn gen pipelines: the driver took %.1f s\n", pms / 1000.0);
+        if (pms > 250.0 || pipeCacheFresh_) savePipeCache();
         VkDescriptorPoolSize ps{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NB};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = 1;
@@ -4422,12 +4425,16 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
             }
             if (!it.words) {
                 // (air: never baked) one id throughout, no slot in the grid
-                std::vector<uint16_t> ids(4096, 0);
                 if (world->layerNeed(Key3{0, cx, sy, cz})) {
+                    std::vector<uint16_t> ids(4096, 0);
                     std::shared_ptr<const Section> sec = world->putSection(cx, sy, cz, ids.data(), SectionStore::REGEN);
                     grid->put(cx, sy, cz, VgIds(sec, &sec->mats));
                 } else {
-                    grid->putPacked(cx, sy, cz, std::make_shared<const std::vector<uint32_t>>(packSection(ids.data())));
+                    static const auto airPacked = [] {
+                        std::vector<uint16_t> z(4096, 0);
+                        return std::make_shared<const std::vector<uint32_t>>(packSection(z.data()));
+                    }();
+                    grid->putPacked(cx, sy, cz, airPacked);
                 }
                 sent++;
                 continue;

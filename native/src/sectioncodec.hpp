@@ -111,12 +111,14 @@ inline bool getVarint(const uint8_t*& p, const uint8_t* e, uint32_t& v) {
 // the model: the neighbours' bits (place 0-2, which exist 0-7, which agree 0-7) and the index tree
 struct Model {
     uint16_t hit[3 * 8 * 8];
-    std::vector<uint16_t> tree;
+    uint16_t tree[4096];
+    uint32_t treeSize = 1;
     int bits = 0;
     explicit Model(uint32_t n) {
         std::fill(std::begin(hit), std::end(hit), uint16_t(PROB_ONE / 2));
         while ((1u << bits) < n) bits++;
-        tree.assign(size_t(1) << bits, uint16_t(PROB_ONE / 2));
+        treeSize = 1u << bits;
+        std::fill(tree, tree + treeSize, uint16_t(PROB_ONE / 2));
     }
 };
 
@@ -190,7 +192,7 @@ inline void encodeGrid(const uint32_t* vals, std::vector<uint8_t>& out) {
             int bit = int((v >> b) & 1u);
             e.bit(m.tree[node], bit);
             node = node * 2 + uint32_t(bit);
-            if (node >= m.tree.size()) node = 1;  // (the tree's last level: no probability needed past it)
+            if (node >= m.treeSize) node = 1;  // (the tree's last level: no probability needed past it)
         }
     }
     e.finish();
@@ -201,20 +203,20 @@ inline bool decodeGrid(const uint8_t* p, size_t size, uint32_t* vals) {
     const uint8_t* e = p + size;
     uint32_t n;
     if (!codec::getVarint(p, e, n) || n == 0 || n > 4096) return false;
-    std::vector<uint32_t> pal(n);
-    for (uint32_t& v : pal)
-        if (!codec::getVarint(p, e, v)) return false;
+    uint32_t pal[4096];
+    for (uint32_t i = 0; i < n; i++)
+        if (!codec::getVarint(p, e, pal[i])) return false;
     if (n == 1) {
         std::fill(vals, vals + 4096, pal[0]);
         return true;
     }
     codec::Model m(n);
     codec::Decoder d(p, e);
-    std::vector<uint32_t> idx(4096);
+    uint32_t idx[4096];
     for (int i = 0; i < 4096; i++) {
         uint32_t c[3];
         int ctx;
-        int k = codec::neighbours(idx.data(), i, c, ctx);
+        int k = codec::neighbours(idx, i, c, ctx);
         bool done = false;
         for (int j = 0; j < k && !done; j++)
             if (d.bit(m.hit[j * 64 + ctx])) {
@@ -227,7 +229,7 @@ inline bool decodeGrid(const uint8_t* p, size_t size, uint32_t* vals) {
             int bit = d.bit(m.tree[node]);
             v = v << 1 | uint32_t(bit);
             node = node * 2 + uint32_t(bit);
-            if (node >= m.tree.size()) node = 1;
+            if (node >= m.treeSize) node = 1;
         }
         if (v >= n) return false;
         idx[size_t(i)] = v;

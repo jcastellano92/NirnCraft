@@ -157,6 +157,8 @@ bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b ==
 // shared images (the near info and near light: abi 0.15, FRAME_NEAR_LIGHT)
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMG_NEAR_INFO = 4, IMG_NEAR_LIGHT = 5,
               IMAGES = 6;
+// (S4, ATLAS_VK_ASYNC=1) the staging ring Minecraft's copies read instead of the traced images: colour, depth, near light
+constexpr uint32_t STAGE_RING = 2;
 // push constants of the publish and ingest passes: width, height, and whether the near light / info rides along
 constexpr uint32_t PASS_PUSH_BYTES = 16;  // width, height, nearLight, pre-exposure (float bits)
 
@@ -247,6 +249,8 @@ struct SharedVkRetirement final : VkRetirement {
     VkDevice device = VK_NULL_HANDLE;
     SharedImage images[IMAGES]{};
     SharedImage sun{};
+    SharedImage ring[STAGE_RING][3]{};
+    SharedImage ringSun[STAGE_RING]{};
     VkSemaphore frame = VK_NULL_HANDLE, copy = VK_NULL_HANDLE;
     VkCommandPool pool = VK_NULL_HANDLE;
     PFN_vkDestroyImageView destroyView = vkDestroyImageView;
@@ -258,11 +262,16 @@ struct SharedVkRetirement final : VkRetirement {
         if (pool) destroyPool(device, pool, nullptr);
         if (frame) destroySemaphore(device, frame, nullptr);
         if (copy) destroySemaphore(device, copy, nullptr);
-        for (SharedImage* s : {&images[0], &images[1], &images[2], &images[3], &images[4], &images[5], &sun}) {
-            if (s->view) destroyView(device, s->view, nullptr);
-            if (s->image) destroyImage(device, s->image, nullptr);
-            if (s->mem) freeMemory(device, s->mem, nullptr);
-        }
+        for (SharedImage* s : {&images[0], &images[1], &images[2], &images[3], &images[4], &images[5], &sun})
+            destroy(*s);
+        for (auto& set : ring)
+            for (auto& s : set) destroy(s);
+        for (auto& s : ringSun) destroy(s);
+    }
+    void destroy(SharedImage& s) {
+        if (s.view) destroyView(device, s.view, nullptr);
+        if (s.image) destroyImage(device, s.image, nullptr);
+        if (s.mem) freeMemory(device, s.mem, nullptr);
     }
 };
 
@@ -474,6 +483,8 @@ public:
                         ",\"driverId\":" + std::to_string(driverId_) + ",\"api\":" + q(apiString(props_.apiVersion)) +
                         ",\"deviceUuid\":" + q(hex16(deviceUuid_)) + ",\"driverUuid\":" + q(hex16(driverUuid_)) +
                         ",\"onMinecraftDevice\":" + b(adopted_) +
+                        ",\"vkAsync\":{\"ring\":" + b(asyncRing_) + ",\"frames\":" + std::to_string(ringFrames_) +
+                        ",\"notReady\":" + std::to_string(ringNotReady_) + "}" +
                         ",\"interop\":" + q(attached_ ? "vulkan shared device (zero-copy)" : "not attached") +
                         ",\"timestamps\":" + b(timestamps_) + ",\"genLowPriority\":" + b(genLowPriority_) +
                         ",\"genOwnFamily\":" + b(genFamily_ != UINT32_MAX && genFamily_ != family_) +
@@ -997,7 +1008,7 @@ public:
             for (auto& s : slots_) s.inFlight = false;
             destroyInterop();
         }
-        if (!createTargets(w, h, err) || !createSplice(err)) {
+        if (!createTargets(w, h, err) || !createSplice(err) || !createRing(w, h, err)) {
             destroyInterop();
             return false;
         }
@@ -1029,7 +1040,7 @@ public:
         ready = false;
         if (adopted_ && !attached_ && value == 0) { ready = true; return true; }
         if (!vkSharedAttached() || !copyTl_) return fail(err, "not attached to Minecraft's Vulkan device");
-        uint64_t wanted = value ? value : lastCopyWait_;
+        uint64_t wanted = (value == ~0ull && asyncRing_) ? ringNeed(frameTlValue_ + 1) : (value ? value : lastCopyWait_);
         if (wanted > copyValue_) return fail(err, "copy value was never offered");
         if (!wanted) { ready = true; return true; }
         VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
@@ -1050,6 +1061,7 @@ public:
         if (ready) return fail(err, "the splice has already completed");
         // The caller guarantees this command buffer was never recorded/submitted. No host signal is issued.
         spliceValue_[uint32_t(frameTlValue_ % SPLICE_RING)] = 0;
+        if (asyncRing_) ringCopy_[uint32_t(frameTlValue_ % STAGE_RING)] = ringCopyPrev_[uint32_t(frameTlValue_ % STAGE_RING)];
         lastCopyWait_ = priorCopyWait_;  // keep the previous completed copy's GPU memory dependency
         // recordFar's global compute barrier orders the canceled publish before the next trace/publish;
         // copySunToImage separately orders its transfer writes. Queue order alone is insufficient.
@@ -1078,6 +1090,19 @@ public:
         token->sun = sunImage_;
         if (sunImage_.mem) allocated_ -= sunImage_.size;
         sunImage_ = {};
+        for (uint32_t r = 0; r < STAGE_RING; r++) {
+            for (int i = 0; i < 3; i++) {
+                token->ring[r][i] = ring_[r][i];
+                if (ring_[r][i].mem) allocated_ -= ring_[r][i].size;
+                ring_[r][i] = {};
+            }
+            token->ringSun[r] = ringSun_[r];
+            if (ringSun_[r].mem) allocated_ -= ringSun_[r].size;
+            ringSun_[r] = {};
+            ringCopy_[r] = ringCopyPrev_[r] = 0;
+        }
+        ringSunSize_ = 0;
+        asyncRing_ = false;
         sunImageSize_ = 0;
         token->frame = frameTl_; token->copy = copyTl_; token->pool = splicePool_;
         frameTl_ = copyTl_ = VK_NULL_HANDLE; splicePool_ = VK_NULL_HANDLE;
@@ -1170,6 +1195,116 @@ public:
         return true;
     }
 
+    // (S4) ATLAS_VK_ASYNC=1: the staging ring. A failure to make it leaves the serialized path (logged), never a failed attach.
+    bool createRing(uint32_t w, uint32_t h, std::string& err) {
+        asyncRing_ = false;
+        ringSunSize_ = 0;
+        ringFrames_ = ringNotReady_ = 0;
+        for (uint32_t r = 0; r < STAGE_RING; r++) {
+            ringCopy_[r] = ringCopyPrev_[r] = 0;
+            ringFresh_[r] = ringSunFresh_[r] = true;
+        }
+        const char* a = std::getenv("ATLAS_VK_ASYNC");
+        if (!a || a[0] != '1') return true;
+        const VkFormat fmt[3] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT};
+        std::string why;
+        for (uint32_t r = 0; r < STAGE_RING && why.empty(); r++)
+            for (int i = 0; i < 3 && why.empty(); i++) createVkImage(ring_[r][i], fmt[i], w, h, why);
+        if (!why.empty()) {
+            std::fprintf(stderr, "[atlas] ATLAS_VK_ASYNC: the staging ring could not be made (%s); serialized copies\n", why.c_str());
+            destroyRing();
+            return true;
+        }
+        asyncRing_ = true;
+        return true;
+    }
+
+    void destroyRing() {
+        for (auto& set : ring_)
+            for (auto& s : set) destroyShared(s);
+        for (auto& s : ringSun_) destroyShared(s);
+        ringSunSize_ = 0;
+    }
+
+    // the ring slot and the splice command buffer the next frame (value) reuses: both copies' reads done?
+    uint64_t ringNeed(uint64_t value) const {
+        return std::max(ringCopy_[value % STAGE_RING], spliceValue_[value % SPLICE_RING]);
+    }
+
+    bool vkRenderReady(bool& ready, std::string& err) override {
+        if (!asyncRing_ || !vkSharedAttached() || !copyTl_) return vkCopyComplete(0, ready, err);
+        ready = false;
+        uint64_t need = ringNeed(frameTlValue_ + 1);
+        if (!need) { ready = true; return true; }
+        uint64_t completed = 0;
+        if (!vkOk(vkGetSemaphoreCounterValue(dev_, copyTl_, &completed), "querying Minecraft's copies", err)) return false;
+        ready = completed >= need;
+        if (!ready) ringNotReady_++;
+        return true;
+    }
+
+    // the sun map's ring images follow the sun map's size (rare: a resize waits, bounded, for Minecraft's copies)
+    bool ensureRingSun(std::string& err) {
+        if (sunSize_ == ringSunSize_) return true;
+        if (!splicesDone(FENCE_TIMEOUT_NS)) return fail(err, "Minecraft's copies did not finish before the sun map resized");
+        for (auto& s : ringSun_) destroyShared(s);
+        ringSunSize_ = 0;
+        if (sunSize_) {
+            for (uint32_t r = 0; r < STAGE_RING; r++) {
+                if (!createVkImage(ringSun_[r], VK_FORMAT_R32G32_SFLOAT, sunSize_, sunSize_ + 1, err)) return false;
+                ringSunFresh_[r] = true;
+            }
+            ringSunSize_ = sunSize_;
+        }
+        return true;
+    }
+
+    // after the publish pass, in the trace's own command buffer: the images into ring slot r (and the sun map's buffer)
+    void recordRingCopy(VkCommandBuffer cmd, uint32_t r, uint32_t w, uint32_t h, bool nearLight, bool sun) {
+        VkImageMemoryBarrier ib[4];
+        uint32_t n = 0;
+        auto fresh = [&](SharedImage& s) {
+            ib[n] = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+            ib[n].image = s.image;
+            ib[n].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+            ib[n].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            ib[n].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+            ib[n].srcQueueFamilyIndex = ib[n].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            ib[n].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            n++;
+        };
+        if (ringFresh_[r]) {
+            for (int i = 0; i < 3; i++) fresh(ring_[r][i]);
+            ringFresh_[r] = false;
+        }
+        if (sun && ringSunFresh_[r]) {
+            fresh(ringSun_[r]);
+            ringSunFresh_[r] = false;
+        }
+        // the publish pass's (and the sun pass's) writes before the copies read them; this ring slot's older copies
+        // before these overwrite it (Minecraft's reads of it are ordered by the timeline wait of the submission)
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, n, ib);
+        auto copy = [&](int img, int slot) {
+            VkImageCopy rc{};
+            rc.srcSubresource = rc.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            rc.extent = {w, h, 1};
+            vkCmdCopyImage(cmd, images_[img].image, VK_IMAGE_LAYOUT_GENERAL, ring_[r][slot].image, VK_IMAGE_LAYOUT_GENERAL, 1, &rc);
+        };
+        copy(IMG_COLOR, 0);
+        copy(IMG_DEPTH, 1);
+        if (nearLight) copy(IMG_NEAR_LIGHT, 2);
+        if (sun) {
+            VkBufferImageCopy region{};
+            region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            region.imageExtent = {sunSize_, sunSize_ + 1, 1};
+            vkCmdCopyBufferToImage(cmd, shared_[B_SUNMAP].buf, ringSun_[r].image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+        }
+    }
+
     // Minecraft's copies of every splice handed out are done (bounded: a frame never submitted would hang here)
     bool splicesDone(uint64_t timeoutNs) {
         if (!copyTl_ || lastCopyWait_ == 0) return true;
@@ -1200,6 +1335,16 @@ public:
 
     bool sharedFrame(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool nearLight, std::string& err) {
         uint32_t w = width_, h = height_;
+        const bool ring = asyncRing_ && ring_[0][0].image;
+        const uint64_t value = frameTlValue_ + 1;
+        const uint32_t r = uint32_t(value % STAGE_RING);
+        if (ring) {
+            // vkRenderReady (the caller's gate) made sure of this without blocking; a direct caller that skipped it fails here
+            uint64_t need = ringNeed(value), completed = 0;
+            if (need && !vkOk(vkGetSemaphoreCounterValue(dev_, copyTl_, &completed), "querying Minecraft's copies", err)) return false;
+            if (completed < need) return fail(err, "the staging ring slot is still read by Minecraft's copies (vkRenderReady first)");
+            if (sharedTargets_.sunMap && !ensureRingSun(err)) return false;
+        }
         begin(s);
         hostImageBarrier(s.cmd, true);  // (first frame: the images' layout; then: the copies' reads before this frame's writes)
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0, (frame.dims[2] & FRAME_NEAR_SPLIT_BIT) != 0,
@@ -1211,8 +1356,9 @@ public:
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
         vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
-        const bool sun = sharedTargets_.sunMap && sunDispatchRows_ && sunImage_.image && sunSize_;
-        if (sun) {
+        const bool sun = sharedTargets_.sunMap && sunDispatchRows_ && sunSize_ && (ring ? ringSun_[r].image : sunImage_.image);
+        if (ring) recordRingCopy(s.cmd, r, w, h, nearLight, sun);
+        else if (sun) {
             if (sunImageFresh_) {
                 VkImageMemoryBarrier ib{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
                 ib.image = sunImage_.image;
@@ -1228,14 +1374,15 @@ public:
             copySunToImage(s.cmd);
         }
         // (the publish's writes reach Minecraft's copies through frameTl_: a semaphore signal makes them available)
-        uint64_t value = ++frameTlValue_;
-        if (!submitTimeline(s, lastCopyWait_, value, err)) return false;
+        frameTlValue_ = value;
+        // (ring: the trace follows its own queue's earlier work; it waits only for Minecraft's copy that read this slot)
+        if (!submitTimeline(s, ring ? ringCopy_[r] : lastCopyWait_, value, err)) return false;
         firstGlFrame_ = false;
         frameIndex_++;
 
         // the copies into Minecraft's images, on its queue after the wait; the ring slot's last use must be done
         uint32_t ri = uint32_t(value % SPLICE_RING);
-        if (spliceValue_[ri]) {
+        if (spliceValue_[ri] && !ring) {  // (the ring checked this without waiting, above)
             VkSemaphoreWaitInfo wi{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
             wi.semaphoreCount = 1;
             wi.pSemaphores = &copyTl_;
@@ -1253,23 +1400,23 @@ public:
         mb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT;
         vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0,
                              nullptr);
-        auto copy = [&](int img, uint64_t dst) {
+        auto copy = [&](int img, int slot, uint64_t dst) {
             if (!dst) return;
-            VkImageCopy r{};
-            r.srcSubresource = r.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            r.extent = {w, h, 1};
-            vkCmdCopyImage(cb, images_[img].image, VK_IMAGE_LAYOUT_GENERAL, reinterpret_cast<VkImage>(dst),
-                           VK_IMAGE_LAYOUT_GENERAL, 1, &r);
+            VkImageCopy rc{};
+            rc.srcSubresource = rc.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            rc.extent = {w, h, 1};
+            vkCmdCopyImage(cb, ring ? ring_[r][slot].image : images_[img].image, VK_IMAGE_LAYOUT_GENERAL,
+                           reinterpret_cast<VkImage>(dst), VK_IMAGE_LAYOUT_GENERAL, 1, &rc);
         };
-        copy(IMG_COLOR, sharedTargets_.color);
-        copy(IMG_DEPTH, sharedTargets_.depth);
-        if (nearLight) copy(IMG_NEAR_LIGHT, sharedTargets_.nearLight);
+        copy(IMG_COLOR, 0, sharedTargets_.color);
+        copy(IMG_DEPTH, 1, sharedTargets_.depth);
+        if (nearLight) copy(IMG_NEAR_LIGHT, 2, sharedTargets_.nearLight);
         if (sun) {
-            VkImageCopy r{};
-            r.srcSubresource = r.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            r.extent = {sunSize_, sunSize_ + 1, 1};
-            vkCmdCopyImage(cb, sunImage_.image, VK_IMAGE_LAYOUT_GENERAL, reinterpret_cast<VkImage>(sharedTargets_.sunMap),
-                           VK_IMAGE_LAYOUT_GENERAL, 1, &r);
+            VkImageCopy rc{};
+            rc.srcSubresource = rc.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            rc.extent = {sunSize_, sunSize_ + 1, 1};
+            vkCmdCopyImage(cb, ring ? ringSun_[r].image : sunImage_.image, VK_IMAGE_LAYOUT_GENERAL,
+                           reinterpret_cast<VkImage>(sharedTargets_.sunMap), VK_IMAGE_LAYOUT_GENERAL, 1, &rc);
         }
         // and the copies before anything of Minecraft's after them reads or writes those images
         mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT;
@@ -1281,6 +1428,11 @@ public:
         spliceValue_[ri] = copied;
         priorCopyWait_ = lastCopyWait_;
         lastCopyWait_ = copied;  // (the next frame's trace waits for these copies before it overwrites the images)
+        if (ring) {
+            ringCopyPrev_[r] = ringCopy_[r];
+            ringCopy_[r] = copied;
+            ringFrames_++;
+        }
         splice_ = VkSplice{uint64_t(reinterpret_cast<uintptr_t>(frameTl_)), value, cb,
                            uint64_t(reinterpret_cast<uintptr_t>(copyTl_)), copied};
         return true;
@@ -3413,8 +3565,12 @@ private:
         destroySplice();
         if (leakImages_) {  // (Minecraft may still read them: left to the process exit, see destroySplice)
             for (auto& s : images_) s = {};
+            for (auto& set : ring_)
+                for (auto& s : set) s = {};
+            for (auto& s : ringSun_) s = {};
             leakImages_ = false;
         }
+        destroyRing();
         destroyShared(sunImage_);
         sunImageSize_ = 0;
         for (auto& s : images_) destroyShared(s);
@@ -3788,6 +3944,16 @@ private:
     VkCommandPool splicePool_ = VK_NULL_HANDLE;
     VkCommandBuffer spliceCmd_[4] = {};
     uint64_t spliceValue_[4] = {};
+    // (S4, ATLAS_VK_ASYNC=1) The trace's last pass copies its images into ring_[r] on atlas's own queue (in order, so the
+    // next trace needs no wait on Minecraft); Minecraft's copies read the ring. A ring slot is reused once the copy that
+    // read it is done (ringCopy_[r]); vkRenderReady asks that without blocking. Off: the serialized path above.
+    bool asyncRing_ = false;
+    SharedImage ring_[STAGE_RING][3];  // colour, depth, near light
+    SharedImage ringSun_[STAGE_RING];
+    uint32_t ringSunSize_ = 0;
+    bool ringFresh_[STAGE_RING] = {true, true}, ringSunFresh_[STAGE_RING] = {true, true};
+    uint64_t ringCopy_[STAGE_RING] = {}, ringCopyPrev_[STAGE_RING] = {};
+    uint64_t ringFrames_ = 0, ringNotReady_ = 0;  // (diagnostics: atlas_info async.*)
     VkSharedTargets sharedTargets_;
     VkSplice splice_;
     SharedImage images_[IMAGES];

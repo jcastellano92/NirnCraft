@@ -140,6 +140,77 @@ int main() {
             std::shared_ptr<const std::vector<uint32_t>> words;
             check(cache.readSection({0, 1, 0, 0}, words) && words, "appended section after torn tail unreadable");
         }
+        {
+            // EXP-6 microbenchmark: 100,000 packSection calls (baseline heap where(65536) vs thread_local scratch)
+            // plus warm region scan + 8-thread 1,024-section ingest read.
+            uint16_t mixed[4096];
+            for (int i = 0; i < 4096; i++) mixed[i] = uint16_t((i * 73 + (i >> 4) * 19) & 15);
+            auto packBaseline = [](const uint16_t* s) {
+                std::vector<uint16_t> pal;
+                std::vector<int16_t> where(65536, -1);
+                for (int i = 0; i < 4096 && pal.size() <= 256; i++)
+                    if (where[s[i]] < 0) where[s[i]] = int16_t(pal.size()), pal.push_back(s[i]);
+                uint32_t n = uint32_t(pal.size());
+                uint32_t bits = n == 1 ? 0 : n <= 2 ? 1 : n <= 4 ? 2 : n <= 16 ? 4 : n <= 256 ? 8 : 16;
+                std::vector<uint32_t> w(1 + (n + 1) / 2 + 4096 * bits / 32, 0u);
+                w[0] = bits | n << 8;
+                for (uint32_t k = 0; k < n; k++) w[1 + k / 2] |= uint32_t(pal[k]) << (16 * (k & 1));
+                size_t at = 1 + (n + 1) / 2;
+                for (int i = 0; i < 4096; i++) {
+                    uint32_t bit = uint32_t(i) * bits;
+                    w[at + bit / 32] |= uint32_t(where[s[i]]) << (bit & 31u);
+                }
+                return w;
+            };
+            constexpr int N_PACK = 100000;
+            size_t sink = 0;
+            auto t0 = std::chrono::steady_clock::now();
+            for (int i = 0; i < N_PACK; i++) sink += packBaseline(mixed).size();
+            double basePackMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            t0 = std::chrono::steady_clock::now();
+            for (int i = 0; i < N_PACK; i++) sink += packSection(mixed).size();
+            double optPackMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+
+            const fs::path benchRoot = root / "bench";
+            fs::create_directories(benchRoot);
+            const uint32_t mHash = sectionHash(mixed);
+            const auto mPacked = std::make_shared<const std::vector<uint32_t>>(packSection(mixed));
+            uint32_t mInfo[GenCache::INFO_WORDS]{};
+            for (int s = 0; s < 16; s++) {
+                mInfo[4 + s * 4] = mHash;
+                mInfo[4 + s * 4 + 2] = GenCache::KIND_BLOCKS;
+            }
+            {
+                GenCache writer;
+                writer.configure(benchRoot.string(), 42);
+                for (int c = 0; c < 64; c++) {
+                    int cx = c & 7, cz = c >> 3;
+                    writer.putChunk(cx, cz, mInfo);
+                    for (int s = 0; s < 16; s++)
+                        writer.putSection({0, cx, s - 4, cz}, mPacked, mHash);
+                }
+                writer.flush();
+            }
+            t0 = std::chrono::steady_clock::now();
+            {
+                GenCache warm;
+                warm.configure(benchRoot.string(), 42);
+                std::atomic<int> next{0};
+                std::array<std::thread, 8> pool;
+                for (auto& th : pool)
+                    th = std::thread([&] {
+                        for (int idx; (idx = next.fetch_add(1)) < 1024;) {
+                            int c = idx >> 4, s = idx & 15;
+                            auto w = warm.section({0, c & 7, s - 4, c >> 3});
+                            check(w != nullptr && !w->empty(), "warm section read failed");
+                        }
+                    });
+                for (auto& th : pool) th.join();
+            }
+            double warmReadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            std::printf("BENCH exp6 packSection_100k_baseline_ms=%.1f packSection_100k_opt_ms=%.1f speedup=%.2fx warm_1024_sections_8t_ms=%.1f (sink=%zu)\n",
+                        basePackMs, optPackMs, basePackMs / std::max(0.001, optPackMs), warmReadMs, sink);
+        }
         fs::remove_all(root);
         std::printf("PASS cache checksum recovery, invalidation, regeneration, known air, and torn payload/header recovery\n");
         return 0;

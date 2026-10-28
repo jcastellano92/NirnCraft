@@ -29,27 +29,51 @@ inline uint32_t packUniform(const uint32_t* w) { return packBits(w) == 0 ? (w[1]
 
 // (C++ mirror) pack: the fewest bits that hold the palette (the GPU's palette order may differ: the same ids)
 inline std::vector<uint32_t> packSection(const uint16_t* ids) {
-    std::vector<uint16_t> pal;
-    std::vector<int16_t> where(65536, -1);
-    for (int i = 0; i < 4096 && pal.size() <= 256; i++)
-        if (where[ids[i]] < 0) where[ids[i]] = int16_t(pal.size()), pal.push_back(ids[i]);
-    uint32_t n = uint32_t(pal.size());
+    uint16_t first = ids[0];
+    bool uniform = true;
+    for (int i = 1; i < 4096; i++) {
+        if (ids[i] != first) {
+            uniform = false;
+            break;
+        }
+    }
+    if (uniform) return {1u << 8, uint32_t(first)};
+
+    struct Scratch {
+        int16_t where[65536];
+        Scratch() { std::fill(std::begin(where), std::end(where), int16_t(-1)); }
+    };
+    thread_local Scratch tls;
+    int16_t* where = tls.where;
+    uint16_t pal[257];
+    uint32_t palLen = 0;
+    for (int i = 0; i < 4096 && palLen <= 256; i++) {
+        uint16_t id = ids[i];
+        if (where[id] < 0) {
+            where[id] = int16_t(palLen);
+            pal[palLen++] = id;
+        }
+    }
+    uint32_t n = palLen;
     uint32_t bits = n == 1 ? 0 : n <= 2 ? 1 : n <= 4 ? 2 : n <= 16 ? 4 : n <= 256 ? 8 : 16;
-    if (bits == 16) n = 0;
-    std::vector<uint32_t> w(1 + (n + 1) / 2, 0u);
-    w[0] = bits | n << 8;
-    for (uint32_t k = 0; k < n; k++) w[1 + k / 2] |= uint32_t(pal[k]) << (16 * (k & 1));
-    if (bits == 0) return w;
     if (bits == 16) {
-        for (int i = 0; i < 4096; i += 2) w.push_back(uint32_t(ids[i]) | uint32_t(ids[i + 1]) << 16);
+        for (uint32_t k = 0; k < palLen; k++) where[pal[k]] = -1;
+        std::vector<uint32_t> w(1 + 2048);
+        w[0] = 16u;
+        for (int i = 0; i < 4096; i += 2) w[1 + (i >> 1)] = uint32_t(ids[i]) | uint32_t(ids[i + 1]) << 16;
         return w;
     }
-    size_t at = w.size();
-    w.resize(at + 4096 * bits / 32, 0u);
+    uint32_t palWords = (n + 1) / 2;
+    uint32_t dataWords = 4096 * bits / 32;
+    std::vector<uint32_t> w(1 + palWords + dataWords, 0u);
+    w[0] = bits | n << 8;
+    for (uint32_t k = 0; k < n; k++) w[1 + k / 2] |= uint32_t(pal[k]) << (16 * (k & 1));
+    uint32_t* dst = w.data() + 1 + palWords;
     for (int i = 0; i < 4096; i++) {
         uint32_t bit = uint32_t(i) * bits;
-        w[at + bit / 32] |= uint32_t(where[ids[i]]) << (bit & 31u);
+        dst[bit >> 5] |= uint32_t(where[ids[i]]) << (bit & 31u);
     }
+    for (uint32_t k = 0; k < palLen; k++) where[pal[k]] = -1;
     return w;
 }
 

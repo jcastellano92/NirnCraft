@@ -21,7 +21,9 @@ final class AtlasVulkan {
     private static Boolean vulkan;
     private static Path path = Path.VK_SHARED;
     private static VulkanDevice device;
-    private enum CopyPhase { OFFERED, CANCELING, RECORDING, SUBMITTED, COMPLETE, FAILED }
+    private static final boolean ASYNC = !"0".equals(System.getenv("ATLAS_VK_ASYNC"))
+            && !"false".equalsIgnoreCase(System.getProperty("atlas.vk.async", "true"));
+    private enum CopyPhase { OFFERED, CANCELING, RECORDING, PENDING, SUBMITTED, COMPLETE, FAILED }
     // Render-thread owned. A failed/ambiguous insertion is retained until device teardown is prevented.
     private static final java.util.Map<Object, CopyPhase> copies = new java.util.IdentityHashMap<>();
     private static final java.util.Map<AtlasNative.Context, java.util.concurrent.CompletableFuture<Void>> copyWaits = new java.util.IdentityHashMap<>();
@@ -94,7 +96,7 @@ final class AtlasVulkan {
             }
             public void submit() { encoder.submit(); }
             public boolean waitCopy() { return ctx.vkWaitCopy(s.signalValue(), COPY_TIMEOUT_NS); }
-        });
+        }, ASYNC);
     }
 
     interface CopyOps {
@@ -107,8 +109,12 @@ final class AtlasVulkan {
 
     /** The actual offer/record/submit state machine, with injected operations for failure tests. */
     static boolean splice(Object owner, CopyOps ops) {
+        return splice(owner, ops, false);
+    }
+
+    static boolean splice(Object owner, CopyOps ops, boolean async) {
         CopyPhase prior = copies.get(owner);
-        if (prior != null && prior != CopyPhase.COMPLETE)
+        if (prior != null && prior != CopyPhase.COMPLETE && prior != CopyPhase.PENDING)
             throw new IllegalStateException("atlas: refusing a splice while the previous copy is " + prior);
         copies.put(owner, CopyPhase.OFFERED);
         try {
@@ -120,9 +126,13 @@ final class AtlasVulkan {
         }
         copies.put(owner, CopyPhase.RECORDING);
         ops.record();
-        // Synchronous S3 baseline: public backend submission keeps the frontend profiler's frame intact.
+        // Public backend submission keeps the frontend profiler's frame intact.
         // Once insertion starts, failure cleanup retires resources; it must never cancel or host-signal this splice.
         ops.submit();
+        if (async) {
+            copies.put(owner, CopyPhase.PENDING);
+            return true;
+        }
         copies.put(owner, CopyPhase.SUBMITTED);
         } catch (Throwable failure) {
             if (copies.get(owner) == CopyPhase.OFFERED) {
@@ -180,7 +190,7 @@ final class AtlasVulkan {
         try { ready = completed.getAsBoolean(); }
         catch (Throwable failure) { copies.put(owner, CopyPhase.FAILED); throw failure; }
         if (ready) { copies.remove(owner); return true; }
-        if (phase != CopyPhase.SUBMITTED)
+        if (phase != CopyPhase.SUBMITTED && phase != CopyPhase.PENDING)
             throw new IllegalStateException("atlas: cannot retire an unconfirmed Vulkan copy (" + phase + ")");
         return false;
     }
@@ -198,6 +208,7 @@ final class AtlasVulkan {
         requirePollable(owner);
         CopyPhase phase = copies.get(owner);
         if (phase == null || phase == CopyPhase.COMPLETE) { copyConfirmed(owner); return true; }
+        if (phase == CopyPhase.PENDING) return true;
         if (phase != CopyPhase.SUBMITTED) throw new IllegalStateException("atlas: unknown copy phase " + phase);
         java.util.concurrent.CompletableFuture<Void> completion;
         try { completion = wait.get(); }
@@ -206,6 +217,30 @@ final class AtlasVulkan {
         try { completion.join(); }
         catch (RuntimeException failure) { copies.put(owner, CopyPhase.FAILED); throw failure; }
         copyConfirmed(owner);
+        return true;
+    }
+
+    /** Promote an async pending copy to a waited submission when targets are closing. */
+    static boolean drainPending(AtlasNative.Context ctx) {
+        if (path() != Path.VK_SHARED) return true;
+        return drainPending(ctx, () -> waitCopyAsync(ctx, Path.VK_SHARED));
+    }
+
+    static boolean drainPending(Object owner, java.util.function.Supplier<java.util.concurrent.CompletableFuture<Void>> wait) {
+        requirePollable(owner);
+        if (copies.get(owner) == CopyPhase.PENDING) copies.put(owner, CopyPhase.SUBMITTED);
+        return finishPending(owner, wait);
+    }
+
+    /** Wait only for the oldest staging-ring slot (frame N-2) when both ring slots are in flight, keeping frame N-1 overlapping. */
+    static boolean waitRingSlot(AtlasNative.Context ctx) {
+        if (path() != Path.VK_SHARED) return true;
+        requirePollable(ctx);
+        boolean ok;
+        try { ok = ctx.vkWaitCopy(-1L, COPY_TIMEOUT_NS); }
+        catch (Throwable failure) { copies.put(ctx, CopyPhase.FAILED); throw failure; }
+        if (!ok)
+            throw new AtlasNative.AtlasException(AtlasNative.ERR_TIMEOUT, "atlas: shared Vulkan ring slot did not complete in 5 s");
         return true;
     }
 

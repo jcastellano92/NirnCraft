@@ -51,7 +51,7 @@ static int failures = 0;
     X(vkAllocateMemory) X(vkFreeMemory) X(vkBindImageMemory) X(vkCreateBuffer) X(vkDestroyBuffer)                     \
     X(vkGetBufferMemoryRequirements) X(vkBindBufferMemory) X(vkMapMemory) X(vkCreateCommandPool)                      \
     X(vkDestroyCommandPool) X(vkAllocateCommandBuffers) X(vkBeginCommandBuffer) X(vkEndCommandBuffer)                 \
-    X(vkCmdPipelineBarrier) X(vkCmdCopyImageToBuffer)
+    X(vkCmdPipelineBarrier) X(vkCmdCopyImageToBuffer) X(vkCmdFillBuffer)
 static PFN_vkGetInstanceProcAddr gipa = nullptr;
 #define VKT_DECL(n) static PFN_##n n = nullptr;
 VKT_FNS(VKT_DECL)
@@ -698,7 +698,11 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
         makeImage(depth, VK_FORMAT_R32_SFLOAT, W, H);
         bool lit = gridFixture() || (std::getenv("ATLAS_VK_TEST_LIT") && std::getenv("ATLAS_VK_TEST_LIT")[0] == '1');
         if (lit) makeImage(nearLight, VK_FORMAT_R16G16B16A16_SFLOAT, W, H);
-        if (abandon) makeImage(sun, VK_FORMAT_R32G32_SFLOAT, 64, 65);
+        // (S4, ATLAS_VK_ASYNC=1: atlas's staging ring, no CPU wait per frame; the sun map rides through it too)
+        const char* asyncEnv = std::getenv("ATLAS_VK_ASYNC");
+        const bool async = asyncEnv && asyncEnv[0] == '1';
+        const bool withSun = abandon || async;
+        if (withSun) makeImage(sun, VK_FORMAT_R32G32_SFLOAT, 64, 65);
         VkCommandPoolCreateInfo pc{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
         pc.queueFamilyIndex = gfx;
         vkCreateCommandPool(dev, &pc, nullptr, &pool);
@@ -713,8 +717,8 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
         vkBeginCommandBuffer(cmd[0], &bi);
         VkImageMemoryBarrier ib[4];
         VkImage targetImages[] = {color.image, depth.image, nearLight.image, sun.image};
-        int imageCount = 2 + (lit ? 1 : 0) + (abandon ? 1 : 0);
-        if (abandon && !lit) targetImages[2] = sun.image;
+        int imageCount = 2 + (lit ? 1 : 0) + (withSun ? 1 : 0);
+        if (withSun && !lit) targetImages[2] = sun.image;
         for (int i = 0; i < imageCount; i++) {
             ib[i] = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
             ib[i].image = targetImages[i];
@@ -740,6 +744,12 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
             std::string info = atlas_info(ctx);
             CHECK(info.find("\"interop\":\"vulkan shared device (zero-copy)\"") != std::string::npos);
             CHECK(info.find("\"onMinecraftDevice\":true") != std::string::npos);
+            if (async) {
+                CHECK(info.find("\"vkAsync\":{\"ring\":true") != std::string::npos);
+                CHECK(atlas_set_sun_map(ctx, 64, 256.0f) == ATLAS_OK);
+            } else {
+                CHECK(info.find("\"vkAsync\":{\"ring\":false") != std::string::npos);
+            }
             AtlasGlFrameIO io{};
             io.dstColor = io.dstDepth = 1;
             io.dstNearLight = (s.f.flags & ATLAS_FRAME_NEAR_LIGHT) ? 1u : 0u;
@@ -859,7 +869,46 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
             }
             auto t0 = std::chrono::steady_clock::now();
             double inCall = 0;
-            int submitted = 0;
+            int submitted = 0, notReady = 0, maxInFlight = 0;
+            std::vector<uint64_t> outstanding;  // (async) the copies handed out and not yet seen complete
+            auto asyncDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(60);
+            // (ATLAS_VK_TEST_MCLOAD=n) a stand-in for Minecraft's own frame: n x 64 MB buffer fills on "Minecraft's" queue
+            // before each splice, so the wall time per frame shows what the serialized copy wait costs and what the ring hides
+            VkBuffer loadBuf = VK_NULL_HANDLE;
+            VkDeviceMemory loadMem = VK_NULL_HANDLE;
+            VkCommandBuffer loadCmd = VK_NULL_HANDLE;
+            const char* loadEnv = std::getenv("ATLAS_VK_TEST_MCLOAD");
+            const int loadFills = loadEnv ? std::atoi(loadEnv) : 0;
+            if (loadFills > 0) {
+                VkBufferCreateInfo lb{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+                lb.size = 64u << 20;
+                lb.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+                CHECK(vkCreateBuffer(dev, &lb, nullptr, &loadBuf) == VK_SUCCESS);
+                VkMemoryRequirements lr;
+                vkGetBufferMemoryRequirements(dev, loadBuf, &lr);
+                VkMemoryAllocateInfo lm{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+                lm.allocationSize = lr.size;
+                lm.memoryTypeIndex = memType(phys, lr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                CHECK(vkAllocateMemory(dev, &lm, nullptr, &loadMem) == VK_SUCCESS);
+                vkBindBufferMemory(dev, loadBuf, loadMem, 0);
+                VkCommandBufferAllocateInfo la{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+                la.commandPool = pool;
+                la.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+                la.commandBufferCount = 1;
+                CHECK(vkAllocateCommandBuffers(dev, &la, &loadCmd) == VK_SUCCESS);
+                VkCommandBufferBeginInfo lbi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+                lbi.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+                vkBeginCommandBuffer(loadCmd, &lbi);
+                VkMemoryBarrier lmb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+                lmb.srcAccessMask = lmb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                for (int k = 0; k < loadFills; k++) {
+                    vkCmdFillBuffer(loadCmd, loadBuf, 0, VK_WHOLE_SIZE, uint32_t(k));
+                    vkCmdPipelineBarrier(loadCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &lmb, 0,
+                                         nullptr, 0, nullptr);
+                }
+                vkEndCommandBuffer(loadCmd);
+                std::printf("  S4 pacing: Minecraft stand-in frame = %d x 64 MB fills\n", loadFills);
+            }
             for (int i = 0; i < FRAMES; i++) {
                 if (i == WARM) {
                     vkQueueWaitIdle(mcQueue);
@@ -874,6 +923,15 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
                     break;
                 }
                 inCall += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count();
+                if (async && !sp.commandBuffer) {  // the ring slot is still read by an earlier copy: wait for oldest slot (N-2)
+                    notReady++;
+                    if (std::chrono::steady_clock::now() > asyncDeadline) { std::printf("  FAIL: ring never freed\n"); failures++; break; }
+                    if (atlas_vk_wait_copy(ctx, ~0ull, 5'000'000'000ull) != ATLAS_OK) {
+                        std::printf("  FAIL: ring slot wait frame %d\n", i); failures++; break;
+                    }
+                    i--;
+                    continue;
+                }
                 CHECK(sp.commandBuffer && sp.signalSemaphore && sp.waitSemaphore);
                 // "Minecraft's" frame: wait for atlas's frame, the copies, the signal atlas reuses its images after
                 VkSemaphore waitSem = reinterpret_cast<VkSemaphore>(uintptr_t(sp.waitSemaphore));
@@ -894,10 +952,25 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
                 fs.pCommandBuffers = &cb;
                 fs.signalSemaphoreCount = 1;
                 fs.pSignalSemaphores = &sigSem;
+                if (loadCmd) {  // "Minecraft's frame" work first on its queue; the splice follows in queue order
+                    VkSubmitInfo ls{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+                    ls.commandBufferCount = 1;
+                    ls.pCommandBuffers = &loadCmd;
+                    CHECK(vkQueueSubmit(mcQueue, 1, &ls, VK_NULL_HANDLE) == VK_SUCCESS);
+                }
                 VkResult submittedResult = vkQueueSubmit(mcQueue, 1, &fs, VK_NULL_HANDLE);
                 CHECK(submittedResult == VK_SUCCESS);
                 if (submittedResult != VK_SUCCESS) break;
-                if (atlas_vk_wait_copy(ctx, sp.signalValue, 5'000'000'000ull) != ATLAS_OK) {
+                if (async) {
+                    // no CPU wait: count what is still outstanding (the overlap the ring allows)
+                    outstanding.push_back(sp.signalValue);
+                    for (auto it = outstanding.begin(); it != outstanding.end();) {
+                        uint32_t done = 0;
+                        if (atlas_vk_copy_complete(ctx, *it, &done) != ATLAS_OK) { failures++; break; }
+                        it = done ? outstanding.erase(it) : it + 1;
+                    }
+                    if (int(outstanding.size()) > maxInFlight) maxInFlight = int(outstanding.size());
+                } else if (atlas_vk_wait_copy(ctx, sp.signalValue, 5'000'000'000ull) != ATLAS_OK) {
                     std::printf("  FAIL: copy wait frame %d\n", i); failures++; break;
                 }
                 submitted++;
@@ -905,13 +978,47 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
             vkQueueWaitIdle(mcQueue);
             std::printf("  receipt S3: independent context, %d submitted splices, output age 0, info %s\n", submitted, atlas_info(ctx));
             CHECK(submitted == FRAMES);
+            std::fflush(stdout);
+            std::printf("  S4 pacing: %s: %.3f ms wall per frame over %d timed frames (%d fills of MC load per frame)\n",
+                        async ? "async ring" : "serialized",
+                        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / (FRAMES - WARM),
+                        FRAMES - WARM, loadFills);
+            if (loadBuf) vkDestroyBuffer(dev, loadBuf, nullptr);
+            if (loadMem) vkFreeMemory(dev, loadMem, nullptr);
+            if (async) {
+                std::setvbuf(stdout, nullptr, _IONBF, 0); std::printf("TRACE s4 begin\n");
+                std::printf("  S4 async: %d frames, %d not-ready polls, max %d copies outstanding without a CPU wait\n", submitted,
+                            notReady, maxInFlight);
+                // the ring never blocks: Minecraft's copies withheld, the frame after the ring is full is no frame (not a hang)
+                uint32_t idle = 0;
+                CHECK(atlas_vk_copy_complete(ctx, 0, &idle) == ATLAS_OK && idle == 1);
+                AtlasVkSplice w1{}, w2{}, w3{};
+                std::printf("TRACE s4 before w1\n"); std::fflush(stdout);
+                CHECK(atlas_vk_render_shared(ctx, &s.f, &io, &tg, &w1) == ATLAS_OK && w1.commandBuffer);
+                CHECK(atlas_vk_render_shared(ctx, &s.f, &io, &tg, &w2) == ATLAS_OK && w2.commandBuffer);
+                std::printf("TRACE s4 before w3\n"); std::fflush(stdout);
+                auto q0 = std::chrono::steady_clock::now();
+                AtlasStatus st3 = atlas_vk_render_shared(ctx, &s.f, &io, &tg, &w3);
+                double q3 = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - q0).count();
+                CHECK(st3 == ATLAS_OK && !w3.commandBuffer && !w3.signalValue);
+                CHECK(q3 < 1000.0);
+                std::printf("  S4 async: ring full -> no frame in %.3f ms (never blocks)\n", q3);
+                // withheld copies go in order; the ring frees and the next frame is offered
+                CHECK(submitSplice(mcQueue, w1) == VK_SUCCESS);
+                CHECK(submitSplice(mcQueue, w2) == VK_SUCCESS);
+                CHECK(atlas_vk_wait_copy(ctx, w2.signalValue, 5'000'000'000ull) == ATLAS_OK);
+                CHECK(atlas_vk_render_shared(ctx, &s.f, &io, &tg, &w3) == ATLAS_OK && w3.commandBuffer);
+                CHECK(submitSplice(mcQueue, w3) == VK_SUCCESS);
+                CHECK(atlas_vk_wait_copy(ctx, w3.signalValue, 5'000'000'000ull) == ATLAS_OK);
+                vkQueueWaitIdle(mcQueue);
+            }
             sceneReceipt(ctx, "S3", false);
             s3WallMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / (FRAMES - WARM);
             s3Ms = inCall / (FRAMES - WARM);
             // read the targets back
             size_t px = size_t(W) * H;
             VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
-            bc.size = px * (lit ? 20 : 12);
+            bc.size = px * (lit ? 20 : 12) + (async ? 64 * 65 * 8 : 0);
             bc.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
             vkCreateBuffer(dev, &bc, nullptr, &rb);
             VkMemoryRequirements r;
@@ -937,6 +1044,13 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
                 reg.bufferOffset = px * 12;
                 vkCmdCopyImageToBuffer(cmd[1], nearLight.image, VK_IMAGE_LAYOUT_GENERAL, rb, 1, &reg);
             }
+            if (async) {
+                VkBufferImageCopy sreg{};
+                sreg.bufferOffset = px * (lit ? 20 : 12);
+                sreg.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+                sreg.imageExtent = {64, 65, 1};
+                vkCmdCopyImageToBuffer(cmd[1], sun.image, VK_IMAGE_LAYOUT_GENERAL, rb, 1, &sreg);
+            }
             mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
             vkCmdPipelineBarrier(cmd[1], VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0,
@@ -953,6 +1067,19 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
                              reinterpret_cast<const float*>(static_cast<const char*>(map) + px * 8) + px);
             if (lit) got.nearLight.assign(reinterpret_cast<const uint16_t*>(static_cast<const char*>(map) + px * 12),
                                           reinterpret_cast<const uint16_t*>(static_cast<const char*>(map) + px * 12) + px * 4);
+            if (async) {
+                // a content hash of what Minecraft's targets hold, to compare with the serialized run's line
+                auto fnv = [](const void* p, size_t n, uint64_t h) {
+                    for (size_t i = 0; i < n; i++) h = (h ^ static_cast<const uint8_t*>(p)[i]) * 1099511628211ull;
+                    return h;
+                };
+                const char* sm = static_cast<const char*>(map) + px * (lit ? 20 : 12);
+                size_t sunNonzero = 0;
+                for (size_t i = 0; i < 64 * 65 * 2; i++) sunNonzero += reinterpret_cast<const uint32_t*>(sm)[i] != 0;
+                std::printf("  S4 content hash: color+depth %016llx sun-map %016llx (%zu nonzero words)\n",
+                            (unsigned long long)fnv(got.depth.data(), got.depth.size() * 4, fnv(got.color.data(), got.color.size() * 2, 14695981039346656037ull)),
+                            (unsigned long long)fnv(sm, 64 * 65 * 8, 14695981039346656037ull), sunNonzero);
+            }
             contentReceipt("S3", got.depth, nonzeroHalfLight(got.nearLight.empty() ? nullptr : got.nearLight.data(), px), lit, s.f, true);
             size_t badC, badD;
             compareHost(refC, refD, got, W, H, badC, badD);

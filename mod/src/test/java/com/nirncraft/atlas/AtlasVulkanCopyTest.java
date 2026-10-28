@@ -140,4 +140,97 @@ class AtlasVulkanCopyTest {
             buildField.set(null, oldBuild); readyField.setBoolean(null, oldReady);
         }
     }
+
+    @Test
+    void asyncPendingSpliceDeliversConsecutiveFramesWithout30HzSkip() {
+        Object owner = new Object();
+        for (int frame = 0; frame < 60; frame++) {
+            assertTrue(AtlasVulkan.finishPending(owner, () -> {
+                fail("async pending frame handoff must not block or schedule waitCopyAsync between normal frames");
+                return null;
+            }));
+            Ops ops = new Ops();
+            ops.fail = "wait"; // proves async splice never calls synchronous waitCopy() on the render thread
+            assertTrue(AtlasVulkan.splice(owner, ops, true));
+            assertEquals(1, ops.recorded);
+            assertEquals(1, ops.submitted);
+        }
+        // When the 2-slot native ring fills (sp == null) or targets close, drainPending promotes PENDING -> SUBMITTED:
+        var completion = new java.util.concurrent.CompletableFuture<Void>();
+        assertFalse(AtlasVulkan.drainPending(owner, () -> completion));
+        assertFalse(AtlasVulkan.finishPending(owner, () -> completion));
+        completion.complete(null);
+        assertTrue(AtlasVulkan.finishPending(owner, () -> completion));
+    }
+
+    @Test
+    void exp3SpriteTexelAndMaterialExtractionCacheBenchmark() {
+        // Simulate 512 distinct 16x16 sprites and 9,457 exact materials (matching g10-live exactIds.used=9457).
+        int numSprites = 512, numMaterials = 9457;
+        com.mojang.blaze3d.platform.NativeImage[] images = new com.mojang.blaze3d.platform.NativeImage[numSprites];
+        for (int s = 0; s < numSprites; s++) {
+            var img = new com.mojang.blaze3d.platform.NativeImage(16, 16, false);
+            for (int y = 0; y < 16; y++)
+                for (int x = 0; x < 16; x++)
+                    img.setPixel(x, y, 0xFF000000 | ((s * 37 + x * 13) & 255) << 16 | ((s * 17 + y * 29) & 255) << 8 | ((x ^ y ^ s) & 255));
+            images[s] = img;
+        }
+        try {
+            // Baseline: every material rasterizes 6 faces x (4x4x16 + 16x16x1) = 3,072 NativeImage.getPixel calls.
+            long t0 = System.nanoTime();
+            long baseChecksum = 0;
+            for (int m = 0; m < numMaterials; m++) {
+                var img = images[m & (numSprites - 1)];
+                int tint = (m * 0x13579B) & 0xF8F8F8;
+                // 6 faces at TILE=4 (sub=4 -> 256 samples/face) + 6 faces at TILE=16 (sub=1 -> 256 samples/face)
+                for (int f = 0; f < 12; f++) {
+                    for (int y = 0; y < 16; y++)
+                        for (int x = 0; x < 16; x++) {
+                            int c = img.getPixel(x, y);
+                            baseChecksum += (c ^ tint);
+                        }
+                }
+            }
+            double baseColdMs = (System.nanoTime() - t0) / 1e6;
+
+            // Optimized cold: frame0Texels extracts each sprite once into int[256] + caches Extracted per (sid, q)
+            long t1 = System.nanoTime();
+            int[][] spriteCache = new int[numSprites][];
+            long[] extractedCache = new long[numMaterials];
+            long optChecksum = 0;
+            for (int m = 0; m < numMaterials; m++) {
+                int spIdx = m & (numSprites - 1);
+                int[] f0 = spriteCache[spIdx];
+                if (f0 == null) {
+                    var img = images[spIdx];
+                    f0 = new int[256];
+                    for (int y = 0; y < 16; y++)
+                        for (int x = 0; x < 16; x++) f0[x + 16 * y] = img.getPixel(x, y);
+                    spriteCache[spIdx] = f0;
+                }
+                int tint = (m * 0x13579B) & 0xF8F8F8;
+                long matSum = 0;
+                for (int f = 0; f < 12; f++) {
+                    for (int i = 0; i < 256; i++) matSum += (f0[i] ^ tint);
+                }
+                extractedCache[m] = matSum;
+                optChecksum += matSum;
+            }
+            double optColdMs = (System.nanoTime() - t1) / 1e6;
+
+            // Optimized warm reload (e.g. context restart / persistTo / ingestTable):
+            long t2 = System.nanoTime();
+            long warmChecksum = 0;
+            for (int m = 0; m < numMaterials; m++) warmChecksum += extractedCache[m];
+            double optWarmMs = (System.nanoTime() - t2) / 1e6;
+
+            assertEquals(baseChecksum, optChecksum);
+            assertEquals(baseChecksum, warmChecksum);
+            System.out.printf(java.util.Locale.ROOT,
+                    "BENCH exp3 materials=%d baseColdMs=%.2f optColdMs=%.2f optWarmMs=%.3f coldSpeedup=%.2fx%n",
+                    numMaterials, baseColdMs, optColdMs, optWarmMs, baseColdMs / Math.max(0.001, optColdMs));
+        } finally {
+            for (var img : images) if (img != null) img.close();
+        }
+    }
 }

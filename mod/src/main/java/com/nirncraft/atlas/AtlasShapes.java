@@ -33,41 +33,97 @@ final class AtlasShapes {
 
     /** atlas.h AtlasMaterialShape: occupancy (bit x + 4 * (z + 4 * y)), mean ARGB, flags, 6 x 16 ARGB face texels. */
     record Shape(long occupancy, int mean, int flags, int[][] faces) {}
+    record StateModel(List<BlockStateModelPart> parts, List<BakedQuad> quads, List<AABB> boxes,
+                      long boxMask, boolean fullCube, boolean brickable, int offsetWord) {}
+    record Extracted(Shape shape, int[][] textures, BrickModel brick, int offsetWord) {}
 
-    /** The model quads the lab's library samples a state's faces from (its parts at a fixed seed, every face and the unculled). */
-    static List<BakedQuad> quads(BlockState st) {
-        List<BakedQuad> quads = new ArrayList<>();
-        for (BlockStateModelPart p : parts(st)) {
-            for (Direction d : Direction.values()) quads.addAll(p.getQuads(d));
-            quads.addAll(p.getQuads(null));
+    private static volatile Object modelEpoch;
+    private static final java.util.Map<BlockState, StateModel> STATE_MODELS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<Long, Extracted> EXTRACTED = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<TextureAtlasSprite, int[]> FRAME0_TEXELS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static boolean checkEpoch() {
+        var mc = Minecraft.getInstance();
+        if (mc == null || mc.getModelManager() == null) return false;
+        Object cur = mc.getModelManager().getBlockStateModelSet();
+        if (cur == null) return false;
+        if (cur != modelEpoch) {
+            synchronized (AtlasShapes.class) {
+                if (cur != modelEpoch) {
+                    STATE_MODELS.clear();
+                    EXTRACTED.clear();
+                    SPRITE_TEXELS.clear();
+                    FRAME0_TEXELS.clear();
+                    modelEpoch = cur;
+                }
+            }
         }
-        return quads;
+        return true;
     }
 
-    /** The model parts the state draws (a multipart model's every matching case; a variant's pick at a fixed seed). */
-    static List<BlockStateModelPart> parts(BlockState st) {
+    static StateModel stateModel(BlockState st) {
+        if (!checkEpoch()) return buildStateModel(st);
+        return STATE_MODELS.computeIfAbsent(st, AtlasShapes::buildStateModel);
+    }
+
+    private static StateModel buildStateModel(BlockState st) {
         List<BlockStateModelPart> parts = new ArrayList<>();
         try {
-            // (NeoForge's overload with the state: the plain one hands the parts the air's state, and a model that
-            // picks its parts by the state it is given drew only its unconditional ones: a fence's or a wall's post,
-            // a pane's centre, no half of a double plant)
             Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(st).collectParts(
                     net.minecraft.client.renderer.block.BlockAndTintGetter.EMPTY, BlockPos.ZERO, st, RandomSource.create(42L), parts);
         } catch (RuntimeException e) {
             parts.clear();
         }
-        return parts;
-    }
-
-    /** The state's outline shape as boxes (none when it cannot say). */
-    static List<AABB> boxes(BlockState st) {
+        parts = List.copyOf(parts);
+        List<BakedQuad> quads = new ArrayList<>();
+        for (BlockStateModelPart p : parts) {
+            for (Direction d : Direction.values()) quads.addAll(p.getQuads(d));
+            quads.addAll(p.getQuads(null));
+        }
+        quads = List.copyOf(quads);
         VoxelShape shape;
         try {
             shape = st.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
         } catch (RuntimeException e) {
             shape = net.minecraft.world.phys.shapes.Shapes.empty();
         }
-        return shape.toAabbs();
+        List<AABB> boxes = List.copyOf(shape.toAabbs());
+        long boxMask = mask(boxes);
+        boolean fullCube = fullCubeModel(quads);
+        boolean brickable = computeBrickable(st, quads, fullCube);
+        int offset = computeOffsetWord(st);
+        return new StateModel(parts, quads, boxes, boxMask, fullCube, brickable, offset);
+    }
+
+    static Extracted extracted(BlockState st, int q) {
+        if (!checkEpoch()) return buildExtracted(st, q);
+        long key = (long) net.minecraft.world.level.block.Block.getId(st) << 32 | (q & 0xFFFFFFFFL);
+        return EXTRACTED.computeIfAbsent(key, ignored -> buildExtracted(st, q));
+    }
+
+    private static Extracted buildExtracted(BlockState st, int q) {
+        Shape shape;
+        try { shape = of(st, q); } catch (RuntimeException e) { shape = null; }
+        int[][] tex;
+        try { tex = textures(st, q); } catch (RuntimeException e) { tex = null; }
+        BrickModel brick;
+        try { brick = brick(st, q); } catch (RuntimeException e) { brick = null; }
+        return new Extracted(shape, tex, brick, offsetWord(st));
+    }
+
+    /** The model quads the lab's library samples a state's faces from (its parts at a fixed seed, every face and the unculled). */
+    static List<BakedQuad> quads(BlockState st) {
+        return stateModel(st).quads();
+    }
+
+    /** The model parts the state draws (a multipart model's every matching case; a variant's pick at a fixed seed). */
+    static List<BlockStateModelPart> parts(BlockState st) {
+        return stateModel(st).parts();
+    }
+
+    /** The state's outline shape as boxes (none when it cannot say). */
+    static List<AABB> boxes(BlockState st) {
+        return stateModel(st).boxes();
     }
 
     /** The micro-voxels whose centres the shape holds, bit x + 4 * (z + 4 * y). */
@@ -143,9 +199,10 @@ final class AtlasShapes {
      * Null when it has neither a shape nor a model (a full cube in its colour then).
      */
     static Shape of(BlockState st, int tint) {
-        List<BakedQuad> quads = quads(st);
-        List<AABB> boxes = boxes(st);
-        long mask = mask(boxes);
+        StateModel sm = stateModel(st);
+        List<BakedQuad> quads = sm.quads();
+        List<AABB> boxes = sm.boxes();
+        long mask = sm.boxMask();
         int[][] faces = new int[6][];
         for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(st, d, quads, tint, TILE);
         // thinner than a micro-voxel (a snow layer, a carpet, a torch, a lantern's chain): its outline fills none of the
@@ -162,6 +219,24 @@ final class AtlasShapes {
         // (and a plain cube with see-through texels: a copper grate, mangrove roots, a cut-out cube's holes)
         boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes) || !st.isSolidRender() && holedCube(quads, faces);  // (a full opaque cube never gets holes)
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
+    }
+
+    private static int[] frame0Texels(TextureAtlasSprite sp) {
+        int[] cached = FRAME0_TEXELS.get(sp);
+        if (cached != null) return cached.length == 0 ? null : cached;
+        NativeImage img;
+        try {
+            img = sp.contents().getOriginalImage();
+        } catch (RuntimeException e) {
+            FRAME0_TEXELS.put(sp, new int[0]);
+            return null;
+        }
+        int fw = sp.contents().width(), fh = sp.contents().height();
+        int[] t = new int[fw * fh];
+        for (int y = 0; y < fh; y++)
+            for (int x = 0; x < fw; x++) t[x + fw * y] = img.getPixel(x, y);
+        FRAME0_TEXELS.put(sp, t);
+        return t;
     }
 
     /**
@@ -191,12 +266,8 @@ final class AtlasShapes {
         ordered.sort(java.util.Comparator.comparingDouble(q -> quadDepth(d, q)));
         for (BakedQuad q : ordered) {
             TextureAtlasSprite sp = q.materialInfo().sprite();
-            NativeImage img;
-            try {
-                img = sp.contents().getOriginalImage();
-            } catch (RuntimeException e) {
-                continue;
-            }
+            int[] f0 = frame0Texels(sp);
+            if (f0 == null) continue;
             int qt = tint < 0 || q.materialInfo().tintIndex() < 0 ? -1
                     : st == null ? tint : AtlasMaterials.layerTint(st, q.materialInfo().tintIndex(), tint);
             boolean tinted = qt >= 0;
@@ -235,7 +306,7 @@ final class AtlasShapes {
                             float s = clamp01((aa - a0) / (a1 - a0)), t = clamp01((bb - b0) / (b1 - b0));
                             float u = lerp2(pu[c00], pu[c10], pu[c01], pu[c11], s, t), v = lerp2(pv[c00], pv[c10], pv[c01], pv[c11], s, t);
                             int px = Math.min(fw - 1, Math.max(0, (int) (u * fw))), py = Math.min(fh - 1, Math.max(0, (int) (v * fh)));
-                            int c = img.getPixel(px, py);  // ARGB, frame 0
+                            int c = f0[px + fw * py];  // ARGB, frame 0
                             double al = (c >>> 24) / 255.0;
                             n++;
                             if (al < 0.1) continue;
@@ -431,6 +502,10 @@ final class AtlasShapes {
     /** Forget the cached sprite texels (resources reloaded). */
     static void clearSprites() {
         SPRITE_TEXELS.clear();
+        FRAME0_TEXELS.clear();
+        STATE_MODELS.clear();
+        EXTRACTED.clear();
+        modelEpoch = null;
     }
 
     /**
@@ -441,7 +516,11 @@ final class AtlasShapes {
      */
     static boolean brickable(BlockState st, List<BakedQuad> quads) {
         if (quads.isEmpty()) return false;
-        boolean cube = fullCubeModel(quads);
+        return computeBrickable(st, quads, fullCubeModel(quads));
+    }
+
+    private static boolean computeBrickable(BlockState st, List<BakedQuad> quads, boolean cube) {
+        if (quads.isEmpty()) return false;
         // leaves are textured cut-out cubes; a block tagged leaves whose model is no cube (a berry bush, a hedge's
         // twigs) is a brick like any plant (as a leaves cube it was its texture on six faces)
         if (st.is(BlockTags.LEAVES) && cube) return false;
@@ -503,6 +582,10 @@ final class AtlasShapes {
      * largest offsets, from the offset the state gives positions (0: none).
      */
     static int offsetWord(BlockState st) {
+        return stateModel(st).offsetWord();
+    }
+
+    private static int computeOffsetWord(BlockState st) {
         try {
             if (!st.hasOffsetFunction()) return 0;
             double h = 0, v = 0;
@@ -520,9 +603,10 @@ final class AtlasShapes {
 
     /** A state's brick model (tint RGB for its tinted quads, -1 none), or null when it takes no brick. */
     static BrickModel brick(BlockState st, int tint) {
-        List<BakedQuad> quads = quads(st);
+        StateModel sm = stateModel(st);
+        List<BakedQuad> quads = sm.quads();
         if (quads.isEmpty()) return fluidBrick(st);
-        if (!brickable(st, quads)) return null;
+        if (!sm.brickable()) return null;
         List<BrickQuad> out = new ArrayList<>(quads.size());
         for (BakedQuad q : quads) {
             TextureAtlasSprite sp = q.materialInfo().sprite();

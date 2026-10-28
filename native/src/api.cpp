@@ -1437,7 +1437,7 @@ static AtlasStatus renderShared(AtlasContext* ctx, const AtlasFrame* f, const At
     {
         bool ready = false;
         std::string err;
-        if (!ctx->backend->vkCopyComplete(0, ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
+        if (!ctx->backend->vkRenderReady(ready, err)) return backendFailure(ctx, err, ATLAS_ERR_STATE);
         if (!ready) return ATLAS_OK;  // no frame, history, images or stats changed
     }
     fr::frame();  // the flight recorder's frame boundary: one atlas frame a game frame
