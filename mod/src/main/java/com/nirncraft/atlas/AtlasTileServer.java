@@ -225,6 +225,11 @@ public final class AtlasTileServer {
                 && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"));
     }
 
+    static boolean isGpuCoarseOnly() {
+        AtlasTileServer t = current;
+        return t != null && t.gpuCoarseOnly();
+    }
+
     private double tickMs() {
         return server.getAverageTickTimeNanos() / 1e6;
     }

@@ -289,6 +289,7 @@ final class AtlasOverlayLive {
                     }
                     double x = AtlasClientGen.cameraX(), z = AtlasClientGen.cameraZ();
                     int reach = AtlasClientGen.RADIUS * 16 + AHEAD;
+                    boolean nearUpdated = updateSeededNear(x, z, reach);
                     // the nearest settlement or seeded start not ready yet
                     int best = -1;
                     double bestD = Double.MAX_VALUE;
@@ -301,7 +302,7 @@ final class AtlasOverlayLive {
                         }
                     }
                     AtlasOverlayStarts.Start seeded = null;
-                    for (AtlasOverlayStarts.Start st : seededNear(x, z, reach)) {
+                    for (AtlasOverlayStarts.Start st : near) {
                         if (ready.contains(st.key())) continue;
                         BoundingBox b = st.box();
                         double d = Math.max(Math.max(b.minX() - x, x - b.maxX()), Math.max(b.minZ() - z, z - b.maxZ()));
@@ -310,19 +311,51 @@ final class AtlasOverlayLive {
                             seeded = st;
                         }
                     }
-                    noBake(plan);  // (the seeded starts found near the camera)
-                    scanned = true;
+                    if (nearUpdated || !scanned) {
+                        noBake(plan);  // (the seeded starts found near the camera)
+                        scanned = true;
+                    }
                     if (best < 0 && seeded == null) {
                         LockSupport.parkNanos(500_000_000L);
                         continue;
                     }
                     String id = seeded != null ? seeded.key() : plan.sId[best];
-                    List<? extends StructurePiece> pieces = seeded != null ? seeded.pieces() : AtlasOverlayTapes.pieces(id);
-                    int layer = seeded != null ? seeded.layer() : AtlasOverlayTapes.LAYER_SETTLEMENTS;
                     doing = "preparing " + id;
                     long[] keys = load(id);
-                    if (keys == null) keys = record(id, pieces, layer);
-                    ready.add(id);
+                    if (keys != null) {
+                        ready.add(id);
+                        Set<Long> batchKeys = new LinkedHashSet<>();
+                        for (long k : keys) batchKeys.add(k);
+                        for (int s = 0; s < plan.settlements(); s++) {
+                            if (ready.contains(plan.sId[s])) continue;
+                            double d = Math.max(Math.abs(plan.sX[s] - x), Math.abs(plan.sZ[s] - z)) - plan.sReach[s];
+                            if (d <= reach) {
+                                long[] more = load(plan.sId[s]);
+                                if (more != null) {
+                                    ready.add(plan.sId[s]);
+                                    for (long k : more) batchKeys.add(k);
+                                }
+                            }
+                        }
+                        for (AtlasOverlayStarts.Start st : near) {
+                            if (ready.contains(st.key())) continue;
+                            BoundingBox b = st.box();
+                            double d = Math.max(Math.max(b.minX() - x, x - b.maxX()), Math.max(b.minZ() - z, z - b.maxZ()));
+                            if (d <= reach) {
+                                long[] more = load(st.key());
+                                if (more != null) {
+                                    ready.add(st.key());
+                                    for (long k : more) batchKeys.add(k);
+                                }
+                            }
+                        }
+                        keys = batchKeys.stream().mapToLong(Long::longValue).toArray();
+                    } else {
+                        List<? extends StructurePiece> pieces = seeded != null ? seeded.pieces() : AtlasOverlayTapes.pieces(id);
+                        int layer = seeded != null ? seeded.layer() : AtlasOverlayTapes.LAYER_SETTLEMENTS;
+                        keys = record(id, pieces, layer);
+                        ready.add(id);
+                    }
                     Map<Long, Integer> offsets = new HashMap<>();
                     ovl.set(AtlasOvlNative.SET_TAPES, tapes.tapeWords(offsets));
                     noBake(plan);  // (its chunks made from now on are kept)
@@ -338,19 +371,25 @@ final class AtlasOverlayLive {
         }
 
         /** The seeded starts whose source chunk lies within reach (+ a start's own reach); found again after a move. */
-        List<AtlasOverlayStarts.Start> seededNear(double x, double z, int reach) {
-            if (!Double.isNaN(nearX) && Math.max(Math.abs(x - nearX), Math.abs(z - nearZ)) < 128) return near;
+        boolean updateSeededNear(double x, double z, int reach) {
+            int margin = 256;
+            if (!Double.isNaN(nearX) && Math.max(Math.abs(x - nearX), Math.abs(z - nearZ)) < margin) return false;
             if (starts == null) {
                 ServerLevel ow = server.overworld();
                 starts = new AtlasOverlayStarts(server.registryAccess(), ow.getChunkSource().getGenerator(), ow.getChunkSource().getGeneratorState(),
                         server.getStructureTemplateManager(), ow, AtlasOverlayStarts.ALL);
             }
             doing = "finding seeded starts";
-            int r = reach + AtlasOverlayStarts.REACH + 128;
+            int r = reach + AtlasOverlayStarts.REACH + margin;
             near = starts.in((int) x - r, (int) z - r, (int) x + r, (int) z + r);
             nearX = x;
             nearZ = z;
             doing = "";
+            return true;
+        }
+
+        List<AtlasOverlayStarts.Start> seededNear(double x, double z, int reach) {
+            updateSeededNear(x, z, reach);
             return near;
         }
 

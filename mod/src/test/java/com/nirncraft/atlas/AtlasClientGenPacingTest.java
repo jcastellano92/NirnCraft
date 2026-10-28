@@ -65,3 +65,4 @@ class AtlasClientGenPacingTest {
         assertFalse(AtlasClientGen.shouldAllowInterleavedFarTurn(false, false, true, 12.0));
     }
 }
+

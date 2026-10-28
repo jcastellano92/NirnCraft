@@ -69,6 +69,7 @@ final class AtlasOverlayStarts {
     private final RegistryAccess access;
     private final ChunkGenerator generator;
     private final RandomState random;
+    private final Climate.Sampler climate;
     private final ChunkGeneratorStructureState state;
     private final StructureTemplateManager templates;
     private final LevelHeightAccessor heights;
@@ -83,6 +84,7 @@ final class AtlasOverlayStarts {
         this.generator = generator;
         this.state = state;
         this.random = state.randomState();
+        this.climate = this.random.createClimateSampler(SamplerContext.builder().enableCaches().build());
         this.templates = templates;
         this.heights = heights;
         this.seed = state.getLevelSeed();
@@ -139,7 +141,6 @@ final class AtlasOverlayStarts {
     private List<Start> startsAt(Holder<StructureSet> set, ChunkPos chunk) {
         if (!set.value().placement().isStructureChunk(state, chunk.x(), chunk.z())) return NONE;
         List<StructureSet.StructureSelectionEntry> options = new ArrayList<>(set.value().structures());
-        Climate.Sampler climate = random.createClimateSampler(SamplerContext.builder().enableCaches().build());
         if (options.size() == 1) return start(options.get(0), chunk, climate);
         WorldgenRandom pick = new WorldgenRandom(new LegacyRandomSource(0L));
         pick.setLargeFeatureSeed(seed, chunk.x(), chunk.z());

@@ -65,6 +65,7 @@ public:
     ~SectionStore();
     // the cold tier's directory (empty: none), the world's identity, the budgets (bytes); the edit layers on disk loaded
     void configure(const std::string& dir, uint64_t seed, uint32_t genVersion, uint64_t warmBudget, uint64_t coldBudget);
+    void setGenActive(bool on) { genActive_ = on; }
     void put(const Key3& k, PackedIds words, uint32_t hash, uint8_t flags);
     PackedIds get(const Key3& k);  // warm, else cold, else a self-contained layer (then warm again); null: none
     PackedIds peek(const Key3& k) const {  // (warm only, not counted)
@@ -163,6 +164,7 @@ private:
     };
     std::string dir_;
     uint32_t genVersion_ = 0;
+    bool genActive_ = false;
     uint64_t coldBudget_ = 2ull << 30, coldBytes_ = 0, clock_ = 0, deltaBytes_ = 0;
     // the kept regions (enforce's): the cold tier is read back only inside them (what warm would let go again at once)
     int keepRx_ = 0, keepRz_ = 0, keep_ = -1;

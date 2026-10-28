@@ -505,6 +505,7 @@ void World::setGenFingerprint(uint64_t fp) {
         if (genFp_ == fp) return;
         ++sectionRevision_;
         genFp_ = fp;
+        store_->setGenActive(genFp_ != 0);
         root = storeRoot_;
     }
     genCache_->configure(root, fp);
@@ -570,6 +571,9 @@ std::shared_ptr<const Section> World::layerOver(const Key3& k, Section& s, uint8
 }
 
 void World::commitSection(const Key3& k, std::shared_ptr<Section> s, uint8_t flags) {
+    if (genFp_ != 0 && !(flags & SectionStore::EDITED) && !store_->layer(k)) {
+        flags |= SectionStore::REGEN;
+    }
     ++sectionRevision_;
     sections_[k] = s;
     if (gridCoarse.load(std::memory_order_relaxed) < coarseTop()) undigested_.insert(k);  // (World::digest)
@@ -679,7 +683,8 @@ std::shared_ptr<const Section> World::putSection(int sx, int sy, int sz, const u
     return s;
 }
 
-bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep) {
+bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, SectionSnapshot& out, bool outsideKeep,
+                             bool collectEntries) {
     out = {};
     std::unique_lock<std::mutex> lock(mu_, std::defer_lock);
     if (wait) lock.lock();
@@ -710,12 +715,14 @@ bool World::snapshotSections(int sx0, int sz0, int sx1, int sz1, bool wait, Sect
         complete = store_->completeRange(read);
         ++sectionRevision_;
     }
-    for (const auto& [k, sec] : sections_)
-        if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.entries.emplace_back(k, SectionSrc{sec, nullptr});
-    std::vector<std::pair<Key3, PackedIds>> warm;
-    store_->memoryInRange(sx0, sz0, sx1, sz1, warm);
-    for (auto& [k, words] : warm)
-        if (!sections_.count(k)) out.entries.emplace_back(k, SectionSrc{nullptr, std::move(words)});
+    if (collectEntries) {
+        for (const auto& [k, sec] : sections_)
+            if (k.x >= sx0 && k.x < sx1 && k.z >= sz0 && k.z < sz1) out.entries.emplace_back(k, SectionSrc{sec, nullptr});
+        std::vector<std::pair<Key3, PackedIds>> warm;
+        store_->memoryInRange(sx0, sz0, sx1, sz1, warm);
+        for (auto& [k, words] : warm)
+            if (!sections_.count(k)) out.entries.emplace_back(k, SectionSrc{nullptr, std::move(words)});
+    }
     out.revision = sectionRevision_;
     return complete;
 }
@@ -956,6 +963,7 @@ void World::configureStore(const std::string& dir, uint64_t seed, uint32_t genVe
     uint64_t bh = buildHash();
     genVersion ^= uint32_t(bh) ^ uint32_t(bh >> 32);
     store_->configure(dir, seed, genVersion, warmBytes ? warmBytes : 512ull << 20, coldBytes ? coldBytes : 4ull << 30);
+    store_->setGenActive(genFp_ != 0);
     {
         // (the gen cache beside the world's other tiers: <dir>/<seed>/gen-<fingerprint>)
         char sub[32];

@@ -11,7 +11,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
@@ -256,7 +255,7 @@ final class AtlasClientSections {
             if (c == null || sy < c.getMinSectionY() || sy > c.getMaxSectionY()) continue;
             int[][] one = {nearIds(c.getSection(sy - c.getMinSectionY()))};
             int[][] tints = columnTints(mc.level, c, sy * 16 + 8);
-            AtlasSections.Decoded d = new AtlasSections.Decoded(cx, cz, sy, one, tints[0][136], tints[1][136], tints[0], tints[1]);
+            AtlasSections.Decoded d = new AtlasSections.Decoded(cx, cz, sy, one, tints[2][0], tints[2][1], tints[0], tints[1]);
             dirtyCount++;
             synchronized (READY) {
                 READY.add(d);
@@ -314,7 +313,7 @@ final class AtlasClientSections {
         int cx = c.getPos().x(), cz = c.getPos().z();
         com.nirncraft.atlas.server.AtlasServerAgreement.client(cx, cz, minSec, secs);  // (the server's chunk against the GPU's)
         int[][] tints = columnTints(level, c, high);
-        return new AtlasSections.Decoded(cx, cz, minSec, secs, tints[0][136], tints[1][136], tints[0], tints[1]);
+        return new AtlasSections.Decoded(cx, cz, minSec, secs, tints[2][0], tints[2][1], tints[0], tints[1]);
     }
 
     private static final int[] TINT_GRID = {0, 4, 8, 12, 15};
@@ -323,11 +322,11 @@ final class AtlasClientSections {
      * Chunk c's grass and foliage colours per column (x + 16 z) as vanilla blends them (BiomeColors, its colour cache)
      * at height y: what the chunk mesher tints each block with.
      *
-     * <p>Fast-paths uniform biome chunks (>85% of chunks) by checking the 4 corners + center (5 samples vs 256), and
-     * on biome borders samples the 5x5 grid (25 samples vs 256) with bilinear RGB interpolation across each cell.
+     * <p>Fast-paths uniform biome chunks (>85% of chunks) by checking the 4 corners + center (5 samples vs 256),
+     * returning {@code null} column arrays when the chunk's biome tint is uniform so section hashes match the GPU
+     * generator's section claims without re-uploading unchanged sections.
      */
     private static int[][] columnTints(ClientLevel level, LevelChunk c, int y) {
-        int[] grass = new int[256], foliage = new int[256];
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int bx = c.getPos().x() << 4, bz = c.getPos().z() << 4;
 
@@ -353,11 +352,10 @@ final class AtlasClientSections {
 
         if (g00 == gCenter && g40 == gCenter && g04 == gCenter && g44 == gCenter
                 && f00 == fCenter && f40 == fCenter && f04 == fCenter && f44 == fCenter) {
-            Arrays.fill(grass, gCenter);
-            Arrays.fill(foliage, fCenter);
-            return new int[][] {grass, foliage};
+            return new int[][] {null, null, {gCenter, fCenter}};
         }
 
+        int[] grass = new int[256], foliage = new int[256];
         int[] gs = new int[25], fs = new int[25];
         gs[0] = g00; fs[0] = f00;
         gs[4] = g40; fs[4] = f40;
@@ -378,7 +376,7 @@ final class AtlasClientSections {
 
         interpolateGrid(gs, grass);
         interpolateGrid(fs, foliage);
-        return new int[][] {grass, foliage};
+        return new int[][] {grass, foliage, {grass[136], foliage[136]}};
     }
 
     private static void interpolateGrid(int[] grid25, int[] out256) {

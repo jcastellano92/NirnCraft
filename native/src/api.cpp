@@ -166,7 +166,9 @@ struct AtlasContext {
     uint64_t materialLightsHash = 0;
     bool gridLights = false;  // some material emits: the grid's emitters are lights (gridLightMain)
     std::vector<MaterialGpu> palette;
+    uint64_t paletteRevision = 1;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
+    uint64_t weatherRevision = 1;
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
     float rainFactor = 0;
     float preExposure = 1.0f;  // atlas_set_pre_exposure
@@ -256,6 +258,7 @@ static void syncClasses(AtlasContext* ctx) {
     }
     ctx->voxgrid.setClasses(grid);  // (the grid's coarse levels: the same vote, on the GPU)
     ctx->world.setClasses(std::move(grid));  // (and the regions' levels: world.hpp voteCoarse)
+    ctx->paletteRevision++;
 }
 
 
@@ -977,6 +980,7 @@ ATLAS_API AtlasStatus atlas_set_weather(AtlasContext* ctx, const AtlasWeather* w
         if (src[i]) std::memcpy(ctx->weather.data() + size_t(i) * 128 * 128, src[i], 128 * 128 * 4);
     }
     ctx->rainFactor = w->rainFactor;
+    ctx->weatherRevision++;
     return ATLAS_OK;
 }
 
@@ -1029,6 +1033,7 @@ ATLAS_API AtlasStatus atlas_set_air(AtlasContext* ctx, const AtlasAir* a) {
     ctx->airLut = lut;
     writeLut(lut, ctx->weather);
     ctx->airVersion++;
+    ctx->weatherRevision++;
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }
@@ -1827,7 +1832,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     }
     std::memcpy(g.lods, in.scene->lods, sizeof(g.lods));
     in.palette = &ctx->palette;
+    in.paletteRevision = ctx->paletteRevision;
     in.weather = &ctx->weather;
+    in.weatherRevision = ctx->weatherRevision;
     in.cloudNoise = &ctx->cloudNoise;
     // far actors: in the kernel's frame (relative to the integer camera block, like every other position there),
     // computed in double; the curvature drop uses the distance from the camera itself

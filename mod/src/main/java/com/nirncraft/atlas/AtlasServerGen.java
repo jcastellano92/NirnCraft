@@ -12,11 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The client generator's side of the integrated server's chunks (docs/ATLAS-GPU-LOOP.md section 4): the server's
  * {@code AtlasChunkGenerator} asks for a chunk, the generator's worker puts it through the chunk store with the chunks the
- * camera wants (ahead of them, the server's chunks come first), and the decorated ids that come out of the store go back to
- * the server as the chunk to fill. The store keeps one answer per chunk: the server gets exactly the blocks the grid was
- * given. Requests are lock-free for the server's threads; everything else runs on the generator's worker thread.
+ * camera wants, and the decorated ids that come out of the store go back to the server as the chunk to fill. The store keeps
+ * one answer per chunk: the server gets exactly the blocks the grid was given. Requests are lock-free for the server's
+ * threads; everything else runs on the generator's worker thread.
  */
 final class AtlasServerGen implements AtlasServerFeed.Provider {
+    static final int SERVER_KEEP_R = 11;
+
     private static final class Req {
         final int cx, cz;
         final CompletableFuture<AtlasServerFeed.Chunk> f = new CompletableFuture<>();
@@ -28,12 +30,15 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         }
     }
 
+    private record ReadyChunk(int cx, int cz, AtlasServerFeed.Chunk chunk, long[] hashes) {}
+
     private final java.util.Set<net.minecraft.world.level.levelgen.structure.Structure> coveredSets =
             java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
     private final BlockState[] palette;
     private final int[] nearIds;       // per generator id: the renderer's near id (the agreement tally)
     private final AtlasClientGen owner;
     private final ConcurrentHashMap<Long, Req> reqs = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ReadyChunk> readyChunks = new ConcurrentHashMap<>();
     private volatile boolean up, closed;
     private volatile long served, flagged, waitedForTapes, notFinal, overflow, badReadbacks;
     /** Requests the store holds at once; the rest are made in Java (-Dnirncraft.atlas.serverGen.outstanding). */
@@ -66,8 +71,34 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
 
     void close() {
         closed = true;
+        readyChunks.clear();
         for (Req r : reqs.values()) r.f.complete(null);  // (the server makes them in Java)
         reqs.clear();
+    }
+
+    void onCacheHit(long k) {
+        readyChunks.remove(k);
+        Req r = reqs.remove(k);
+        if (r != null) r.f.complete(null);
+    }
+
+    void invalidate(long k) {
+        readyChunks.remove(k);
+        Req r = reqs.remove(k);
+        if (r != null) r.f.complete(null);
+    }
+
+    void prune(int camCx, int camCz) {
+        int keep = SERVER_KEEP_R + 2;
+        readyChunks.values().removeIf(rc -> Math.max(Math.abs(rc.cx - camCx), Math.abs(rc.cz - camCz)) > keep);
+        for (var it = reqs.entrySet().iterator(); it.hasNext(); ) {
+            var e = it.next();
+            Req r = e.getValue();
+            if (Math.max(Math.abs(r.cx - camCx), Math.abs(r.cz - camCz)) > keep) {
+                it.remove();
+                r.f.complete(null);
+            }
+        }
     }
 
     @Override
@@ -84,16 +115,15 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
             notFinal++;
             return null;
         }
-        // the store makes a decorated chunk in about a tenth of a second (a trees' chunk longer): a burst the server asks for
-        // (a spawn, a teleport, a flight) is more than it can answer in a tolerable time, and the chunks past this many
-        // outstanding go to Java at once; the walk's trickle is the GPU's
-        if (reqs.size() >= MAX_OUTSTANDING) {
-            overflow++;
-            return null;
+        long k = ChunkPos.pack(cx, cz);
+        ReadyChunk rc = readyChunks.remove(k);
+        if (rc != null) {
+            AtlasServerAgreement.gpu(cx, cz, rc.hashes, null);
+            served++;
+            return CompletableFuture.completedFuture(rc.chunk);
         }
-        Req r = reqs.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new Req(cx, cz));
-        owner.wake();
-        return r.f.copy();  // (the caller's timeout must not complete the shared future)
+        // Only serve chunks already completed by the GPU store so Worker-Main threads never block waiting on store stages
+        return null;
     }
 
     @Override
@@ -128,9 +158,13 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         gen.storePrioritize(java.util.Arrays.copyOf(xz, n * 2));
     }
 
-    /** Whether any request waits (the worker passes the id buffer to the store's call only then). */
+    /** Whether any request waits or the current store batch is near the server's chunk window. */
     boolean pending() {
         return !reqs.isEmpty();
+    }
+
+    boolean wantsIds(int[] batch, int camCx, int camCz) {
+        return !reqs.isEmpty() || readyChunks.size() < 256;
     }
 
     /**
@@ -142,9 +176,10 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
         int n = 0;
         for (Req r : reqs.values()) {
             if (r.submitted) continue;
-            if (!AtlasOverlayLive.finalAt(r.cx, r.cz)) {  // (a settlement or start found since the request: Java makes it)
+            long k = ChunkPos.pack(r.cx, r.cz);
+            if (owner.isCacheServed(k) || owner.isStorePacked(k) || !AtlasOverlayLive.finalAt(r.cx, r.cz)) {
                 waitedForTapes++;
-                reqs.remove(ChunkPos.pack(r.cx, r.cz));
+                reqs.remove(k);
                 r.f.complete(null);
                 continue;
             }
@@ -158,23 +193,30 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
 
     /**
      * Worker thread: the store gave m chunks (their pairs in xz, ids and flags as atlas_gen_run_store gave them): those
-     * the server asked for go to it. A chunk the kernels could not prove exact goes as null (Java makes it).
+     * the server asked for (or within SERVER_KEEP_R of the camera) are decoded. A chunk the kernels could not prove exact
+     * goes as null (Java makes it).
      */
     void delivered(int[] xz, int m, int[] ids, int[] flags, int[] info) {
+        delivered(xz, m, ids, flags, info, owner.cameraCx(), owner.cameraCz());
+    }
+
+    void delivered(int[] xz, int m, int[] ids, int[] flags, int[] info, int camCx, int camCz) {
         for (int i = 0; i < m; i++) {
-            long k = ChunkPos.pack(xz[i * 2], xz[i * 2 + 1]);
+            int cx = xz[i * 2], cz = xz[i * 2 + 1];
+            long k = ChunkPos.pack(cx, cz);
             Req r = reqs.remove(k);
-            if (r == null) continue;
+            boolean preCache = r == null && readyChunks.size() < 256
+                    && Math.max(Math.abs(cx - camCx), Math.abs(cz - camCz)) <= SERVER_KEEP_R
+                    && AtlasOverlayLive.finalAt(cx, cz);
+            if (r == null && !preCache) continue;
             if (flags[i] != 0) {
                 flagged++;
-                r.f.complete(null);
+                if (r != null) r.f.complete(null);
                 continue;
             }
             short[][] secs = new short[40][];
             long[] hashes = new long[40];
             int base = i * AtlasGenNative.CHUNK_WORDS;
-            int[] near = new int[4096];
-            int[][] nearSecs = new int[40][];
             for (int s = 0; s < 40; s++) {
                 short[] sec = null;
                 for (int w = 0; w < 2048; w++) {
@@ -188,9 +230,9 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
                 if (sec == null) {
                     hashes[s] = AtlasServerAgreement.AIR;
                 } else {
-                    for (int b = 0; b < 4096; b++) near[b] = nearIds[sec[b] & 0xFFFF];
-                    hashes[s] = AtlasServerAgreement.hash(near);
-                    nearSecs[s] = near.clone();
+                    long h = 0xcbf29ce484222325L;
+                    for (int b = 0; b < 4096; b++) h = (h ^ nearIds[sec[b] & 0xFFFF]) * 0x100000001b3L;
+                    hashes[s] = h;
                 }
             }
             // the ids against the store's own report of the chunk (kinds: air, blocks, deep rock): a section the report says
@@ -205,13 +247,18 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
                 badReadbacks++;
                 if (badReadbacks <= 5)
                     com.nirncraft.NirnCraft.LOGGER.warn("atlas server feed: chunk {},{} ids disagree with the store's report ({} sections non-air, {} disagree): Java makes it",
-                            xz[i * 2], xz[i * 2 + 1], nonAir, disagree);
-                r.f.complete(null);
+                            cx, cz, nonAir, disagree);
+                if (r != null) r.f.complete(null);
                 continue;
             }
-            AtlasServerAgreement.gpu(xz[i * 2], xz[i * 2 + 1], hashes, nearSecs);
-            served++;
-            r.f.complete(new AtlasServerFeed.Chunk(xz[i * 2], xz[i * 2 + 1], secs, palette, AtlasSideOps.at(xz[i * 2], xz[i * 2 + 1])));
+            AtlasServerFeed.Chunk chunk = new AtlasServerFeed.Chunk(cx, cz, secs, palette, AtlasSideOps.at(cx, cz));
+            if (r != null) {
+                AtlasServerAgreement.gpu(cx, cz, hashes, null);
+                served++;
+                r.f.complete(chunk);
+            } else {
+                readyChunks.put(k, new ReadyChunk(cx, cz, chunk, hashes));
+            }
         }
     }
 
@@ -222,7 +269,7 @@ final class AtlasServerGen implements AtlasServerFeed.Provider {
 
     /** "server feed: asked / served / flagged / waiting for tapes" (atlas-info). */
     String state() {
-        return "serverFeed{up=" + up + " waiting=" + reqs.size() + " served=" + served + " flagged=" + flagged
+        return "serverFeed{up=" + up + " waiting=" + reqs.size() + " ready=" + readyChunks.size() + " served=" + served + " flagged=" + flagged
                 + " tapeWaits=" + waitedForTapes + " javaNotFinal=" + notFinal + " javaOverflow=" + overflow + " badReadbacks=" + badReadbacks + "}";
     }
 }

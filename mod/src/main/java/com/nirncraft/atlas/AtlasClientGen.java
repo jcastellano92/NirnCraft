@@ -121,7 +121,10 @@ final class AtlasClientGen implements AutoCloseable {
         for (int i = 0; i < chunkKeys.length; i++) {
             long k = chunkKeys[i];
             any |= c.done.remove(k);
+            c.cacheServed.remove(k);
+            c.storePacked.remove(k);
             c.deferred.remove(k);
+            if (c.serverGen != null) c.serverGen.invalidate(k);
             xz[i * 2] = ChunkPos.getX(k);
             xz[i * 2 + 1] = ChunkPos.getZ(k);
             for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(xz[i * 2], sec - 4, xz[i * 2 + 1]));
@@ -143,7 +146,7 @@ final class AtlasClientGen implements AutoCloseable {
     /** Far tiles a side around the camera per coarse level (the level's window is 4 tiles of 16 of its chunks). */
     static final int FAR_TILES = 2;
     /** Chunks per GPU batch; the first after a jump is small, so the blocks under the camera come first. */
-    private static final int BATCH = 64, FIRST_BATCH = 16, CACHE_BATCH = 256, READY_MAX = 512;
+    private static final int BATCH = 64, FIRST_BATCH = 16, URGENT_BATCH = 24, CACHE_BATCH = 256, READY_MAX = 512;
     private static volatile AtlasClientGen active;
 
     // the camera, from the render thread (follow)
@@ -170,7 +173,35 @@ final class AtlasClientGen implements AutoCloseable {
     private final ThreadLocal<BiomeResolver> biomes;
     private final long zoomSeed;
     private final Set<Long> done = ConcurrentHashMap.newKeySet();
+    private final Set<Long> cacheServed = ConcurrentHashMap.newKeySet();
+    private final Set<Long> storePacked = ConcurrentHashMap.newKeySet();
     private final Set<Long> deepRock = ConcurrentHashMap.newKeySet();  // sections left out as deep solid rock
+
+    boolean isCacheServed(long k) {
+        return cacheServed.contains(k);
+    }
+
+    boolean isStorePacked(long k) {
+        return storePacked.contains(k);
+    }
+
+    int cameraCx() {
+        return camCx;
+    }
+
+    int cameraCz() {
+        return camCz;
+    }
+
+    private int lastBatchCamCx = Integer.MIN_VALUE, lastBatchCamCz = Integer.MIN_VALUE;
+
+    private boolean urgentNearBatch(int cx, int cz, int ccx, int ccz) {
+        if (firstUpNs == 0 || AtlasLoadingScreen.holding()) return false;
+        if (Math.abs(ccx - lastBatchCamCx) > 1 || Math.abs(ccz - lastBatchCamCz) > 1) return false;
+        if (camVx * camVx + camVz * camVz > 25.0 * 25.0) return false;
+        int dx = cx - ccx, dz = cz - ccz;
+        return dx * dx + dz * dz <= NEAR_BOOST_R * NEAR_BOOST_R;
+    }
     /**
      * A chunk waiting to go up: the generator's own 16-bit sections (gen; deep rock left out, the arrays the features'
      * store keeps: nothing copied) or, decorated, the feed's far ids (decoded), with the chunk's tints.
@@ -929,21 +960,8 @@ final class AtlasClientGen implements AutoCloseable {
             try {
                 refreshStats();
                 nearBoost();
-                // the integrated server's chunks first: they are what the world waits on (a few, in the store's call)
-                if (serverGen != null && direct && storeOn) {
-                    boolean served = false;
-                    try {
-                        serverGen.prioritize(gen);
-                        served = serveServer(ids, flags, info);
-                    } catch (RuntimeException e) {  // (the server's chunks never stop the camera's: Java makes them from now on)
-                        com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the server feed is off", e);
-                        AtlasServerGen sg = serverGen;
-                        serverGen = null;
-                        com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
-                        sg.close();
-                    }
-                    if (served) continue;
-                }
+                // Integrated server chunks piggyback on normal camera store runs (delivered / readyChunks)
+                // so server chunk loading never preempts camera L0 planning or bypasses .gch cache.
                 long ln = System.nanoTime();
                 if (ln - loopLogNs > 20_000_000_000L) {
                     // (dev: the worker's state to the log every 20 s)
@@ -1014,7 +1032,9 @@ final class AtlasClientGen implements AutoCloseable {
                         int px0 = ChunkPos.getX(near.get(0)) >> 3, pz0 = ChunkPos.getZ(near.get(0)) >> 3;
                         near.removeIf(k -> (ChunkPos.getX(k) >> 3) != px0 || (ChunkPos.getZ(k) >> 3) != pz0);
                     }
-                    int n = Math.min(BATCH, near.size());
+                    int maxBatch = !near.isEmpty() && urgentNearBatch(ChunkPos.getX(near.get(0)), ChunkPos.getZ(near.get(0)), ccx, ccz)
+                            ? URGENT_BATCH : BATCH;
+                    int n = Math.min(maxBatch, near.size());
                     if (n > 0) {
                         nearIdle = false;
                         // The store keeps a patch's neighbourhood at a time (next() sends none while 64 chunks wait). The
@@ -1348,6 +1368,8 @@ final class AtlasClientGen implements AutoCloseable {
                 if (dx * dx + dz * dz > RADIUS * RADIUS) continue;
                 long k = ChunkPos.pack(jumpCx + dx, jumpCz + dz);
                 if (!upSinceJump.contains(k) && done.remove(k)) {
+                    cacheServed.remove(k);
+                    storePacked.remove(k);
                     lost++;
                     // (its sections were claimed as uploaded, and the grid does not hold them (it refilled after the claim): asked
                     // again without this, the claim said "the core has these blocks" and the chunk never came up: 151 of 441,
@@ -1397,7 +1419,11 @@ final class AtlasClientGen implements AutoCloseable {
             if (m > 0) gen.ingest(new long[m]);  // (nothing sent: the batch is released)
             // (the store brings out whatever else was ready too, packed and not sent: asked for again, else holes in the window)
             for (int i = 0; i < m; i++)
-                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz) done.remove(ChunkPos.pack(outXZ[i * 2], outXZ[i * 2 + 1]));
+                if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz) {
+                    long pk = ChunkPos.pack(outXZ[i * 2], outXZ[i * 2 + 1]);
+                    done.remove(pk);
+                    storePacked.remove(pk);
+                }
             for (int i = 0; i < m; i++) {
                 if (outXZ[i * 2] != cx || outXZ[i * 2 + 1] != cz || fl[i] != 0) continue;
                 int o = i * AtlasGenNative.INFO_WORDS;
@@ -1486,9 +1512,24 @@ final class AtlasClientGen implements AutoCloseable {
             long gz = AtlasRecorder.begin();
             generatedChunks += n;  // (these chunks the cache did not have: through the store's stages)
             AtlasServerGen sg = serverGen;
-            boolean idsForServer = sg != null && sg.pending();
+            int scx = camCx, scz = camCz;
+            if (batch.length > 0) {
+                lastBatchCamCx = scx;
+                lastBatchCamCz = scz;
+            }
+            boolean idsForServer = sg != null && sg.wantsIds(batch, scx, scz);
             int m = gen.runStore(batch, outXZ, idsForServer ? ids : null, flags, info, tt);
-            if (idsForServer && m > 0) sg.delivered(outXZ, m, ids, flags, info);
+            for (int i = 0; i < m; i++) storePacked.add(ChunkPos.pack(outXZ[i * 2], outXZ[i * 2 + 1]));
+            if (idsForServer && m > 0) {
+                try {
+                    sg.delivered(outXZ, m, ids, flags, info, scx, scz);
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas client generation: the server feed is off", e);
+                    serverGen = null;
+                    com.nirncraft.atlas.server.AtlasServerFeed.unbind(sg);
+                    sg.close();
+                }
+            }
             AtlasRecorder.end(Z_RUN_STORE, gz, 0, batch.length / 2);
             gt = tt[0];
             storeFinished += m;
@@ -1520,7 +1561,9 @@ final class AtlasClientGen implements AutoCloseable {
                 continue;
             }
             if (!inWindow(cx, cz, ccx, ccz, RADIUS + 1)) {
-                done.remove(ChunkPos.pack(cx, cz));  // the camera left while it ran: generated again if it comes back
+                long pk = ChunkPos.pack(cx, cz);
+                done.remove(pk);  // the camera left while it ran: generated again if it comes back
+                storePacked.remove(pk);
                 continue;
             }
             if (wantIds && near(cx, cz, ccx, ccz, FEATURE_RADIUS + 2)) store.put(ChunkPos.pack(cx, cz), compact(ids, i));
@@ -1561,7 +1604,9 @@ final class AtlasClientGen implements AutoCloseable {
             if (lost == 0) continue;
             // not taken (no window yet, outside it, the pool full): forgotten, so they go again when they can
             refused = true;
-            done.remove(ChunkPos.pack(batch[i * 2], batch[i * 2 + 1]));
+            long pk = ChunkPos.pack(batch[i * 2], batch[i * 2 + 1]);
+            done.remove(pk);
+            storePacked.remove(pk);
             for (int sec = 0; sec < 40; sec++)
                 if ((lost >>> sec & 1) != 0) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(batch[i * 2], sec - 4, batch[i * 2 + 1]));
         }
@@ -1695,11 +1740,12 @@ final class AtlasClientGen implements AutoCloseable {
             return new int[0];
         }
         int px0 = batch[0] >> 3, pz0 = batch[1] >> 3;
-        int[] keep = new int[Math.min(batch.length, BATCH * 2)];
+        int maxPairs = urgentNearBatch(batch[0], batch[1], camCx, camCz) ? URGENT_BATCH * 2 : BATCH * 2;
+        int[] keep = new int[Math.min(batch.length, maxPairs)];
         int m = 0;
         for (int i = 0; i < batch.length; i += 2) {
             int cx = batch[i], cz = batch[i + 1];
-            if ((cx >> 3) == px0 && (cz >> 3) == pz0 && m < BATCH * 2) {
+            if ((cx >> 3) == px0 && (cz >> 3) == pz0 && m < maxPairs) {
                 keep[m++] = cx;
                 keep[m++] = cz;
             } else {
@@ -1746,6 +1792,9 @@ final class AtlasClientGen implements AutoCloseable {
                 continue;
             }
             if (AtlasClientSections.isReal(cx, cz)) {  // the loaded chunk's own blocks are up: they stay (and count as up: the spawn area waited for 152 of these for good)
+                long pk = ChunkPos.pack(cx, cz);
+                cacheServed.add(pk);
+                if (serverGen != null) serverGen.onCacheHit(pk);
                 markCovered(cx, cz);
                 continue;
             }
@@ -1767,6 +1816,9 @@ final class AtlasClientGen implements AutoCloseable {
                         if ((lost >>> sec & 1) != 0) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
                     continue;
                 }
+                long pk = ChunkPos.pack(cx, cz);
+                cacheServed.add(pk);
+                if (serverGen != null) serverGen.onCacheHit(pk);
                 AtlasClientSections.up(cx, cz);
                 uploadedChunks++;
                 cachedChunks++;
@@ -1861,8 +1913,12 @@ final class AtlasClientGen implements AutoCloseable {
         if (cand.isEmpty()) return null;
         cand.sort(java.util.Comparator.comparingLong(c -> c[1]));
         if (storeOn) {
-            int px0 = ChunkPos.getX(cand.get(0)[0]) >> 3, pz0 = ChunkPos.getZ(cand.get(0)[0]) >> 3;
-            if (!cacheWindowPass()) cand.removeIf(c -> (ChunkPos.getX(c[0]) >> 3) != px0 || (ChunkPos.getZ(c[0]) >> 3) != pz0);
+            int cx0 = ChunkPos.getX(cand.get(0)[0]), cz0 = ChunkPos.getZ(cand.get(0)[0]);
+            int px0 = cx0 >> 3, pz0 = cz0 >> 3;
+            if (!cacheWindowPass()) {
+                cand.removeIf(c -> (ChunkPos.getX(c[0]) >> 3) != px0 || (ChunkPos.getZ(c[0]) >> 3) != pz0);
+                if (urgentNearBatch(cx0, cz0, ccx, ccz)) max = Math.min(max, URGENT_BATCH);
+            }
         }
         int n = Math.min(max, cand.size());
         int[] xz = new int[n * 2];
@@ -2078,7 +2134,10 @@ final class AtlasClientGen implements AutoCloseable {
                     if (!wanted && inWindow(x, z, ccx, ccz, RADIUS + 1)) continue;
                     // the chunk is made again; only this section's claim goes, so only it is sent again
                     AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(x, list[i + 2], z));
-                    done.remove(ChunkPos.pack(x, z));
+                    long pk = ChunkPos.pack(x, z);
+                    done.remove(pk);
+                    cacheServed.remove(pk);
+                    storePacked.remove(pk);
                     // a loaded chunk is never made again (fromCache leaves a real chunk's blocks alone): its section is
                     // read again from the chunk. Without this level 0's ask was lost for good (its "asked" flag stays):
                     // a hole in the near field drawn by the coarse levels a few blocks from the player (10-26: 11 blocks
@@ -2098,9 +2157,12 @@ final class AtlasClientGen implements AutoCloseable {
         done.removeIf(k -> {
             int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
             if (Math.abs(cx - ccx) <= far && Math.abs(cz - ccz) <= far) return false;
+            cacheServed.remove(k);
+            storePacked.remove(k);
             for (int sec = 0; sec < 40; sec++) AtlasEditsClient.unclaim(net.minecraft.core.SectionPos.asLong(cx, sec - 4, cz));
             return true;
         });
+        if (serverGen != null) serverGen.prune(ccx, ccz);
         deepRock.removeIf(k -> Math.abs(net.minecraft.core.SectionPos.x(k) - ccx) > far || Math.abs(net.minecraft.core.SectionPos.z(k) - ccz) > far);
     }
 

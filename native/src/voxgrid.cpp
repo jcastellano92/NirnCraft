@@ -905,7 +905,7 @@ void VoxGrid::prepare(World& world, const double centre[3]) {
     }
     if (needed) {
         World::SectionSnapshot snapshot;
-        world.snapshotSections(x0, z0, x1, z1, true, snapshot);  // ticket I/O without either shared lock
+        world.snapshotSections(x0, z0, x1, z1, true, snapshot, false, false);  // ticket I/O without either shared lock
     }
 }
 
@@ -2308,6 +2308,11 @@ void VoxGrid::coarseReadmit(VgBatch& b) {
 }
 
 void VoxGrid::takeCoarse(VgBatch& b) {
+    const auto coarseStart = std::chrono::steady_clock::now();
+    const bool liveFrame = stats_.frames > 0 && stats_.settledFrame > 0;
+    auto coarseOverBudget = [&]() -> bool {
+        return liveFrame && std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - coarseStart).count() >= 4.0;
+    };
     b.classes = classes_;
     coarseJobAt_.clear();
     // (the coarse standby is ranked again with level 0's waiting: the view moved on, or slots came free; and, the camera
@@ -2443,7 +2448,12 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     std::unordered_map<const void*, uint32_t> stagedPacks;  // (and packed ones)
     for (size_t i = 0; i < b.packs.size(); i++) stagedPacks[b.packs[i].get()] = uint32_t(i);
     int sectionLevels = std::min(4, activeCoarse_);
-    for (auto& [dist, key] : order) {
+    for (size_t idx = 0; idx < order.size(); ++idx) {
+        if (idx > 0 && (idx & 31u) == 0 && coarseOverBudget()) {
+            cpendingCursor_ -= (order.size() - idx);
+            break;
+        }
+        auto& [dist, key] = order[idx];
         auto pit = cpending_.find(key);
         if (!refreshWorldSource(key, pit->second.ids)) { ++cpendingRev_; continue; }
         CPending p = std::move(pit->second);

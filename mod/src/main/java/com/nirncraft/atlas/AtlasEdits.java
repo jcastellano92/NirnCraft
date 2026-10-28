@@ -147,22 +147,27 @@ public final class AtlasEdits {
         ServerLevel level = server.overworld();
         if (level == null) return;
         if (file == null) open(server);
+        boolean lightsOnly = AtlasTileServer.isGpuCoarseOnly() && AtlasClientSections.ON && !why;
         if (server.getTickCount() % RESECTION_EVERY == 0 && !RESECTION.isEmpty()) {
-            for (Long k : new ArrayList<>(RESECTION)) {
-                RESECTION.remove(k);
-                CHUNK_HASH.remove(k);  // (scanned whole again: its columns and its sections, AtlasSections.record)
-                if (QUEUED.add(k)) {
-                    synchronized (CHUNKS) {
-                        CHUNKS.add(k);
+            if (lightsOnly) {
+                RESECTION.clear();
+            } else {
+                for (Long k : new ArrayList<>(RESECTION)) {
+                    RESECTION.remove(k);
+                    CHUNK_HASH.remove(k);  // (scanned whole again: its columns and its sections, AtlasSections.record)
+                    if (QUEUED.add(k)) {
+                        synchronized (CHUNKS) {
+                            CHUNKS.add(k);
+                        }
                     }
                 }
             }
         }
-        scanChunks(level);
+        scanChunks(level, lightsOnly);
         if (!DIRTY.isEmpty() || !LIGHT_DIRTY.isEmpty()) flush(level);
         if (server.getTickCount() % PUSH_EVERY == 0) {
             push(server, level);
-            AtlasSections.push(server, level);
+            if (!lightsOnly) AtlasSections.push(server, level);
         }
         if (server.getTickCount() % 1200 == 0) saveInBackground();
     }
@@ -192,7 +197,7 @@ public final class AtlasEdits {
         });
     }
 
-    private static void scanChunks(ServerLevel level) {
+    private static void scanChunks(ServerLevel level, boolean lightsOnly) {
         for (int n = 0; n < CHUNKS_PER_TICK; n++) {
             Long k;
             synchronized (CHUNKS) {
@@ -203,6 +208,30 @@ public final class AtlasEdits {
             int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
             LevelChunk c = level.getChunkSource().getChunkNow(cx, cz);
             if (c == null) continue;  // gone again: the next load scans it
+            // its light sources (fires, torches, lamps, lava, the mod's fire blocks): the far field's lights
+            List<long[]> lights = new ArrayList<>();
+            c.findBlockLightSources((pos, st) -> {
+                int e = st.getLightEmission();
+                if (e >= 10 && lights.size() < 64) lights.add(new long[] {pos.asLong(), e});
+            });
+            if (lightsOnly) {
+                if (lights.isEmpty()) continue;
+                boolean anyLightChanged = false;
+                for (long[] l : lights) {
+                    BlockPos p = BlockPos.of(l[0]);
+                    TileJournal j = JOURNAL.computeIfAbsent(tileKey(Math.floorDiv(p.getX(), TILE), Math.floorDiv(p.getZ(), TILE)),
+                            kk -> new TileJournal());
+                    synchronized (j) {
+                        Light old = j.lights.get(l[0]);
+                        if (old != null && old.level() == (int) l[1]) continue;
+                        j.version++;
+                        j.lights.put(l[0], new Light(p.getX(), p.getY(), p.getZ(), (int) l[1], j.version));
+                        anyLightChanged = true;
+                    }
+                }
+                if (anyLightChanged) changedSinceSave = true;
+                continue;
+            }
             Column[] cols = new Column[256];
             long h = 1469598103934665603L;
             for (int lz = 0; lz < 16; lz++)
@@ -215,12 +244,6 @@ public final class AtlasEdits {
                     h = (h ^ col.roofId()) * 1099511628211L;
                     h = (h ^ col.water()) * 1099511628211L;
                 }
-            // its light sources (fires, torches, lamps, lava, the mod's fire blocks): the far field's lights
-            List<long[]> lights = new ArrayList<>();
-            c.findBlockLightSources((pos, st) -> {
-                int e = st.getLightEmission();
-                if (e >= 10 && lights.size() < 64) lights.add(new long[] {pos.asLong(), e});
-            });
             for (long[] l : lights) h = (h ^ l[0]) * 1099511628211L;
             Long had = CHUNK_HASH.put(k, h);
             if (why) explain(k, cx, cz, had, cols, lights.size());

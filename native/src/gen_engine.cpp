@@ -1520,7 +1520,7 @@ public:
                 // The surface rule in bands of y: one thread walks its column's rules (a noise a block, in doubles), 10 to 50 ms
                 // whatever the chunks beside it (slicing by chunks left the pass's time as it was: every slice "latency"). A band is a
                 // submission of about ATLAS_GEN_PART_MS; its state waits in colInfo (atlas_gen.slang).
-                uint32_t B = bandBlocks(), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
+                uint32_t B = bandBlocks(n), gx = (PASS_ITEMS[p] + GROUP - 1) / GROUP;
                 uint32_t bands = (uint32_t(NOISE_H_BLOCKS) + B) / B;  // (y from the stack's top, NOISE_H + 1 values, B a band)
                 uint32_t groupedBands = 0, groupedBlocks = 0;
                 for (uint32_t k = 0; k < bands; k++) {
@@ -1533,18 +1533,18 @@ public:
                     groupedBands++;
                     groupedBlocks += B;
                     int bandHi = -64 + NOISE_H_BLOCKS - int(k * B);
-                    // High sky bands (y > 240) and deep basement bands (y < -16) are mostly early-exit or uniform rock;
-                    // coalesce multiple bands per submission to avoid hundreds of <0.3 ms micro-submissions.
-                    bool skyBand = bandHi > 240;
+                    // High sky bands (y > 384) are guaranteed above all terrain;
+                    // coalesce multiple sky bands per submission while recording every submission for bandSeen().
+                    bool skyBand = bandHi > 384;
                     int nextBandHi = -64 + NOISE_H_BLOCKS - int((k + 1) * B);
-                    uint32_t maxGroup = skyBand ? 16u : 1u;
-                    bool flushSkyBeforeTerrain = skyBand && nextBandHi <= 240;
+                    uint32_t maxGroup = skyBand ? 8u : 1u;
+                    bool flushSkyBeforeTerrain = skyBand && nextBandHi <= 384;
                     if (k + 1 < bands) {
                         barrier(VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
                                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
                         if (groupedBands >= maxGroup || flushSkyBeforeTerrain) {
-                            ring_[cur_].sliceKind = skyBand ? -1 : BAND_KIND;
-                            ring_[cur_].sliceUnits = skyBand ? 0 : groupedBlocks;
+                            ring_[cur_].sliceKind = BAND_KIND;
+                            ring_[cur_].sliceUnits = groupedBlocks;
                             if (!submit(err, false)) return false;
                             begin();
                             vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
@@ -1552,8 +1552,8 @@ public:
                             groupedBlocks = 0;
                         }
                     } else {
-                        ring_[cur_].sliceKind = skyBand ? -1 : BAND_KIND;
-                        ring_[cur_].sliceUnits = skyBand ? 0 : groupedBlocks;
+                        ring_[cur_].sliceKind = BAND_KIND;
+                        ring_[cur_].sliceUnits = groupedBlocks;
                     }
                 }
                 vkCmdPushConstants(cmd_, layout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(GenParams), &b.params);
@@ -2750,17 +2750,20 @@ private:
         }();
         return v;
     }
-    uint32_t bandBlocks() {
+    uint32_t bandBlocks(uint32_t n = 64) {
         int fixed = surfaceBand();
         if (fixed > 0) return uint32_t(std::min(fixed, NOISE_H_BLOCKS + 1));
         static const double partMs = envMs("ATLAS_GEN_PART_MS", 4.0);
-        if (bandPerBlock_ <= 0.0) return 8;  // (not measured yet: a few blocks, never the whole pass of 50 ms the first call took)
-        return uint32_t(std::clamp(partMs * 0.35 / bandPerBlock_, 2.0, 64.0));
+        const bool live = shared_ && !boost_.load(std::memory_order_relaxed);
+        const uint32_t maxB = live ? (n > 32 ? 12u : 16u) : 64u;
+        if (bandPerBlock_ <= 0.0) return std::min(8u, maxB);  // (not measured yet: a few blocks, never the whole pass of 50 ms the first call took)
+        return uint32_t(std::clamp(partMs * 0.35 / bandPerBlock_, 2.0, double(maxB)));
     }
     void bandSeen(uint32_t blocks, double ms) {
         if (blocks == 0) return;
         double per = ms / double(blocks);
-        bandPerBlock_ = std::max(bandPerBlock_ * 0.995, per);
+        const bool live = shared_ && !boost_.load(std::memory_order_relaxed);
+        bandPerBlock_ = std::max(bandPerBlock_ * (live ? 0.998 : 0.995), per);
     }
     uint32_t sliceOf(uint32_t kind, uint32_t n) {
         static const bool on = [] {
@@ -2787,17 +2790,23 @@ private:
             return !e || std::atoi(e) != 0;
         }();
         if (!on || n <= 1) return std::max(1u, n);
+        const bool live = shared_ && pace_.cls != 2 && !boost_.load(std::memory_order_relaxed);
         double& sl = farSlice_[kind];
-        if (sl <= 0.0) sl = initial;
-        return uint32_t(std::clamp(sl, std::min(64.0, double(n)), double(n)));  // (64 groups at least: beside the frames a slice's time holds their share, and slices shrunk by it made a tile in 200 submissions)
+        if (sl <= 0.0) sl = live ? std::min(initial, kind == 103u ? 128.0 : 32.0) : initial;
+        const double minSl = live ? 16.0 : 64.0;
+        const double maxSl = live ? std::min<double>(n, kind == 103u ? 1024.0 : 512.0) : double(n);
+        return uint32_t(std::clamp(sl, std::min(minSl, double(n)), maxSl));
     }
     void farSliceSeen(uint32_t kind, uint32_t units, double ms) {
         static const double loadLimit = envMs("ATLAS_GEN_FAR_PASS_MS", 6.0);
-        const double limit = pace_.cls == 2 || boost_.load(std::memory_order_relaxed) ? loadLimit : std::min(loadLimit, 4.0);  // (play: 4 ms, as far as the pass's floor lets it)
+        const bool live = shared_ && pace_.cls != 2 && !boost_.load(std::memory_order_relaxed);
+        const double limit = !live ? loadLimit : std::min(loadLimit, 4.0);  // (play: 4 ms, as far as the pass's floor lets it)
         double& sl = farSlice_[kind];
         if (sl <= 0.0 || units == 0) return;
-        if (ms > limit) sl = std::max(64.0, double(units) * limit / ms * 0.85);
-        else if (ms < limit * 0.85 && double(units) >= sl * 0.95) sl = std::min(sl * 1.25, 4096.0);
+        const double minSl = live ? 16.0 : 64.0;
+        const double maxSl = live ? (kind == 103u ? 1024.0 : 512.0) : 4096.0;
+        if (ms > limit) sl = std::max(minSl, double(units) * limit / ms * 0.85);
+        else if (ms < limit * 0.85 && double(units) >= sl * 0.95) sl = std::min(sl * (live ? 1.15 : 1.25), maxSl);
     }
     // before a submission: wait for the budget; returns the wait
     double paceAcquire() {

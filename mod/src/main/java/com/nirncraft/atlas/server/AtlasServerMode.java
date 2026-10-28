@@ -1,29 +1,40 @@
 package com.nirncraft.atlas.server;
 
 /**
- * Whether the integrated server runs beside the GPU world (docs/ATLAS-GPU-LOOP.md section 4): Infinite ATLAS draws every
- * pixel ({@code -Dnirncraft.atlas.unified=true}) from the client's own GPU generation
- * ({@code -Dnirncraft.atlas.clientGen=true}), so the server no longer has to load or make what is only drawn. Read from
- * system properties (the integrated server shares the client's JVM); a dedicated server never has them.
+ * Integrated-server trim for GPU-owned worlds (docs/ATLAS-GPU-LOOP.md section 4): when Infinite ATLAS draws the world on the
+ * client from its own GPU generation ({@code -Dnirncraft.atlas.unified=true -Dnirncraft.atlas.clientGen=true}), the integrated
+ * server exists only for gameplay within interaction reach (collisions, block edits, entities, containers, quests). Its view
+ * and simulation distances are capped to {@link #SERVER_VIEW} chunks so the CPU chunk pipeline does not generate or light a
+ * 12-chunk ring the renderer never reads.
+ *
+ * <p>{@code -Dnirncraft.atlas.serverCap=false} leaves the distances as the player's options set them; {@code .serverView=N}
+ * sets the cap (chunks, 2..16, default 8).</p>
  */
 public final class AtlasServerMode {
     private AtlasServerMode() {}
 
-    /** Unified + client generation: the GPU world is the drawn world. */
+    public static final int SERVER_VIEW = Math.max(2, Math.min(16, Integer.getInteger("nirncraft.atlas.serverView", 8)));
+
+    /** Whether the client draws the world from its own GPU generation in this process. */
     public static boolean gpuWorld() {
         return Boolean.getBoolean("nirncraft.atlas.unified") && Boolean.getBoolean("nirncraft.atlas.clientGen");
     }
 
-    /** The server's chunk loading is capped to the simulation radius ({@code -Dnirncraft.atlas.serverView=-1} turns it off). */
+    /** Whether the integrated server's chunk and simulation distances are capped to {@link #SERVER_VIEW}. */
     public static boolean capView() {
-        return gpuWorld() && Integer.getInteger("nirncraft.atlas.serverView", 0) >= 0;
+        return gpuWorld() && !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.serverCap"));
     }
 
     /**
-     * The server's chunks come from the GPU store ({@code -Dnirncraft.atlas.serverGen=false} keeps Java generation, for the
-     * before/after measures); the AtlasChunkGenerator checks the GPU is really there before each chunk.
+     * Whether the integrated server takes its Overworld chunks from the client generator's GPU chunk store and skips its own
+     * surface and decoration passes on them ({@code -Dnirncraft.atlas.serverGen=true}).
      */
     public static boolean gpuChunks() {
-        return gpuWorld() && Boolean.getBoolean("nirncraft.atlas.serverGen");  // off by default until the generator keeps up (owner, 2026-10-25): -Dnirncraft.atlas.serverGen=true
+        return gpuWorld() && Boolean.getBoolean("nirncraft.atlas.serverGen");
+    }
+
+    public static int clampView(int requested) {
+        return capView() ? Math.min(requested, SERVER_VIEW) : requested;
     }
 }
+

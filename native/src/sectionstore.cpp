@@ -496,7 +496,7 @@ void SectionStore::put(const Key3& k, PackedIds words, uint32_t hash, uint8_t fl
         LayerPtr l = layer(k);
         if (l && (flags & EDITED) && !l->replaced && !l->baseLost) {
             r.onDisk = !l->dirty;
-        } else {
+        } else if (!(((flags & REGEN) || (genActive_ && !l)) && !(flags & EDITED))) {
             ColdRegion& cr = coldRegion(regionKey(k.x, k.z));
             auto it = cr.recs.find(k);
             r.onDisk = it != cr.recs.end() && it->second.hash == hash && it->second.flags == flags;
@@ -797,7 +797,7 @@ void SectionStore::drop(std::unordered_map<Key3, Rec, Key3Hash>::iterator it) {
     changed(k);
     const Rec& r = it->second;
     LayerPtr l = layer(k);
-    if ((r.flags & REGEN) && !(r.flags & EDITED)) {
+    if (((r.flags & REGEN) || (genActive_ && !l)) && !(r.flags & EDITED)) {
         st_.dropped++;  // (made again when wanted)
     } else if (l && (r.flags & EDITED) && !l->replaced && !l->baseLost) {
         if (l->dirty || !r.onDisk) writeLayer(k, r.words);  // (a delta; or whole, a rewrite)

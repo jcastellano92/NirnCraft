@@ -28,6 +28,7 @@ public final class Lookahead {
     }
 
     static void refresh(ServerPlayer p) {
+        if (com.nirncraft.atlas.server.AtlasServerMode.capView() && !Boolean.getBoolean("nirncraft.atlas.serverLookahead")) return;
         ServerLevel level = p.level();
         int view = Math.max(2, com.nirncraft.atlas.server.AtlasServerCap.viewDistance(level.getServer()));
         double yaw = Math.toRadians(p.getYRot());

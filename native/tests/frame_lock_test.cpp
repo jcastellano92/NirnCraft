@@ -530,6 +530,48 @@ static void wave4CoverageCoarseAndPruneBench() {
     std::printf("BENCH wave4 coverage_ms=%.3f takeCoarse_8k_ms=%.3f\n", covMs, takeCoarseMs);
 }
 
+static void wave5GenColdAndSnapshotBench() {
+    // EXP-34: verify SectionStore with genActive drops unedited sections without coldWrites while spilling edited ones
+    {
+        Fixture fixture;
+        SectionStore store;
+        store.configure(fixture.path.string(), 99, 7, 1ull << 24, 1ull << 28);
+        store.setGenActive(true);
+        store.put({0, 10, 6, 0}, packed(5), hash(5), 0);
+        store.enforce(10000, 10000, 0);
+        while (store.drainSpills(1000)) {}
+        auto st = store.stats();
+        check(st.coldWrites == 0 && st.dropped == 1,
+              "EXP-34: unedited section wrote to cold tier despite genActive=true");
+        auto l = store.makeLayer({0, 11, 6, 0});
+        l->set(0, 9);
+        store.put({0, 11, 6, 0}, packed(9), hash(9), SectionStore::EDITED);
+        store.enforce(10000, 10000, 0);
+        while (store.drainSpills(1000)) {}
+        st = store.stats();
+        check(st.spilled == 1,
+              "EXP-34: edited section was not spilled when genActive=true");
+    }
+    // EXP-36: verify snapshotSections collectEntries=false skips copying section entries
+    {
+        World world;
+        auto s = ids(3);
+        for (int z = -16; z < 16; z++)
+            for (int x = -16; x < 16; x++)
+                world.putSection(x, 6, z, s.data());
+        World::SectionSnapshot fullSnap, lightSnap;
+        auto t0 = std::chrono::steady_clock::now();
+        for (int it = 0; it < 50; it++) world.snapshotSections(-16, -16, 16, 16, true, fullSnap, false, true);
+        double fullMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / 50.0;
+        t0 = std::chrono::steady_clock::now();
+        for (int it = 0; it < 50; it++) world.snapshotSections(-16, -16, 16, 16, true, lightSnap, false, false);
+        double lightMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / 50.0;
+        check(fullSnap.entries.size() == 1024 && lightSnap.entries.empty(),
+              "EXP-36: snapshotSections collectEntries flag did not control entry collection");
+        std::printf("BENCH wave5 snapshot_full_ms=%.4f snapshot_light_ms=%.4f\n", fullMs, lightMs);
+    }
+}
+
 int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
@@ -542,6 +584,7 @@ int main() {
         integratedMemoryCap();
         putPackedBatchParityAndBench();
         wave4CoverageCoarseAndPruneBench();
+        wave5GenColdAndSnapshotBench();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

@@ -285,13 +285,14 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 double x = camX, y = camY, z = camZ;
                 boolean pending = false, overlaid = false;
+                boolean hasTiles = source.hasTerrainTiles();
                 long tPass = System.nanoTime();
                 source.view(x, z, camYaw, camHalf);
                 // arrived where nothing is resident (the finest tile under the camera is missing): an instant pass first,
                 // every level from ready-made tiles and stand-ins, coarsest first, built and shown before any exact tile
                 // (the first pass after a teleport took 3.6 s, all of it before anything new was drawn)
                 int c0x = Math.floorDiv((int) Math.floor(x), AtlasNative.TILE), c0z = Math.floorDiv((int) Math.floor(z), AtlasNative.TILE);
-                boolean quick = source.hasTerrainTiles() && !ctx.hasTile(0, c0x, c0z);
+                boolean quick = hasTiles && !ctx.hasTile(0, c0x, c0z);
                 if (quick) {
                     for (int lod = lods - 1; lod >= 0; lod--) {
                         int span = 256 << lod;
@@ -308,11 +309,13 @@ final class AtlasFarField implements AutoCloseable {
                     }
                 }
                 source.beginPass();
-                for (int lod = 0; lod < lods; lod++) {
-                    int span = 256 << lod;
-                    int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
-                    pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
-                            (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
+                if (hasTiles) {
+                    for (int lod = 0; lod < lods; lod++) {
+                        int span = 256 << lod;
+                        int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
+                        pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
+                                (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
+                    }
                 }
                 long tCover = System.nanoTime();
                 // the server's changes (players building, explosions, water, lights): put the tiles they touch up again
@@ -337,7 +340,8 @@ final class AtlasFarField implements AutoCloseable {
                     Overlay ovE = overlay();
                     if (ovE != null) ovE.invalidate(edited);
                 }
-                for (long ck : AtlasEditsClient.takeLightsDirty())  // a re-light: lights only, no tile, no rebuild
+                java.util.List<Long> lightsDirty = AtlasEditsClient.takeLightsDirty();
+                for (long ck : lightsDirty)  // a re-light: lights only, no tile, no rebuild
                     AtlasLights.upload(ctx, AtlasEditsClient.lightGroup(ck), AtlasEditsClient.lights(ck));
                 long tEdits = System.nanoTime();
                 // the server's real sections (the finest levels' real blocks), within a share of the pass
@@ -350,12 +354,17 @@ final class AtlasFarField implements AutoCloseable {
                     sectionsApplied = ovS.applySections(ctx, System.nanoTime() + share);
                     overlaid |= sectionsApplied > 0;
                 }
+                boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
+                lastX = x;
+                lastZ = z;
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
                 // the old window stayed on screen until they finished (a teleport showed stale far ground)
                 long tSections = System.nanoTime();
-                updateProgressive(x, y, z);
+                if (hasTiles || !updated || moved || sectionsApplied > 0 || !edited.isEmpty() || !lightsDirty.isEmpty() || ctx.stats().pending() > 0) {
+                    updateProgressive(x, y, z);
+                }
                 long tUpdate1 = System.nanoTime();
-                Overlay ov = overlay();
+                Overlay ov = hasTiles ? overlay() : null;
                 if (ov != null) {
                     long deadline = System.nanoTime() + OVERLAY_BUDGET_MS * 1_000_000L;
                     for (int lod = 0; lod < lods; lod++) {
@@ -373,9 +382,6 @@ final class AtlasFarField implements AutoCloseable {
                 boolean first = !updated;
                 updated = true;
                 // idle while the camera stays inside the same finest-LOD region and nothing is left to refine
-                boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
-                lastX = x;
-                lastZ = z;
                 boolean was = streaming;
                 // only what the camera sees counts, and buildings / trees still going up (captures wait for them)
                 boolean tilesPending = source.visiblePending();
@@ -404,7 +410,7 @@ final class AtlasFarField implements AutoCloseable {
                     timeline.addLast(entry);
                     while (timeline.size() > 4000) timeline.removeFirst();
                 }
-                Thread.sleep((pending || overlaid ? 5 : moved ? (source.hasTerrainTiles() ? 5 : 25) : 100) + restMs);
+                Thread.sleep((pending || overlaid ? 5 : moved ? (hasTiles ? 5 : 25) : 100) + restMs);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {

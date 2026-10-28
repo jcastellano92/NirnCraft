@@ -172,28 +172,49 @@ final class AtlasEditsClient {
                 long key = net.minecraft.core.SectionPos.asLong(d.cx(), d.sy0() + s, d.cz());
                 if (client && AtlasClientGen.skipRock(key, ids)) continue;  // generation's tiles stone holds it
                 long h = 0xcbf29ce484222325L ^ ((long) d.grass() << 24 ^ d.foliage());
-                for (int id : ids) h = (h ^ id) * 0x100000001b3L;
-                if (d.grassCols() != null)
-                    for (int c = 0; c < 256; c++) h = (h ^ ((long) d.grassCols()[c] << 24 ^ d.foliageCols()[c])) * 0x100000001b3L;
+                boolean hasTinted = false;
+                if (d.grassCols() != null) {
+                    int prevId = 0;
+                    boolean prevTinted = false;
+                    for (int id : ids) {
+                        h = (h ^ id) * 0x100000001b3L;
+                        if (id != 0 && !hasTinted) {
+                            if (id == prevId) {
+                                hasTinted = prevTinted;
+                            } else {
+                                prevId = id;
+                                prevTinted = AtlasMaterials.biomeTinted(Block.stateById(id));
+                                hasTinted = prevTinted;
+                            }
+                        }
+                    }
+                    if (hasTinted)
+                        for (int c = 0; c < 256; c++) h = (h ^ ((long) d.grassCols()[c] << 24 ^ d.foliageCols()[c])) * 0x100000001b3L;
+                } else {
+                    for (int id : ids) h = (h ^ id) * 0x100000001b3L;
+                }
                 synchronized (UPLOADED) {
                     if (UPLOADED.containsKey(key) && UPLOADED.get(key) == h) continue;  // the core has these blocks
                     UPLOADED.put(key, h);
                     noteUp(key);
                 }
+                int prevId = 0;
+                short prevMat = 0;
                 for (int i = 0; i < 4096; i++) {
                     int id = ids[i];
                     if (id == 0) {
                         out[i] = 0;
                         continue;
                     }
-                    Short m;
-                    if (d.grassCols() != null && AtlasMaterials.biomeTinted(Block.stateById(id))) {
+                    if (hasTinted && AtlasMaterials.biomeTinted(Block.stateById(id))) {
                         // a biome-tinted block (grass, leaves, vines) in its own column's colours (vanilla's blend)
                         int col = (i & 15) + 16 * ((i >> 4) & 15);
                         BlockState st = Block.stateById(id);
-                        m = mats.section(st, AtlasMaterials.tint(st, d.grassCols()[col], d.foliageCols()[col]));
+                        out[i] = mats.section(st, AtlasMaterials.tint(st, d.grassCols()[col], d.foliageCols()[col]));
+                    } else if (id == prevId) {
+                        out[i] = prevMat;
                     } else {
-                        m = local.get(id);
+                        Short m = local.get(id);
                         if (m == null) {
                             BlockState st = Block.stateById(id);
                             // (shapes on: one id per block state, its real shape, face tiles and brick; mats.section) in
@@ -201,8 +222,10 @@ final class AtlasEditsClient {
                             m = mats.section(st, AtlasMaterials.tint(st, d.grass(), d.foliage()));
                             local.put(id, m);
                         }
+                        prevId = id;
+                        prevMat = m;
+                        out[i] = prevMat;
                     }
-                    out[i] = m;
                 }
                 mats.flush(ctx);
                 ctx.uploadSection(d.cx(), d.sy0() + s, d.cz(), out);

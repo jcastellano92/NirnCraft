@@ -920,15 +920,17 @@ public:
         // hundred, so the part grows by a quarter while it runs under 85 % of the limit (twice the budget, 8 ms: what a
         // submission may take) and is cut to the share of it when it ran over.
         const double limit = budget;  // (the generator's: 4 ms in play, 8 while the loading screen holds the player)
-        const double floorN = budget < 6.0 ? 64.0 : 256.0;  // (in play a part may be small: beside the frames its time holds their share)
-        if (c.n <= 0.0) c.n = 256.0;
+        const bool live = budget < 6.0;
+        const double floorN = live ? 64.0 : 256.0;  // (in play a part may be small: beside the frames its time holds their share)
+        const double capN = live ? std::min<double>(maxN, 512.0) : double(maxN);
+        if (c.n <= 0.0) c.n = live ? 128.0 : 256.0;
         for (; farFed_ < b->partsDone && farFed_ < farPlan_.size(); farFed_++) {
             double t = double(b->partUs[farFed_]) / 1000.0, used = double(farPlan_[farFed_].n);
             if (t > limit) c.n = std::max(floorN, used * limit / t * 0.85);
-            else if (t < limit * 0.85 && used >= c.n * 0.95) c.n = std::min(c.n * 1.25, double(maxN));
+            else if (t < limit * 0.85 && used >= c.n * 0.95) c.n = std::min(c.n * (live ? 1.15 : 1.25), capN);
         }
         const uint32_t left = chunks - farOff_;
-        if (part == 0) c.n = std::min(c.n, 2048.0);  // (a new tile: not sized from the last tile's end alone)
+        if (part == 0) c.n = std::min(c.n, live ? 256.0 : 2048.0);  // (a new tile: not sized from the last tile's end alone)
         uint32_t n = profile ? profileN : uint32_t(c.n);
         n = std::min(left, std::max(64u, n & ~63u));
         // (a thread's scratch is a slot of the dispatch: its width times the rows, past the places' list: within the scratch)
@@ -1187,10 +1189,10 @@ public:
                 bool fullRound = partRound_ == 0 || partActive_ * 2 >= n;
                 bool boost = b->version < 3 || b->pad3 != 0u;
                 double want = double(bud) * (ms > partMs ? partMs * 0.8 : partMs) / ms;
-                uint32_t minBud = minBudgetFor(partRoundRec_);
+                uint32_t minBud = minBudgetFor(partRoundRec_, boost);
                 double lo = ms > partMs * 2.0 ? double(minBud) : std::max(double(minBud), double(bud) / 8.0);
                 double hi = ms > partMs ? double(bud) : (cut && fullRound && ms < partMs * 0.75) ? std::max(double(bud) + 1.0, double(bud) * 1.5) : double(bud);
-                uint32_t maxBud = maxBudgetFor(partRoundRec_, boost);
+                uint32_t maxBud = maxBudgetFor(partRoundRec_, boost, partActive_);
                 bud = uint32_t(std::clamp(want, lo, hi));
                 bud = std::clamp<uint32_t>(bud, minBud, maxBud);
             }
@@ -1252,10 +1254,10 @@ public:
             }();
             bool rockParts = rocksOn && types_[step] == 3;
             bool boost = b->version < 3 || b->pad3 != 0u;
-            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = initBudgetFor(step, lakeParts || rockParts, boost));
-            bud = std::clamp<uint32_t>(bud, minBudgetFor(step), maxBudgetFor(step, boost));
-            featBudget_[step] = bud;
             partActive_ = partRound_ == 0 ? n : std::max(1u, partLeft_);
+            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = initBudgetFor(step, lakeParts || rockParts, boost, partActive_));
+            bud = std::clamp<uint32_t>(bud, minBudgetFor(step, boost), maxBudgetFor(step, boost, partActive_));
+            featBudget_[step] = bud;
             vkCmdFillBuffer(cmd, cnt_.buf, 0, clockOn() ? CNT_BYTES : 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
@@ -1376,21 +1378,25 @@ public:
         uint32_t cfg = pw[step + 5];
         return size_t(cfg) < progBytes_ / 4 ? pw[cfg] : 0u;
     }
-    uint32_t initBudgetFor(uint32_t step, bool wideParts, bool boost = true) const {
+    uint32_t initBudgetFor(uint32_t step, bool wideParts, bool boost = true, uint32_t activeOrigins = 16u) const {
         static const bool treePhasesOn = [] {
             const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
             return !(e && e[0] == '0');
         }();
         uint32_t type = step < types_.size() ? types_[step] : 0u;
-        if (type == 4) return treePhasesOn ? (boost ? 256u : 128u) : 1u;
-        if (wideParts) return boost ? 2048u : 256u;
+        if (type == 4) {
+            if (!treePhasesOn) return 1u;
+            if (boost) return 256u;
+            return activeOrigins > 32u ? 32u : (activeOrigins > 16u ? 64u : 128u);
+        }
+        if (wideParts) return boost ? 2048u : (activeOrigins > 32u ? 128u : 256u);
         if (type == 1) {
             uint32_t sz = oreSizeOf(step);
             return sz >= 12u ? 1u : (sz >= 8u ? 4u : 16u);
         }
         return boost ? 64u : 32u;
     }
-    uint32_t minBudgetFor(uint32_t step) const {
+    uint32_t minBudgetFor(uint32_t step, bool boost = true) const {
         static const bool treePhasesOn = [] {
             const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
             return !(e && e[0] == '0');
@@ -1404,18 +1410,21 @@ public:
             return !(e && e[0] == '0');
         }();
         uint32_t type = step < types_.size() ? types_[step] : 0u;
-        if (type == 4 && treePhasesOn) return 64u;
-        if ((type == 8 && lakesOn) || (type == 3 && rocksOn)) return 256u;
+        if (type == 4 && treePhasesOn) return boost ? 64u : 16u;
+        if ((type == 8 && lakesOn) || (type == 3 && rocksOn)) return boost ? 256u : 64u;
         return 1u;
     }
-    uint32_t maxBudgetFor(uint32_t step, bool boost = true) const {
+    uint32_t maxBudgetFor(uint32_t step, bool boost = true, uint32_t activeOrigins = 16u) const {
         static const bool treePhasesOn = [] {
             const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
             return !(e && e[0] == '0');
         }();
         uint32_t type = step < types_.size() ? types_[step] : 0u;
-        if (type == 4) return treePhasesOn ? (boost ? 1024u : 128u) : 1u;
-        if (type == 3 || type == 8) return boost ? 4096u : 512u;
+        if (type == 4) {
+            if (!treePhasesOn) return 1u;
+            return boost ? 1024u : (activeOrigins > 32u ? 64u : 128u);
+        }
+        if (type == 3 || type == 8) return boost ? 4096u : (activeOrigins > 32u ? 256u : 512u);
         if (type == 1) {
             uint32_t sz = oreSizeOf(step);
             return sz >= 16u ? 1u : (sz >= 12u ? 2u : (sz >= 8u ? (boost ? 16u : 8u) : (boost ? 64u : 32u)));

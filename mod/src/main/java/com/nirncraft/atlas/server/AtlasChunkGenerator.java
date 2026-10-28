@@ -67,7 +67,7 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
     }
 
     /** How long a request for a chunk may wait for the GPU before Java makes it. */
-    static final long TIMEOUT_MS = Long.getLong("nirncraft.atlas.serverGen.timeoutMs", 6_000L);
+    static final long TIMEOUT_MS = Long.getLong("nirncraft.atlas.serverGen.timeoutMs", 1_500L);
 
     /** Chunks filled from the GPU whose decoration step has not run yet (chunk pos -> time, ns). */
     private final ConcurrentHashMap<Long, Long> filled = new ConcurrentHashMap<>();
@@ -101,6 +101,24 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
         long t0 = System.nanoTime();
         CompletableFuture<AtlasServerFeed.Chunk> ask = feed.request(pos.x(), pos.z());
         if (ask == null) return java(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);
+        if (ask.isDone() && !ask.isCompletedExceptionally()) {
+            AtlasServerFeed.Chunk gpu = ask.getNow(null);
+            AtlasServerStats.GPU_WAIT_NS.addAndGet(System.nanoTime() - t0);
+            if (gpu != null) {
+                try {
+                    fill(chunk, gpu);
+                    AtlasServerAgreement.path(pos.x(), pos.z(), true);
+                    markFilled(pos);
+                    AtlasServerStats.GPU_CHUNKS.incrementAndGet();
+                    return CompletableFuture.completedFuture(chunk);
+                } catch (RuntimeException e) {
+                    NirnCraft.LOGGER.warn("atlas server chunk {} could not be filled from the GPU ({}): Java makes it", pos, e.toString());
+                    if (!(chunk instanceof net.minecraft.world.level.chunk.ProtoChunk)) throw e;
+                    clear(chunk);
+                }
+            }
+            return java(chunk, blender, randomState, structureManager, biomeManager, carverBiomeRegion, possibleBiomes);
+        }
         return ask.orTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS).handleAsync((gpu, err) -> {
             AtlasServerStats.GPU_WAIT_NS.addAndGet(System.nanoTime() - t0);
             if (gpu != null && err == null) {
@@ -167,10 +185,19 @@ public final class AtlasChunkGenerator extends NoiseBasedChunkGenerator {
             LevelChunkSection section = chunk.getSection(s);
             section.acquire();
             try {
+                int prevId = 0;
+                BlockState prevState = null;
                 for (int i = 0; i < 4096; i++) {
                     int id = ids[i] & 0xFFFF;
                     if (id == 0) continue;
-                    BlockState state = palette[id];
+                    BlockState state;
+                    if (id == prevId) {
+                        state = prevState;
+                    } else {
+                        state = palette[id];
+                        prevId = id;
+                        prevState = state;
+                    }
                     if (state.isAir()) continue;
                     section.setBlockState(i & 15, i >> 8, i >> 4 & 15, state, false);
                 }

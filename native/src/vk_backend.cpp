@@ -303,6 +303,7 @@ struct Slot {
     bool inFlight = false;
     VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
+    uint64_t paletteRev = 0, weatherRev = 0;
     bool farDirty = true, publishDirty = true, ingestDirty = true;
     // the level-0 grid's build this frame (voxgrid.hpp): its sections and jobs in host memory, what to record
     Buf vgStage, vgJobs, vgGsrc;
@@ -319,6 +320,8 @@ struct Slot {
     };
     std::vector<VgGpuCopy> vgGcopies;
     VkDescriptorSet vgSet = VK_NULL_HANDLE;
+    VkBuffer vgBoundBuf[VG_BINDINGS] = {};
+    VkDeviceSize vgBoundRange[VG_BINDINGS] = {};
     std::vector<VkBufferCopy> vgCopies;
     uint32_t vgJobCount = 0;
     int vgOx = 0, vgOz = 0;  // the batch's window origin (sections)
@@ -2495,9 +2498,11 @@ private:
         if (pnSplit) nearKind = Mem::DeviceOnly;
         const size_t nearBytes = pnSplit ? px * 4 : 16;
         cloudDiv_ = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
+        const bool needPalette = !s.bufs[B_PALETTE].buf || s.paletteRev != in.paletteRevision || in.paletteRevision == 0;
+        const bool needWeather = !s.bufs[B_WEATHER].buf || s.weatherRev != in.weatherRevision || in.weatherRevision == 0;
         bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, Mem::HostWrite, err) &&
-                  upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err) &&
-                  upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, Mem::HostWrite, err) &&
+                  (!needPalette || upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err)) &&
+                  (!needWeather || upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, Mem::HostWrite, err)) &&
                   upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, Mem::HostWrite, err) &&
                   ensure(s.bufs[B_COLOR], px * 16, false, outKind, err) && ensure(s.bufs[B_NORMAL], px * 4, false, outKind, err) &&
                   ensure(s.bufs[B_DEPTH], px * 4, false, outKind, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, outKind, err) &&
@@ -2508,6 +2513,8 @@ private:
                   ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err) &&
                   ensure(s.bufs[B_WATER_ADD], pnSplit ? px * 16 : 16, false, Mem::DeviceOnly, err);
         if (ok) {
+            s.paletteRev = in.paletteRevision;
+            s.weatherRev = in.weatherRevision;
             VkBuffer before = s.bufs[B_SURFACE].buf;
             VkBuffer ageBefore = s.bufs[B_NEAR_AGE].buf;
             VkBuffer hitBefore = s.bufs[B_FAR_HIT].buf;
@@ -2968,16 +2975,23 @@ private:
                                          &vgRank_};
         VkDescriptorBufferInfo bi[VG_BINDINGS];
         VkWriteDescriptorSet wr[VG_BINDINGS];
+        uint32_t writeCount = 0;
         for (uint32_t i = 0; i < VG_BINDINGS; i++) {
-            bi[i] = {bound[i]->buf, 0, storageRange(*bound[i])};
-            wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            wr[i].dstSet = s.vgSet;
-            wr[i].dstBinding = i;
-            wr[i].descriptorCount = 1;
-            wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            wr[i].pBufferInfo = &bi[i];
+            VkBuffer buf = bound[i]->buf;
+            VkDeviceSize range = storageRange(*bound[i]);
+            if (s.vgBoundBuf[i] == buf && s.vgBoundRange[i] == range) continue;
+            s.vgBoundBuf[i] = buf;
+            s.vgBoundRange[i] = range;
+            bi[writeCount] = {buf, 0, range};
+            wr[writeCount] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+            wr[writeCount].dstSet = s.vgSet;
+            wr[writeCount].dstBinding = i;
+            wr[writeCount].descriptorCount = 1;
+            wr[writeCount].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            wr[writeCount].pBufferInfo = &bi[writeCount];
+            writeCount++;
         }
-        vkUpdateDescriptorSets(dev_, VG_BINDINGS, wr, 0, nullptr);
+        if (writeCount > 0) vkUpdateDescriptorSets(dev_, writeCount, wr, 0, nullptr);
         return true;
     }
 
@@ -3699,14 +3713,18 @@ private:
             sharedDirty_ = true;
             sharedDirtySlots_ = 0;
         }
-        for (auto& s : slots_)
+        for (auto& s : slots_) {
+            for (auto& vb : s.vgBoundBuf) vb = VK_NULL_HANDLE;
             if (&b >= s.bufs && &b < s.bufs + BINDINGS) {
                 s.farDirty = true;
+                if (&b == &s.bufs[B_PALETTE]) s.paletteRev = 0;
+                if (&b == &s.bufs[B_WEATHER]) s.weatherRev = 0;
                 if (&b == &s.bufs[B_COLOR] || &b == &s.bufs[B_NORMAL] || &b == &s.bufs[B_DEPTH] ||
                     &b == &s.bufs[B_NEAR_LIGHT])
                     s.publishDirty = true;
                 if (&b == &s.bufs[B_NEAR] || &b == &s.bufs[B_NEAR_INFO]) s.ingestDirty = true;
             }
+        }
         return true;
     }
 

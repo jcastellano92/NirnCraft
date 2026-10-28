@@ -50,7 +50,9 @@ struct FrameInputs {
     const PackedScene* scene;
     FrameGpu frame;
     const std::vector<MaterialGpu>* palette;
+    uint64_t paletteRevision = 0;
     const std::vector<uint32_t>* weather;
+    uint64_t weatherRevision = 0;
     const std::vector<uint32_t>* cloudNoise;  // 64^3 RGBA8
     const float* nearDepth = nullptr;         // host path: w*h near-field view distances (null: none)
     bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
