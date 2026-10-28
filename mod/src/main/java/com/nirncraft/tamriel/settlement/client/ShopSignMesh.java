@@ -25,6 +25,7 @@ public final class ShopSignMesh {
     private static final float UV_PAD = 0.25f / 256.0f;
 
     private final List<Quad> quads = new ArrayList<>();
+    private volatile Quad[] bakedQuads;
 
     public record Quad(
             float x0, float y0, float z0,
@@ -37,6 +38,15 @@ public final class ShopSignMesh {
 
     public List<Quad> quads() {
         return quads;
+    }
+
+    /** Appends all quads from another mesh into this mesh. */
+    public ShopSignMesh addAll(ShopSignMesh other) {
+        if (other != null && !other.quads.isEmpty()) {
+            quads.addAll(other.quads);
+            bakedQuads = null;
+        }
+        return this;
     }
 
     /** Adds an axis-aligned 3D cuboid in pixel coordinates ([-8..8] = 1 block). */
@@ -178,24 +188,36 @@ public final class ShopSignMesh {
                 n.x, n.y, n.z,
                 u0, v0, u1, v1
         ));
+        bakedQuads = null;
     }
 
     public void render(PoseStack poseStack, VertexConsumer vc, int packedLight) {
-        render(poseStack.last(),vc,packedLight);
+        render(poseStack.last(), vc, packedLight);
     }
-    public void render(PoseStack.Pose last,VertexConsumer vc,int packedLight) {
+
+    public void render(PoseStack.Pose last, VertexConsumer vc, int packedLight) {
+        Quad[] qs = bakedQuads;
+        if (qs == null || qs.length != quads.size()) {
+            bakedQuads = qs = quads.toArray(Quad[]::new);
+        }
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
-        for (Quad q : quads) {
+        float m00 = normal.m00(), m01 = normal.m01(), m02 = normal.m02();
+        float m10 = normal.m10(), m11 = normal.m11(), m12 = normal.m12();
+        float m20 = normal.m20(), m21 = normal.m21(), m22 = normal.m22();
+        for (int i = 0, len = qs.length; i < len; i++) {
+            Quad q = qs[i];
+            float tnx = m00 * q.nx + m10 * q.ny + m20 * q.nz;
+            float tny = m01 * q.nx + m11 * q.ny + m21 * q.nz;
+            float tnz = m02 * q.nx + m12 * q.ny + m22 * q.nz;
             vc.addVertex(pose, q.x0, q.y0, q.z0).setColor(255, 255, 255, 255).setUv(q.u0, q.v0)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(tnx, tny, tnz);
             vc.addVertex(pose, q.x1, q.y1, q.z1).setColor(255, 255, 255, 255).setUv(q.u1, q.v0)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(tnx, tny, tnz);
             vc.addVertex(pose, q.x2, q.y2, q.z2).setColor(255, 255, 255, 255).setUv(q.u1, q.v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(tnx, tny, tnz);
             vc.addVertex(pose, q.x3, q.y3, q.z3).setColor(255, 255, 255, 255).setUv(q.u0, q.v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(tnx, tny, tnz);
         }
     }
 }
-

@@ -27,23 +27,35 @@ final class AtlasInfo {
     /** The last answer for the running context, or null (none yet: the next call has it). Never blocks. */
     static String latest() {
         AtlasNative.Context c = AtlasClient.infoContext();
-        askedNs = System.nanoTime();
+        long now = System.nanoTime();
+        boolean wasIdle = now - askedNs > WARM_NS;
+        askedNs = now;
         start();
+        if (wasIdle) LockSupport.unpark(thread);
         Snap s = snap;
         return s != null && s.ctx == c ? s.json : null;
     }
 
     /**
-     * The answer of at most {@code maxAgeMs} ago; a direct read (this thread, the core's call) when the thread's is older or
-     * there is none. For diagnostics that must be current (the probe verbs); not for per-tick callers.
+     * The answer of at most {@code maxAgeMs} ago; keeps the background reader warm and never blocks the render thread
+     * once a reading for the current context exists.
      */
     static String fresh(long maxAgeMs) {
+        long now = System.nanoTime();
+        boolean wasIdle = now - askedNs > WARM_NS;
+        askedNs = now;
+        start();
+        if (wasIdle) LockSupport.unpark(thread);
         var lease = AtlasClient.acquireInfoContext();
         if (lease == null) return null;
         try (lease) {
             AtlasNative.Context c = lease.context();
             Snap s = snap;
-            if (s != null && s.ctx == c && System.nanoTime() - s.ns <= maxAgeMs * 1_000_000L) return s.json;
+            if (s != null && s.ctx == c) {
+                if (now - s.ns <= maxAgeMs * 1_000_000L) return s.json;
+                LockSupport.unpark(thread);
+                if (com.mojang.blaze3d.systems.RenderSystem.isOnRenderThread()) return s.json;
+            }
             return read(c);
         }
     }

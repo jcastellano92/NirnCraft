@@ -670,11 +670,12 @@ public final class SkyFlocks {
         ClientLevel level=event.getLevel();float partial=event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         Vec3 c=event.getCamera().position();PoseStack pose=new PoseStack();
         CapturedGeometry.Builder vertices=new CapturedGeometry.Builder();VertexConsumer vc=vertices;
+        BlockPos.MutableBlockPos lightPos = new BlockPos.MutableBlockPos();
         for (Flock f : FLOCKS) {
             for (Bird b : f.birds) {
                 double x = Mth.lerp(partial, b.xo, b.x), y = Mth.lerp(partial, b.yo, b.y), z = Mth.lerp(partial, b.zo, b.z);
                 if ((x - c.x) * (x - c.x) + (z - c.z) * (z - c.z) > 155 * 155) continue;
-                int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(x, y, z));
+                int light = LightCoordsUtil.getLightCoords(level, lightPos.set(Mth.floor(x), Mth.floor(y), Mth.floor(z)));
                 pose.pushPose();
                 pose.translate(x - c.x, y - c.y, z - c.z);
                 pose.rotateDegrees(Axis.YP, -Mth.rotLerp(partial, b.yawO, b.yaw));
@@ -690,7 +691,7 @@ public final class SkyFlocks {
             float t = (l.age + partial) / l.len;
             double x = l.x + l.dx * l.age, z = l.z + l.dz * l.age;
             double y = l.y + Math.sin(t * Math.PI) * 1.1;
-            int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(x, y, z));
+            int light = LightCoordsUtil.getLightCoords(level, lightPos.set(Mth.floor(x), Mth.floor(y), Mth.floor(z)));
             pose.pushPose();
             pose.translate(x - c.x, y - c.y, z - c.z);
             pose.rotateDegrees(Axis.YP, (float) -Math.toDegrees(Math.atan2(-l.dx, l.dz)));

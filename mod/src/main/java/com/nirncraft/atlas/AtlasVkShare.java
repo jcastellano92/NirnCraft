@@ -149,6 +149,8 @@ public final class AtlasVkShare {
                     for (int k = 0; k < q.queueCount(); k++) prio.put(k, q.pQueuePriorities().get(k));
                 }
             }
+            if (frame == f) prio.put(frameIndex, 1.0f);
+            if (gen == f && genIndex >= 0) prio.put(genIndex, 0.0f);
             qs.get(e++).sType$Default().pNext(next).queueFamilyIndex(f).pQueuePriorities(prio);
         }
         // extensions: Minecraft's, then ours where offered

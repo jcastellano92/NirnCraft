@@ -349,7 +349,13 @@ final class AtlasCoarseBake implements Runnable {
             } else if (whole && wholeNs == 0) {
                 wholeNs = System.nanoTime();
             }
-            if (whole && phase == 3) phase = 4;
+            if (whole && phase == 3) {
+                phase = 4;
+                var lease = releaseGate.enter();
+                if (lease != null) {
+                    try (lease) { gen.bakeEnd(); }
+                }
+            }
             LockSupport.parkNanos(whole || AtlasLoadingScreen.holding() ? 20_000_000L : 5_000_000L);
         }
     }

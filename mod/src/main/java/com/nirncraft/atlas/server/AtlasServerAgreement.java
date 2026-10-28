@@ -118,6 +118,14 @@ public final class AtlasServerAgreement {
     private static final Long2IntOpenHashMap PATH = new Long2IntOpenHashMap();  // chunk -> 1 filled from the GPU, 2 made by Java
     private static long chunksJavaMade, pureCompared, pureSame;
 
+    /** Whether chunk (cx, cz) and all eight neighbours were filled from the GPU store this session (no Java decoration overlap). */
+    public static synchronized boolean isPureGpu(int cx, int cz) {
+        for (int dz = -1; dz <= 1; dz++)
+            for (int dx = -1; dx <= 1; dx++)
+                if (PATH.get(net.minecraft.world.level.ChunkPos.pack(cx + dx, cz + dz)) != 1) return false;
+        return true;
+    }
+
     /** The server filled the chunk from the GPU ids (placed: the blocks it set), or made it in Java. */
     public static synchronized void path(int cx, int cz, boolean gpu) {
         if (PATH.size() > 8 * KEEP) PATH.clear();

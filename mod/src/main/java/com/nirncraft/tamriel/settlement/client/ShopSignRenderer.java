@@ -78,13 +78,35 @@ public final class ShopSignRenderer {
         event.registerBlockEntityRenderer(BlockEntityTypes.SIGN, Wall::new);
     }
 
+    private static final RenderType CUTOUT = net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(ATLAS);
+    private record CachedSign(BlockState state, SignText front, SignText back, Classification classification, Direction outward, SignModelPair pair, float phase, long outwardTick) {}
+    private static final java.util.Map<SignBlockEntity, CachedSign> SIGN_CACHE = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
     private record Extra(Classification classification,Direction outward,SignModelPair pair,float sway) {}
     private static Extra extractExtra(SignBlockEntity be,float partial,boolean standing) {
-        Classification c=standing?Classification.VANILLA:classify(be);
+        if (standing) return new Extra(Classification.VANILLA, Direction.SOUTH, null, 0);
+        BlockState state = be.getBlockState();
+        SignText front = be.getText(SignTextSlot.FRONT);
+        SignText back = be.getText(SignTextSlot.BACK);
+        Level level = be.getLevel();
+        long gameTime = level != null ? level.getGameTime() : 0L;
+        CachedSign cached = SIGN_CACHE.get(be);
+        if (cached == null || cached.state != state || cached.front != front || cached.back != back) {
+            Classification c = classify(be);
+            Direction out = c.kind() == Kind.SHOP_3D && c.type() != null ? resolveOutwardDirection(be) : Direction.SOUTH;
+            SignModelPair pair = c.kind() == Kind.SHOP_3D && c.type() != null ? ShopSignModels.get(c.culture(), c.type()) : null;
+            float phase = (be.getBlockPos().asLong() & 0xffffL) * .017f;
+            cached = new CachedSign(state, front, back, c, out, pair, phase, gameTime);
+            SIGN_CACHE.put(be, cached);
+        } else if (cached.classification.kind() == Kind.SHOP_3D && cached.classification.type() != null && level != null && gameTime - cached.outwardTick >= 100L) {
+            Direction out = resolveOutwardDirection(be);
+            cached = new CachedSign(state, front, back, cached.classification, out, cached.pair, cached.phase, gameTime);
+            SIGN_CACHE.put(be, cached);
+        }
+        Classification c = cached.classification;
         if(c.kind()!=Kind.SHOP_3D||c.type()==null)return new Extra(c,Direction.SOUTH,null,0);
         float time=be.getLevel()==null?partial:be.getLevel().getGameTime()+partial;
         float phase=(be.getBlockPos().asLong()&0xffffL)*.017f;
-        return new Extra(c,resolveOutwardDirection(be),ShopSignModels.get(c.culture(),c.type()),(float)Math.sin(time*.075f+phase)*2.2f);
+        return new Extra(c, cached.outward, cached.pair, (float) Math.sin(time * .075f + cached.phase) * 2.2f);
     }
     public static class HangingState extends HangingSignRenderState { Extra extra; }
     public static class WallState extends StandingSignRenderState { Extra extra; }
@@ -113,7 +135,7 @@ public final class ShopSignRenderer {
         }
     }
     private static void submitSign(Extra extra,int light,PoseStack pose,SubmitNodeCollector collector){
-        var type=net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(ATLAS);
+        var type=CUTOUT;
         pose.pushPose();pose.translate(.5,.5,.5);pose.rotateDegrees(Axis.YP,-extra.outward().toYRot());
         collector.submitCustomGeometry(pose,type,(p,v)->extra.pair().bracket().render(p,v,light));
         pose.translate(0,5.4f/16,0);pose.rotateDegrees(Axis.ZP,extra.sway());pose.translate(0,-5.4f/16,0);

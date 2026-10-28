@@ -134,33 +134,44 @@ VoxGrid::Coverage VoxGrid::coverageLocked() const {
     // per level the known columns (some row not UNLOADED), by window cell
     std::vector<uint8_t> known[VG_LEVELS];
     {
-        known[0].assign(size_t(D) * D, 0);
-        for (int z = 0; z < D; z++)
-            for (int x = 0; x < D; x++) {
-                int unl = 0;
-                for (int y = 0; y < H; y++) unl += state_[size_t(y) * D * D + size_t(z) * D + size_t(x)] == VG_UNLOADED ? 1 : 0;
-                c.columns[0]++;
-                if (unl == H) c.holes[0]++;
-                else if (unl) c.partial[0]++;
-                known[0][size_t(z) * D + size_t(x)] = unl < H ? 1 : 0;
-            }
+        size_t nc = size_t(D) * D;
+        std::vector<uint8_t> unl(nc, 0);
+        for (int y = 0; y < H; y++) {
+            const uint8_t* row = &state_[size_t(y) * nc];
+            for (size_t col = 0; col < nc; col++) unl[col] += row[col] == VG_UNLOADED ? 1u : 0u;
+        }
+        known[0].resize(nc);
+        for (size_t col = 0; col < nc; col++) {
+            int u = unl[col];
+            c.columns[0]++;
+            if (u == H) c.holes[0]++;
+            else if (u) c.partial[0]++;
+            known[0][col] = u < H ? 1u : 0u;
+        }
     }
     for (int k = 1; k <= activeCoarse_; k++) {
         const Level& L = lv_[k];
         if (!L.centred) continue;
-        known[k].assign(size_t(L.D) * L.D, 0);
-        for (int z = 0; z < L.D; z++)
-            for (int x = 0; x < L.D; x++) {
-                int unl = 0;
-                for (int y = 0; y < L.H; y++) {
-                    uint32_t cl = L.cell(L.ox + x, y, L.oz + z);
-                    unl += (L.word[cl] & 3u) == VG_UNLOADED && !L.rock[cl] ? 1 : 0;  // (rock under the surface is known)
-                }
-                c.columns[k]++;
-                if (unl == L.H) c.holes[k]++;
-                else if (unl) c.partial[k]++;
-                known[k][size_t(z) * L.D + size_t(x)] = unl < L.H ? 1 : 0;
+        size_t nc = size_t(L.D) * L.D;
+        std::vector<uint8_t> unl(nc, 0);
+        for (int y = 0; y < L.H; y++) {
+            size_t base = size_t(y) * nc;
+            for (size_t pcol = 0; pcol < nc; pcol++) {
+                size_t cl = base + pcol;
+                unl[pcol] += (L.word[cl] & 3u) == VG_UNLOADED && !L.rock[cl] ? 1u : 0u;  // (rock under the surface is known)
             }
+        }
+        known[k].resize(nc);
+        for (int z = 0; z < L.D; z++) {
+            size_t pz = size_t(pmod(L.oz + z, L.D)) * L.D;
+            for (int x = 0; x < L.D; x++) {
+                int u = unl[pz + size_t(pmod(L.ox + x, L.D))];
+                c.columns[k]++;
+                if (u == L.H) c.holes[k]++;
+                else if (u) c.partial[k]++;
+                known[k][size_t(z) * L.D + size_t(x)] = u < L.H ? 1u : 0u;
+            }
+        }
     }
     {
         // level 0 within 6 chunks of the camera: the columns the player stands among, none may be missing
@@ -172,49 +183,78 @@ VoxGrid::Coverage VoxGrid::coverageLocked() const {
                 if (!(inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))])) c.l0Near6++;
             }
     }
-    // the far reach: the nearest sample no level knows
-    float best = float(RMAX);
-    for (int j = 0; j < N; j++)
-        for (int i = 0; i < N; i++) {
-            float dx = float((i - N / 2) * CELL + CELL / 2), dz = float((j - N / 2) * CELL + CELL / 2);
-            float d = std::sqrt(dx * dx + dz * dz);
-            if (d >= best || d > float(RMAX)) continue;
-            int wx = camB_[0] + int(dx), wz = camB_[2] + int(dz);
-            bool seen = false;
-            int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
-            // (level 0's columns by their place in the ring: the window slides over it)
-            if (inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) seen = true;
-            for (int k = 1; k <= activeCoarse_ && !seen; k++) {
-                const Level& L = lv_[k];
-                if (!L.centred) continue;
-                int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
-                if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) seen = true;
+    struct RadialSample {
+        int16_t dx, dz;
+        float d;
+    };
+    static const std::vector<RadialSample> farSamples = [] {
+        std::vector<RadialSample> s;
+        s.reserve(N * N);
+        for (int j = 0; j < N; j++)
+            for (int i = 0; i < N; i++) {
+                int dx = (i - N / 2) * CELL + CELL / 2, dz = (j - N / 2) * CELL + CELL / 2;
+                float d = std::sqrt(float(dx) * float(dx) + float(dz) * float(dz));
+                if (d <= float(RMAX)) s.push_back({int16_t(dx), int16_t(dz), d});
             }
-            if (!seen) best = d;
+        std::sort(s.begin(), s.end(), [](const RadialSample& a, const RadialSample& b) { return a.d < b.d; });
+        return s;
+    }();
+    // the far reach: the nearest sample no level knows (samples pre-sorted by ascending radial distance)
+    float best = float(RMAX);
+    const uint8_t* k0 = known[0].data();
+    for (const RadialSample& s : farSamples) {
+        int wx = camB_[0] + int(s.dx), wz = camB_[2] + int(s.dz);
+        int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
+        if (inWindow(sx, VG_MIN_SY, sz) && k0[size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) continue;
+        bool seen = false;
+        for (int k = 1; k <= activeCoarse_; k++) {
+            const Level& L = lv_[k];
+            if (!L.centred) continue;
+            int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
+            if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) {
+                seen = true;
+                break;
+            }
         }
+        if (!seen) {
+            best = s.d;
+            break;
+        }
+    }
     c.reach = best;
     {
         constexpr int FC = 32, FR = 1500, FN = 2 * FR / FC;
-        for (int j = 0; j < FN; j++)
-            for (int i = 0; i < FN; i++) {
-                float dx = float((i - FN / 2) * FC + FC / 2), dz = float((j - FN / 2) * FC + FC / 2);
-                float d = std::sqrt(dx * dx + dz * dz);
-                if (d > float(FR)) continue;
-                int wx = camB_[0] + int(dx), wz = camB_[2] + int(dz);
-                bool seen = false;
-                int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
-                if (inWindow(sx, VG_MIN_SY, sz) && known[0][size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) seen = true;
-                for (int k = 1; k <= activeCoarse_ && !seen; k++) {
-                    const Level& L = lv_[k];
-                    if (!L.centred) continue;
-                    int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
-                    if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) seen = true;
+        static const std::vector<RadialSample> nearSamples = [] {
+            std::vector<RadialSample> s;
+            s.reserve(FN * FN);
+            for (int j = 0; j < FN; j++)
+                for (int i = 0; i < FN; i++) {
+                    int dx = (i - FN / 2) * FC + FC / 2, dz = (j - FN / 2) * FC + FC / 2;
+                    float d = std::sqrt(float(dx) * float(dx) + float(dz) * float(dz));
+                    if (d <= float(FR)) s.push_back({int16_t(dx), int16_t(dz), d});
                 }
-                if (!seen) {
-                    c.nearHoles++;
-                    c.nearReach = std::min(c.nearReach, d);
+            std::sort(s.begin(), s.end(), [](const RadialSample& a, const RadialSample& b) { return a.d < b.d; });
+            return s;
+        }();
+        for (const RadialSample& s : nearSamples) {
+            int wx = camB_[0] + int(s.dx), wz = camB_[2] + int(s.dz);
+            int sx = fdiv(wx, 16), sz = fdiv(wz, 16);
+            if (inWindow(sx, VG_MIN_SY, sz) && k0[size_t(pmod(sz, D)) * D + size_t(pmod(sx, D))]) continue;
+            bool seen = false;
+            for (int k = 1; k <= activeCoarse_; k++) {
+                const Level& L = lv_[k];
+                if (!L.centred) continue;
+                int cx = fdiv(wx, 16 << k), cz = fdiv(wz, 16 << k);
+                if (L.inWindow(cx, cz) && known[k][size_t(cz - L.oz) * L.D + size_t(cx - L.ox)]) {
+                    seen = true;
+                    break;
                 }
             }
+            if (!seen) {
+                c.nearHoles++;
+                c.nearReach = std::min(c.nearReach, s.d);
+            }
+        }
     }
     return c;
 }
@@ -482,12 +522,44 @@ void VoxGrid::gpuUniform(const std::vector<UniformHit>& hits) {
 
 void VoxGrid::dropOutside() {
     auto out = [&](const Key& k) { return !inWindow(k.x, k.y, k.z); };
+    for (auto it = pending_.begin(); it != pending_.end();) {
+        if (out(it->first)) {
+            if (it->second.gpu()) gpuLetGo(it->first.x, it->first.y, it->first.z, 1u);
+            baseFetch_.erase(it->first);
+            it = pending_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    bool cpendingPruned = false;
+    for (auto it = cpending_.begin(); it != cpending_.end();) {
+        uint32_t keep = 0;
+        for (int k = 1; k <= std::min(4, activeCoarse_); k++) {
+            const Level& L = lv_[k];
+            int s = L.span();
+            if (L.centred && L.inWindow(fdiv(it->first.x, s), fdiv(it->first.z, s)) &&
+                it->first.y >= VG_MIN_SY && (it->first.y - VG_MIN_SY) / s < L.H)
+                keep |= 1u << k;
+        }
+        uint32_t dropped = it->second.levels & ~keep;
+        if (dropped && it->second.ids.gpu()) gpuLetGo(it->first.x, it->first.y, it->first.z, dropped);
+        it->second.levels &= keep;
+        if (!it->second.levels) {
+            it = cpending_.erase(it);
+            cpendingPruned = true;
+        } else {
+            ++it;
+        }
+    }
+    if (cpendingPruned) ++cpendingRev_;
     for (auto it = standby_.begin(); it != standby_.end();) it = out(it->first) ? standby_.erase(it) : std::next(it);
     for (auto it = gpuStandby_.begin(); it != gpuStandby_.end();) it = out(it->first) ? gpuStandby_.erase(it) : std::next(it);
     for (auto it = gpuCandDirty_.begin(); it != gpuCandDirty_.end();) it = out(*it) ? gpuCandDirty_.erase(it) : std::next(it);
     for (auto it = wantedAt_.begin(); it != wantedAt_.end();) it = out(it->first) ? wantedAt_.erase(it) : std::next(it);
     for (auto it = gpuUniformHint_.begin(); it != gpuUniformHint_.end();)
         it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuUniformHint_.erase(it);
+    for (auto it = gpuRef_.begin(); it != gpuRef_.end();)
+        it = pending_.count(it->first) || cpending_.count(it->first) ? std::next(it) : gpuRef_.erase(it);
     auto outsideAll = [&](const Key& key) {
         if (inWindow(key.x, key.y, key.z)) return false;
         for (int k = 1; k <= activeCoarse_; k++) {
@@ -509,7 +581,7 @@ int64_t VoxGrid::viewDist(int64_t dx, int64_t dz) const {
     int64_t d2 = dx * dx + dz * dz;
     // behind the camera: as if twice as far (what it sees first)
     float dot = float(dx) * viewX_ + float(dz) * viewZ_;
-    if (d2 > 4 && dot < -0.2f * std::sqrt(float(d2))) d2 *= 4;
+    if (d2 > 4 && dot < 0.0f && dot * dot > 0.04f * float(d2)) d2 *= 4;
     return d2;
 }
 
@@ -793,12 +865,16 @@ void VoxGrid::frame(const int32_t camBlock[3], World& world) {
     // the coarse levels follow too; placed (or a jump) they read the world here at once when its lock is free
     camSy_ = fdiv(camBlock[1], 16);
     if (coarseLevels > 0 && !laidOut_) layOut();
-    bool placed = false;
+    bool placed = false, coarseMoved = false;
     for (int k = 1; k <= activeCoarse_; k++) {
         Level& L = lv_[k];
+        int prevOx = L.ox, prevOz = L.oz;
+        uint64_t prevJumps = L.jumps;
         placeLevel(L, camSx_, camSz_);
+        coarseMoved |= L.ox != prevOx || L.oz != prevOz || L.jumps != prevJumps;
         placed |= L.freshCount == uint32_t(L.D * L.D);
     }
+    if (coarseMoved) dropOutside();
     lock.unlock();
     if (readNow || placed) refillSnapshot(world, false);
 }
@@ -818,7 +894,7 @@ void VoxGrid::prepare(World& world, const double centre[3]) {
         };
         if (!centred_ || std::abs(sx - (ox_ + D / 2)) > FOLLOW || std::abs(sz - (oz_ + D / 2)) > FOLLOW)
             window(sx - D / 2, sz - D / 2, D, 1);
-        int levels = std::clamp(coarseLevels, 0, VG_LEVELS - 1);
+        int levels = std::clamp(coarseLevels, 0, 4);
         for (int k = 1; k <= levels; ++k) {
             int span = 1 << k, cx = fdiv(sx, span), cz = fdiv(sz, span), follow = std::max(1, 8 >> k);
             const Level& level = lv_[k];
@@ -972,8 +1048,13 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
             std::fill(L.colMaxHigh.begin(), L.colMaxHigh.end(), int8_t(-1));
         }
         L.vacated.clear();
-        L.fresh.assign(size_t(L.D) * L.D, 1);
-        L.freshCount = uint32_t(L.D * L.D);
+        if (L.k <= 4) {
+            L.fresh.assign(size_t(L.D) * L.D, 1);
+            L.freshCount = uint32_t(L.D * L.D);
+        } else {
+            L.fresh.clear();
+            L.freshCount = 0;
+        }
         L.clearPending = true;
         L.jumps++;
         for (auto& [key, p] : cpending_) p.levels &= ~(1u << L.k);  // (read again from the world)
@@ -1015,15 +1096,19 @@ void VoxGrid::placeLevel(Level& L, int camSx, int camSz) {
                         for (int dx = 0; dx < s; dx++)
                             gpuLetGoColumn(cx * s + dx, cz * s + dz, 1u << L.k);
                 }
-                size_t col = size_t(pmod(cz, L.D)) * L.D + size_t(pmod(cx, L.D));
-                if (!L.fresh[col]) L.freshCount++;
-                L.fresh[col] = 1;
+                if (L.k <= 4) {
+                    size_t col = size_t(pmod(cz, L.D)) * L.D + size_t(pmod(cx, L.D));
+                    if (!L.fresh[col]) L.freshCount++;
+                    L.fresh[col] = 1;
+                }
             }
         L.shifts++;
     }
     L.ox = nox;
     L.oz = noz;
     L.centred = true;
+    victimsBuilt_[L.k] = false;
+    victimsFresh_[L.k] = false;
 }
 
 void VoxGrid::requestHostRefill(int sx, int sy, int sz) {
@@ -1068,7 +1153,7 @@ void VoxGrid::refillSnapshot(World& world, bool wait) {
         std::lock_guard<std::mutex> lock(mu_);
         if (!wait && !lookupWanted_.empty()) return;
         if (freshColumns_) x0 = ox_, z0 = oz_, x1 = ox_ + D, z1 = oz_ + D;
-        for (int k = 1; k <= activeCoarse_; k++) {
+        for (int k = 1; k <= std::min(4, activeCoarse_); k++) {
             const Level& level = lv_[k];
             if (!level.freshCount) continue;
             int span = level.span();
@@ -1088,7 +1173,10 @@ void VoxGrid::refillSnapshot(World& world, bool wait) {
     World::SectionSnapshot snapshot;
     if (!world.snapshotSections(x0, z0, x1, z1, wait, snapshot)) return;
     std::unordered_set<Key, KeyHash> found;
-    for (const auto& [key, sec] : snapshot.entries) found.insert({key.x, key.y, key.z});
+    if (!wanted.empty()) {
+        found.reserve(snapshot.entries.size());
+        for (const auto& [key, sec] : snapshot.entries) found.insert({key.x, key.y, key.z});
+    }
     size_t next = 0;
     bool paused = false;
     do {
@@ -1129,7 +1217,7 @@ void VoxGrid::refillSnapshot(World& world, bool wait) {
                 std::fill(colFresh_.begin(), colFresh_.end(), uint8_t(0)); freshColumns_ = 0;
                 stats_.refills++; stats_.lastRefillFrame = stats_.frames;
             }
-            for (int k = 1; k <= activeCoarse_; k++) {
+            for (int k = 1; k <= std::min(4, activeCoarse_); k++) {
                 Level& L = lv_[k];
                 std::fill(L.fresh.begin(), L.fresh.end(), uint8_t(0)); L.freshCount = 0;
             }
@@ -1995,10 +2083,11 @@ void VoxGrid::coarseVictims(Level& L) {
     auto& vs = victims_[k];
     if (victimsBuilt_[k]) return;
     victimsBuilt_[k] = true;
+    victimsFresh_[k] = true;
     vs.clear();
     for (uint32_t s = 0; s < L.nextSlot; s++) {
         uint32_t vc = L.slotCell[s];
-        if (vc == ~0u) continue;
+        if (vc == ~0u || L.touched[vc]) continue;
         int vx, vy, vz;
         cellCoords(L, vc, vx, vy, vz);
         vs.push_back({chunkPriority(k, vx, vy, vz), vc});
@@ -2008,10 +2097,16 @@ void VoxGrid::coarseVictims(Level& L) {
 
 bool VoxGrid::coarseRoom(Level& L, float dist) {
     if (!L.freeSlots.empty() || L.nextSlot < L.cap) return true;
-    coarseVictims(L);
+    float need = dist * 1.15f + float(16 << L.k);
     auto& vs = victims_[L.k];
+    coarseVictims(L);
     while (!vs.empty() && (L.slotOf[vs.back().second] == ~0u || L.touched[vs.back().second])) vs.pop_back();
-    return !vs.empty() && vs.back().first > dist * 1.15f + float(16 << L.k);
+    if ((vs.empty() || !(vs.back().first > need)) && !victimsFresh_[L.k]) {
+        victimsBuilt_[L.k] = false;
+        coarseVictims(L);
+        while (!vs.empty() && (L.slotOf[vs.back().second] == ~0u || L.touched[vs.back().second])) vs.pop_back();
+    }
+    return !vs.empty() && vs.back().first > need;
 }
 
 uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw) {
@@ -2028,11 +2123,17 @@ uint32_t VoxGrid::coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw) {
     } else {
         // the pool full: the farthest chunk gives its slot when it is farther than this one (unknown from then on, until
         // the window leaves its column; never one written in this batch)
+        float need = dist * 1.15f + float(16 << k);
         auto& vs = victims_[k];
         coarseVictims(L);
         while (!vs.empty() && (L.slotOf[vs.back().second] == ~0u || L.touched[vs.back().second])) vs.pop_back();
+        if ((vs.empty() || !(vs.back().first > need)) && !victimsFresh_[k]) {
+            victimsBuilt_[k] = false;
+            coarseVictims(L);
+            while (!vs.empty() && (L.slotOf[vs.back().second] == ~0u || L.touched[vs.back().second])) vs.pop_back();
+        }
         // (by a margin, as level 0's: no thrash)
-        if (!vs.empty() && vs.back().first > dist * 1.15f + float(16 << k)) {
+        if (!vs.empty() && vs.back().first > need) {
             uint32_t vc = vs.back().second;
             vs.pop_back();
             slot = L.slotOf[vc];
@@ -2214,7 +2315,17 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     if (camSx_ != coarseRankedSx_ || camSz_ != coarseRankedSz_) coarseRankDue_ = true, coarseRankedSx_ = camSx_, coarseRankedSz_ = camSz_;
     if (batches % 8 == 0)
         for (int k = 1; k <= activeCoarse_ && !coarseRankDue_; k++) coarseRankDue_ = !lostCells_[k].empty();
-    for (int k = 1; k <= activeCoarse_; k++) victimsBuilt_[k] = false;
+    int camSy = fdiv(camB_[1], 16);
+    bool camMoved = camSx_ != victimsCam_[0] || camSy != victimsCam_[1] || camSz_ != victimsCam_[2] ||
+                    fwd_[0] * victimsFwd_[0] + fwd_[1] * victimsFwd_[1] + fwd_[2] * victimsFwd_[2] < 0.985f;
+    if (camMoved) {
+        victimsCam_[0] = camSx_, victimsCam_[1] = camSy, victimsCam_[2] = camSz_;
+        for (int i = 0; i < 3; i++) victimsFwd_[i] = fwd_[i];
+    }
+    for (int k = 1; k <= activeCoarse_; k++) {
+        victimsFresh_[k] = false;
+        if (camMoved || victims_[k].empty()) victimsBuilt_[k] = false;
+    }
     coarseReadmit(b);
     for (int k = 1; k <= activeCoarse_; k++) {
         Level& L = lv_[k];
@@ -2296,7 +2407,9 @@ void VoxGrid::takeCoarse(VgBatch& b) {
     };
     bool sameView = (cpendingCam_[0] == camSx_ && cpendingCam_[1] == camSy_ && cpendingCam_[2] == camSz_ &&
                      cpendingView_[0] == viewX_ && cpendingView_[1] == viewZ_);
-    if (!sameView || cpendingOrderRev_ != cpendingRev_ || cpendingCursor_ >= cpendingOrder_.size()) {
+    size_t liveRem = cpending_.size();
+    size_t wantShare = std::min(liveRem, std::max(size_t(scaled(coarseBudget)), std::min(liveRem / 8, size_t(scaled(4096)))));
+    if (!sameView || cpendingOrderRev_ != cpendingRev_ || cpendingOrder_.size() - cpendingCursor_ < wantShare) {
         cpendingOrder_.clear();
         cpendingOrder_.reserve(cpending_.size());
         for (auto it = cpending_.begin(); it != cpending_.end();) {
@@ -2307,6 +2420,13 @@ void VoxGrid::takeCoarse(VgBatch& b) {
             cpendingOrder_.push_back({viewDist(it->first.x - camSx_, it->first.z - camSz_) * 64 + std::abs(it->first.y - camSy_), it->first});
             ++it;
         }
+        size_t totalOrder = cpendingOrder_.size();
+        wantShare = std::min(totalOrder, std::max(size_t(scaled(coarseBudget)), std::min(totalOrder / 8, size_t(scaled(4096)))));
+        size_t window = std::min(totalOrder, std::max(wantShare * 4, size_t(2048)));
+        if (window < totalOrder) {
+            std::nth_element(cpendingOrder_.begin(), cpendingOrder_.begin() + ptrdiff_t(window), cpendingOrder_.end(), byDist);
+            cpendingOrder_.resize(window);
+        }
         std::sort(cpendingOrder_.begin(), cpendingOrder_.end(), byDist);
         cpendingCursor_ = 0;
         cpendingOrderRev_ = cpendingRev_;
@@ -2314,7 +2434,7 @@ void VoxGrid::takeCoarse(VgBatch& b) {
         cpendingView_[0] = viewX_, cpendingView_[1] = viewZ_;
     }
     size_t rem = cpendingOrder_.size() - cpendingCursor_;
-    size_t share = std::min(rem, std::max(size_t(scaled(coarseBudget)), std::min(rem / 8, size_t(scaled(4096)))));
+    size_t share = std::min(rem, wantShare);
     std::vector<std::pair<int64_t, Key>> order(cpendingOrder_.begin() + ptrdiff_t(cpendingCursor_),
                                                cpendingOrder_.begin() + ptrdiff_t(cpendingCursor_ + share));
     cpendingCursor_ += share;

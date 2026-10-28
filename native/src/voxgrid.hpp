@@ -678,6 +678,9 @@ private:
     uint32_t coarseSlot(Level& L, uint32_t cell, VgBatch& b, bool raw = false);
     std::vector<std::pair<float, uint32_t>> victims_[VG_LEVELS];
     bool victimsBuilt_[VG_LEVELS] = {};
+    bool victimsFresh_[VG_LEVELS] = {};
+    int victimsCam_[3] = {INT_MIN, INT_MIN, INT_MIN};
+    float victimsFwd_[3] = {0.0f, 0.0f, 0.0f};
     struct ColFill {
         int k;
         uint32_t cell;

@@ -90,7 +90,7 @@ final class AtlasClientGen implements AutoCloseable {
      * before. {@code .storeSlots}: the store's chunks (about 1.3 MiB each).
      */
     static final boolean STORE = !"false".equalsIgnoreCase(System.getProperty("nirncraft.atlas.clientGen.store"));
-    static final int STORE_SLOTS = Integer.getInteger("nirncraft.atlas.clientGen.storeSlots", 768);
+    static final int STORE_SLOTS = Integer.getInteger("nirncraft.atlas.clientGen.storeSlots", 384);
     /** Dev runs ({@code -Dnirncraft.dev} or the harness's autorun): the GPU decoration failing stops the client generator. */
     static final boolean DEV = System.getProperty("nirncraft.dev") != null || !System.getProperty("nirncraft.autorun", "").isEmpty();
     /** {@code .direct=false}: the generator's sections come back to the CPU and go up as uploads (the old path). */
@@ -143,7 +143,7 @@ final class AtlasClientGen implements AutoCloseable {
     /** Far tiles a side around the camera per coarse level (the level's window is 4 tiles of 16 of its chunks). */
     static final int FAR_TILES = 2;
     /** Chunks per GPU batch; the first after a jump is small, so the blocks under the camera come first. */
-    private static final int BATCH = 64, FIRST_BATCH = 16, READY_MAX = 512;
+    private static final int BATCH = 64, FIRST_BATCH = 16, CACHE_BATCH = 256, READY_MAX = 512;
     private static volatile AtlasClientGen active;
 
     // the camera, from the render thread (follow)
@@ -882,7 +882,7 @@ final class AtlasClientGen implements AutoCloseable {
     private record Planned(int[] batch, int cx, int cz, java.util.concurrent.CompletableFuture<int[][]> pages) {}
 
     private Planned plan(int ccx, int ccz, int max) {
-        int[] batch = next(ccx, ccz, max);
+        int[] batch = next(ccx, ccz, cacheWindowPass() ? (max == FIRST_BATCH ? BATCH : CACHE_BATCH) : max);
         if (batch == null) return null;
         for (int i = 0; i < batch.length; i += 2) done.add(ChunkPos.pack(batch[i], batch[i + 1]));  // claimed
         if (devicePages)  // the device makes the pages (atlas_page.slang): nothing to compute here
@@ -1454,15 +1454,21 @@ final class AtlasClientGen implements AutoCloseable {
             long cz = AtlasRecorder.begin();
             batch = fromCache(batch, info);
             AtlasRecorder.end(Z_CACHE, cz, 50_000);
-            if (batch.length == 0 && !storeOn) return;
+            if (batch.length == 0) {
+                if (!storeOn) return;
+                if (defer) {
+                    int[] st = gen.storeStats();
+                    if (st == null || st.length < 2 || (st[1] == 0 && (st.length < 3 || st[2] == 0))) return;
+                }
+            }
             if (defer && storeOn && batch.length > 0) {
                 // the misses near the camera (NEAR_BOOST_R: the field the player sees first) go into the store now; the
                 // others wait for the window's lookups (a relaunch serves its whole window from disk first). All of them
                 // waited: after a jump the first chunk was up 8.3 s later, ~2 s of it the window's 1,800 lookups (10-26)
-                batch = nearFirst(batch, camCx, camCz);
+                batch = storeBatch(nearFirst(batch, camCx, camCz));
                 if (batch.length == 0) {
                     int[] st = gen.storeStats();  // (the store runs on what waits in it, the near ones, with each lookup)
-                    if (st == null || st.length < 2 || st[1] == 0) return;
+                    if (st == null || st.length < 2 || (st[1] == 0 && (st.length < 3 || st[2] == 0))) return;
                 }
             }
         }
@@ -1676,7 +1682,49 @@ final class AtlasClientGen implements AutoCloseable {
     }
 
     /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
+    private boolean cacheWindowPass() {
+        return direct && storeOn && cacheArm && devicePages && gen.cacheSupported();
+    }
+
+    /** Caps store misses from a multi-patch cache pass to one 8x8 patch (at most BATCH) when the store has room; defers the rest. */
+    private int[] storeBatch(int[] batch) {
+        if (!storeOn || batch.length == 0) return batch;
+        int[] st = gen.storeStats();
+        if (st != null && st.length > 1 && st[1] >= 64) {
+            for (int i = 0; i < batch.length; i += 2) deferred.add(ChunkPos.pack(batch[i], batch[i + 1]));
+            return new int[0];
+        }
+        int px0 = batch[0] >> 3, pz0 = batch[1] >> 3;
+        int[] keep = new int[Math.min(batch.length, BATCH * 2)];
+        int m = 0;
+        for (int i = 0; i < batch.length; i += 2) {
+            int cx = batch[i], cz = batch[i + 1];
+            if ((cx >> 3) == px0 && (cz >> 3) == pz0 && m < BATCH * 2) {
+                keep[m++] = cx;
+                keep[m++] = cz;
+            } else {
+                deferred.add(ChunkPos.pack(cx, cz));
+            }
+        }
+        return m == keep.length ? keep : java.util.Arrays.copyOf(keep, m);
+    }
+
+    /** The chunks of batch the cache knows put into the grid from it; returns the others (to generate). */
     private int[] fromCache(int[] batch, int[] info) {
+        if (batch.length <= BATCH * 2) return fromCacheSlice(batch, info);
+        int[] allRest = new int[batch.length];
+        int nr = 0;
+        for (int off = 0; off < batch.length; off += BATCH * 2) {
+            int end = Math.min(batch.length, off + BATCH * 2);
+            int[] slice = java.util.Arrays.copyOfRange(batch, off, end);
+            int[] r = fromCacheSlice(slice, info);
+            System.arraycopy(r, 0, allRest, nr, r.length);
+            nr += r.length;
+        }
+        return java.util.Arrays.copyOf(allRest, nr);
+    }
+
+    private int[] fromCacheSlice(int[] batch, int[] info) {
         int n = batch.length / 2;
         cacheAsked += n;
         byte[] hit = new byte[n];
@@ -1795,7 +1843,7 @@ final class AtlasClientGen implements AutoCloseable {
         // 14 x 14 a patch, where a ring of single chunks would want more slots than the store has)
         if (storeOn) {
             int[] st = gen.storeStats();
-            if (st != null && st.length > 1 && st[1] >= 64) return null;
+            if (!cacheWindowPass() && st != null && st.length > 1 && st[1] >= 64) return null;
         }
         int r = RADIUS;
         for (int dz = -r; dz <= r; dz++)
@@ -1814,7 +1862,7 @@ final class AtlasClientGen implements AutoCloseable {
         cand.sort(java.util.Comparator.comparingLong(c -> c[1]));
         if (storeOn) {
             int px0 = ChunkPos.getX(cand.get(0)[0]) >> 3, pz0 = ChunkPos.getZ(cand.get(0)[0]) >> 3;
-            cand.removeIf(c -> (ChunkPos.getX(c[0]) >> 3) != px0 || (ChunkPos.getZ(c[0]) >> 3) != pz0);
+            if (!cacheWindowPass()) cand.removeIf(c -> (ChunkPos.getX(c[0]) >> 3) != px0 || (ChunkPos.getZ(c[0]) >> 3) != pz0);
         }
         int n = Math.min(max, cand.size());
         int[] xz = new int[n * 2];

@@ -482,6 +482,54 @@ static void putPackedBatchParityAndBench() {
                 serialMs, batchMs, serialMs / std::max(0.001, batchMs));
 }
 
+static void wave4CoverageCoarseAndPruneBench() {
+    auto mixed = packed(3);
+    World world;
+    VoxGrid grid;
+    grid.setWorld(&world);
+    grid.D = 64;
+    grid.coarseD = 64;
+    grid.coarseLevels = 6;
+    int32_t cam[3] = {0, 100, 0};
+    grid.frame(cam, world);
+
+    // Populate 8,192 pending / cpending sections across the L0..L2 windows
+    std::vector<VoxGrid::PackedEntry> entries;
+    entries.reserve(8192);
+    uint32_t mixedUni = packUniform(mixed->data());
+    for (int i = 0; i < 8192; i++) {
+        int sx = (i & 63) - 32, sz = ((i >> 6) & 63) - 32, sy = (i >> 12) + 4;
+        entries.push_back({sx, sy, sz, mixed, mixedUni});
+    }
+    grid.putPackedBatch(entries.data(), entries.size());
+    check(grid.residency().coarseWaiting == 8192, "expected 8192 coarseWaiting entries before takeCoarse");
+
+    // EXP-21 benchmark: 4 consecutive take() calls while new entries arrive each frame (incrementing cpendingRev_)
+    auto t0 = std::chrono::steady_clock::now();
+    for (int f = 0; f < 4; f++) {
+        VoxGrid::PackedEntry one{0, 6 + f, 0, mixed, mixedUni};
+        grid.putPackedBatch(&one, 1);
+        auto b = grid.take(64);
+        check(!b.ingests.empty(), "expected takeCoarse to stage coarse ingests");
+    }
+    double takeCoarseMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / 4.0;
+
+    // EXP-20a benchmark: coverage() scan across all 7 levels
+    t0 = std::chrono::steady_clock::now();
+    VoxGrid::Coverage cov{};
+    constexpr int COV_ITERS = 20;
+    for (int it = 0; it < COV_ITERS; it++) cov = grid.coverage();
+    double covMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / COV_ITERS;
+    check(cov.columns[0] == 64 * 64 && cov.holes[0] < cov.columns[0], "coverageLocked L0 columns/holes sanity failed");
+
+    // EXP-23b test: shift L0 and coarse windows away and verify dropOutside() prunes out-of-window pending_ and cpending_
+    int32_t farCam[3] = {100000, 100, 100000};
+    grid.frame(farCam, world);
+    check(grid.stats().pending == 0 && grid.residency().coarseWaiting == 0,
+          "EXP-23b: dropOutside did not prune out-of-window pending_ and cpending_ entries");
+    std::printf("BENCH wave4 coverage_ms=%.3f takeCoarse_8k_ms=%.3f\n", covMs, takeCoarseMs);
+}
+
 int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
@@ -493,6 +541,7 @@ int main() {
         unansweredAskIsRepeated();
         integratedMemoryCap();
         putPackedBatchParityAndBench();
+        wave4CoverageCoarseAndPruneBench();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

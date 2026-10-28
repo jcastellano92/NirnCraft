@@ -28,6 +28,10 @@ final class AtlasFarField implements AutoCloseable {
         /** True when tiles carry block palette ids (AtlasPalette.blocks), false for atlas's preview palette. */
         boolean usesBlockPalette();
 
+        default boolean hasTerrainTiles() {
+            return true;
+        }
+
         void prepare(AtlasNative.Context ctx) throws IOException;
 
         /**
@@ -105,6 +109,11 @@ final class AtlasFarField implements AutoCloseable {
             @Override
             public boolean usesBlockPalette() {
                 return true;
+            }
+
+            @Override
+            public boolean hasTerrainTiles() {
+                return false;
             }
 
             @Override
@@ -282,7 +291,7 @@ final class AtlasFarField implements AutoCloseable {
                 // every level from ready-made tiles and stand-ins, coarsest first, built and shown before any exact tile
                 // (the first pass after a teleport took 3.6 s, all of it before anything new was drawn)
                 int c0x = Math.floorDiv((int) Math.floor(x), AtlasNative.TILE), c0z = Math.floorDiv((int) Math.floor(z), AtlasNative.TILE);
-                boolean quick = !ctx.hasTile(0, c0x, c0z);
+                boolean quick = source.hasTerrainTiles() && !ctx.hasTile(0, c0x, c0z);
                 if (quick) {
                     for (int lod = lods - 1; lod >= 0; lod--) {
                         int span = 256 << lod;
@@ -359,7 +368,7 @@ final class AtlasFarField implements AutoCloseable {
                     }
                 }
                 long tOverlays = System.nanoTime();
-                updateProgressive(x, y, z);  // builds what changed and stages it for the next frames
+                if (overlayBusy) updateProgressive(x, y, z);  // builds what changed and stages it for the next frames
                 long tUpdate2 = System.nanoTime();
                 boolean first = !updated;
                 updated = true;
@@ -395,7 +404,7 @@ final class AtlasFarField implements AutoCloseable {
                     timeline.addLast(entry);
                     while (timeline.size() > 4000) timeline.removeFirst();
                 }
-                Thread.sleep((moved || pending || overlaid ? 5 : 100) + restMs);
+                Thread.sleep((pending || overlaid ? 5 : moved ? (source.hasTerrainTiles() ? 5 : 25) : 100) + restMs);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {

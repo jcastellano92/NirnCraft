@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
@@ -184,17 +185,33 @@ final class AtlasClientSections {
         }
         int[] ids = new int[4096];
         if (sec == null || sec.hasOnlyAir()) return ids;
-        for (int y = 0; y < 16; y++)
-            for (int z = 0; z < 16; z++)
+        BlockState prevState = null;
+        int prevId = 0;
+        for (int y = 0; y < 16; y++) {
+            int yBase = 256 * y;
+            for (int z = 0; z < 16; z++) {
+                int zBase = yBase + 16 * z;
                 for (int x = 0; x < 16; x++) {
                     BlockState s = sec.getBlockState(x, y, z);
-                    Integer id = IDS.get(s);
-                    if (id == null) {
-                        id = nearId(s);
-                        IDS.put(s, id);
+                    int id;
+                    if (s == prevState) {
+                        id = prevId;
+                    } else if (s.isAir()) {
+                        prevState = s;
+                        prevId = id = 0;
+                    } else {
+                        Integer cached = IDS.get(s);
+                        if (cached == null) {
+                            cached = nearId(s);
+                            IDS.put(s, cached);
+                        }
+                        prevState = s;
+                        prevId = id = cached;
                     }
-                    ids[x + 16 * (z + 16 * y)] = id;
+                    ids[zBase + x] = id;
                 }
+            }
+        }
         return ids;
     }
 
@@ -257,6 +274,13 @@ final class AtlasClientSections {
             QUEUED.remove(k);
             LevelChunk c = mc.level.getChunkSource().getChunkNow(ChunkPos.getX(k), ChunkPos.getZ(k));
             if (c != null) {
+                int cx = ChunkPos.getX(k), cz = ChunkPos.getZ(k);
+                if (UP.contains(k) && !com.nirncraft.atlas.server.AtlasServerStats.isRecording()
+                        && com.nirncraft.atlas.server.AtlasServerAgreement.isPureGpu(cx, cz)
+                        && AtlasSideOps.at(cx, cz).isEmpty()) {
+                    REAL.add(k);
+                    continue;
+                }
                 long r0 = System.nanoTime();
                 AtlasSections.Decoded d = read(mc.level, c);
                 readNs += System.nanoTime() - r0;
@@ -293,21 +317,104 @@ final class AtlasClientSections {
         return new AtlasSections.Decoded(cx, cz, minSec, secs, tints[0][136], tints[1][136], tints[0], tints[1]);
     }
 
+    private static final int[] TINT_GRID = {0, 4, 8, 12, 15};
+
     /**
      * Chunk c's grass and foliage colours per column (x + 16 z) as vanilla blends them (BiomeColors, its colour cache)
      * at height y: what the chunk mesher tints each block with.
+     *
+     * <p>Fast-paths uniform biome chunks (>85% of chunks) by checking the 4 corners + center (5 samples vs 256), and
+     * on biome borders samples the 5x5 grid (25 samples vs 256) with bilinear RGB interpolation across each cell.
      */
     private static int[][] columnTints(ClientLevel level, LevelChunk c, int y) {
         int[] grass = new int[256], foliage = new int[256];
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int bx = c.getPos().x() << 4, bz = c.getPos().z() << 4;
-        for (int z = 0; z < 16; z++)
-            for (int x = 0; x < 16; x++) {
-                p.set(bx + x, y, bz + z);
-                grass[x + 16 * z] = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
-                foliage[x + 16 * z] = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        p.set(bx + 8, y, bz + 8);
+        int gCenter = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+        int fCenter = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        p.set(bx, y, bz);
+        int g00 = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+        int f00 = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        p.set(bx + 15, y, bz);
+        int g40 = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+        int f40 = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        p.set(bx, y, bz + 15);
+        int g04 = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+        int f04 = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        p.set(bx + 15, y, bz + 15);
+        int g44 = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+        int f44 = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
+
+        if (g00 == gCenter && g40 == gCenter && g04 == gCenter && g44 == gCenter
+                && f00 == fCenter && f40 == fCenter && f04 == fCenter && f44 == fCenter) {
+            Arrays.fill(grass, gCenter);
+            Arrays.fill(foliage, fCenter);
+            return new int[][] {grass, foliage};
+        }
+
+        int[] gs = new int[25], fs = new int[25];
+        gs[0] = g00; fs[0] = f00;
+        gs[4] = g40; fs[4] = f40;
+        gs[12] = gCenter; fs[12] = fCenter;
+        gs[20] = g04; fs[20] = f04;
+        gs[24] = g44; fs[24] = f44;
+
+        for (int gz = 0; gz < 5; gz++) {
+            int z = TINT_GRID[gz];
+            for (int gx = 0; gx < 5; gx++) {
+                int idx = gz * 5 + gx;
+                if (idx == 0 || idx == 4 || idx == 12 || idx == 20 || idx == 24) continue;
+                p.set(bx + TINT_GRID[gx], y, bz + z);
+                gs[idx] = net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(level, p) & 0xFFFFFF;
+                fs[idx] = net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, p) & 0xFFFFFF;
             }
+        }
+
+        interpolateGrid(gs, grass);
+        interpolateGrid(fs, foliage);
         return new int[][] {grass, foliage};
+    }
+
+    private static void interpolateGrid(int[] grid25, int[] out256) {
+        for (int gz = 0; gz < 4; gz++) {
+            int z0 = TINT_GRID[gz], z1 = TINT_GRID[gz + 1], dz = z1 - z0;
+            for (int gx = 0; gx < 4; gx++) {
+                int x0 = TINT_GRID[gx], x1 = TINT_GRID[gx + 1], dx = x1 - x0;
+                int c00 = grid25[gz * 5 + gx], c10 = grid25[gz * 5 + gx + 1];
+                int c01 = grid25[(gz + 1) * 5 + gx], c11 = grid25[(gz + 1) * 5 + gx + 1];
+                if (c00 == c10 && c00 == c01 && c00 == c11) {
+                    for (int z = z0; z <= z1; z++) {
+                        int row = z << 4;
+                        for (int x = x0; x <= x1; x++) out256[row + x] = c00;
+                    }
+                    continue;
+                }
+                int r00 = (c00 >> 16) & 0xFF, g00 = (c00 >> 8) & 0xFF, b00 = c00 & 0xFF;
+                int r10 = (c10 >> 16) & 0xFF, g10 = (c10 >> 8) & 0xFF, b10 = c10 & 0xFF;
+                int r01 = (c01 >> 16) & 0xFF, g01 = (c01 >> 8) & 0xFF, b01 = c01 & 0xFF;
+                int r11 = (c11 >> 16) & 0xFF, g11 = (c11 >> 8) & 0xFF, b11 = c11 & 0xFF;
+                int area = dx * dz;
+                int half = area >> 1;
+                for (int z = z0; z <= z1; z++) {
+                    int wz1 = z - z0, wz0 = z1 - z;
+                    int row = z << 4;
+                    for (int x = x0; x <= x1; x++) {
+                        int wx1 = x - x0, wx0 = x1 - x;
+                        int w00 = wx0 * wz0, w10 = wx1 * wz0, w01 = wx0 * wz1, w11 = wx1 * wz1;
+                        int r = (r00 * w00 + r10 * w10 + r01 * w01 + r11 * w11 + half) / area;
+                        int g = (g00 * w00 + g10 * w10 + g01 * w01 + g11 * w11 + half) / area;
+                        int b = (b00 * w00 + b10 * w10 + b01 * w01 + b11 * w11 + half) / area;
+                        out256[row + x] = (r << 16) | (g << 8) | b;
+                    }
+                }
+            }
+        }
     }
 
     private static long readNs, readCount, dirtyCount;

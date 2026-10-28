@@ -163,6 +163,7 @@ public final class AtlasTileServer {
         AtlasTileServer t = current;
         if (t == null) return;
         // a line a minute while tiles flow: what the stream costs a host (LAN / dedicated) and that clients get it
+        if (t.gpuCoarseOnly()) return;
         if (t.server.getTickCount() % 1200 == 0 && t.sentTiles != t.loggedTiles) {
             t.loggedTiles = t.sentTiles;
             com.nirncraft.NirnCraft.LOGGER.info("atlas tile service: {} tiles ({} MB) sent to {} players so far, {} pregenerating",
@@ -212,6 +213,16 @@ public final class AtlasTileServer {
         }
         int every = com.nirncraft.render.quality.HostLoad.pregenIntervalTicks(mspt);
         if (every > 0 && t.server.getTickCount() % every == 0) t.pregenerate();
+    }
+
+    /**
+     * Single-player with the client GPU generator's coarse levels active (no terrain tiles): skip background CPU tile
+     * pre-building and surface self-checks on nirncraft-atlas-columns-* unless a LAN guest connects or farTiles=true.
+     */
+    private boolean gpuCoarseOnly() {
+        return !server.isDedicatedServer() && !server.isPublished() && peers.isEmpty()
+                && AtlasClientGen.ON && AtlasClientGen.far()
+                && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"));
     }
 
     private double tickMs() {
@@ -264,6 +275,7 @@ public final class AtlasTileServer {
     public static int[] prebuildProgress() {
         AtlasTileServer t = current;
         if (t == null) return null;
+        if (t.gpuCoarseOnly()) return null;
         List<long[]> sw = t.sweep;
         return sw == null ? new int[] {0, 0} : new int[] {Math.min(t.sweepAt, sw.size()), sw.size()};
     }

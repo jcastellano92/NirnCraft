@@ -1185,11 +1185,12 @@ public:
                 // budget for the next batch's round 0). A round over the target cuts it at once, down to 1 if needed.
                 bool cut = left_.map && *static_cast<const uint32_t*>(left_.map) > 0u;
                 bool fullRound = partRound_ == 0 || partActive_ * 2 >= n;
+                bool boost = b->version < 3 || b->pad3 != 0u;
                 double want = double(bud) * (ms > partMs ? partMs * 0.8 : partMs) / ms;
                 uint32_t minBud = minBudgetFor(partRoundRec_);
                 double lo = ms > partMs * 2.0 ? double(minBud) : std::max(double(minBud), double(bud) / 8.0);
                 double hi = ms > partMs ? double(bud) : (cut && fullRound && ms < partMs * 0.75) ? std::max(double(bud) + 1.0, double(bud) * 1.5) : double(bud);
-                uint32_t maxBud = maxBudgetFor(partRoundRec_);
+                uint32_t maxBud = maxBudgetFor(partRoundRec_, boost);
                 bud = uint32_t(std::clamp(want, lo, hi));
                 bud = std::clamp<uint32_t>(bud, minBud, maxBud);
             }
@@ -1250,7 +1251,10 @@ public:
                 return !(e && e[0] == '0');
             }();
             bool rockParts = rocksOn && types_[step] == 3;
-            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = initBudgetFor(step, lakeParts || rockParts));
+            bool boost = b->version < 3 || b->pad3 != 0u;
+            uint32_t bud = it != featBudget_.end() ? it->second : (featBudget_[step] = initBudgetFor(step, lakeParts || rockParts, boost));
+            bud = std::clamp<uint32_t>(bud, minBudgetFor(step), maxBudgetFor(step, boost));
+            featBudget_[step] = bud;
             partActive_ = partRound_ == 0 ? n : std::max(1u, partLeft_);
             vkCmdFillBuffer(cmd, cnt_.buf, 0, clockOn() ? CNT_BYTES : 4, 0u);
             barrier(cmd, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -1372,19 +1376,19 @@ public:
         uint32_t cfg = pw[step + 5];
         return size_t(cfg) < progBytes_ / 4 ? pw[cfg] : 0u;
     }
-    uint32_t initBudgetFor(uint32_t step, bool wideParts) const {
+    uint32_t initBudgetFor(uint32_t step, bool wideParts, bool boost = true) const {
         static const bool treePhasesOn = [] {
             const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
             return !(e && e[0] == '0');
         }();
         uint32_t type = step < types_.size() ? types_[step] : 0u;
-        if (type == 4) return treePhasesOn ? 256u : 1u;
-        if (wideParts) return 2048u;
+        if (type == 4) return treePhasesOn ? (boost ? 256u : 128u) : 1u;
+        if (wideParts) return boost ? 2048u : 256u;
         if (type == 1) {
             uint32_t sz = oreSizeOf(step);
             return sz >= 12u ? 1u : (sz >= 8u ? 4u : 16u);
         }
-        return 64u;
+        return boost ? 64u : 32u;
     }
     uint32_t minBudgetFor(uint32_t step) const {
         static const bool treePhasesOn = [] {
@@ -1404,19 +1408,19 @@ public:
         if ((type == 8 && lakesOn) || (type == 3 && rocksOn)) return 256u;
         return 1u;
     }
-    uint32_t maxBudgetFor(uint32_t step) const {
+    uint32_t maxBudgetFor(uint32_t step, bool boost = true) const {
         static const bool treePhasesOn = [] {
             const char* e = std::getenv("ATLAS_FEAT_TREE_PHASES");
             return !(e && e[0] == '0');
         }();
         uint32_t type = step < types_.size() ? types_[step] : 0u;
-        if (type == 4) return treePhasesOn ? 1024u : 1u;
-        if (type == 3 || type == 8) return 4096u;
+        if (type == 4) return treePhasesOn ? (boost ? 1024u : 128u) : 1u;
+        if (type == 3 || type == 8) return boost ? 4096u : 512u;
         if (type == 1) {
             uint32_t sz = oreSizeOf(step);
-            return sz >= 16u ? 1u : (sz >= 12u ? 2u : (sz >= 8u ? 16u : 64u));
+            return sz >= 16u ? 1u : (sz >= 12u ? 2u : (sz >= 8u ? (boost ? 16u : 8u) : (boost ? 64u : 32u)));
         }
-        return 256u;
+        return boost ? 256u : 64u;
     }
     Buf left_;  // (host) the last round's count of origins with placements left
     struct RecStat {

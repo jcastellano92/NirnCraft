@@ -70,6 +70,8 @@ public final class WeatherFieldTexture implements AutoCloseable {
     private boolean initialized;
     private int lastCenterCellX = Integer.MIN_VALUE;
     private int lastCenterCellZ = Integer.MIN_VALUE;
+    private int lastSampledCellX = Integer.MIN_VALUE;
+    private int lastSampledCellZ = Integer.MIN_VALUE;
     private static final java.util.concurrent.ExecutorService SAMPLER=java.util.concurrent.Executors.newSingleThreadExecutor(r->{
         Thread t=new Thread(r,"NirnCraft weather grids"); t.setDaemon(true); return t;
     });
@@ -204,7 +206,7 @@ public final class WeatherFieldTexture implements AutoCloseable {
             pendingGrid=null; java.util.Arrays.fill(sampledX,Integer.MIN_VALUE);
         }
         if(pendingGrid!=null && pendingGrid.isDone()) {
-            nextGrid=System.currentTimeMillis()+750;
+            nextGrid=System.currentTimeMillis()+(centerCellX==lastSampledCellX && centerCellZ==lastSampledCellZ ? 2500 : 750);
             try {
                 Grid grid=pendingGrid.join();
                 if(grid.identity==samplingIdentity) {
@@ -239,7 +241,11 @@ public final class WeatherFieldTexture implements AutoCloseable {
             }
             pendingGrid=null;
         }
-        if(pendingGrid==null && (System.currentTimeMillis()>=nextGrid || teleported)) {
+        long nowMs = System.currentTimeMillis();
+        boolean movedCell = initialized && (centerCellX != lastSampledCellX || centerCellZ != lastSampledCellZ);
+        if(pendingGrid==null && (nowMs>=nextGrid || teleported || (movedCell && nowMs>=nextGrid-1750))) {
+            lastSampledCellX = centerCellX;
+            lastSampledCellZ = centerCellZ;
             var climate=CloudClimate.snapshot();
             var kinds=new java.util.HashMap<String,WeatherKind>();
             for(String region:ClientWeather.regionIds()) {

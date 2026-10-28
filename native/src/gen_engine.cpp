@@ -1371,6 +1371,7 @@ public:
             poll();
             sb.part = part;
             sb.partsDone = partsDone_;
+            sb.pad3 = (!shared_ || boost_.load(std::memory_order_relaxed)) ? 1u : 0u;
             sb.partUs = partUs_.data();
             sb.lastPartUs = partsDone_ ? partUs_[partsDone_ - 1] : 0u;
             sb.units = whole ? 0u : perUnit > 0.0 ? uint32_t(std::clamp(partMs / perUnit, 1.0, 4096.0)) : 2u;

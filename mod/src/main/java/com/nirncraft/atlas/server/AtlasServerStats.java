@@ -33,6 +33,10 @@ public final class AtlasServerStats {
 
     private static final ThreadMXBean TMX = ManagementFactory.getThreadMXBean();
     private static volatile boolean recording;
+
+    public static boolean isRecording() {
+        return recording;
+    }
     private static long tickStart, t0, lastSecNs, newAtBegin;
     private static float[] ticks = new float[4096];
     private static int tickCount;

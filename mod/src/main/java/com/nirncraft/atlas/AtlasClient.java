@@ -1070,7 +1070,9 @@ public final class AtlasClient {
             // it streams them; otherwise (or until they arrive) the seed-free raster stand-in
             AtlasFarField.ColumnSource source = null;
             if (mc.hasSingleplayerServer())
-                source = AtlasExactSource.forServer(mc.getSingleplayerServer(), AtlasFarField::previewRaster);
+                source = AtlasClientGen.ON && AtlasClientGen.far() && !"true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.farTiles"))
+                        ? AtlasFarField.noTerrainSource()
+                        : AtlasExactSource.forServer(mc.getSingleplayerServer(), AtlasFarField::previewRaster);
             else if (serverWorldId != 0)
                 source = new AtlasServerSource(serverWorldId, mc.gameDirectory.toPath(), AtlasFarField::previewRaster);
             // exact heights on the GPU where this machine has a device that keeps them bit-exact and it is faster
