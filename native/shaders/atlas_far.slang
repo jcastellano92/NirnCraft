@@ -25,8 +25,23 @@
 #endif
 static const bool FAR_SPLIT = ATLAS_FAR_SPLIT != 0;
 // (the trace's walks and cores: real calls in the general kernels, so a cold driver compile stays at a minute or two;
-// inlined into one function in the split frames' farMain, which is built in the background)
-#if ATLAS_FAR_SPLIT
+// inlined into one function in the split frames' farMain and sunMapMain; inner walk helpers inlined into traceLodCore
+// in nearLightMain via ATLAS_INNER_INLINE while keeping traceLodCore/traceSecondaryCore outlined)
+#ifndef ATLAS_TRACE_INLINE
+#define ATLAS_TRACE_INLINE 0
+#endif
+#ifndef ATLAS_INNER_INLINE
+#define ATLAS_INNER_INLINE 0
+#endif
+#ifndef ATLAS_NO_GROUPS
+#define ATLAS_NO_GROUPS 0
+#endif
+#if ATLAS_FAR_SPLIT || ATLAS_TRACE_INLINE
+#define TRACE_CORE_CALL
+#else
+#define TRACE_CORE_CALL [noinline]
+#endif
+#if ATLAS_FAR_SPLIT || ATLAS_TRACE_INLINE || ATLAS_INNER_INLINE
 #define TRACE_CALL
 #else
 #define TRACE_CALL [noinline]
@@ -1246,8 +1261,13 @@ void traceInApply(TraceIn ti) {
 void traceInApplyC(TraceIn ti) {
     cSecondary = (ti.mode & TM_SECONDARY) != 0u;
     cSkipWater = (ti.mode & TM_SKIP_WATER) != 0u;
+#if ATLAS_NO_GROUPS
+    cGroups = false;
+    cPrimary = false;
+#else
     cGroups = (ti.mode & TM_GROUPS) != 0u;
     cPrimary = (ti.mode & TM_PRIMARY) != 0u;
+#endif
     cAblate = ti.ablate;
     cSecAblate = ti.secAblate;
     cSecMode = ti.secMode;
@@ -1264,7 +1284,7 @@ void traceInApplyC(TraceIn ti) {
     cTr = ti.tr;
 }
 
-TRACE_CALL
+TRACE_CORE_CALL
 TraceOut traceLodCore(TraceIn ti, int lod, float3 p0, float3 d, float len) {
     cGroups = false;
     cGroupPa = 0.001;
@@ -2013,7 +2033,7 @@ struct SecOut {
     int hitLod;
     uint secCount;
 };
-TRACE_CALL
+TRACE_CORE_CALL
 SecOut traceSecondaryCore(SecIn si, float3 p, float3 dir, float maxT, int lod) {
     sGroups = false;
     sGroupPa = 0.001;
@@ -4404,9 +4424,11 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float upperY = lowerY + 72.0 + 120.0 * dbg.weather.r + 300.0 * dbg.weather.g;
             // r: tower, g: cloud top (0 at y 200, 1 at y 1000), b: base (0 at 100, 1 at 400)
             color = float3(dbg.weather.g, (upperY - 200.0) / 800.0, (lowerY - 100.0) / 300.0);
+#ifndef ATLAS_CLOUD_PASS
             float hdbg;
             float3 probe = float3(wpos.x, 520.0, wpos.z);
             color.r = cumulusDensity(probe, dbg, length(p.xz), hdbg) > 0.0 ? 1.0 : 0.0;
+#endif
         }
     } else if ((frame.dims.z & FRAME_SKY) != 0) {
         color = skyColor(dir, sun);

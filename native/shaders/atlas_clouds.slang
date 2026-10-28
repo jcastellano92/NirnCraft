@@ -138,12 +138,21 @@ float middleCloudDensity(float3 p, float4 w) {
 
 // GetCloudNoise at quality 3 (4 octaves), CLOUD_SPEED_MULT 100, CLOUD_UNBOUND_AMOUNT 1, no smoke plumes.
 // p: world position with y = altitude above the (curved) surface datum. horizontal: distance from the camera.
+#ifdef ATLAS_CLOUD_PASS
+[ForceInline]
+float2 cumulusDensity(float3 p, float4 colWeather, float4 colDynamics, float horizontal) {
+    float skyCov = colWeather.r, skyTower = colWeather.g, skyCurtain = colWeather.b;
+    float effectiveCov = max(skyCov, skyCurtain * 0.68);
+    float4 dyn = colDynamics;
+    float h01 = 0.0;
+#else
 [noinline]  // (one copy, called: see atlas_far.slang traceLod)
 float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01) {
     float skyCov = col.weather.r, skyTower = col.weather.g, skyCurtain = col.weather.b;
     float effectiveCov = max(skyCov, skyCurtain * 0.68);
     float4 dyn = col.dynamics;
     h01 = 0.0;
+#endif
     float baseRoll = 0.0;
     if (effectiveCov > 0.48 || skyTower > 0.30) {
         float rollStrength = saturate(max(effectiveCov - 0.45, skyTower * 0.85));
@@ -153,8 +162,13 @@ float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01)
     float higher = lower + 72.0 + 120.0 * skyCov + 300.0 * skyTower;
     if (p.y < lower || p.y > higher) {
         float ice = highCloudDensity(p, dyn, skyCov, skyTower);
+#ifdef ATLAS_CLOUD_PASS
+        float middle = middleCloudDensity(p, colWeather);
+        return float2(max(ice, middle), h01);
+#else
         float middle = middleCloudDensity(p, col.weather);
         return max(ice, middle);
+#endif
     }
     float height01 = saturate((p.y - lower) / max(12.0, higher - lower));
     h01 = height01;
@@ -197,7 +211,11 @@ float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01)
             parcelShape = lerp(lobe, parcelShape, hh) + 0.16 * hh * (1.0 - hh);
         }
     }
+#ifdef ATLAS_CLOUD_PASS
+    if (parcelShape < -0.10) return float2(0.0, h01);
+#else
     if (parcelShape < -0.10) return 0.0;
+#endif
 
     float wind = 0.006 * weatherTime() * (1.0 + 0.85 * height01);
     float noise = 0.0, persist = 1.0, total = 0.0;
@@ -229,12 +247,22 @@ float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01)
         float3 edgePos = (p - float3(0.8, 0.0, 0.6) * weatherTime() * 0.9) / 26.0;
         eroded -= (1.0 - cloudNoiseAt(edgePos)) * 0.20 * closeDetail;
     }
+#ifdef ATLAS_CLOUD_PASS
+    return float2(max(eroded, 0.0) * cumulusProfile * 0.48 + overcastFloor, h01);
+#else
     return max(eroded, 0.0) * cumulusProfile * 0.48 + overcastFloor;
+#endif
 }
 
 float cloudDensityAt(float3 p, float horizontal, out float h01) {
     CloudColumn col = sampleColumn(p.xz, horizontal);
+#ifdef ATLAS_CLOUD_PASS
+    float2 dh = cumulusDensity(p, col.weather, col.dynamics, horizontal);
+    h01 = dh.y;
+    return dh.x;
+#else
     return cumulusDensity(p, col, horizontal, h01);
+#endif
 }
 
 // Altitude of a camera-relative world-flat point above the curved datum (planet curvature).
@@ -323,7 +351,13 @@ CloudResult marchClouds(float3 o, float3 dir, float tLimit, float3 sun, uint2 pi
         // nothing can form where the column is clear and the upper layers have no veil
         if (max(col.weather.r, col.weather.b) < 0.03 && alt < 640.0) continue;
         float hh;
+#ifdef ATLAS_CLOUD_PASS
+        float2 dh = cumulusDensity(wp, col.weather, col.dynamics, horizontal);
+        hh = dh.y;
+        float sigma = max(dh.x, 0.0);
+#else
         float sigma = max(cumulusDensity(wp, col, horizontal, hh), 0.0);
+#endif
         if (sigma <= 1e-5) continue;
         if (r.firstHit < 0.0) r.firstHit = ts;
         float tau = sigma * dt * 0.18;

@@ -919,6 +919,7 @@ void biomeClimate0(inout BCol c) {
 // the column fields at a quart column's block (what the climate entries read there), for column(): no page out here
 [noinline]
 void ownColumnFields(BCol c) {
+#ifdef ATLAS_COL_OWN
     int x = c.qx << 2, z = c.qz << 2;
     uint nf = hdr(H_FIELDS);
     g_colX = x;
@@ -933,13 +934,16 @@ void ownColumnFields(BCol c) {
     }
     if (nf > 16u) markBad(32u);
     g_colOwn = true;
+#endif
 }
 [noinline]
 uint quartBiomeFar(int qx, int qy, int qz) {
     BCol c = biomeColumn(qx, qz);
     ownColumnFields(c);
     biomeClimate0(c);
+#ifdef ATLAS_COL_OWN
     g_colOwn = false;
+#endif
     int y = qy < -16 ? -16 : (qy > 159 ? 159 : qy);  // ChunkAccess.getNoiseBiome clamps to the chunk
     return noiseBiome(c, y);
 }

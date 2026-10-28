@@ -699,8 +699,15 @@ static bool stageThree(const std::string& data, uint32_t W, uint32_t H, const st
         bool lit = gridFixture() || (std::getenv("ATLAS_VK_TEST_LIT") && std::getenv("ATLAS_VK_TEST_LIT")[0] == '1');
         if (lit) makeImage(nearLight, VK_FORMAT_R16G16B16A16_SFLOAT, W, H);
         // (S4, ATLAS_VK_ASYNC=1: atlas's staging ring, no CPU wait per frame; the sun map rides through it too)
+        if (abandon && !std::getenv("ATLAS_VK_ASYNC")) {
+#if defined(_WIN32)
+            _putenv_s("ATLAS_VK_ASYNC", "0");
+#else
+            setenv("ATLAS_VK_ASYNC", "0", 1);
+#endif
+        }
         const char* asyncEnv = std::getenv("ATLAS_VK_ASYNC");
-        const bool async = asyncEnv && asyncEnv[0] == '1';
+        const bool async = !(asyncEnv && asyncEnv[0] == '0');
         const bool withSun = abandon || async;
         if (withSun) makeImage(sun, VK_FORMAT_R32G32_SFLOAT, 64, 65);
         VkCommandPoolCreateInfo pc{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};

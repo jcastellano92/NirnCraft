@@ -4423,6 +4423,7 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
         struct Item {
             uint32_t chunk, sec, kind;
             std::shared_ptr<const std::vector<uint32_t>> words;
+            uint32_t uni = VG_UNI_UNSET;
             bool valid = false;
         };
         std::vector<Item> items;
@@ -4444,14 +4445,18 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
         atlas::parallelRun([&] {
             for (size_t k; (k = next.fetch_add(1)) < items.size();) {
                 Item& it = items[k];
-                if (it.kind == GenCache::KIND_AIR) it.valid = true;
+                if (it.kind == GenCache::KIND_AIR) { it.uni = 0; it.valid = true; }
                 else if (it.kind == GenCache::KIND_BLOCKS) {
                     it.words = gc->section(Key3{0, chunkXZ[it.chunk * 2], int32_t(it.sec) - 4, chunkXZ[it.chunk * 2 + 1]});
                     it.valid = it.words != nullptr;
+                    if (it.valid) it.uni = packUniform(it.words->data());
                 }
             }
         }, 8);
         uint32_t sent = 0;
+        std::vector<VoxGrid::PackedEntry> batch;
+        batch.reserve(items.size());
+        struct BatchFlush { VoxGrid* g; std::vector<VoxGrid::PackedEntry>& b; ~BatchFlush() { if (!b.empty()) g->putPackedBatch(b.data(), b.size()); } } flush{grid, batch};
         for (const Item& it : items) {
             int32_t cx = chunkXZ[it.chunk * 2], cz = chunkXZ[it.chunk * 2 + 1], sy = int32_t(it.sec) - 4;
             if (!it.valid) {
@@ -4463,13 +4468,14 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
                 if (world->layerNeed(Key3{0, cx, sy, cz})) {
                     std::vector<uint16_t> ids(4096, 0);
                     std::shared_ptr<const Section> sec = world->putSection(cx, sy, cz, ids.data(), SectionStore::REGEN);
+                    if (!batch.empty()) { grid->putPackedBatch(batch.data(), batch.size()); batch.clear(); }
                     grid->put(cx, sy, cz, VgIds(sec, &sec->mats));
                 } else {
                     static const auto airPacked = [] {
                         std::vector<uint16_t> z(4096, 0);
                         return std::make_shared<const std::vector<uint32_t>>(packSection(z.data()));
                     }();
-                    grid->putPacked(cx, sy, cz, airPacked);
+                    batch.push_back({cx, sy, cz, airPacked, 0});
                 }
                 sent++;
                 continue;
@@ -4479,9 +4485,10 @@ ATLAS_API AtlasStatus atlas_gen_cache_ingest(AtlasGen* h, const int32_t* chunkXZ
                 std::vector<uint16_t> ids(4096);
                 unpackSection(it.words->data(), ids.data());
                 std::shared_ptr<const Section> sec = world->putSection(cx, sy, cz, ids.data(), SectionStore::REGEN);
+                if (!batch.empty()) { grid->putPackedBatch(batch.data(), batch.size()); batch.clear(); }
                 grid->put(cx, sy, cz, VgIds(sec, &sec->mats));
             } else {
-                grid->putPacked(cx, sy, cz, it.words);
+                batch.push_back({cx, sy, cz, it.words, it.uni});
             }
             sent++;
         }

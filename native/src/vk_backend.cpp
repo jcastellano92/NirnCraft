@@ -1205,7 +1205,7 @@ public:
             ringFresh_[r] = ringSunFresh_[r] = true;
         }
         const char* a = std::getenv("ATLAS_VK_ASYNC");
-        if (!a || a[0] != '1') return true;
+        if (a && a[0] == '0') return true;
         const VkFormat fmt[3] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT};
         std::string why;
         for (uint32_t r = 0; r < STAGE_RING && why.empty(); r++)

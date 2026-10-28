@@ -417,7 +417,7 @@ static void integratedMemoryCap() {
 
     VoxGrid discrete;
     discrete.planMemory(24ull << 30, 0, false);
-    check(discrete.slotCap == 40960 && discrete.slotCap <= 40960, "24 GiB discrete GPU should bound default level-0 slotCap to <= 40960 shell slots");
+    check(discrete.slotCap == 32768 && discrete.slotCap <= 32768 && totalPoolBytes(discrete) == 100352ull * VoxGrid::SLOT_BYTES, "24 GiB discrete GPU should bound default level-0 slotCap to <= 32768 shell slots (100352 total slots)");
 
     VoxGrid deck;
     deck.planMemory(16ull << 30, 0, true);
@@ -432,6 +432,56 @@ static void integratedMemoryCap() {
     check(explicitOverride.slotCap > deck.slotCap, "explicit ATLAS_VOXGRID_MEM override was ignored on integrated GPU");
 }
 
+static void putPackedBatchParityAndBench() {
+    auto mixed = packed(3);
+    std::array<uint16_t, 4096> uniArr; uniArr.fill(7);
+    auto uniPacked = std::make_shared<const std::vector<uint32_t>>(packSection(uniArr.data()));
+    std::array<uint16_t, 4096> airArr; airArr.fill(0);
+    auto airPacked = std::make_shared<const std::vector<uint32_t>>(packSection(airArr.data()));
+
+    World worldA, worldB;
+    VoxGrid gridA, gridB;
+    gridA.setWorld(&worldA); gridB.setWorld(&worldB);
+    int32_t cam[3] = {0, 100, 0};
+    gridA.frame(cam, worldA); gridB.frame(cam, worldB);
+
+    std::vector<VoxGrid::PackedEntry> entries;
+    entries.reserve(1024);
+    for (int i = 0; i < 1024; i++) {
+        int sx = (i & 15) - 8, sz = ((i >> 4) & 7) - 4, sy = (i >> 7) + 2;
+        VgPacked w = (i % 3 == 0) ? mixed : (i % 3 == 1) ? uniPacked : airPacked;
+        entries.push_back({sx, sy, sz, w, VG_UNI_UNSET});
+    }
+    for (const auto& e : entries) gridA.putPacked(e.sx, e.sy, e.sz, e.words);
+    for (auto& e : entries) e.uni = packUniform(e.words->data());
+    gridB.putPackedBatch(entries.data(), entries.size());
+
+    auto batchA = gridA.take(1024), batchB = gridB.take(1024);
+    check(batchA.jobs.size() == batchB.jobs.size() && batchA.packs.size() == batchB.packs.size(),
+          "putPackedBatch job/pack count diverged from serial putPacked");
+    for (size_t i = 0; i < batchA.jobs.size(); i++) {
+        check(batchA.jobs[i].chunk == batchB.jobs[i].chunk && batchA.jobs[i].word == batchB.jobs[i].word &&
+              batchA.jobs[i].slot == batchB.jobs[i].slot && batchA.jobs[i].data == batchB.jobs[i].data,
+              "putPackedBatch job word/slot diverged from serial putPacked");
+    }
+
+    constexpr int ITERS = 20;
+    auto t0 = std::chrono::steady_clock::now();
+    for (int it = 0; it < ITERS; it++) {
+        for (const auto& e : entries) gridA.putPacked(e.sx, e.sy, e.sz, e.words);
+    }
+    double serialMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / ITERS;
+
+    t0 = std::chrono::steady_clock::now();
+    for (int it = 0; it < ITERS; it++) {
+        for (auto& e : entries) e.uni = packUniform(e.words->data());
+        gridB.putPackedBatch(entries.data(), entries.size());
+    }
+    double batchMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / ITERS;
+    std::printf("BENCH exp17 putPacked_1024_serial_ms=%.3f putPackedBatch_1024_ms=%.3f speedup=%.2fx\n",
+                serialMs, batchMs, serialMs / std::max(0.001, batchMs));
+}
+
 int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
@@ -442,6 +492,7 @@ int main() {
                             StandbyChange::NoCoarse, StandbyChange::FlagConflict}) gpuStandbyCandidate(change);
         unansweredAskIsRepeated();
         integratedMemoryCap();
+        putPackedBatchParityAndBench();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

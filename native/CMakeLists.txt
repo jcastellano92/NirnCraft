@@ -99,7 +99,7 @@ foreach(lp "stage_trace:0:0" "stage_trace_clock:1:0" "stage_trace_water:0:1" "st
 endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_cloud.spv"
-  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry cloudMain -stage compute -O3 -o "${GEN}/atlas_cloud.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry cloudMain -stage compute -O3 -DATLAS_CLOUD_PASS=1 -o "${GEN}/atlas_cloud.spv"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:cloudMain -> SPIR-V")
 add_custom_command(
   OUTPUT "${GEN}/atlas_cloud_spv.h"
@@ -108,11 +108,11 @@ add_custom_command(
   DEPENDS "${GEN}/atlas_cloud.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
   OUTPUT "${GEN}/atlas_sunmap.spv"
-  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry sunMapMain -stage compute -O3 -o "${GEN}/atlas_sunmap.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry sunMapMain -stage compute -O3 -DATLAS_TRACE_INLINE=1 -DATLAS_NO_GROUPS=1 -o "${GEN}/atlas_sunmap.spv"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:sunMapMain -> SPIR-V")
 add_custom_command(
   OUTPUT "${GEN}/atlas_nearlight.spv"
-  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry nearLightMain -stage compute -O3 -o "${GEN}/atlas_nearlight.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry nearLightMain -stage compute -O3 -DATLAS_INNER_INLINE=1 -DATLAS_NO_GROUPS=1 -o "${GEN}/atlas_nearlight.spv"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far:nearLightMain -> SPIR-V")
 add_custom_command(
   OUTPUT "${GEN}/atlas_nearlight_spv.h"
@@ -422,13 +422,17 @@ set(GEN_HEADERS)
 set(GEN_CPU_ENTRIES)
 foreach(pass corner aquifer fill top surface pack cols secs mats math probe pageCols pageBiomes tile tileSurf tileBiome farChunk)
   set(entry "${pass}Main")
+  set(GEN_PASS_DEFS)
+  if(pass STREQUAL "tileBiome")
+    set(GEN_PASS_DEFS -DATLAS_COL_OWN=1)
+  endif()
   set(GEN_VALIDATE)
   if(SPIRV_VAL)
     set(GEN_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_gen_${pass}.spv")
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_gen_${pass}.spv"
-    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise
+    COMMAND "${SLANGC}" "${GEN_SRC}" -target spirv -entry ${entry} -stage compute -O3 -fp-mode precise ${GEN_PASS_DEFS}
             -warnings-disable 41035 -o "${GEN}/atlas_gen_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_gen_${pass}_raw.spv" "${GEN}/atlas_gen_${pass}.spv"
     ${GEN_VALIDATE}
@@ -446,7 +450,7 @@ foreach(pass corner aquifer fill top surface pack cols secs mats math probe page
 endforeach()
 add_custom_command(
   OUTPUT "${GEN}/atlas_gen_cpu.cpp"
-  COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -warnings-disable 41035
+  COMMAND "${SLANGC}" "${GEN_SRC}" -target cpp ${GEN_CPU_ENTRIES} -O3 -fp-mode precise -DATLAS_COL_OWN=1 -warnings-disable 41035
           -o "${GEN}/atlas_gen_cpu.cpp"
   DEPENDS "${GEN_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_exact.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_map.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_page.slang" COMMENT "slangc atlas_gen -> C++ (CPU reference)")
 # the generator's chunk store (atlas_store.slang: a chunk into its slot and back, the map's region and elevation per
@@ -544,6 +548,7 @@ set(FEAT_DEFS)
 if(ATLAS_FEAT_CLOCK)
   set(FEAT_DEFS -DFEAT_CLOCK=1)
 endif()
+set(FEAT_O0_PASSES ore cover rock spring vein rockw)
 foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:featApplyMain" "pack:featPackMain"
              "ore:featOreMain" "cover:featCoverMain" "rock:featRockMain" "tree:featTreeMain" "freeze:featFreezeMain"
              "disk:featDiskMain" "spring:featSpringMain" "lake:featLakeMain" "aux:featAuxMain"
@@ -553,14 +558,18 @@ foreach(pair "hm:featHmMain" "init:featInitMain" "copy:featCopyMain" "apply:feat
   string(REPLACE ":" ";" pe "${pair}")
   list(GET pe 0 pass)
   list(GET pe 1 entry)
+  set(FEAT_OPT -O3)
+  if(pass IN_LIST FEAT_O0_PASSES)
+    set(FEAT_OPT -O0)
+  endif()
   set(FEAT_VALIDATE)
   if(SPIRV_VAL)
     set(FEAT_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/atlas_feat_${pass}.spv")
   endif()
   add_custom_command(
     OUTPUT "${GEN}/atlas_feat_${pass}.spv"
-    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute -O0 -fp-mode precise ${FEAT_DEFS}
-            -warnings-disable 41035 -o "${GEN}/atlas_feat_${pass}_raw.spv"
+    COMMAND "${SLANGC}" "${FEAT_SRC}" -target spirv -entry ${entry} -stage compute ${FEAT_OPT} -fp-mode precise ${FEAT_DEFS}
+            -warnings-disable 41035 -warnings-disable 20101 -o "${GEN}/atlas_feat_${pass}_raw.spv"
     COMMAND spv_exact "${GEN}/atlas_feat_${pass}_raw.spv" "${GEN}/atlas_feat_${pass}.spv"
     ${FEAT_VALIDATE}
     DEPENDS "${FEAT_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_feat_math.slang" spv_exact COMMENT "slangc atlas_features:${entry} -> SPIR-V (exact float contract)")

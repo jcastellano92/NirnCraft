@@ -381,11 +381,15 @@ int pageSlot(int cx, int cz) {
     return pageIndex[j * params.pageW + i];
 }
 // (far columns, atlas_page.slang) a thread's own column fields at one (x, z): no page there
+#ifdef ATLAS_COL_OWN
 static bool g_colOwn = false;
 static int g_colX = 0, g_colZ = 0;
 static float g_colVals[16];
+#endif
 float column(uint field, int x, int z) {
+#ifdef ATLAS_COL_OWN
     if (g_colOwn && x == g_colX && z == g_colZ && field < 16u) return g_colVals[field];
+#endif
     int s = pageSlot(x >> 4, z >> 4);
     if (s < 0) { markBad(2u); return 0.0f; }
     return asfloat(pages[uint(s) * pageWords() + field * 256u + uint(((z & 15) << 4) | (x & 15))]);

@@ -9,14 +9,12 @@
  ],
  "spv": {
   "atlas_cloud": {
-   "instructions": 7671,
+   "instructions": 7294,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
    "structCalls": 0,
-   "structCallsOk": [
-    "cumulusDensity"
-   ]
+   "structCallsOk": []
   },
   "atlas_far": {
    "instructions": 78047,
@@ -47,7 +45,7 @@
    ]
   },
   "atlas_feat_apply": {
-   "instructions": 233,
+   "instructions": 228,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -55,17 +53,17 @@
    "structCallsOk": []
   },
   "atlas_feat_aux": {
-   "instructions": 1238,
-   "private": 1,
+   "instructions": 1129,
+   "private": 0,
    "workgroup": 0,
-   "fnArrays": 2,
+   "fnArrays": 6,
    "structCalls": 0,
    "structCallsOk": [
     "floorD"
    ]
   },
   "atlas_feat_copy": {
-   "instructions": 167,
+   "instructions": 161,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -119,7 +117,7 @@
    ]
   },
   "atlas_feat_disk": {
-   "instructions": 19814,
+   "instructions": 20013,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
@@ -127,41 +125,28 @@
    "structCallsOk": [
     "arraySize",
     "ceilD",
-    "ceilF",
-    "cosS",
     "divD",
     "divF",
     "fieldSample",
     "floorD",
     "floraGround",
     "fmFind",
-    "fmGet",
-    "fmHas",
     "fmInit",
-    "fmKey",
-    "fmN",
     "fmPut",
     "fmRehash",
     "fmSetSlot",
-    "fmSetVal",
-    "fmSize",
-    "fmVal",
-    "gContains",
-    "gGet",
-    "gSet",
     "out1",
     "qPop",
     "qPush",
     "rngDoubleP",
     "rngIntBP",
     "rngNextP",
-    "sinS",
     "twoProd",
     "valueNoise"
    ]
   },
   "atlas_feat_farcanopy": {
-   "instructions": 640,
+   "instructions": 519,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -171,7 +156,7 @@
    ]
   },
   "atlas_feat_farplaces": {
-   "instructions": 212,
+   "instructions": 197,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -179,16 +164,14 @@
    "structCallsOk": []
   },
   "atlas_feat_fartrees": {
-   "instructions": 12737,
+   "instructions": 13329,
    "private": 1,
    "workgroup": 0,
-   "fnArrays": 15,
+   "fnArrays": 21,
    "structCalls": 0,
    "structCallsOk": [
-    "ceilF",
     "divD",
     "divF",
-    "expS",
     "farScatterNext",
     "fbm",
     "fieldSample",
@@ -201,7 +184,7 @@
    ]
   },
   "atlas_feat_freeze": {
-   "instructions": 19812,
+   "instructions": 20030,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
@@ -209,41 +192,28 @@
    "structCallsOk": [
     "arraySize",
     "ceilD",
-    "ceilF",
-    "cosS",
     "divD",
     "divF",
     "fieldSample",
     "floorD",
     "floraGround",
     "fmFind",
-    "fmGet",
-    "fmHas",
     "fmInit",
-    "fmKey",
-    "fmN",
     "fmPut",
     "fmRehash",
     "fmSetSlot",
-    "fmSetVal",
-    "fmSize",
-    "fmVal",
-    "gContains",
-    "gGet",
-    "gSet",
     "out1",
     "qPop",
     "qPush",
     "rngDoubleP",
     "rngIntBP",
     "rngNextP",
-    "sinS",
     "twoProd",
     "valueNoise"
    ]
   },
   "atlas_feat_hm": {
-   "instructions": 445,
+   "instructions": 377,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -251,7 +221,7 @@
    "structCallsOk": []
   },
   "atlas_feat_init": {
-   "instructions": 736,
+   "instructions": 553,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 1,
@@ -259,7 +229,7 @@
    "structCallsOk": []
   },
   "atlas_feat_lake": {
-   "instructions": 20717,
+   "instructions": 20737,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 9,
@@ -267,41 +237,28 @@
    "structCallsOk": [
     "arraySize",
     "ceilD",
-    "ceilF",
-    "cosS",
     "divD",
     "divF",
     "fieldSample",
     "floorD",
     "floraGround",
     "fmFind",
-    "fmGet",
-    "fmHas",
     "fmInit",
-    "fmKey",
-    "fmN",
     "fmPut",
     "fmRehash",
     "fmSetSlot",
-    "fmSetVal",
-    "fmSize",
-    "fmVal",
-    "gContains",
-    "gGet",
-    "gSet",
     "out1",
     "qPop",
     "qPush",
     "rngDoubleP",
     "rngIntBP",
     "rngNextP",
-    "sinS",
     "twoProd",
     "valueNoise"
    ]
   },
   "atlas_feat_lakew": {
-   "instructions": 2160,
+   "instructions": 1995,
    "private": 1,
    "workgroup": 0,
    "fnArrays": 1,
@@ -312,7 +269,7 @@
    ]
   },
   "atlas_feat_mask": {
-   "instructions": 2797,
+   "instructions": 2215,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -367,7 +324,7 @@
    ]
   },
   "atlas_feat_pack": {
-   "instructions": 119,
+   "instructions": 120,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -431,7 +388,7 @@
    ]
   },
   "atlas_feat_sapply": {
-   "instructions": 256,
+   "instructions": 233,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -481,55 +438,35 @@
    ]
   },
   "atlas_feat_tree": {
-   "instructions": 41864,
+   "instructions": 43893,
    "private": 1,
    "workgroup": 0,
-   "fnArrays": 24,
+   "fnArrays": 32,
    "structCalls": 0,
    "structCallsOk": [
-    "LX",
-    "LZ",
     "arraySize",
-    "atan2S",
     "ceilD",
-    "ceilF",
-    "cosS",
     "divD",
     "divF",
-    "expS",
     "fbm",
     "fieldSample",
     "floorD",
     "floraGround",
     "fmFind",
-    "fmGet",
-    "fmHas",
     "fmInit",
-    "fmKey",
-    "fmN",
     "fmPut",
     "fmRehash",
     "fmRemove",
     "fmSetSlot",
-    "fmSetVal",
     "fmShiftKeys",
-    "fmSize",
-    "fmVal",
-    "gContains",
-    "gGet",
-    "gSet",
-    "hypotS",
-    "leafFor",
     "lying",
     "out1",
-    "powD",
     "qPop",
     "qPush",
     "rngDoubleP",
     "rngIntBP",
     "rngNextP",
     "roots",
-    "setL",
     "shAcacia",
     "shAspen",
     "shBaldCypress",
@@ -548,7 +485,6 @@
     "shStump",
     "shTwisted",
     "shWillow",
-    "sinS",
     "sqrtD",
     "tier",
     "trunkDraw",
@@ -637,10 +573,10 @@
    "structCallsOk": []
   },
   "atlas_gen_pageBiomes": {
-   "instructions": 16520,
-   "private": 4,
+   "instructions": 16470,
+   "private": 1,
    "workgroup": 0,
-   "fnArrays": 46,
+   "fnArrays": 45,
    "structCalls": 0,
    "structCallsOk": [
     "beyondSample",
@@ -698,10 +634,10 @@
    "structCallsOk": []
   },
   "atlas_gen_surface": {
-   "instructions": 8782,
-   "private": 4,
+   "instructions": 8621,
+   "private": 1,
    "workgroup": 0,
-   "fnArrays": 44,
+   "fnArrays": 43,
    "structCalls": 0,
    "structCallsOk": [
     "runRules"
@@ -750,10 +686,10 @@
    ]
   },
   "atlas_gen_tileSurf": {
-   "instructions": 21636,
-   "private": 4,
+   "instructions": 21475,
+   "private": 1,
    "workgroup": 0,
-   "fnArrays": 69,
+   "fnArrays": 68,
    "structCalls": 0,
    "structCallsOk": [
     "beyondSample",
@@ -1067,19 +1003,15 @@
    "structCallsOk": []
   },
   "atlas_nearlight": {
-   "instructions": 26246,
-   "private": 28,
+   "instructions": 24197,
+   "private": 0,
    "workgroup": 1,
-   "fnArrays": 30,
+   "fnArrays": 6,
    "structCalls": 0,
    "structCallsOk": [
     "cumulusDensity",
-    "traceGroups",
     "traceLodCore",
-    "traceLodRegions",
-    "traceRegion",
-    "traceSecondaryCore",
-    "traceVoxGrid"
+    "traceSecondaryCore"
    ]
   },
   "atlas_neartemporal": {
@@ -1207,18 +1139,13 @@
    "structCallsOk": []
   },
   "atlas_sunmap": {
-   "instructions": 19157,
-   "private": 28,
+   "instructions": 13118,
+   "private": 0,
    "workgroup": 0,
-   "fnArrays": 31,
+   "fnArrays": 7,
    "structCalls": 0,
    "structCallsOk": [
-    "cumulusDensity",
-    "traceGroups",
-    "traceLodCore",
-    "traceLodRegions",
-    "traceRegion",
-    "traceVoxGrid"
+    "cumulusDensity"
    ]
   },
   "atlas_vg_cand": {
@@ -1381,37 +1308,37 @@
    "farMain": {
     "registers": 128,
     "shared": 12544,
-    "local": 12176,
+    "local": 12192,
     "stack": 0,
-    "binary": 2329472
+    "binary": 2330112
    },
    "farMain (split frames)": {
     "registers": 168,
-    "shared": 7936,
-    "local": 3344,
+    "shared": 16640,
+    "local": 3216,
     "stack": 0,
-    "binary": 2006144
+    "binary": 2008064
    },
    "cloudMain": {
     "registers": 72,
     "shared": 6912,
-    "local": 128,
+    "local": 16,
     "stack": 0,
-    "binary": 162560
+    "binary": 140800
    },
    "sunMapMain": {
     "registers": 128,
-    "shared": 12544,
-    "local": 2432,
+    "shared": 4864,
+    "local": 512,
     "stack": 0,
-    "binary": 403072
+    "binary": 219008
    },
    "nearLightMain": {
     "registers": 128,
     "shared": 12560,
-    "local": 5264,
+    "local": 4288,
     "stack": 0,
-    "binary": 572288
+    "binary": 580480
    },
    "nearUpsampleMain": {
     "registers": 43,
@@ -1479,9 +1406,9 @@
    "farMain (shade)": {
     "registers": 128,
     "shared": 12544,
-    "local": 1168,
+    "local": 1184,
     "stack": 0,
-    "binary": 930944
+    "binary": 935168
    },
    "traceMain (lean water)": {
     "registers": 80,

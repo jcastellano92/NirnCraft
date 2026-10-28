@@ -191,6 +191,12 @@ public:
     void putLocked(int sx, int sy, int sz, VgIds ids);  // (caller holds mu_)
     // a section's packed words (the gen cache's: sectionpack.hpp), expanded on the GPU
     void putPacked(int sx, int sy, int sz, VgPacked words);
+    struct PackedEntry {
+        int sx = 0, sy = 0, sz = 0;
+        VgPacked words;
+        uint32_t uni = VG_UNI_UNSET;
+    };
+    void putPackedBatch(const PackedEntry* entries, size_t count);
     // (the self-baking cache) generated sections on the GPU to pack for the world's gen cache (World::BAKE): at most
     // bakeBudget a batch; their buffers held (gpuPendingOffsets) until a batch took them
     void bakeGpu(uint64_t buffer, const uint64_t* offsets, const int32_t* pos, size_t count, int level = 0);

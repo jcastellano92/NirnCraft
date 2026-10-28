@@ -92,14 +92,14 @@ void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes, bool inte
     uint64_t slots = uint64_t(double(deviceBytes) * share) / SLOT_BYTES;
     // (never more than a slot per active shell/cave section of the window, <= 10 mixed sections/column by default, or all H
     // when ATLAS_VOXGRID_MEM is set; never fewer than the old fixed pool)
-    uint64_t cells = uint64_t(D) * uint64_t(explicitMem ? H : std::min(H, 10)) * uint64_t(D);
+    uint64_t cells = uint64_t(D) * uint64_t(explicitMem ? H : std::min(H, 8)) * uint64_t(D);
     // (at most a slot a cell, what one descriptor sees of the pool, and 2^19: a coarse target's slot << 12 in 32 bits)
     uint64_t hi = std::min<uint64_t>({cells, maxRangeBytes ? maxRangeBytes / (VG_SECTION_WORDS * 4) : cells, 1u << 19});
     slotCap = uint32_t(std::clamp<uint64_t>(slots, std::min<uint64_t>(16384, hi), hi));
     // the coarse levels' pools from the plan too (their windows' surface chunks: a few a column; fixed small pools
     // evicted and refused all the time, the far field never whole): 5 % of the device, never under the old pools
     if (!coarseCapByHand) {
-        static const double rows[VG_LEVELS] = {0, 6.0, 4.0, 3.0, 2.5, 2.5, 2.0};  // (chunks a window column, to a full pool)
+        static const double rows[VG_LEVELS] = {0, 5.0, 3.0, 2.5, 2.0, 2.0, 2.0};  // (chunks a window column, to a full pool)
         double want = 0;
         for (int k = 1; k < VG_LEVELS; k++) want += double(coarseD) * coarseD * rows[k];
         double budget = double(deviceBytes) * 0.05 / SLOT_BYTES;
@@ -628,6 +628,15 @@ void VoxGrid::put(int sx, int sy, int sz, VgIds a) {
     if (!enabled || !a) return;
     std::lock_guard<std::mutex> lock(mu_);
     putLocked(sx, sy, sz, std::move(a));
+}
+
+void VoxGrid::putPackedBatch(const PackedEntry* entries, size_t count) {
+    if (!enabled || !entries || count == 0) return;
+    std::lock_guard<std::mutex> lock(mu_);
+    for (size_t i = 0; i < count; i++) {
+        if (!entries[i].words) continue;
+        putSrc(entries[i].sx, entries[i].sy, entries[i].sz, VgSrc{nullptr, entries[i].words, entries[i].uni});
+    }
 }
 
 void VoxGrid::putPacked(int sx, int sy, int sz, VgPacked words) {
