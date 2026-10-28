@@ -34,6 +34,70 @@ def set_backend(mode):
     game.lw.atomic(options, b'\n'.join(lines))
     return raw
 
+
+_PARITY_JVM_OVERRIDE = re.compile(r'^-Dnirncraft\.atlas\.(?:cacheDir|memoryDiagnostics)=')
+_STRAY_HARNESS_FLAG = re.compile(r'^-Dnirncraft\.(?:atlas|autotest)\.')
+_PARITY_PROP_LINE = re.compile(rb'^nirncraft\.atlas\.(?:cacheDir|memoryDiagnostics)=')
+
+
+def sanitize_instance_cfg(raw):
+    """Strip duplicate -Dnirncraft.(atlas|autotest).* tokens outside the harness marker and parity-only overrides inside it."""
+    text = raw.decode('utf-8')
+    m = re.search(r'^(JvmArgs="?)([^\r\n"]*?)("?)(\r?)$', text, re.M)
+    if not m:
+        return raw
+    prefix, body, suffix, cr = m.groups()
+    block_re = re.compile(re.escape(game.MARK[0]) + r'.*?' + re.escape(game.MARK[1]))
+    block_match = block_re.search(body)
+    outside = block_re.sub('', body).split()
+    clean_outside = [tok for tok in outside if not _STRAY_HARNESS_FLAG.match(tok)]
+    if block_match:
+        inner = block_match.group(0)[len(game.MARK[0]):-len(game.MARK[1])].split()
+        seen = set()
+        clean_inner = []
+        for tok in inner:
+            if _PARITY_JVM_OVERRIDE.match(tok) or tok in seen:
+                continue
+            seen.add(tok)
+            clean_inner.append(tok)
+        if clean_inner:
+            clean_outside.append(f"{game.MARK[0]} {' '.join(clean_inner)} {game.MARK[1]}")
+    rebuilt = f"{prefix}{' '.join(clean_outside)}{suffix}{cr}"
+    return (text[:m.start()] + rebuilt + text[m.end():]).encode('utf-8')
+
+
+def sanitize_flags_properties(raw):
+    """Remove parity_capture's temporary cacheDir / memoryDiagnostics overrides from nirncraft-harness-flags.properties."""
+    if raw is None:
+        return None
+    kept = [line for line in raw.splitlines(keepends=True) if not _PARITY_PROP_LINE.match(line.lstrip())]
+    return b''.join(kept)
+
+
+def snapshot_launcher_state(instance_dir=None, flags_file=None, atomic=None):
+    cfg_path = Path(instance_dir or game.lw.INSTANCE) / 'instance.cfg'
+    flags_path = Path(flags_file or game.FLAGS_FILE)
+    write_atomic = atomic or game.lw.atomic
+    clean_cfg = sanitize_instance_cfg(cfg_path.read_bytes()) if cfg_path.exists() else None
+    if clean_cfg is not None:
+        write_atomic(cfg_path, clean_cfg)
+    clean_flags = sanitize_flags_properties(flags_path.read_bytes()) if flags_path.exists() else None
+    if clean_flags is not None:
+        write_atomic(flags_path, clean_flags)
+    return {'cfg_path': cfg_path, 'cfg': clean_cfg, 'flags_path': flags_path, 'flags': clean_flags, 'atomic': write_atomic}
+
+
+def restore_launcher_state(saved):
+    if not saved:
+        return
+    write_atomic = saved['atomic']
+    if saved['cfg'] is not None:
+        write_atomic(saved['cfg_path'], saved['cfg'])
+    if saved['flags'] is None:
+        saved['flags_path'].unlink(missing_ok=True)
+    else:
+        write_atomic(saved['flags_path'], saved['flags'])
+
 JCMD = Path(os.environ.get('JAVA25_HOME') or r'E:\NirnCraft-scratch\toolchains\jdk-25.0.4.1+1') / 'bin/jcmd.exe'
 
 
@@ -108,6 +172,7 @@ def main():
     if '--validation' in sys.argv:
         enable_validation(out)
     if game.running(): game.close()
+    launcher_state = snapshot_launcher_state()
     if '--cold' in sys.argv:  # a private empty cache dir (never wipes the shared test-instance cache): the bake is still running at shutdown
         root = (out / 'generated-cache').resolve(); root.mkdir(exist_ok=True)
         (root / 'keep-gen-sets').write_text('3\n', encoding='utf-8')
@@ -148,6 +213,7 @@ def main():
             if game.running(): close_with_dump(out, mode)
         finally:
             game.lw.atomic(game.GAME / 'options.txt', original)
+            restore_launcher_state(launcher_state)
 
 
 if __name__ == '__main__':

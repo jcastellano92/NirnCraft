@@ -123,6 +123,7 @@ def _set_group_flags(jvm, raw_args=()):
     if not m:
         raise SystemExit("instance has no JvmArgs; prepare it with tools/qa/prism_autotest.ps1 -PrepareOnly -Live")
     args = re.sub(re.escape(MARK[0]) + r".*?" + re.escape(MARK[1]), "", m.group(1)).strip()
+    args = " ".join(tok for tok in args.split() if not tok.startswith(("-Dnirncraft.atlas.", "-Dnirncraft.autotest.")))
     marker = probe_flags.format_marker(jvm, raw_args)
     if marker:
         args = f"{args} {marker.decode('utf-8')}"

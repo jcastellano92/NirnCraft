@@ -81,11 +81,13 @@ void VoxGrid::setView(const float fwd[3], float cosHalf, float pixelAngle, float
     levelBias_ = levelBias;
 }
 
-void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes) {
+void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes, bool integrated) {
     std::lock_guard<std::mutex> lock(mu_);
     if (laidOut_ || centred_ || !deviceBytes || std::getenv("ATLAS_VOXGRID_SLOTS")) return;  // (fixed, or by hand)
     double share = 0.10;
-    if (const char* e = std::getenv("ATLAS_VOXGRID_MEM")) share = std::clamp(std::atof(e), 0.01, 0.6);
+    const char* memEnv = std::getenv("ATLAS_VOXGRID_MEM");
+    if (memEnv && *memEnv) share = std::clamp(std::atof(memEnv), 0.01, 0.6);
+    else if (integrated) deviceBytes = std::min<uint64_t>(deviceBytes, 10ull << 30);  // (UMA / Steam Deck: <= 1.5 GiB total pool)
     uint64_t slots = uint64_t(double(deviceBytes) * share) / SLOT_BYTES;
     // (never more than a slot a cell of the window, never fewer than the old fixed pool)
     uint64_t cells = uint64_t(D) * H * D;

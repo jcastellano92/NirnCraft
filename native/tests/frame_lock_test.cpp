@@ -2,6 +2,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <future>
 #include <stdexcept>
@@ -395,6 +396,42 @@ static void unansweredAskIsRepeated() {
     check(asks >= 2, "an unanswered GPU ask was never repeated: the section waits in standby with no request");
 }
 
+static void setEnvVar(const char* name, const char* value) {
+#ifdef _WIN32
+    _putenv_s(name, value ? value : "");
+#else
+    if (value && *value) setenv(name, value, 1);
+    else unsetenv(name);
+#endif
+}
+
+static uint64_t totalPoolBytes(const VoxGrid& grid) {
+    uint64_t slots = grid.slotCap;
+    for (int k = 1; k < VG_LEVELS; k++) slots += grid.coarseCap[k];
+    return slots * uint64_t(VoxGrid::SLOT_BYTES);
+}
+
+static void integratedMemoryCap() {
+    setEnvVar("ATLAS_VOXGRID_SLOTS", "");
+    setEnvVar("ATLAS_VOXGRID_MEM", "");
+
+    VoxGrid discrete;
+    discrete.planMemory(24ull << 30, 0, false);
+    check(discrete.slotCap > 150000, "24 GiB discrete GPU should plan > 150k level-0 slots by default");
+
+    VoxGrid deck;
+    deck.planMemory(16ull << 30, 0, true);
+    uint64_t deckBytes = totalPoolBytes(deck);
+    check(deckBytes <= (3ull << 29), "16 GiB integrated/UMA GPU (Steam Deck) default pool exceeded 1.5 GiB cap");
+    check(deck.slotCap >= 65536 && deck.slotCap <= 120000, "16 GiB integrated/UMA GPU level-0 slots out of expected capped range");
+
+    setEnvVar("ATLAS_VOXGRID_MEM", "0.20");
+    VoxGrid explicitOverride;
+    explicitOverride.planMemory(16ull << 30, 0, true);
+    setEnvVar("ATLAS_VOXGRID_MEM", "");
+    check(explicitOverride.slotCap > deck.slotCap, "explicit ATLAS_VOXGRID_MEM override was ignored on integrated GPU");
+}
+
 int main() {
     try {
         std::printf("TRACE begin frame-lock held World, cold I/O, edit, window reset and source revision\n");
@@ -404,6 +441,7 @@ int main() {
                             StandbyChange::Jump, StandbyChange::HostReplace, StandbyChange::UniformReplace,
                             StandbyChange::NoCoarse, StandbyChange::FlagConflict}) gpuStandbyCandidate(change);
         unansweredAskIsRepeated();
+        integratedMemoryCap();
         std::printf("TRACE done frame-lock PASS (CPU synchronization; no route/performance verdict)\n");
         return 0;
     } catch (const std::exception& e) { std::fprintf(stderr, "FAIL frame-lock: %s\n", e.what()); return 1; }

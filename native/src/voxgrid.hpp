@@ -179,7 +179,7 @@ public:
     static constexpr uint32_t SLOT_BYTES = VG_SECTION_WORDS * 4 + 64 * 12;
     // the memory plan (atlas_memory_info): `deviceBytes` the device-local budget the process may use (0: unknown, the
     // default cap stays); ATLAS_VOXGRID_MEM the share of it level 0's pool takes (0.10)
-    void planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes = 0);  // (and what one descriptor sees)
+    void planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes = 0, bool integrated = false);  // (and what one descriptor sees)
     bool enabled = true;  // ATLAS_VOXGRID=0: off (the SVDAG level 0 alone)
 
     // a section's ids as World::putSection gets them (any thread)

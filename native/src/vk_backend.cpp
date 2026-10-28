@@ -1028,7 +1028,7 @@ public:
         m.atlasBytes = allocated_.load();
         m.maxStorageRange = maxStorageRange_;
         m.integrated = props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
-                       props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
+                       props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU || host < 0;
         m.budgetExt = budgetExt_;
         return true;
     }
