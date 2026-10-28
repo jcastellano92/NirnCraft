@@ -2625,6 +2625,14 @@ static void testStalls() {
     for (int i = 0; i < 6; i++) CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);
     std::string before = atlas_info(ctx);
     CHECK(before.find("\"voxgrid\"") != std::string::npos);
+    {
+        size_t scPos = before.find("\"slotCap\":");
+        CHECK(scPos != std::string::npos);
+        if (scPos != std::string::npos) {
+            unsigned long sc = std::strtoul(before.c_str() + scPos + 10, nullptr, 10);
+            CHECK(sc >= 16384 && sc <= 40960);
+        }
+    }
     CHECK(before.find("\"genCache\":{") != std::string::npos);  // (off here: no generator names a fingerprint; its lock is held all the same)
     const double HOLD_MS = 2500.0;
     CHECK(atlas_debug_hold_locks(ctx, uint32_t(HOLD_MS)) == ATLAS_OK);

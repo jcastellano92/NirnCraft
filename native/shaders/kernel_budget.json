@@ -1347,7 +1347,7 @@
    "structCallsOk": []
   },
   "stage_trace": {
-   "instructions": 6906,
+   "instructions": 5932,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1355,7 +1355,7 @@
    "structCallsOk": []
   },
   "stage_trace_clock": {
-   "instructions": 6496,
+   "instructions": 5522,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1373,7 +1373,7 @@
    ]
   },
   "stage_trace_water": {
-   "instructions": 8284,
+   "instructions": 7273,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,
@@ -1381,7 +1381,7 @@
    "structCallsOk": []
   },
   "stage_trace_refine": {
-   "instructions": 8857,
+   "instructions": 7780,
    "private": 0,
    "workgroup": 0,
    "fnArrays": 0,

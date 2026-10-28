@@ -66,7 +66,7 @@ float lodRes(float3 p, int lodCount) {
 static const float SMOOTH_COARSE_PX = 1.5;  // a voxel this many footprints wide, or more, is drawn smooth
 static const uint HIT_SMOOTH_N = 2u;        // (the record's albedo flags: bit 0 its own albedo, bit 1 a smooth normal)
 static const float WATER_SEE = 96.0;        // blocks of water past which nothing behind shows (atlas_far.slang's)
-static const uint FAR_AMORT_N = 4u;         // (atlas_far.slang's: a hit is taken while younger than this many frames)
+static const uint FAR_AMORT_N = 8u;         // (atlas_far.slang's: a hit is taken while younger than this many frames)
 
 // (atlas_groups.slang's)
 uint hashU(uint x) {
@@ -86,9 +86,7 @@ uint matAt(int3 v, int gx, int gz, int X, int Y, int Z, uint base) {
     int3 hiV = int3(X, Y, Z) * 16 - 1;
     bool inside = all(v >= int3(0, 0, 0)) && all(v <= hiV);
     int3 c = clamp(v, int3(0, 0, 0), hiV) >> 4;
-    int px = (c.x + gx) % X, pz = (c.z + gz) % Z;
-    px += px < 0 ? X : 0;
-    pz += pz < 0 ? Z : 0;
+    int px = (c.x + gx) & (X - 1), pz = (c.z + gz) & (Z - 1);
     uint cw = vgChunks[base + uint((c.y * Z + pz) * X + px)];
     uint st = cw & 3u;
     int3 l = v & 15;
@@ -129,9 +127,7 @@ float unloadedExit(int j, float3 p, float3 d) {
     float3 fq = floor(q);
     int3 c = int3(fq) - int3(d.x < 0.0 && q.x == fq.x ? 1 : 0, d.y < 0.0 && q.y == fq.y ? 1 : 0, d.z < 0.0 && q.z == fq.z ? 1 : 0);
     if (any(c < int3(0, 0, 0)) || c.x >= X || c.y >= Y || c.z >= Z) return 1e30;
-    int px = (c.x + L.x) % X, pz = (c.z + L.y) % Z;
-    px += px < 0 ? X : 0;
-    pz += pz < 0 ? Z : 0;
+    int px = (c.x + L.x) & (X - 1), pz = (c.z + L.y) & (Z - 1);
     uint cw = vgChunks[uint(L.z) + uint((c.y * Z + pz) * X + px)];
     if ((cw & 3u) != ST_UNLOADED) return 0.0;
     int3 lo = c - int3(int((cw >> 2) & 31u), int((cw >> 12) & 31u), int((cw >> 22) & 31u));
@@ -203,8 +199,7 @@ float4 texSampleL(uint at, int f, float u, float v, float fp) {
     float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
     int l0 = int(lv), l1 = min(4, l0 + 1);
     int n0 = 16 >> l0, n1 = 16 >> l1;
-    uint m0 = l0 == 0 ? 0u : (l0 == 1 ? 256u : (l0 == 2 ? 320u : (l0 == 3 ? 336u : 340u)));
-    uint m1 = l1 == 0 ? 0u : (l1 == 1 ? 256u : (l1 == 2 ? 320u : (l1 == 3 ? 336u : 340u)));
+    uint m0 = 341u - (341u >> (2u * uint(l0))), m1 = 341u - (341u >> (2u * uint(l1)));
     uint b = at + uint(f) * 341u;
     uint c0 = texData[b + m0 + uint(min(int(u * float(n0)), n0 - 1) + n0 * min(int(v * float(n0)), n0 - 1))];
     uint c1 = texData[b + m1 + uint(min(int(u * float(n1)), n1 - 1) + n1 * min(int(v * float(n1)), n1 - 1))];
@@ -636,9 +631,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 uint cw = 0u, st = ST_UNLOADED;
                 int3 c = v >> 4;
                 if (held) {
-                    int px = (c.x + gx) % X, pz = (c.z + gz) % Z;
-                    px += px < 0 ? X : 0;
-                    pz += pz < 0 ? Z : 0;
+                    int px = (c.x + gx) & (X - 1), pz = (c.z + gz) & (Z - 1);
                     cw = vgChunks[base + uint((c.y * Z + pz) * X + px)];
                     st = cw & 3u;
                 }
@@ -672,9 +665,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                                         ue = 1e30;
                                         break;
                                     }
-                                    int qx = (cc.x + gx) % X, qz = (cc.z + gz) % Z;
-                                    qx += qx < 0 ? X : 0;
-                                    qz += qz < 0 ? Z : 0;
+                                    int qx = (cc.x + gx) & (X - 1), qz = (cc.z + gz) & (Z - 1);
                                     uint w2 = vgChunks[base + uint((cc.y * Z + qz) * X + qx)];
                                     if ((w2 & 3u) != ST_UNLOADED) break;
                                     int3 lo2 = cc - int3(int((w2 >> 2) & 31u), int((w2 >> 12) & 31u), int((w2 >> 22) & 31u));
@@ -995,8 +986,7 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
             float back = -min(vs, max(tHit - hitFrom, 0.0));
             float u0 = back, u1 = min(1.5 * vs, max(tMax - tHit, 0.0));
             int3 cellAt = int3(-0x7FFFFFFF, 0, 0);
-            uint m0 = 0u, m1 = 0u, m2 = 0u, m3 = 0u, m4 = 0u, m5 = 0u, m6 = 0u, m7 = 0u;
-            float o0 = 0.0, o1 = 0.0, o2 = 0.0, o3 = 0.0, o4 = 0.0, o5 = 0.0, o6 = 0.0, o7 = 0.0;
+            uint occ = 0u;  // (the cell's eight voxel centres solid, bit x + 2 y + 4 z: a mask, not sixteen live values)
             const int N = 10;
             float du = (u1 - u0) / float(N);
             float us = u0, uPrev = u0;
@@ -1010,19 +1000,14 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 int3 b = int3(floor(q));
                 if (any(b != cellAt)) {
                     cellAt = b;
-                    m0 = matAt(b, gx, gz, X, Y, Z, base);
-                    m1 = matAt(b + int3(1, 0, 0), gx, gz, X, Y, Z, base);
-                    m2 = matAt(b + int3(0, 1, 0), gx, gz, X, Y, Z, base);
-                    m3 = matAt(b + int3(1, 1, 0), gx, gz, X, Y, Z, base);
-                    m4 = matAt(b + int3(0, 0, 1), gx, gz, X, Y, Z, base);
-                    m5 = matAt(b + int3(1, 0, 1), gx, gz, X, Y, Z, base);
-                    m6 = matAt(b + int3(0, 1, 1), gx, gz, X, Y, Z, base);
-                    m7 = matAt(b + int3(1, 1, 1), gx, gz, X, Y, Z, base);
-                    o0 = occOf(m0, skipW); o1 = occOf(m1, skipW); o2 = occOf(m2, skipW); o3 = occOf(m3, skipW);
-                    o4 = occOf(m4, skipW); o5 = occOf(m5, skipW); o6 = occOf(m6, skipW); o7 = occOf(m7, skipW);
+                    occ = 0u;
+                    [unroll]
+                    for (int jo = 0; jo < 8; jo++)
+                        occ |= occOf(matAt(b + int3(jo & 1, (jo >> 1) & 1, (jo >> 2) & 1), gx, gz, X, Y, Z, base), skipW) > 0.0 ? 1u << uint(jo) : 0u;
                 }
                 w3 = q - float3(b);
-                float f = lerp(lerp(lerp(o0, o1, w3.x), lerp(o2, o3, w3.x), w3.y), lerp(lerp(o4, o5, w3.x), lerp(o6, o7, w3.x), w3.y), w3.z);
+                float f = lerp(lerp(lerp(float(occ & 1u), float((occ >> 1) & 1u), w3.x), lerp(float((occ >> 2) & 1u), float((occ >> 3) & 1u), w3.x), w3.y),
+                               lerp(lerp(float((occ >> 4) & 1u), float((occ >> 5) & 1u), w3.x), lerp(float((occ >> 6) & 1u), float((occ >> 7) & 1u), w3.x), w3.y), w3.z);
                 if (si < N) {
                     if (f >= 0.5) {
                         crossed = true;
@@ -1045,17 +1030,19 @@ void traceMain(uint3 id : SV_DispatchThreadID) {
                 // the colour: the solid corners' albedo by their trilinear weights (no data: no colour of its own)
                 float3 acc = float3(0, 0, 0);
                 float wsum = 0.0;
-                float3 v0 = 1.0 - w3;
-                if (o0 > 0.0 && m0 != 0xFFFFFFFFu) { float wk = v0.x * v0.y * v0.z; acc += palette[m0].albedoRough.rgb * wk; wsum += wk; }
-                if (o1 > 0.0 && m1 != 0xFFFFFFFFu) { float wk = w3.x * v0.y * v0.z; acc += palette[m1].albedoRough.rgb * wk; wsum += wk; }
-                if (o2 > 0.0 && m2 != 0xFFFFFFFFu) { float wk = v0.x * w3.y * v0.z; acc += palette[m2].albedoRough.rgb * wk; wsum += wk; }
-                if (o3 > 0.0 && m3 != 0xFFFFFFFFu) { float wk = w3.x * w3.y * v0.z; acc += palette[m3].albedoRough.rgb * wk; wsum += wk; }
-                if (o4 > 0.0 && m4 != 0xFFFFFFFFu) { float wk = v0.x * v0.y * w3.z; acc += palette[m4].albedoRough.rgb * wk; wsum += wk; }
-                if (o5 > 0.0 && m5 != 0xFFFFFFFFu) { float wk = w3.x * v0.y * w3.z; acc += palette[m5].albedoRough.rgb * wk; wsum += wk; }
-                if (o6 > 0.0 && m6 != 0xFFFFFFFFu) { float wk = v0.x * w3.y * w3.z; acc += palette[m6].albedoRough.rgb * wk; wsum += wk; }
-                if (o7 > 0.0 && m7 != 0xFFFFFFFFu) { float wk = w3.x * w3.y * w3.z; acc += palette[m7].albedoRough.rgb * wk; wsum += wk; }
+                [loop]
+                for (int jc = 0; jc < 8; jc++) {
+                    if (((occ >> uint(jc)) & 1u) == 0u) continue;
+                    uint mc = matAt(cellAt + int3(jc & 1, (jc >> 1) & 1, (jc >> 2) & 1), gx, gz, X, Y, Z, base);
+                    if (mc == 0xFFFFFFFFu) continue;
+                    float wk = ((jc & 1) != 0 ? w3.x : 1.0 - w3.x) * (((jc >> 1) & 1) != 0 ? w3.y : 1.0 - w3.y) * (((jc >> 2) & 1) != 0 ? w3.z : 1.0 - w3.z);
+                    acc += palette[mc].albedoRough.rgb * wk;
+                    wsum += wk;
+                }
                 alb = wsum > 1e-6 ? acc / wsum : float3(0.5, 0.5, 0.5);
                 // (the crossing's own cell's gradient, for where the stencil below is flat)
+                float o0 = float(occ & 1u), o1 = float((occ >> 1) & 1u), o2 = float((occ >> 2) & 1u), o3 = float((occ >> 3) & 1u);
+                float o4 = float((occ >> 4) & 1u), o5 = float((occ >> 5) & 1u), o6 = float((occ >> 6) & 1u), o7 = float((occ >> 7) & 1u);
                 float3 gc = float3(lerp(lerp(o1 - o0, o3 - o2, w3.y), lerp(o5 - o4, o7 - o6, w3.y), w3.z),
                                    lerp(lerp(o2 - o0, o3 - o1, w3.x), lerp(o6 - o4, o7 - o5, w3.x), w3.z),
                                    lerp(lerp(o4 - o0, o5 - o1, w3.x), lerp(o6 - o2, o7 - o3, w3.x), w3.y));

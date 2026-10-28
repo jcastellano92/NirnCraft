@@ -417,13 +417,13 @@ static void integratedMemoryCap() {
 
     VoxGrid discrete;
     discrete.planMemory(24ull << 30, 0, false);
-    check(discrete.slotCap > 150000, "24 GiB discrete GPU should plan > 150k level-0 slots by default");
+    check(discrete.slotCap == 40960 && discrete.slotCap <= 40960, "24 GiB discrete GPU should bound default level-0 slotCap to <= 40960 shell slots");
 
     VoxGrid deck;
     deck.planMemory(16ull << 30, 0, true);
     uint64_t deckBytes = totalPoolBytes(deck);
     check(deckBytes <= (3ull << 29), "16 GiB integrated/UMA GPU (Steam Deck) default pool exceeded 1.5 GiB cap");
-    check(deck.slotCap >= 65536 && deck.slotCap <= 120000, "16 GiB integrated/UMA GPU level-0 slots out of expected capped range");
+    check(deck.slotCap >= 16384 && deck.slotCap <= 40960, "16 GiB integrated/UMA GPU level-0 slots out of expected capped range");
 
     setEnvVar("ATLAS_VOXGRID_MEM", "0.20");
     VoxGrid explicitOverride;

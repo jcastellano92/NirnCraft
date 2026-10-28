@@ -3717,7 +3717,7 @@ float eyeWaterDepth(out uint mat) {
 // by a hash of the tile (a warp's rays are traced together or not at all: one traced lane in a warp costs the warp's
 // whole walk). Pixels drive it, never a distance: the footprint and the reprojection decide. What moves or shines is
 // not in the hit: the movers (traceActors) and the light (nearLightMain, its lights) are this frame's, every frame.
-static const uint FAR_AMORT_N = 4u;
+static const uint FAR_AMORT_N = 8u;
 // (the store: tHit, tW, the hit's material and albedo flags; its axis, level and the water's level, the water's
 // material, the albedo as halves, the frame it was traced: frame.temporal.x's low 16 bits)
 // (inlined: as a [noinline] call its two TraceResults went through memory, and the split kernel's shared memory grew

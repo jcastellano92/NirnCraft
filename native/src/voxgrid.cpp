@@ -86,11 +86,13 @@ void VoxGrid::planMemory(uint64_t deviceBytes, uint64_t maxRangeBytes, bool inte
     if (laidOut_ || centred_ || !deviceBytes || std::getenv("ATLAS_VOXGRID_SLOTS")) return;  // (fixed, or by hand)
     double share = 0.10;
     const char* memEnv = std::getenv("ATLAS_VOXGRID_MEM");
-    if (memEnv && *memEnv) share = std::clamp(std::atof(memEnv), 0.01, 0.6);
+    const bool explicitMem = memEnv && *memEnv;
+    if (explicitMem) share = std::clamp(std::atof(memEnv), 0.01, 0.6);
     else if (integrated) deviceBytes = std::min<uint64_t>(deviceBytes, 10ull << 30);  // (UMA / Steam Deck: <= 1.5 GiB total pool)
     uint64_t slots = uint64_t(double(deviceBytes) * share) / SLOT_BYTES;
-    // (never more than a slot a cell of the window, never fewer than the old fixed pool)
-    uint64_t cells = uint64_t(D) * H * D;
+    // (never more than a slot per active shell/cave section of the window, <= 10 mixed sections/column by default, or all H
+    // when ATLAS_VOXGRID_MEM is set; never fewer than the old fixed pool)
+    uint64_t cells = uint64_t(D) * uint64_t(explicitMem ? H : std::min(H, 10)) * uint64_t(D);
     // (at most a slot a cell, what one descriptor sees of the pool, and 2^19: a coarse target's slot << 12 in 32 bits)
     uint64_t hi = std::min<uint64_t>({cells, maxRangeBytes ? maxRangeBytes / (VG_SECTION_WORDS * 4) : cells, 1u << 19});
     slotCap = uint32_t(std::clamp<uint64_t>(slots, std::min<uint64_t>(16384, hi), hi));
